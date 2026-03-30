@@ -1,0 +1,82 @@
+services:
+
+  # ── MASTER ─────────────────────────────────────────────────
+  mysql-master:
+    build:
+      context: ./docker/master
+      dockerfile: Dockerfile
+    container_name: project_master
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: project_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - master_data:/var/lib/mysql
+    networks:
+      - project_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  # ── SLAVE 1 ────────────────────────────────────────────────
+  mysql-slave1:
+    build:
+      context: ./docker/slave1
+      dockerfile: Dockerfile
+    container_name: project_slave1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: project_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - slave1_data:/var/lib/mysql
+    networks:
+      - project_net
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  # ── SLAVE 2 ────────────────────────────────────────────────
+  mysql-slave2:
+    build:
+      context: ./docker/slave2
+      dockerfile: Dockerfile
+    container_name: project_slave2
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: project_db
+    ports:
+      - "3308:3306"
+    volumes:
+      - slave2_data:/var/lib/mysql
+    networks:
+      - project_net
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  master_data:
+  slave1_data:
+  slave2_data:
+
+networks:
+  project_net:
+    driver: bridge
