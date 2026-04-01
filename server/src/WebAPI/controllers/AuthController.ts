@@ -4,14 +4,19 @@ import { IAuthService } from "../../Domain/services/auth/IAuthService";
 import { ValidationResult } from "../../Domain/types/ValidationResult";
 import { validateLogin } from "../validators/auth/validateLogin";
 import { validateRegister } from "../validators/auth/validateRegister";
+import { upload} from "./multer"
 
 export class AuthController {
   private readonly router = Router();
 
   public constructor(private readonly authService: IAuthService) {
     this.router.post("/auth/login", this.login.bind(this));
-    this.router.post("/auth/register", this.register.bind(this));
-  }
+    this.router.post(
+        "/auth/register",
+        upload.single("image"), 
+        this.register.bind(this)
+      );
+        }
 
   private async login(req: Request, res: Response): Promise<void> {
     const { username, password } = req.body as { username?: string; password?: string };
@@ -28,10 +33,13 @@ export class AuthController {
   }
 
   private async register(req: Request, res: Response): Promise<void> {
-    const { username, email, password, role } = req.body as { username?: string; email?: string; password?: string; role?: string };
-    const v: ValidationResult = validateRegister(username ?? "", email ?? "", password ?? "");
+    const file = req.file;
+    const image = file ? file.filename : "";
+    const { username, email, password, role,fullname,bio } = req.body as { username?: string; email?: string; password?: string; role?: string; fullname?: string;bio?: string;  };
+    const v: ValidationResult = validateRegister(username ?? "", email ?? "", password ?? "",fullname??"",bio??"");
     if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
-    const result = await this.authService.register(username!, email!, role ?? "user", password!);
+
+    const result = await this.authService.register(username!, email!, role ?? "user", password!,fullname!,bio??"",image??"");
     if (result.id === 0) { res.status(409).json({ success: false, message: "Username or email already taken" }); return; }
     const token = jwt.sign(
       { id: result.id, username: result.username, role: result.role },

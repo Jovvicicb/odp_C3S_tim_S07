@@ -12,7 +12,7 @@ export class UserRepository implements IUserRepository {
   ) {}
 
   private map(r: RowDataPacket): User {
-    return new User(r.id, r.username, r.email, r.role as UserRole, r.passwordHash, r.isActive);
+    return new User(r.id, r.username, r.email, r.role as UserRole, r.passwordHash, r.isActive,r.fullname,r.bio,r.image);
   }
 
   async create(user: User): Promise<User> {
@@ -20,11 +20,11 @@ export class UserRepository implements IUserRepository {
     if (!res) return new User();
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `INSERT INTO users (username, email, role, passwordHash) VALUES (?, ?, ?, ?)`,
-        [user.username, user.email, user.role, user.passwordHash]
+        `INSERT INTO users (username, email, role, passwordHash,fullname,bio,image) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [user.username, user.email, user.role, user.passwordHash,user.fullname,user.bio,user.image]
       );
       if (result.insertId === 0) return new User();
-      return new User(result.insertId, user.username, user.email, user.role, user.passwordHash);
+      return new User(result.insertId, user.username, user.email, user.role, user.passwordHash,user.fullname,user.bio,user.image);
     } catch (err) {
       this.logger.error("UserRepository", "create failed", err);
       return new User();
@@ -84,8 +84,8 @@ export class UserRepository implements IUserRepository {
     if (!res) return false;
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `UPDATE users SET username = ?, email = ?, role = ?, isActive = ? WHERE id = ?`,
-        [user.username, user.email, user.role, user.isActive, user.id]
+        `UPDATE users SET username = ?, email = ?, role = ?, isActive = ?, fullname = ?,bio = ?,image =? WHERE id = ?`,
+        [user.username, user.email, user.role, user.isActive, user.fullname ,user.bio,user.image,user.id]
       );
       return result.affectedRows > 0;
     } catch (err) {

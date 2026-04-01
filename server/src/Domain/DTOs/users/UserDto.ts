@@ -6,6 +6,10 @@ export class UserDto {
     public username: string = "",
     public email: string    = "",
     public role: UserRole   = UserRole.USER,
-    public isActive: number = 1,
+    public fullname:string ="",
+    public bio:string="",
+    public image:string="",
+    public isActive: number = 1
+    
   ) {}
 }

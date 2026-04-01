@@ -7,13 +7,13 @@ export class UserService implements IUserService {
 
   async getAll(): Promise<UserDto[]> {
     const users = await this.userRepo.findAll();
-    return users.map((u) => new UserDto(u.id, u.username, u.email, u.role, u.isActive));
+    return users.map((u) => new UserDto(u.id, u.username, u.email, u.role,u.fullname,u.bio,u.image, u.isActive));
   }
 
   async getById(id: number): Promise<UserDto | null> {
     const u = await this.userRepo.findById(id);
     if (u.id === 0) return null;
-    return new UserDto(u.id, u.username, u.email, u.role, u.isActive);
+    return new UserDto(u.id, u.username, u.email, u.role,u.fullname,u.bio,u.image, u.isActive);
   }
 
   async deactivate(id: number): Promise<boolean> {

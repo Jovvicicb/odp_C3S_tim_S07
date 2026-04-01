@@ -5,5 +5,9 @@ export class AuthUserDto {
     public id: number       = 0,
     public username: string = "",
     public role: UserRole   = UserRole.USER,
+    public fullname:string ="",
+    public bio:string ="",
+    public image:string =""
+
   ) {}
 }

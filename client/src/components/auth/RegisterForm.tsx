@@ -4,17 +4,45 @@ import type { IAuthAPIService } from "../../api_services/auth/IAuthAPIService";
 
 export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
   const { login } = useAuth();
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [username, setUsername] = useState("");
+  const [fullname, setFullName] = useState("");
+  const [email, SetEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [bio, setBio] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string>("");
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); setError(""); setLoading(true);
-    const res = await authApi.register(form.username, form.email, form.password, "user");
-    setLoading(false);
-    if (!res.success || !res.data) { setError(res.message ?? "Registration failed"); return; }
-    login(res.data);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const formData = new FormData();
+
+    formData.append("username", username);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("role", "user");
+    formData.append("fullname", fullname);
+    formData.append("bio", bio);
+
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+    try {
+      const res = await authApi.register(formData);
+
+      if (!res.success || !res.data) {
+        setError(res.message ?? "Registration failed");
+        return;
+      }
+      login(res.data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,25 +62,141 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
       )}
 
       <form onSubmit={submit} className="flex flex-col gap-4">
-        {(["username", "email", "password"] as const).map((field) => (
-          <div key={field}>
-            <label className="block text-xs text-white/40 mb-2 font-medium capitalize">{field}</label>
-            <input
-              type={field === "password" ? "password" : field === "email" ? "email" : "text"}
-              value={form[field]} onChange={set(field)} required
-              className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-              placeholder={field === "password" ? "Min 8 chars, 1 uppercase, 1 number" : ""} />
+        <div>
+          <label className="block text-xs text-white/40 mb-2 font-medium">
+            Username
+          </label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+            placeholder="your_username"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs text-white/40 mb-2 font-medium">
+            FullName
+          </label>
+          <input
+            type="text"
+            value={fullname}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+            className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+            placeholder="your_fullname"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs text-white/40 mb-2 font-medium">
+            Email
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => SetEmail(e.target.value)}
+            required
+            className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+            placeholder="your_email"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs text-white/40 mb-2 font-medium">
+            Password
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+            placeholder="Min 8 chars, 1 uppercase, 1 number"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs text-white/40 mb-2 font-medium">
+            Bio
+          </label>
+          <input
+            type="text"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+            placeholder="your_bio"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs text-white/40 mb-2 font-medium">
+            Profile image
+          </label>
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+
+              const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+              if (!allowedTypes.includes(file.type)) {
+                setError("Only JPG, PNG or WEBP images are allowed");
+                setImageFile(null);
+                return;
+              }
+
+              if (file.size > 2 * 1024 * 1024) {
+                setError("Image must be smaller than 2MB");
+                return;
+              }
+
+              setError("");
+
+              setImageFile(file);
+
+              const reader = new FileReader();
+              reader.onload = () => {
+                setPreview(reader.result as string);
+              };
+              reader.readAsDataURL(file);
+            }}
+            className="w-full bg-white/4 border border-white/10 rounded-xl px-3 py-2 text-white text-sm file:bg-white/10 file:border-0 file:text-white file:px-3 file:py-1 file:rounded-lg"
+          />
+        </div>
+
+        {preview && (
+          <div className="mt-3 flex items-center gap-3">
+            <img
+              src={preview}
+              alt="preview"
+              className="w-16 h-16 rounded-full object-cover border border-white/20"
+            />
+            <span className="text-xs text-white/40">Preview</span>
           </div>
-        ))}
-        <button type="submit" disabled={loading}
-          className="mt-2 bg-white hover:bg-white/90 disabled:opacity-50 text-black font-semibold rounded-xl py-3 text-sm transition-colors">
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-2 bg-white hover:bg-white/90 disabled:opacity-50 text-black font-semibold rounded-xl py-3 text-sm transition-colors"
+        >
           {loading ? "Creating account…" : "Create account"}
         </button>
       </form>
 
       <p className="text-center text-white/30 text-sm mt-6">
         Already have an account?{" "}
-        <a href="/login" className="text-white/60 hover:text-white transition-colors">Sign in</a>
+        <a
+          href="/login"
+          className="text-white/60 hover:text-white transition-colors"
+        >
+          Sign in
+        </a>
       </p>
     </div>
   );
