@@ -20,7 +20,7 @@ export class UserRepository implements IUserRepository {
     if (!res) return new User();
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `INSERT INTO users (username, email, role, passwordHash,fullname,bio,image) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO users (username, email, role, password_hash,fullname,bio,profile_picture) VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [user.username, user.email, user.role, user.passwordHash,user.fullname,user.bio,user.image]
       );
       if (result.insertId === 0) return new User();
@@ -84,7 +84,7 @@ export class UserRepository implements IUserRepository {
     if (!res) return false;
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `UPDATE users SET username = ?, email = ?, role = ?, isActive = ?, fullname = ?,bio = ?,image =? WHERE id = ?`,
+        `UPDATE users SET username = ?, email = ?, role = ?, is_active = ?, fullname = ?,bio = ?,profile_picture =? WHERE id = ?`,
         [user.username, user.email, user.role, user.isActive, user.fullname ,user.bio,user.image,user.id]
       );
       return result.affectedRows > 0;

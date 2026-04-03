@@ -7,7 +7,7 @@ import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 
 dotenv.config();
 
-const DB_NAME = process.env.DB_NAME ?? "project_db";
+const DB_NAME = process.env.DB_NAME ?? "pulse_net_db";
 
 const masterPool: Pool = mysql.createPool({
   host:     process.env.DB_MASTER_HOST     ?? "localhost",

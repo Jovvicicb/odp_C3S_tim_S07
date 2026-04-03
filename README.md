@@ -1,6 +1,7 @@
 # Project Template
 
 Full-stack TypeScript template with:
+
 - **Client**: React 19 + Vite + TailwindCSS v4 + React Router v7
 - **Server**: Node.js + Express 5 + TypeScript
 - **Database**: MySQL 8 with Master + 2 Slave replication via Docker
@@ -8,13 +9,13 @@ Full-stack TypeScript template with:
 
 ## Stack
 
-| Layer      | Technology                              |
-|------------|-----------------------------------------|
-| Frontend   | React, Vite, TailwindCSS, Axios         |
-| Backend    | Node.js, Express, TypeScript            |
-| Auth       | JWT (jsonwebtoken), bcryptjs            |
-| Database   | MySQL 8, mysql2, Master-Slave replication |
-| DevOps     | Docker, docker-compose                  |
+| Layer    | Technology                                |
+| -------- | ----------------------------------------- |
+| Frontend | React, Vite, TailwindCSS, Axios           |
+| Backend  | Node.js, Express, TypeScript              |
+| Auth     | JWT (jsonwebtoken), bcryptjs              |
+| Database | MySQL 8, mysql2, Master-Slave replication |
+| DevOps   | Docker, docker-compose                    |
 
 ## Project Structure
 
@@ -91,7 +92,7 @@ npm run dev
 
 ## Customisation Checklist
 
-- [ ] Rename `project_db` → your database name (docker-compose.yml, setup-replication.sh, .env.example)
+- [x] Rename `project_db` → your database name (docker-compose.yml, setup-replication.sh, .env.example)
 - [ ] Replace `Entity` / `entities` with your domain model name throughout
 - [ ] Update `UserRole` enum if you need different roles
 - [ ] Update nav items in `Layout.tsx` to match your routes

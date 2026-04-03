@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": "./src",
     "outDir": "dist",
     "sourceMap": true,
     "target": "esnext",
@@ -16,3 +17,4 @@
     "test/**/*.ts",
   ],
 }
+
