@@ -12,7 +12,7 @@ export class UserRepository implements IUserRepository {
   ) {}
 
   private map(r: RowDataPacket): User {
-    return new User(r.id, r.username, r.email, r.role as UserRole, r.passwordHash, r.isActive,r.fullname,r.bio,r.image);
+    return new User(r.id, r.username, r.email, r.role as UserRole, r.password_hash,r.fullname,r.bio,r.profile_picture,r.is_active);
   }
 
   async create(user: User): Promise<User> {
@@ -42,8 +42,7 @@ export class UserRepository implements IUserRepository {
       return new User();
     } finally { res.conn.release(); }
   }
-
-  async findByUsername(username: string): Promise<User> {
+async findByUsername(username: string): Promise<User> {
     const res = await this.db.getReadConnection();
     if (!res) return new User();
     try {
@@ -54,7 +53,7 @@ export class UserRepository implements IUserRepository {
       return new User();
     } finally { res.conn.release(); }
   }
-
+  
   async findByEmail(email: string): Promise<User> {
     const res = await this.db.getReadConnection();
     if (!res) return new User();
