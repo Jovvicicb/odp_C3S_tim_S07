@@ -6,15 +6,15 @@ import { ConsoleLoggerService } from "./Services/logger/ConsoleLoggerService";
 import { DbManager } from "./Database/connection/DbConnectionPool";
 
 import { UserRepository }   from "./Database/repositories/users/UserRepository";
-import { EntityRepository } from "./Database/repositories/entity/EntityRepository";
+import { CommunityRepository } from "./Database/repositories/entity/CommunityRepository";
 
 import { AuthService }   from "./Services/auth/AuthService";
 import { UserService }   from "./Services/users/UserService";
-import { EntityService } from "./Services/entity/EntityService";
+import { CommunityService } from "./Services/community/CommunityService";
 
 import { AuthController }   from "./WebAPI/controllers/AuthController";
 import { UserController }   from "./WebAPI/controllers/UserController";
-import { EntityController } from "./WebAPI/controllers/EntityController";
+import { CommunityController } from "./WebAPI/controllers/CommunityController";
 
 
 
@@ -25,12 +25,12 @@ export const db     = new DbManager(logger);
 
 // Repositories
 const userRepo   = new UserRepository(db, logger);
-const entityRepo = new EntityRepository(db, logger);
+const entityRepo = new CommunityRepository(db, logger);
 
 // Services
 const authService   = new AuthService(userRepo);
 const userService   = new UserService(userRepo);
-const entityService = new EntityService(entityRepo);
+const communityService = new CommunityService(entityRepo);
 
 // Express
 const app = express();
@@ -45,7 +45,7 @@ app.use(express.json());
 
 app.use("/api/v1", new AuthController(authService).getRouter());
 app.use("/api/v1", new UserController(userService).getRouter());
-app.use("/api/v1", new EntityController(entityService).getRouter());
+app.use("/api/v1", new CommunityController(communityService).getRouter());
 
 
 export default app;

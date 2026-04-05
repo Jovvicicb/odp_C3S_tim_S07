@@ -93,7 +93,7 @@ npm run dev
 ## Customisation Checklist
 
 - [x] Rename `project_db` → your database name (docker-compose.yml, setup-replication.sh, .env.example)
-- [ ] Replace `Entity` / `entities` with your domain model name throughout
+- [x] Replace `Entity` / `entities` with your domain model name throughout
 - [ ] Update `UserRole` enum if you need different roles
 - [ ] Update nav items in `Layout.tsx` to match your routes
 - [ ] Add your domain-specific routes in `App.tsx`
