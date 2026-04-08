@@ -6,6 +6,10 @@ import { CreateCommunityDto } from "../../../Domain/DTOs/community/CreateCommuni
 import { CommunityType } from "../../../Domain/enums/CommunityType";
 import { DbManager } from "../../connection/DbConnectionPool";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
+import { log } from "node:console";
+
+
+const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
 export class CommunityRepository implements ICommunityRepository {
   public constructor(
@@ -38,32 +42,64 @@ export class CommunityRepository implements ICommunityRepository {
     } finally { res.conn.release(); }
   }
 
-  async findAll(page = 1, limit = 20): Promise<CommunityDto[]> {
+  async findAll(page :number, limit :number,type?:CommunityType): Promise<{communities:CommunityDto[];total:number}> {
     const res = await this.db.getReadConnection();
-    if (!res) return [];
-    const offset = (page - 1) * limit;
+    if (!res) return {communities:[],total: 0};
+    
+    const offset = safeInt((page - 1) * limit);
+    const lim = safeInt(limit);
+    const where = type ? `WHERE type = ?` : "";
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT * FROM communities  ORDER BY id DESC LIMIT ? OFFSET ?`, [limit, offset]
+       const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+       FROM communities
+       ${where}
+       ORDER BY created_at DESC
+       LIMIT ${lim} OFFSET ${offset}`,
+        type ? [type] : [],
       );
-      return rows.map((r) => this.map(r));
+
+       const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total
+       FROM communities
+       ${where}`,
+        type ? [type] : [],
+      );
+
+      return {
+        communities: rows.map((r) => this.map(r)),
+        total: cnt[0]?.total ?? 0};
     } catch (err) {
       this.logger.error("CommunityRepository", "findAll failed", err);
-      return [];
+      return {communities : [] ,total:0};
     } finally { res.conn.release(); }
   }
 
-  async findByOwnerId(ownerId: number): Promise<CommunityDto[]> {
+  async findByOwnerId(ownerId: number,page:number,limit:number): Promise<{communities:CommunityDto[];total:number}> {
     const res = await this.db.getReadConnection();
-    if (!res) return [];
+    if (!res) return {communities:[],total:0};
+    const offset = safeInt((page - 1) * limit);
+    const lim = safeInt(limit);
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT * FROM communities WHERE owner_id  = ? ORDER BY id DESC`, [ownerId]
+        `SELECT * FROM communities
+         WHERE  = owner_id?
+         ORDER BY created_at DESC
+         LIMIT ${lim} OFFSET ${offset}`,
+        [ownerId],
       );
-      return rows.map((r) => this.map(r));
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total FROM communities WHERE owner_id = ?`,
+        [ownerId],
+      );
+      return {
+        communities: rows.map((r) => this.map(r)),
+        total: cnt[0]?.total ?? 0,
+      };
     } catch (err) {
       this.logger.error("CommunityRepository", "findByUserId failed", err);
-      return [];
+      return {communities:[] ,total:0};
     } finally { res.conn.release(); }
   }
 

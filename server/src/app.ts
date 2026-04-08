@@ -6,7 +6,8 @@ import { ConsoleLoggerService } from "./Services/logger/ConsoleLoggerService";
 import { DbManager } from "./Database/connection/DbConnectionPool";
 
 import { UserRepository }   from "./Database/repositories/users/UserRepository";
-import { CommunityRepository } from "./Database/repositories/entity/CommunityRepository";
+import { CommunityRepository } from "./Database/repositories/community/CommunityRepository";
+
 
 import { AuthService }   from "./Services/auth/AuthService";
 import { UserService }   from "./Services/users/UserService";
@@ -25,12 +26,12 @@ export const db     = new DbManager(logger);
 
 // Repositories
 const userRepo   = new UserRepository(db, logger);
-const entityRepo = new CommunityRepository(db, logger);
+const communityRepo = new CommunityRepository(db, logger);
 
 // Services
 const authService   = new AuthService(userRepo);
 const userService   = new UserService(userRepo);
-const communityService = new CommunityService(entityRepo);
+const communityService = new CommunityService(communityRepo);
 
 // Express
 const app = express();

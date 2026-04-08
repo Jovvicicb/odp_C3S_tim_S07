@@ -3,6 +3,6 @@ export class PaginatedListDto<T> {
     public items: T[]      = [],
     public total: number   = 0,
     public page: number    = 1,
-    public limit: number   = 20,
+    public limit: number   = 10,
   ) {}
 }

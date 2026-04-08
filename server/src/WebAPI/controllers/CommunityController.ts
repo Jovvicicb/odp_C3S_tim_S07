@@ -6,6 +6,7 @@ import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { CreateCommunityDto } from "../../Domain/DTOs/community/CreateCommunityDto";
 import { upload } from "./multer";
+import { CommunityType } from "../../Domain/enums/CommunityType";
 
 export class CommunityController {
   private readonly router = Router();
@@ -20,9 +21,11 @@ export class CommunityController {
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
-    const page  = parseInt(req.query.page  as string ?? "1",  10);
-    const limit = parseInt(req.query.limit as string ?? "20", 10);
-    const result = await this.communityService.getAll(page, limit);
+    const page  = parseInt(String(req.query.page ?? "1"), 10);
+    const limit = Math.min(parseInt(String(req.query.limit ?? "20"), 10), 100);
+    const typeParam = req.query.type as string | undefined;
+    const type = typeParam && Object.values(CommunityType).includes(typeParam as CommunityType) ? typeParam as CommunityType : undefined;
+    const result = await this.communityService.getAll(page, limit,type);
     res.status(200).json({ success: true, data: result });
   }
 
@@ -36,8 +39,11 @@ export class CommunityController {
 
   private async getByOwnerId(req: Request, res: Response): Promise<void> {
     const userId = parseInt(req.params.userId as string, 10);
+    const page  = parseInt(String(req.query.page ?? "1"), 10);
+    const limit = Math.min(parseInt(String(req.query.limit ?? "20"), 10), 100);
+    
     if (isNaN(userId)) { res.status(400).json({ success: false, message: "Invalid userId" }); return; }
-    const items = await this.communityService.getByOwnerId(userId);
+    const items = await this.communityService.getByOwnerId(userId!,page,limit);
     res.status(200).json({ success: true, data: items });
   }
 

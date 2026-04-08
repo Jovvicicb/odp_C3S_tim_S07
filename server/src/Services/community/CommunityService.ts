@@ -5,6 +5,7 @@ import { CommunityDto } from "../../Domain/DTOs/community/CommunityDto";
 import { CreateCommunityDto } from "../../Domain/DTOs/community/CreateCommunityDto";
 import { PaginatedListDto } from "../../Domain/DTOs/community/PaginatedListDto";
 import { Community } from "../../Domain/models/Community";
+import { CommunityType } from "../../Domain/enums/CommunityType";
 
 export class CommunityService implements ICommunityService {
   public constructor(private readonly communityRepo: ICommunityRepository) {}
@@ -23,18 +24,19 @@ export class CommunityService implements ICommunityService {
   );
 }
 
-  async getAll(page = 1, limit = 20): Promise<PaginatedListDto<CommunityDto>> {
-    const items = await this.communityRepo.findAll(page, limit);
-    return new PaginatedListDto(items, items.length, page, limit);
+  async getAll(page :number, limit:number,type?:CommunityType): Promise<PaginatedListDto<CommunityDto>> {
+    const items = await this.communityRepo.findAll(page, limit,type);
+    return new PaginatedListDto(items.communities, items.total, page, limit);
   }
 
   async getById(id: number): Promise<CommunityDto | null> {
     return this.communityRepo.findById(id);
   }
 
-  async getByOwnerId(userId: number): Promise<CommunityDto[]> {
-    return this.communityRepo.findByOwnerId(userId);
-  }
+  async getByOwnerId(userId: number,page:number,limit:number):  Promise<PaginatedListDto<CommunityDto>> {
+    const items = await this.communityRepo.findAll(page, limit);
+    return new PaginatedListDto(items.communities, items.total, page, limit);
+    }
 
   async create(dto: CreateCommunityDto): Promise<CommunityDto | null> {
     const created = await this.communityRepo.create(dto);
