@@ -8,6 +8,7 @@ import NotFoundPage from "./pages/not_found/NotFoundPage";
 import UserDashboard from "./pages/user/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
+import CreateCommunity from "./pages/user/CreateCommunity";
 
 export default function App() {
   return (
@@ -21,6 +22,15 @@ export default function App() {
         element={
           <ProtectedRoute requiredRole="user">
             <UserDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/communities/create"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <CreateCommunity />
           </ProtectedRoute>
         }
       />
