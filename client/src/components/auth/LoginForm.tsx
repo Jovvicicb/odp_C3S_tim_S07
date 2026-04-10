@@ -9,12 +9,56 @@ export function LoginForm({ authApi }: { authApi: IAuthAPIService }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const validate = () => {
+    if (!username.trim()) return "Username is required";
+    if (username.trim().length < 3 || username.trim().length > 40) {
+      return "Username must be between 3 and 40 characters";
+    }
+    if (!/^[A-Za-z0-9-]+$/.test(username.trim())) {
+      return "Username can contain only letters, numbers and dash";
+    }
+    if (!password) {
+      return "Password is required";
+    }
+
+    if (password.length < 8) {
+      return "Password must be at least 8 characters";
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+
+    if (!/[0-9]/.test(password)) {
+      return "Password must contain at least one number";
+    }
+    return null;
+  };
+
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); setError(""); setLoading(true);
-    const res = await authApi.login(username, password);
-    setLoading(false);
-    if (!res.success || !res.data) { setError(res.message ?? "Invalid credentials"); return; }
-    login(res.data);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await authApi.login(username, password);
+      if (!res.success || !res.data) {
+        setError(res.message ?? "Invalid credentials");
+        return;
+      }
+      login(res.data);
+    } catch {
+      setError("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,26 +79,51 @@ export function LoginForm({ authApi }: { authApi: IAuthAPIService }) {
 
       <form onSubmit={submit} className="flex flex-col gap-4">
         <div>
-          <label className="block text-xs text-white/40 mb-2 font-medium">Username</label>
-          <input type="text" value={username} onChange={e => setUsername(e.target.value)} required
+          <label className="block text-xs text-white/40 mb-2 font-medium">
+            Username
+          </label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            minLength={3}
+            maxLength={40}
             className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-            placeholder="your_username" />
+            placeholder="your_username"
+          />
         </div>
         <div>
-          <label className="block text-xs text-white/40 mb-2 font-medium">Password</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
+          <label className="block text-xs text-white/40 mb-2 font-medium">
+            Password
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
             className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-            placeholder="••••••••" />
+            placeholder="••••••••"
+          />
         </div>
-        <button type="submit" disabled={loading}
-          className="mt-2 bg-white hover:bg-white/90 disabled:opacity-50 text-black font-semibold rounded-xl py-3 text-sm transition-colors">
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-2 bg-white hover:bg-white/90 disabled:opacity-50 text-black font-semibold rounded-xl py-3 text-sm transition-colors"
+        >
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
 
       <p className="text-center text-white/30 text-sm mt-6">
         Don't have an account?{" "}
-        <a href="/register" className="text-white/60 hover:text-white transition-colors">Create one</a>
+        <a
+          href="/register"
+          className="text-white/60 hover:text-white transition-colors"
+        >
+          Create one
+        </a>
       </p>
     </div>
   );

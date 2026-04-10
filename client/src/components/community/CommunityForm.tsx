@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ErrorBox, SuccessBox } from "../ui/UI";
 import { communityApi } from "../../api_services/community/CommunityAPIService";
 import { useNavigate } from "react-router-dom";
+import type { CommunityType } from "../../types/community/CommunityTypes";
 
 export default function CommunityForm() {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ export default function CommunityForm() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [rules, setRules] = useState("");
-  const [type, setType] = useState<"public" | "private">("public");
+  const [type, setType] = useState<CommunityType>("public");
   const [avatar, setAvatar] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
 
@@ -26,12 +27,53 @@ export default function CommunityForm() {
     setPreview("");
   };
 
+  const validate = () => {
+    if (!name.trim()) {
+      return "Community name is required";
+    }
+
+    if (name.trim().length < 2 || name.trim().length > 80) {
+      return "Community name must be between 2 and 80 characters";
+    }
+
+    if (description.trim().length > 500) {
+      return "Description must be at most 500 characters";
+    }
+
+    if (rules.trim().length > 250) {
+      return "Rules must be at most 250 characters";
+    }
+
+    if (type !== "public" && type !== "private") {
+      return "Invalid community type";
+    }
+
+    if (avatar) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+      if (!allowedTypes.includes(avatar.type)) {
+        return "Only JPG, PNG or WEBP images are allowed";
+      }
+
+      if (avatar.size > 2 * 1024 * 1024) {
+        return "Image must be smaller than 2MB";
+      }
+    }
+    return null;
+  };
+
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setSuccess("");
-
     setLoading(true);
+
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      setLoading(false);
+      return;
+    }
 
     const formData = new FormData();
 
@@ -71,6 +113,7 @@ export default function CommunityForm() {
         </p>
       </div>
       <form
+        noValidate
         onSubmit={submit}
         className="max-w-xl w-full mx-auto flex flex-col gap-5"
       >
@@ -114,6 +157,7 @@ export default function CommunityForm() {
             onChange={(e) => setRules(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm outline-none focus:border-white/20 resize-none"
             rows={3}
+            maxLength={250}
             placeholder="Community rules..."
           />
         </div>
@@ -159,7 +203,11 @@ export default function CommunityForm() {
               accept="image/*"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                if (!file) return;
+                if (!file) {
+                  setAvatar(null);
+                  setPreview("");
+                  return;
+                }
 
                 const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
                 if (!allowedTypes.includes(file.type)) {
