@@ -9,6 +9,8 @@ import UserDashboard from "./pages/user/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
 import CreateCommunity from "./pages/user/CreateCommunity";
+import CommunityDetailsPage from "./pages/user/CommunityDetailsPage";
+import CommunitiesPage from "./pages/user/CommunitiesPage";
 
 export default function App() {
   return (
@@ -31,6 +33,23 @@ export default function App() {
         element={
           <ProtectedRoute requiredRole="user">
             <CreateCommunity />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/communities/:id"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <CommunityDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/communities"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <CommunitiesPage />
           </ProtectedRoute>
         }
       />
