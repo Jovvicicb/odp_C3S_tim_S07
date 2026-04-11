@@ -14,13 +14,8 @@ export const validateRegister = (u: string, e: string, p: string ,fullname: stri
      return { valid: false, message: "Username can contain only letters, numbers and dash(-)"};
   }
 
-  
-  if (!fullname.trim()) {
-    return { valid: false, message: "FullName is required" };
-  }
-
-  if (fullname.trim().length > 100) {
-    return { valid: false, message: "FullName must be at most 100 characters" };
+  if (fullname.trim().length < 3 || fullname.trim().length > 100) {
+    return { valid: false, message: "FullName must be between 3 and 100 characters" };
   }
 
   if (!/^[A-Za-z\s]+$/.test(fullname.trim())) {

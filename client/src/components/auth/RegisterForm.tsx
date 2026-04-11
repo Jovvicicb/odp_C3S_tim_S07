@@ -24,16 +24,14 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
       return "Username can contain only letters, numbers and dash";
     }
 
-    if (!fullname.trim()) {
-      return "Full name is required";
-    }
+    if (fullname) {
+      if (fullname.trim().length < 3 || fullname.trim().length > 100) {
+        return "FullName must  be between 3 and 100 characters";
+      }
 
-    if (fullname.trim().length > 100) {
-      return "FullName must be at most 100 characters";
-    }
-
-    if (!/^[A-Za-z\s]+$/.test(fullname.trim())) {
-      return "Full name can contain only letters and spaces";
+      if (!/^[A-Za-z\s]+$/.test(fullname.trim())) {
+        return "Full name can contain only letters and spaces";
+      }
     }
 
     if (!email.trim()) {
@@ -60,9 +58,10 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
     if (!/[0-9]/.test(password)) {
       return "Password must contain at least one number";
     }
-
-    if (bio.trim().length > 300) {
-      return "Bio must be at most 300 characters";
+    if (bio) {
+      if (bio.trim().length > 300) {
+        return "Bio must be at most 300 characters";
+      }
     }
 
     if (imageFile) {
@@ -159,7 +158,7 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
             type="text"
             value={fullname}
             onChange={(e) => setFullName(e.target.value)}
-            required
+            minLength={3}
             maxLength={100}
             className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
             placeholder="your_fullname"

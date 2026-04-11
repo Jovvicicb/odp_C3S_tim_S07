@@ -37,11 +37,11 @@ export default function CommunityForm() {
       return "Community name must be between 2 and 80 characters";
     }
 
-    if (description.trim().length > 500) {
+    if (description && description.trim().length > 500) {
       return "Description must be at most 500 characters";
     }
 
-    if (rules.trim().length > 250) {
+    if (rules && rules.trim().length > 250) {
       return "Rules must be at most 250 characters";
     }
 
