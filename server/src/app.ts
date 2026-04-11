@@ -17,6 +17,7 @@ import { AuthController }   from "./WebAPI/controllers/AuthController";
 import { UserController }   from "./WebAPI/controllers/UserController";
 import { CommunityController } from "./WebAPI/controllers/CommunityController";
 
+import { errorHandler } from "./Middlewares/multer/errorHandler";
 
 
 export const logger = new ConsoleLoggerService();
@@ -42,11 +43,11 @@ app.use("/uploads", express.static("uploads"));
 
 
 app.use(cors({ origin: process.env.CLIENT_URL ?? "*" }));
-app.use(express.json());
 
 app.use("/api/v1", new AuthController(authService).getRouter());
 app.use("/api/v1", new UserController(userService).getRouter());
 app.use("/api/v1", new CommunityController(communityService).getRouter());
 
+app.use(errorHandler);
 
 export default app;

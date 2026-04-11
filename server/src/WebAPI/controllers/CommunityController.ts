@@ -5,8 +5,10 @@ import { authenticate } from "../../Middlewares/authentification/AuthMiddleware"
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { CreateCommunityDto } from "../../Domain/DTOs/community/CreateCommunityDto";
-import { upload } from "./multer";
+import { upload } from "../../Middlewares/multer/multer";
 import { CommunityType } from "../../Domain/enums/CommunityType";
+import { ValidationResult } from "../../Domain/types/ValidationResult";
+import { validateCreateCommunity } from "../validators/community/validateCreateCommunity";
 
 export class CommunityController {
   private readonly router = Router();
@@ -47,19 +49,20 @@ export class CommunityController {
     res.status(200).json({ success: true, data: items });
   }
 
-  private async create(req: Request, res: Response): Promise<void> {
-    // TODO: Validate req.body and build CreateEntityDto from it
 
+  private async create(req: Request, res: Response): Promise<void> {
     const file = req.file;
     const avatar = file ? file.filename : "";
+    const { name, description, rules, type } = req.body as { name?: string; description?: string; rules?: string; type?:string };
 
-    const { name, description, rules, type } = req.body;
-
+    const v: ValidationResult = validateCreateCommunity(name ?? "", description ?? "", rules ?? "",type??"",file);
+        if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
+    
     const dto: CreateCommunityDto = {
-      name,
-      description,
-      rules,
-      type,
+      name:name??"",
+      description:description??"",
+      rules:rules??"",
+      type: type === "public" ? CommunityType.PUBLIC : CommunityType.PRIVATE,
       ownerId: req.user!.id,
       avatar
     };
@@ -86,3 +89,7 @@ export class CommunityController {
 
   public getRouter(): Router { return this.router; }
 }
+function vlalidateCreateCommunity(arg0: string, arg1: string, arg2: string, arg3: string, file: Express.Multer.File | undefined): ValidationResult {
+  throw new Error("Function not implemented.");
+}
+

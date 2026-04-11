@@ -77,7 +77,7 @@ export function LoginForm({ authApi }: { authApi: IAuthAPIService }) {
         </div>
       )}
 
-      <form onSubmit={submit} className="flex flex-col gap-4">
+      <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         <div>
           <label className="block text-xs text-white/40 mb-2 font-medium">
             Username

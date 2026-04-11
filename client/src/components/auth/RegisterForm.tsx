@@ -13,6 +13,7 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
   const [preview, setPreview] = useState<string>("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fileKey, setFileKey] = useState(0);
 
   const validate = () => {
     if (!username.trim()) return "Username is required";
@@ -23,6 +24,18 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
       return "Username can contain only letters, numbers and dash";
     }
 
+    if (!fullname.trim()) {
+      return "Full name is required";
+    }
+
+    if (fullname.trim().length > 100) {
+      return "FullName must be at most 100 characters";
+    }
+
+    if (!/^[A-Za-z\s]+$/.test(fullname.trim())) {
+      return "Full name can contain only letters and spaces";
+    }
+
     if (!email.trim()) {
       return "Email is required";
     }
@@ -30,18 +43,6 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
       !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email.trim())
     ) {
       return "Email format is not valid";
-    }
-
-    if (!fullname.trim()) {
-      return "Full name is required";
-    }
-
-    if (fullname.trim.length > 100) {
-      return "FullName must be at most 100 characters";
-    }
-
-    if (!/^[A-Za-z\s]+$/.test(fullname.trim())) {
-      return "Full name can contain only letters and spaces";
     }
 
     if (!password) {
@@ -133,7 +134,7 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
         </div>
       )}
 
-      <form onSubmit={submit} className="flex flex-col gap-4">
+      <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         <div>
           <label className="block text-xs text-white/40 mb-2 font-medium">
             Username
@@ -215,6 +216,7 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
           </label>
 
           <input
+            key={fileKey}
             type="file"
             accept="image/*"
             onChange={(e) => {
@@ -230,11 +232,15 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
                 setError("Only JPG, PNG or WEBP images are allowed");
                 setImageFile(null);
                 setPreview("");
+                setFileKey((prev) => prev + 1);
                 return;
               }
 
               if (file.size > 2 * 1024 * 1024) {
                 setError("Image must be smaller than 2MB");
+                setImageFile(null);
+                setPreview("");
+                setFileKey((prev) => prev + 1);
                 return;
               }
 

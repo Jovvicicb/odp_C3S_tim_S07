@@ -17,6 +17,7 @@ export default function CommunityForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fileKey, setFileKey] = useState(0);
 
   const resetForm = () => {
     setName("");
@@ -89,6 +90,7 @@ export default function CommunityForm() {
     try {
       const res = await communityApi.create(formData);
 
+      console.log(res);
       if (!res.success || !res.data) {
         setError(res.message ?? "Create community failed");
         return;
@@ -199,6 +201,7 @@ export default function CommunityForm() {
             </label>
 
             <input
+              key={fileKey}
               type="file"
               accept="image/*"
               onChange={(e) => {
@@ -214,11 +217,15 @@ export default function CommunityForm() {
                   setError("Only JPG, PNG or WEBP images are allowed");
                   setAvatar(null);
                   setPreview("");
+                  setFileKey((prev) => prev + 1);
                   return;
                 }
 
                 if (file.size > 2 * 1024 * 1024) {
                   setError("Image must be smaller than 2MB");
+                  setAvatar(null);
+                  setPreview("");
+                  setFileKey((prev) => prev + 1);
                   return;
                 }
 
