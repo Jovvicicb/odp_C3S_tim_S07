@@ -6,7 +6,6 @@ import { CreateCommunityDto } from "../../../Domain/DTOs/community/CreateCommuni
 import { CommunityType } from "../../../Domain/enums/CommunityType";
 import { DbManager } from "../../connection/DbConnectionPool";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
-import { log } from "node:console";
 
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
@@ -83,7 +82,7 @@ export class CommunityRepository implements ICommunityRepository {
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
         `SELECT * FROM communities
-         WHERE  = owner_id?
+         WHERE  owner_id = ?
          ORDER BY created_at DESC
          LIMIT ${lim} OFFSET ${offset}`,
         [ownerId],
@@ -135,7 +134,7 @@ export class CommunityRepository implements ICommunityRepository {
     } finally { res.conn.release(); }
   }
 
-  async update(id: number, fields: Partial<Community>): Promise<boolean> {
+  async update(id: number, fields: Partial<CommunityDto>): Promise<boolean> {
     const res = await this.db.getWriteConnection();
     if (!res) return false;
     try {

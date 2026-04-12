@@ -45,7 +45,7 @@ export class CommunityController {
     const limit = Math.min(parseInt(String(req.query.limit ?? "20"), 10), 100);
     
     if (isNaN(userId)) { res.status(400).json({ success: false, message: "Invalid userId" }); return; }
-    const items = await this.communityService.getByOwnerId(userId!,page,limit);
+    const items = await this.communityService.getByOwnerId(userId,page,limit);
     res.status(200).json({ success: true, data: items });
   }
 
@@ -94,7 +94,5 @@ export class CommunityController {
 
   public getRouter(): Router { return this.router; }
 }
-function vlalidateCreateCommunity(arg0: string, arg1: string, arg2: string, arg3: string, file: Express.Multer.File | undefined): ValidationResult {
-  throw new Error("Function not implemented.");
-}
+
 

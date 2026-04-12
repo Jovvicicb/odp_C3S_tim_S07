@@ -34,7 +34,7 @@ export class CommunityService implements ICommunityService {
   }
 
   async getByOwnerId(userId: number,page:number,limit:number):  Promise<PaginatedListDto<CommunityDto>> {
-    const items = await this.communityRepo.findAll(page, limit);
+    const items = await this.communityRepo.findByOwnerId(userId,page, limit);
     return new PaginatedListDto(items.communities, items.total, page, limit);
     }
 
