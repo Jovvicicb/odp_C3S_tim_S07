@@ -1,15 +1,15 @@
 import { ValidationResult } from "../../../Domain/types/ValidationResult";
 
-export const validateLogin = (u: string, p: string): ValidationResult => {
-  if (!u.trim()){
+export const validateLogin = (normalizedUserName: string, p: string): ValidationResult => {
+  if (!normalizedUserName){
     return { valid: false, message: "Username is required" };
   }
 
-  if (u.trim().length < 3 || u.trim().length > 40) {
+  if (normalizedUserName.length < 3 || normalizedUserName.length > 40) {
     return { valid: false, message: "Username must be between 3 and 40 characters"};
   }
 
-  if (!/^[A-Za-z0-9-]+$/.test(u.trim())) {
+  if (!/^[A-Za-z0-9-]+$/.test(normalizedUserName)) {
      return { valid: false, message: "Username can contain only letters, numbers and dash(-)"};
   }
 

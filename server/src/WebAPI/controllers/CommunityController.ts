@@ -54,17 +54,22 @@ export class CommunityController {
     const file = req.file;
     const avatar = file ? file.filename : "";
     const { name, description, rules, type } = req.body as { name?: string; description?: string; rules?: string; type?:string };
-
-    const v: ValidationResult = validateCreateCommunity(name ?? "", description ?? "", rules ?? "",type??"",file);
+    
+    const normalizedName = (name ?? "").trim().replace(/\s+/g, " ");
+    const normalizedDescription =(description ?? "").trim();
+    const normalizedRules = (rules ?? "").trim();
+    const normalizedType = (type ?? "public").trim();
+    
+    const v: ValidationResult = validateCreateCommunity(normalizedName, normalizedDescription,normalizedRules,normalizedType,file);
         if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
     
     const dto: CreateCommunityDto = {
-      name:name??"",
-      description:description??"",
-      rules:rules??"",
-      type: type === "public" ? CommunityType.PUBLIC : CommunityType.PRIVATE,
+      name:normalizedName,
+      description:normalizedDescription,
+      rules:normalizedRules,
+      type: normalizedType === "public" ? CommunityType.PUBLIC : CommunityType.PRIVATE,
       ownerId: req.user!.id,
-      avatar
+      avatar:avatar
     };
 
     

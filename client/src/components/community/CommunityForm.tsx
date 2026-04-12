@@ -29,23 +29,28 @@ export default function CommunityForm() {
   };
 
   const validate = () => {
-    if (!name.trim()) {
+    const normalizedName = name.trim().replace(/\s+/g, " ");
+    const normalizedDescription = (description ?? "").trim();
+    const normalizedRules = (rules ?? "").trim();
+    const normalizedType = (type ?? "public").trim();
+
+    if (!normalizedName) {
       return "Community name is required";
     }
 
-    if (name.trim().length < 2 || name.trim().length > 80) {
+    if (normalizedName.length < 2 || normalizedName.length > 80) {
       return "Community name must be between 2 and 80 characters";
     }
 
-    if (description && description.trim().length > 500) {
+    if (normalizedDescription.length > 500) {
       return "Description must be at most 500 characters";
     }
 
-    if (rules && rules.trim().length > 250) {
-      return "Rules must be at most 250 characters";
+    if (normalizedRules.length > 500) {
+      return "Rules must be at most 500 characters";
     }
 
-    if (type !== "public" && type !== "private") {
+    if (normalizedType !== "public" && normalizedType !== "private") {
       return "Invalid community type";
     }
 
@@ -76,12 +81,17 @@ export default function CommunityForm() {
       return;
     }
 
+    const normalizedName = name.trim().replace(/\s+/g, " ");
+    const normalizedDescription = (description ?? "").trim();
+    const normalizedRules = (rules ?? "").trim();
+    const normalizedType = type ?? "public";
+
     const formData = new FormData();
 
-    formData.append("name", name);
-    formData.append("description", description);
-    formData.append("rules", rules);
-    formData.append("type", type);
+    formData.append("name", normalizedName);
+    formData.append("description", normalizedDescription);
+    formData.append("rules", normalizedRules);
+    formData.append("type", normalizedType);
 
     if (avatar) {
       formData.append("image", avatar);
@@ -89,8 +99,6 @@ export default function CommunityForm() {
 
     try {
       const res = await communityApi.create(formData);
-
-      console.log(res);
       if (!res.success || !res.data) {
         setError(res.message ?? "Create community failed");
         return;
@@ -159,7 +167,7 @@ export default function CommunityForm() {
             onChange={(e) => setRules(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm outline-none focus:border-white/20 resize-none"
             rows={3}
-            maxLength={250}
+            maxLength={500}
             placeholder="Community rules..."
           />
         </div>

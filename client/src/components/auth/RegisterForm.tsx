@@ -16,29 +16,33 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
   const [fileKey, setFileKey] = useState(0);
 
   const validate = () => {
-    if (!username.trim()) return "Username is required";
-    if (username.trim().length < 3 || username.trim().length > 40) {
+    const normalizedUsername = username.trim();
+    const normalizedFullname = fullname.trim().replace(/\s+/g, " ");
+    const normalizedEmail = email.trim();
+    const normalizedBio = bio.trim();
+    if (!normalizedUsername) return "Username is required";
+    if (normalizedUsername.length < 3 || normalizedUsername.length > 40) {
       return "Username must be between 3 and 40 characters";
     }
-    if (!/^[A-Za-z0-9-]+$/.test(username.trim())) {
+    if (!/^[A-Za-z0-9-]+$/.test(normalizedUsername)) {
       return "Username can contain only letters, numbers and dash";
     }
 
-    if (fullname) {
-      if (fullname.trim().length < 3 || fullname.trim().length > 100) {
+    if (normalizedFullname) {
+      if (normalizedFullname.length < 3 || normalizedFullname.length > 100) {
         return "FullName must  be between 3 and 100 characters";
       }
 
-      if (!/^[A-Za-z\s]+$/.test(fullname.trim())) {
+      if (!/^[A-Za-z\s]+$/.test(normalizedFullname)) {
         return "Full name can contain only letters and spaces";
       }
     }
 
-    if (!email.trim()) {
+    if (!normalizedEmail) {
       return "Email is required";
     }
     if (
-      !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email.trim())
+      !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(normalizedEmail)
     ) {
       return "Email format is not valid";
     }
@@ -58,8 +62,8 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
     if (!/[0-9]/.test(password)) {
       return "Password must contain at least one number";
     }
-    if (bio) {
-      if (bio.trim().length > 300) {
+    if (normalizedBio) {
+      if (normalizedBio.length > 300) {
         return "Bio must be at most 300 characters";
       }
     }
@@ -91,14 +95,18 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
       return;
     }
 
+    const normalizedUsername = username.trim();
+    const normalizedFullname = fullname.trim().replace(/\s+/g, " ");
+    const normalizedEmail = email.trim();
+    const normalizedBio = bio.trim();
+
     const formData = new FormData();
 
-    formData.append("username", username);
-    formData.append("email", email);
+    formData.append("username", normalizedUsername);
+    formData.append("email", normalizedEmail);
     formData.append("password", password);
-    formData.append("role", "user");
-    formData.append("fullname", fullname);
-    formData.append("bio", bio);
+    formData.append("fullname", normalizedFullname);
+    formData.append("bio", normalizedBio);
 
     if (imageFile) {
       formData.append("image", imageFile);

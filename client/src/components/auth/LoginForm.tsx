@@ -10,11 +10,13 @@ export function LoginForm({ authApi }: { authApi: IAuthAPIService }) {
   const [loading, setLoading] = useState(false);
 
   const validate = () => {
-    if (!username.trim()) return "Username is required";
-    if (username.trim().length < 3 || username.trim().length > 40) {
+    const normalizedUsername = username.trim();
+
+    if (!normalizedUsername) return "Username is required";
+    if (normalizedUsername.length < 3 || normalizedUsername.length > 40) {
       return "Username must be between 3 and 40 characters";
     }
-    if (!/^[A-Za-z0-9-]+$/.test(username.trim())) {
+    if (!/^[A-Za-z0-9-]+$/.test(normalizedUsername)) {
       return "Username can contain only letters, numbers and dash";
     }
     if (!password) {
@@ -46,9 +48,10 @@ export function LoginForm({ authApi }: { authApi: IAuthAPIService }) {
       setLoading(false);
       return;
     }
+    const normalizedUsername = username.trim();
 
     try {
-      const res = await authApi.login(username, password);
+      const res = await authApi.login(normalizedUsername, password);
       if (!res.success || !res.data) {
         setError(res.message ?? "Invalid credentials");
         return;

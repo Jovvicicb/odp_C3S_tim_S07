@@ -1,54 +1,53 @@
 import { ValidationResult } from "../../../Domain/types/ValidationResult";
 
-export const validateRegister = (u: string, e: string, p: string ,fullname: string, bio:string,file?: Express.Multer.File): ValidationResult => {
+
+export const validateRegister = (normalizedUserName: string, normalizedFullname: string, normalizedEmail: string ,password: string, normalizedBio:string,file?: Express.Multer.File): ValidationResult => {
  
-  if (!u.trim()){
+  if (!normalizedUserName){
     return { valid: false, message: "Username is required" };
   }
 
-  if (u.trim().length < 3 || u.trim().length > 40) {
+  if (normalizedUserName.length < 3 || normalizedUserName.length > 40) {
     return { valid: false, message: "Username must be between 3 and 40 characters"};
   }
 
-  if (!/^[A-Za-z0-9-]+$/.test(u.trim())) {
+  if (!/^[A-Za-z0-9-]+$/.test(normalizedUserName)) {
      return { valid: false, message: "Username can contain only letters, numbers and dash(-)"};
   }
+  if(normalizedFullname){
+    if (normalizedFullname.length < 3 || normalizedFullname.length > 100) {
+      return { valid: false, message: "FullName must be between 3 and 100 characters" };
+    }
+    
+    if (!/^[A-Za-z\s]+$/.test(normalizedFullname)) {
+      return { valid: false, message: "Full name can contain only letters and spaces" };
+    }
+  } 
 
-  if (fullname.trim().length < 3 || fullname.trim().length > 100) {
-    return { valid: false, message: "FullName must be between 3 and 100 characters" };
-  }
-
-  if (!/^[A-Za-z\s]+$/.test(fullname.trim())) {
-    return { valid: false, message: "Full name can contain only letters and spaces" };
-  }
-
-  if (!e.trim()) {
+  if (!normalizedEmail) {
     return { valid: false, message: "Email is required" };
   }
-  if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(e.trim())) 
+  if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(normalizedEmail)) 
   {
     return { valid: false, message: "Email format is not valid" }; 
   }
 
-
-  if (!p) {
+  if (!password) {
     return { valid: false, message: "Password is required" };
   }
     
-  if (p.length < 8) {
+  if (password.length < 8) {
     return { valid: false, message: "Password must be at least 8 characters" };
   }
 
-  if (!/[A-Z]/.test(p)) {
+  if (!/[A-Z]/.test(password)) {
     return { valid: false, message: "Password must contain at least one uppercase letter" };
   }
 
-  if (!/[0-9]/.test(p)) {
+  if (!/[0-9]/.test(password)) {
      return { valid: false, message: "Password must contain at least one number" };
   }
-
-
-  if (bio.trim().length > 300) {
+  if (normalizedBio.length > 300) {
      return { valid: false, message: "Bio must be at most 300 characters" };
   }
   

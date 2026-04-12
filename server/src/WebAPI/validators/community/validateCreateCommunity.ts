@@ -1,24 +1,24 @@
 import { ValidationResult } from "../../../Domain/types/ValidationResult";
 
-export const validateCreateCommunity  = (name: string, description:string ,rules:string,type:string,avatar?: Express.Multer.File): ValidationResult => {
+export const validateCreateCommunity  = (normalizedName: string, normalizedDescription:string ,normalizedRules:string,normalizedType:string,avatar?: Express.Multer.File): ValidationResult => {
 
- if (!name.trim()) {
+    if (!normalizedName) {
       return { valid: false, message: "Community name is required" };
     }
 
-    if (name.trim().length < 2 || name.trim().length > 80) {
+    if (normalizedName.length < 2 || normalizedName.length > 80) {
       return { valid: false, message: "Community name must be between 2 and 80 characters" };
     }
 
-    if (description.trim().length > 500) {
+    if (normalizedDescription.length > 500) {
         return { valid: false, message: "Description must be at most 500 characters" };
     }
 
-    if (rules.trim().length > 250) {
-      return { valid: false, message: "Rules must be at most 250 characters" };
+    if (normalizedRules.length > 500) {
+      return { valid: false, message: "Rules must be at most 500 characters" };
     }
 
-    if (type !== "public" && type !== "private") {
+    if (normalizedType !== "public" && normalizedType !== "private") {
       return { valid: false, message: "Invalid community type" };
     }
 

@@ -20,9 +20,12 @@ export class AuthController {
 
   private async login(req: Request, res: Response): Promise<void> {
     const { username, password } = req.body as { username?: string; password?: string };
-    const v: ValidationResult = validateLogin(username ?? "", password ?? "");
+   
+    const normalizedUserName =(username ?? "").trim();
+   
+    const v: ValidationResult = validateLogin(normalizedUserName, password ?? "");
     if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
-    const result = await this.authService.login(username!, password!);
+    const result = await this.authService.login(normalizedUserName, password!);
     if (result.id === 0) { res.status(401).json({ success: false, message: "Invalid username or password" }); return; }
     const token = jwt.sign(
       { id: result.id, username: result.username, role: result.role },
@@ -35,12 +38,15 @@ export class AuthController {
   private async register(req: Request, res: Response): Promise<void> {
     const file = req.file;
     const image = file ? file.filename : "";
-    const { username, email, password, role,fullname,bio } = req.body as { username?: string; email?: string; password?: string; role?: string; fullname?: string;bio?: string;  };
+    const { username, email, password,fullname,bio } = req.body as { username?: string; email?: string; password?: string; fullname?: string;bio?: string;  };
+    const normalizedUserName =(username ?? "").trim();
     const normalizedFullname = (fullname ?? "").trim().replace(/\s+/g, " ");
-    const v: ValidationResult = validateRegister(username ?? "", email ?? "", password ?? "",normalizedFullname??"",bio??"",file);
+    const normalizedEmail =(email ?? "").trim();
+    const normalizedBio =(bio ?? "").trim();
+    const v: ValidationResult = validateRegister(normalizedUserName,normalizedFullname,normalizedEmail, password ?? "",normalizedBio,file);
     if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
 
-    const result = await this.authService.register(username!, email!, role ?? "user", password!,normalizedFullname!,bio??"",image??"");
+    const result = await this.authService.register(normalizedUserName,normalizedEmail,"user", password!,normalizedFullname,normalizedBio,image??"");
     if (result.id === 0) { res.status(409).json({ success: false, message: "Username or email already taken" }); return; }
     const token = jwt.sign(
       { id: result.id, username: result.username, role: result.role },
