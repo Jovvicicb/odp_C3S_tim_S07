@@ -1,0 +1,13 @@
+import { UserRole } from "../../enums/UserRole";
+
+export class AuthRegisterDto {
+  constructor(
+    public username: string,
+    public email: string,
+    public role: UserRole,
+    public password: string,
+    public fullname: string,
+    public bio: string,
+    public image: string
+  ) {}
+}

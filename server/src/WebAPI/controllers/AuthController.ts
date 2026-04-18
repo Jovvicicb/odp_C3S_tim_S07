@@ -2,9 +2,13 @@ import { Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
 import { IAuthService } from "../../Domain/services/auth/IAuthService";
 import { ValidationResult } from "../../Domain/types/ValidationResult";
-import { validateLogin } from "../validators/auth/validateLogin";
-import { validateRegister } from "../validators/auth/validateRegister";
+import { validateLogin } from "../validators/auth/ValidateLogin";
+import { validateRegister } from "../validators/auth/ValidateRegister";
 import { upload} from "../../Middlewares/multer/multer"
+import { StringNormalizer } from "../../Shared/normalization/StringNormalizer";
+import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
+import { AuthMessages } from "../../Domain/constants/messages/auth/AuthMessages";
+import { RegisterInput } from "../types/auth/RegisterInput";
 
 export class AuthController {
   private readonly router = Router();
@@ -21,39 +25,57 @@ export class AuthController {
   private async login(req: Request, res: Response): Promise<void> {
     const { username, password } = req.body as { username?: string; password?: string };
    
-    const normalizedUserName =(username ?? "").trim();
+    const normalizedUserName =StringNormalizer.trim(username);
    
     const v: ValidationResult = validateLogin(normalizedUserName, password ?? "");
-    if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
+
+    if (!v.valid) { 
+      res.status(HttpStatus.badRequest).json({ success: false, message: v.message }); 
+      return; 
+    }
     const result = await this.authService.login(normalizedUserName, password!);
-    if (result.id === 0) { res.status(401).json({ success: false, message: "Invalid username or password" }); return; }
+    if (result.id === 0) {
+       res.status(HttpStatus.unauthorized).json({
+         success: false, 
+         message: AuthMessages.invalidCredentials
+        }); 
+        return; 
+      }
     const token = jwt.sign(
       { id: result.id, username: result.username, role: result.role },
       process.env.JWT_SECRET ?? "",
       { expiresIn: "24h" }
     );
-    res.status(200).json({ success: true, message: "Login successful", data: token });
+    res.status(HttpStatus.ok).json({ success: true, message: AuthMessages.loginSuccess, data: token });
   }
 
   private async register(req: Request, res: Response): Promise<void> {
-    const file = req.file;
-    const image = file ? file.filename : "";
-    const { username, email, password,fullname,bio } = req.body as { username?: string; email?: string; password?: string; fullname?: string;bio?: string;  };
-    const normalizedUserName =(username ?? "").trim();
-    const normalizedFullname = (fullname ?? "").trim().replace(/\s+/g, " ");
-    const normalizedEmail =(email ?? "").trim();
-    const normalizedBio =(bio ?? "").trim();
-    const v: ValidationResult = validateRegister(normalizedUserName,normalizedFullname,normalizedEmail, password ?? "",normalizedBio,file);
-    if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
+    const { validation, dto } = validateRegister(
+      req.body as RegisterInput,
+      req.file
+    );
 
-    const result = await this.authService.register(normalizedUserName,normalizedEmail,"user", password!,normalizedFullname,normalizedBio,image??"");
-    if (result.id === 0) { res.status(409).json({ success: false, message: "Username or email already taken" }); return; }
+    if (!validation.valid || !dto) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: validation.message,
+      });
+      return;
+    }
+    const result = await this.authService.register(dto);
+    if (result.id === 0) { 
+      res.status(HttpStatus.conflict).json({
+         success: false,
+         message: AuthMessages.alreadyTaken 
+      }); 
+      return; 
+    }
     const token = jwt.sign(
       { id: result.id, username: result.username, role: result.role },
       process.env.JWT_SECRET ?? "",
       { expiresIn: "24h" }
     );
-    res.status(201).json({ success: true, message: "Registration successful", data: token });
+    res.status(HttpStatus.created).json({ success: true, message: AuthMessages.registerSuccess, data: token });
   }
 
   public getRouter(): Router { return this.router; }

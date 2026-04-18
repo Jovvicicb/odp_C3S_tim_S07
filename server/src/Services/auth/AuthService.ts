@@ -4,6 +4,7 @@ import { IUserRepository } from "../../Domain/repositories/users/IUserRepository
 import { AuthUserDto } from "../../Domain/DTOs/auth/AuthUserDto";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { User } from "../../Domain/models/User";
+import { AuthRegisterDto } from "../../Domain/DTOs/auth/AuthRegisterDto";
 
 export class AuthService implements IAuthService {
   private readonly saltRounds = parseInt(process.env.SALT_ROUNDS ?? "10", 10);
@@ -18,15 +19,14 @@ export class AuthService implements IAuthService {
     return new AuthUserDto(user.id, user.username, user.role);
   }
 
-  async register(username: string, email: string, role: string, password: string,fullname:string,bio:string,image:string): Promise<AuthUserDto> {
-    const byName = await this.userRepo.findByUsername(username);
+  async register(dto:AuthRegisterDto): Promise<AuthUserDto> {
+    const byName = await this.userRepo.findByUsername(dto.username);
     if (byName.id !== 0) return new AuthUserDto();
-    const byEmail = await this.userRepo.findByEmail(email);
+    const byEmail = await this.userRepo.findByEmail(dto.email);
     if (byEmail.id !== 0) return new AuthUserDto();
-    const hash = await bcrypt.hash(password, this.saltRounds).catch(() => "");
+    const hash = await bcrypt.hash(dto.password, this.saltRounds).catch(() => "");
     if (!hash) return new AuthUserDto();
-    const userRole = role === UserRole.ADMIN ? UserRole.ADMIN : UserRole.USER;
-    const created = await this.userRepo.create(new User(0, username, email, userRole, hash,fullname,bio,image));
+   const created = await this.userRepo.create(new User(0, dto.username, dto.email, dto.role, hash,dto.fullname,dto.bio,dto.image));
     if (created.id === 0) return new AuthUserDto();
     return new AuthUserDto(created.id, created.username, created.role);
   }

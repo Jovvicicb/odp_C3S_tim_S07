@@ -1,45 +1,73 @@
-import { ValidationResult } from "../../../Domain/types/ValidationResult";
+import { FileValidationMessages } from "../../../Domain/constants/messages/common/FileValidationMessages";
+import { CommunityValidationMessages } from "../../../Domain/constants/messages/community/CommunityValidationMessages";
+import { CommunityType } from "../../../Domain/enums/CommunityType";
+import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
+import { CreateCommunityInput } from "../../types/community/CreateCommunityInput";
+import { ValidateCreateCommunityResult } from "../../../Domain/types/community/ValidateCreateCommunityResult";
 
-export const validateCreateCommunity  = (normalizedName: string, normalizedDescription:string ,normalizedRules:string,normalizedType:string,avatar?: Express.Multer.File): ValidationResult => {
+export const validateCreateCommunity = (
+  input: CreateCommunityInput,
+  file?: Express.Multer.File
+): ValidateCreateCommunityResult => {
+  const normalizedName = StringNormalizer.normalizeSpaces(input.name);
+  const normalizedDescription = StringNormalizer.trim(input.description);
+  const normalizedRules = StringNormalizer.trim(input.rules);
+  const normalizedType = StringNormalizer.trim(input.type) || "public";
 
     if (!normalizedName) {
-      return { valid: false, message: "Community name is required" };
+    return {
+      validation: { valid: false, message: CommunityValidationMessages.nameRequired },
+    };
+  }
+  if (normalizedName.length < 2 || normalizedName.length > 80) {
+    return {
+      validation: { valid: false, message: CommunityValidationMessages.nameLength },
+    };
+  }
+
+  if (normalizedDescription.length > 500) {
+    return {
+      validation: { valid: false, message: CommunityValidationMessages.descriptionTooLong },
+    };
+  }
+
+  if (normalizedRules.length > 500) {
+    return {
+      validation: { valid: false, message: CommunityValidationMessages.rulesTooLong },
+    };
+  }
+
+  if (normalizedType !== "public" && normalizedType !== "private") {
+    return {
+      validation: { valid: false, message: CommunityValidationMessages.invalidType },
+    };
+  }
+
+  if (file) {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.mimetype)) {
+      return {
+        validation: { valid: false, message: FileValidationMessages.imageInvalid },
+      };
     }
 
-    if (normalizedName.length < 2 || normalizedName.length > 80) {
-      return { valid: false, message: "Community name must be between 2 and 80 characters" };
+    if (file.size > 2 * 1024 * 1024) {
+      return {
+        validation: { valid: false, message: FileValidationMessages.imageTooLarge },
+      };
     }
+  }
 
-    if (normalizedDescription.length > 500) {
-        return { valid: false, message: "Description must be at most 500 characters" };
-    }
-
-    if (normalizedRules.length > 500) {
-      return { valid: false, message: "Rules must be at most 500 characters" };
-    }
-
-    if (normalizedType !== "public" && normalizedType !== "private") {
-      return { valid: false, message: "Invalid community type" };
-    }
-
-    if (avatar) {
-        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-        if (!allowedTypes.includes(avatar.mimetype)) {
-        return {
-            valid: false,
-            message: "Only JPG, PNG or WEBP images are allowed",
-        };
-        }
-
-        if (avatar.size > 2 * 1024 * 1024) {
-        return {
-            valid: false,
-            message: "Image must be smaller than 2MB",
-        };
-         }
-     }
-  
-    
-  return { valid: true };
+  return {
+    validation: { valid: true },
+    dto: {
+      name: normalizedName,
+      description: normalizedDescription,
+      rules: normalizedRules,
+      type: normalizedType === "public" ? CommunityType.PUBLIC : CommunityType.PRIVATE,
+      ownerId: input.ownerId,
+      avatar: file?.filename ?? "",
+    },
+  };
 };

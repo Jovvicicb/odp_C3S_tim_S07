@@ -1,54 +1,91 @@
-import { ValidationResult } from "../../../Domain/types/ValidationResult";
+import { AuthValidationMessages } from '../../../Domain/constants/messages/auth/AuthValidationMessages';
+import { FileValidationMessages } from '../../../Domain/constants/messages/common/FileValidationMessages';
+import { AuthRegisterDto } from '../../../Domain/DTOs/auth/AuthRegisterDto';
+import { UserRole } from '../../../Domain/enums/UserRole';
+import { ValidateRegisterResult } from '../../../Domain/types/auth/ValidateRegisterResult';
+import { StringNormalizer } from '../../../Shared/normalization/StringNormalizer';
+import { RegisterInput } from '../../types/auth/RegisterInput';
 
 
-export const validateRegister = (normalizedUserName: string, normalizedFullname: string, normalizedEmail: string ,password: string, normalizedBio:string,file?: Express.Multer.File): ValidationResult => {
- 
+export const validateRegister = (
+  input: RegisterInput,
+  file?: Express.Multer.File
+): ValidateRegisterResult => {
+  const normalizedUserName = StringNormalizer.trim(input.username);
+  const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname);
+  const normalizedEmail = StringNormalizer.normalizeEmail(input.email);
+  const normalizedBio = StringNormalizer.trim(input.bio);
+
   if (!normalizedUserName){
-    return { valid: false, message: "Username is required" };
+    return {
+      validation: { valid: false, message: AuthValidationMessages.usernameRequired},
+    };
   }
 
   if (normalizedUserName.length < 3 || normalizedUserName.length > 40) {
-    return { valid: false, message: "Username must be between 3 and 40 characters"};
+    return {
+      validation: { valid: false, message: AuthValidationMessages.usernameInvalid},
+    };
   }
 
   if (!/^[A-Za-z0-9-]+$/.test(normalizedUserName)) {
-     return { valid: false, message: "Username can contain only letters, numbers and dash(-)"};
+     return {
+      validation: { valid: false, message: AuthValidationMessages.usernameInvalid},
+    };
   }
   if(normalizedFullname){
     if (normalizedFullname.length < 3 || normalizedFullname.length > 100) {
-      return { valid: false, message: "FullName must be between 3 and 100 characters" };
+      return {
+        validation: { valid: false, message: AuthValidationMessages.fullnameInvalid},
+      };
     }
     
     if (!/^[A-Za-z\s]+$/.test(normalizedFullname)) {
-      return { valid: false, message: "Full name can contain only letters and spaces" };
+      return {
+       validation: { valid: false, message: AuthValidationMessages.fullnameInvalid},
+      };
     }
   } 
 
   if (!normalizedEmail) {
-    return { valid: false, message: "Email is required" };
+    return {
+      validation: { valid: false, message: AuthValidationMessages.emailRequired},
+    };
   }
   if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(normalizedEmail)) 
   {
-    return { valid: false, message: "Email format is not valid" }; 
+    return {
+      validation: { valid: false, message: AuthValidationMessages.emailInvalid},
+    };
   }
 
-  if (!password) {
-    return { valid: false, message: "Password is required" };
-  }
+  if (!input.password) {
+     return {
+      validation: { valid: false, message: AuthValidationMessages.passwordRequired},
+    };
+ }
     
-  if (password.length < 8) {
-    return { valid: false, message: "Password must be at least 8 characters" };
-  }
+  if (input.password.length < 8) {
+    return {
+      validation: { valid: false, message: AuthValidationMessages.passwordInvalid},
+    };
+ }
 
-  if (!/[A-Z]/.test(password)) {
-    return { valid: false, message: "Password must contain at least one uppercase letter" };
-  }
+  if (!/[A-Z]/.test(input.password)) {
+    return {
+      validation: { valid: false, message: AuthValidationMessages.passwordInvalid},
+    };
+    }
 
-  if (!/[0-9]/.test(password)) {
-     return { valid: false, message: "Password must contain at least one number" };
-  }
+  if (!/[0-9]/.test(input.password)) {
+     return {
+      validation: { valid: false, message: AuthValidationMessages.passwordInvalid},
+    };
+ }
   if (normalizedBio.length > 300) {
-     return { valid: false, message: "Bio must be at most 300 characters" };
+     return {
+      validation: { valid: false, message: AuthValidationMessages.bioTooLong},
+    };
   }
   
   if (file) {
@@ -56,18 +93,26 @@ export const validateRegister = (normalizedUserName: string, normalizedFullname:
 
     if (!allowedTypes.includes(file.mimetype)) {
       return {
-        valid: false,
-        message: "Only JPG, PNG or WEBP images are allowed",
+        validation: { valid: false, message: FileValidationMessages.imageInvalid},
       };
     }
 
     if (file.size > 2 * 1024 * 1024) {
       return {
-        valid: false,
-        message: "Image must be smaller than 2MB",
+         validation: { valid: false, message: FileValidationMessages.imageTooLarge},
       };
     }
   }   
-
-  return { valid: true };
+ return {
+    validation: { valid: true },
+    dto: new AuthRegisterDto(
+      normalizedUserName,
+      normalizedEmail,
+      UserRole.USER,
+      input.password,
+      normalizedFullname,
+      normalizedBio,
+      file?.filename ?? ""
+    ),
+  };
 };

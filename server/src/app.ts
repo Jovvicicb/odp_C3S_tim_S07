@@ -46,7 +46,7 @@ app.use(cors({ origin: process.env.CLIENT_URL ?? "*" }));
 
 app.use("/api/v1", new AuthController(authService).getRouter());
 app.use("/api/v1", new UserController(userService).getRouter());
-app.use("/api/v1", new CommunityController(communityService).getRouter());
+app.use("/api/v1", new CommunityController(communityService,userService).getRouter());
 
 app.use(errorHandler);
 

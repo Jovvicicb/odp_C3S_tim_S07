@@ -98,7 +98,7 @@ async findByUsername(username: string): Promise<User> {
     if (!res) return false;
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `UPDATE users SET isActive = 0 WHERE id = ?`, [id]
+        `UPDATE users SET is_active = 0 WHERE id = ?`, [id]
       );
       return result.affectedRows > 0;
     } catch (err) {

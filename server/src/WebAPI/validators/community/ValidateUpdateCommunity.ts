@@ -1,0 +1,121 @@
+import { FileValidationMessages } from '../../../Domain/constants/messages/common/FileValidationMessages';
+import { CommunityValidationMessages } from '../../../Domain/constants/messages/community/CommunityValidationMessages';
+import { UpdateCommunityDto } from '../../../Domain/DTOs/community/UpdateCommunityDto';
+import { CommunityType } from '../../../Domain/enums/CommunityType';
+import { StringNormalizer } from '../../../Shared/normalization/StringNormalizer';
+import { UpdateCommunityInput } from '../../types/community/UpdateCommunityInput';
+import { ValidateUpdateCommunityResult } from '../../../Domain/types/community/ValidateUpdateCommunityResult';
+
+export const validateUpdateCommunity = (
+  input: UpdateCommunityInput,
+  file?: Express.Multer.File
+): ValidateUpdateCommunityResult => {
+  const dto: UpdateCommunityDto = {};
+
+
+  if (input.name !== undefined) {
+    const normalizedName = StringNormalizer.normalizeSpaces(input.name);
+
+    if (!normalizedName) {
+      return {
+        validation: { valid: false, message: CommunityValidationMessages.nameRequired },
+      };
+    }
+
+    if (normalizedName.length < 2 || normalizedName.length > 80) {
+      return {
+        validation: {
+          valid: false,
+          message:CommunityValidationMessages.nameLength,
+        },
+      };
+    }
+
+    dto.name = normalizedName;
+  }
+  if (input.description !== undefined) {
+    const normalizedDescription = StringNormalizer.trim(input.description);
+
+    if (normalizedDescription.length > 500) {
+      return {
+        validation: {
+          valid: false,
+          message: CommunityValidationMessages.descriptionTooLong,
+        },
+      };
+    }
+
+    dto.description = normalizedDescription;
+  }
+
+  if (input.rules !== undefined) {
+    const normalizedRules = StringNormalizer.trim(input.rules);
+
+    if (normalizedRules.length > 500) {
+      return {
+        validation: {
+          valid: false,
+          message: CommunityValidationMessages.rulesTooLong,
+        },
+      };
+    }
+
+    dto.rules = normalizedRules;
+  }
+  
+  if (input.type !== undefined) {
+    const normalizedType = StringNormalizer.trim(input.type);
+
+    if (normalizedType !== "public" && normalizedType !== "private") {
+      return {
+        validation: {
+          valid: false,
+          message: CommunityValidationMessages.invalidType,
+        },
+      };
+    }
+
+    dto.type =
+      normalizedType === "public"
+        ? CommunityType.PUBLIC
+        : CommunityType.PRIVATE;
+  }
+
+  if (file) {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.mimetype)) {
+      return {
+        validation: {
+          valid: false,
+          message: FileValidationMessages.imageInvalid,
+        },
+      };
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      return {
+        validation: {
+          valid: false,
+          message: FileValidationMessages.imageTooLarge,
+        },
+      };
+    }
+
+    dto.avatar = file.filename;
+  }
+
+  if (Object.keys(dto).length === 0) {
+    return {
+      validation: {
+        valid: false,
+        message: CommunityValidationMessages.noFieldsToUpdate,
+      },
+    };
+  }
+
+  return {
+    validation: { valid: true },
+    dto,
+  };
+};

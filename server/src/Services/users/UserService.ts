@@ -19,4 +19,8 @@ export class UserService implements IUserService {
   async deactivate(id: number): Promise<boolean> {
     return this.userRepo.deactivate(id);
   }
+  async exists(id: number): Promise<boolean> {
+  const user = await this.userRepo.findById(id);
+  return !!user && user.id !== 0;
+}
 }

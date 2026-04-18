@@ -1,13 +1,15 @@
 import { CommunityDto } from "../../DTOs/community/CommunityDto";
 import { CreateCommunityDto } from "../../DTOs/community/CreateCommunityDto";
-import { PaginatedListDto } from "../../DTOs/community/PaginatedListDto";
-import { CommunityType } from "../../enums/CommunityType";
+import { PaginatedListDto } from "../../DTOs/common/PaginatedListDto";
+import { GetCommunitiesDto } from '../../DTOs/community/GetCommunitiesDto';
+import { GetCommunitiesByUserIdDto } from "../../DTOs/community/GetCommunitiesByUserIdDto";
+import { UpdateCommunityDto } from "../../DTOs/community/UpdateCommunityDto";
 
 export interface ICommunityService {
-  getAll(page: number, limit: number,type?:CommunityType): Promise<PaginatedListDto<CommunityDto>>;
+  getAll(dto:GetCommunitiesDto): Promise<PaginatedListDto<CommunityDto>>;
   getById(id: number): Promise<CommunityDto | null>;
-  getByOwnerId(userId: number,page:number,limit:number): Promise<PaginatedListDto<CommunityDto>>;
+  getByUserId(dto:GetCommunitiesByUserIdDto): Promise<PaginatedListDto<CommunityDto>>;
   create(dto: CreateCommunityDto): Promise<CommunityDto | null>;
-  update(id: number, fields: Partial<CommunityDto>): Promise<boolean>;
+  update(id: number, dto: UpdateCommunityDto): Promise<boolean>;
   delete(id: number): Promise<boolean>;
 }

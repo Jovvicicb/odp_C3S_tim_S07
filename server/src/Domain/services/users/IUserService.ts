@@ -4,4 +4,5 @@ export interface IUserService {
   getAll(): Promise<UserDto[]>;
   getById(id: number): Promise<UserDto | null>;
   deactivate(id: number): Promise<boolean>;
+  exists(id:number):Promise<boolean>;
 }

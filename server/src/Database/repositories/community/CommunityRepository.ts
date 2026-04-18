@@ -3,10 +3,12 @@ import { ICommunityRepository } from "../../../Domain/repositories/community/ICo
 import { Community } from "../../../Domain/models/Community";
 import { CommunityDto  } from "../../../Domain/DTOs/community/CommunityDto";
 import { CreateCommunityDto } from "../../../Domain/DTOs/community/CreateCommunityDto";
-import { CommunityType } from "../../../Domain/enums/CommunityType";
 import { DbManager } from "../../connection/DbConnectionPool";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
-
+import { CommunityMapper } from "../../../Shared/mappers/community/CommunityMapper";
+import { GetCommunitiesDto } from "../../../Domain/DTOs/community/GetCommunitiesDto";
+import { GetCommunitiesByUserIdDto } from "../../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
+import { UpdateCommunityDto } from "../../../Domain/DTOs/community/UpdateCommunityDto";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -16,34 +18,23 @@ export class CommunityRepository implements ICommunityRepository {
     private readonly logger: ILoggerService,
   ) {}
 
-  private map(r: RowDataPacket): CommunityDto {
-    return new CommunityDto( 
-      r.id,
-      r.name,
-      r.description,
-      r.rules,
-      r.type as CommunityType,
-      r.owner_id,
-      r.avatar,
-      new Date(r.created_at),
-      new Date(r.updated_at));
-  }
-
   async findById(id: number): Promise<CommunityDto | null> {
     const res = await this.db.getReadConnection();
     if (!res) return null;
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM communities  WHERE id = ?`, [id]);
-      return rows.length > 0 ? this.map(rows[0]) : null;
+      return rows.length > 0 ? CommunityMapper.toDtoFromRow(rows[0]): null;
     } catch (err) {
       this.logger.error("CommunityRepository", "findById failed", err);
       return null;
     } finally { res.conn.release(); }
   }
 
-  async findAll(page :number, limit :number,type?:CommunityType): Promise<{communities:CommunityDto[];total:number}> {
+  async findAll(dto:GetCommunitiesDto): Promise<{communities:CommunityDto[];total:number}> {
     const res = await this.db.getReadConnection();
     if (!res) return {communities:[],total: 0};
+
+    const {page,limit,type} = dto;
     
     const offset = safeInt((page - 1) * limit);
     const lim = safeInt(limit);
@@ -66,7 +57,7 @@ export class CommunityRepository implements ICommunityRepository {
       );
 
       return {
-        communities: rows.map((r) => this.map(r)),
+        communities: rows.map((r) => CommunityMapper.toDtoFromRow(r)),
         total: cnt[0]?.total ?? 0};
     } catch (err) {
       this.logger.error("CommunityRepository", "findAll failed", err);
@@ -74,9 +65,10 @@ export class CommunityRepository implements ICommunityRepository {
     } finally { res.conn.release(); }
   }
 
-  async findByOwnerId(ownerId: number,page:number,limit:number): Promise<{communities:CommunityDto[];total:number}> {
+  async findByUserId(dto:GetCommunitiesByUserIdDto): Promise<{communities:CommunityDto[];total:number}> {
     const res = await this.db.getReadConnection();
     if (!res) return {communities:[],total:0};
+    const {userId,page,limit} = dto;
     const offset = safeInt((page - 1) * limit);
     const lim = safeInt(limit);
     try {
@@ -85,15 +77,15 @@ export class CommunityRepository implements ICommunityRepository {
          WHERE  owner_id = ?
          ORDER BY created_at DESC
          LIMIT ${lim} OFFSET ${offset}`,
-        [ownerId],
+        [userId],
       );
 
       const [cnt] = await res.conn.execute<RowDataPacket[]>(
         `SELECT COUNT(*) as total FROM communities WHERE owner_id = ?`,
-        [ownerId],
+        [userId],
       );
       return {
-        communities: rows.map((r) => this.map(r)),
+        communities: rows.map((r) => CommunityMapper.toDtoFromRow(r)),
         total: cnt[0]?.total ?? 0,
       };
     } catch (err) {
@@ -134,11 +126,11 @@ export class CommunityRepository implements ICommunityRepository {
     } finally { res.conn.release(); }
   }
 
-  async update(id: number, fields: Partial<CommunityDto>): Promise<boolean> {
+  async update(id: number, dto: UpdateCommunityDto): Promise<boolean> {
     const res = await this.db.getWriteConnection();
     if (!res) return false;
     try {
-      const entries = Object.entries(fields).filter(([, v]) => v !== undefined);
+      const entries = Object.entries(dto).filter(([, v]) => v !== undefined);
       if (entries.length === 0) return false;
       const setClause = entries.map(([k]) => `${k} = ?`).join(", ");
       const values = entries.map(([, v]) => v);
