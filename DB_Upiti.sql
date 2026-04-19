@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   user_id     INT UNSIGNED NULL,
   action      VARCHAR(255) NOT NULL,
   details     TEXT NULL,
+  ip_address  VARCHAR(45) NULL,
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_user (user_id),
   INDEX idx_created (created_at),

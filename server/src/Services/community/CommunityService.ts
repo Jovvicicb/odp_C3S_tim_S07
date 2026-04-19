@@ -1,14 +1,13 @@
-// TODO: Replace with your domain-specific service implementation
 import { ICommunityService } from "../../Domain/services/community/ICommunityService";
 import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
 import { CommunityDto } from "../../Domain/DTOs/community/CommunityDto";
 import { CreateCommunityDto } from "../../Domain/DTOs/community/CreateCommunityDto";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
-import { CommunityType } from "../../Domain/enums/CommunityType";
 import { CommunityMapper } from "../../Shared/mappers/community/CommunityMapper";
 import { GetCommunitiesDto } from "../../Domain/DTOs/community/GetCommunitiesDto";
 import { GetCommunitiesByUserIdDto } from "../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
 import { UpdateCommunityDto } from "../../Domain/DTOs/community/UpdateCommunityDto";
+import { CreateCommunityResponseDto } from "../../Domain/DTOs/community/CreateCommunityResponseDto";
 
 export class CommunityService implements ICommunityService {
   public constructor(private readonly communityRepo: ICommunityRepository) {}
@@ -27,7 +26,7 @@ export class CommunityService implements ICommunityService {
     return new PaginatedListDto(items.communities, items.total, dto.page, dto.limit);
     }
 
-  async create(dto: CreateCommunityDto): Promise<CommunityDto | null> {
+  async create(dto: CreateCommunityDto): Promise<CreateCommunityResponseDto | null> {
     const created = await this.communityRepo.create(dto);
     if (created.id === 0) return null;
     return CommunityMapper.toDtoFromModel(created);

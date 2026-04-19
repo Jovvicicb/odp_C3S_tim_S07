@@ -2,6 +2,7 @@ import { RowDataPacket } from "mysql2";
 import { CommunityDto } from "../../../Domain/DTOs/community/CommunityDto";
 import { CommunityType } from "../../../Domain/enums/CommunityType";
 import { Community } from "../../../Domain/models/Community";
+import { CreateCommunityResponseDto } from "../../../Domain/DTOs/community/CreateCommunityResponseDto";
 
 export class CommunityMapper {
   public static toDtoFromRow(row: RowDataPacket): CommunityDto {
@@ -18,17 +19,9 @@ export class CommunityMapper {
     );
   }
 
-   public static toDtoFromModel(community: Community): CommunityDto {
-    return new CommunityDto(
+   public static toDtoFromModel(community: Community): CreateCommunityResponseDto {
+    return new CreateCommunityResponseDto(
       community.id,
-      community.name,
-      community.description,
-      community.rules,
-      community.type,
-      community.ownerId,
-      community.avatar,
-      community.createdAt ?? new Date(),
-      community.updatedAt ?? new Date()
     );
   }
 

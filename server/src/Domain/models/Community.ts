@@ -10,7 +10,7 @@ export class Community {
     public type: CommunityType = CommunityType.PUBLIC,
     public ownerId: number = 0,
     public avatar: string = "",
-    public createdAt?: Date,
-    public updatedAt?: Date
+    public createdAt: Date = new Date(),
+    public updatedAt: Date = new Date()
   ) {}
 }
