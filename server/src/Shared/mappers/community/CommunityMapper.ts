@@ -5,7 +5,7 @@ import { Community } from "../../../Domain/models/Community";
 import { CreateCommunityResponseDto } from "../../../Domain/DTOs/community/CreateCommunityResponseDto";
 
 export class CommunityMapper {
-  public static toDtoFromRow(row: RowDataPacket): CommunityDto {
+  public static toModel(row: RowDataPacket): CommunityDto {
     return new CommunityDto(
       row.id,
       row.name,
@@ -18,8 +18,21 @@ export class CommunityMapper {
       new Date(row.updated_at)
     );
   }
+  public static toDto(community: Community): CommunityDto {
+    return new CommunityDto(
+      community.id,
+      community.name,
+      community.description,
+      community.rules,
+      community.type,
+      community.ownerId,
+      community.avatar,
+      community.createdAt,
+      community.updatedAt
+    );
+  }
 
-   public static toDtoFromModel(community: Community): CreateCommunityResponseDto {
+   public static toCreateResponseDto(community: Community): CreateCommunityResponseDto {
     return new CreateCommunityResponseDto(
       community.id,
     );

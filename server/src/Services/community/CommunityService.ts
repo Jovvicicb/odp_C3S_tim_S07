@@ -14,22 +14,35 @@ export class CommunityService implements ICommunityService {
 
   async getAll(dto : GetCommunitiesDto): Promise<PaginatedListDto<CommunityDto>> {
     const items = await this.communityRepo.findAll(dto);
-    return new PaginatedListDto(items.communities, items.total, dto.page, dto.limit);
+    return new PaginatedListDto(
+      items.communities.map((c) => CommunityMapper.toDto(c)),
+      items.total, 
+      dto.page, 
+      dto.limit
+    );
   }
 
   async getById(id: number): Promise<CommunityDto | null> {
-    return this.communityRepo.findById(id);
+    const community = await this.communityRepo.findById(id);
+    if (community.id === 0) return null;
+
+    return CommunityMapper.toDto(community);
   }
 
   async getByUserId(dto:GetCommunitiesByUserIdDto):  Promise<PaginatedListDto<CommunityDto>> {
     const items = await this.communityRepo.findByUserId(dto);
-    return new PaginatedListDto(items.communities, items.total, dto.page, dto.limit);
+    return new PaginatedListDto(
+      items.communities.map((c) => CommunityMapper.toDto(c)),
+      items.total, 
+      dto.page, 
+      dto.limit
+    );
     }
 
   async create(dto: CreateCommunityDto): Promise<CreateCommunityResponseDto | null> {
     const created = await this.communityRepo.create(dto);
     if (created.id === 0) return null;
-    return CommunityMapper.toDtoFromModel(created);
+    return CommunityMapper.toCreateResponseDto(created);
   }
 
   async update(id: number, dto: UpdateCommunityDto): Promise<boolean> {
