@@ -8,6 +8,9 @@ import { parseStringValue } from "../parser/common/ParseStringValue";
 import { parseId } from "../parser/common/ParseId";
 import { validateId } from "../validators/common/ValidateId";
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
+import { parsePagination } from "../parser/common/ParsePagination";
+import { validatePagination } from "../validators/common/ValidatePagination";
+import { GetUsersDto } from "../../Domain/DTOs/users/GetUsersDto";
 
 export class UserController {
   private readonly router = Router();
@@ -19,7 +22,21 @@ export class UserController {
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
-    const users = await this.userService.getAll();
+    const pageParam   = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+       
+    const { page, limit } = parsePagination(pageParam, limitParam);
+    
+    const paginationValidation = validatePagination(page , limit);
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
+      return;
+    }
+
+    const dto = new GetUsersDto(page,limit);
+    
+
+    const users = await this.userService.getAll(dto);
     res.status(HttpStatus.ok).json({ 
       success: true, 
       data: users 

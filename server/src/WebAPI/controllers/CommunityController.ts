@@ -51,7 +51,10 @@ export class CommunityController {
 
     const dto = new GetCommunitiesDto(page,limit,type);
     const result = await this.communityService.getAll(dto);
-    res.status(HttpStatus.ok).json({ success: true, data: result });
+    res.status(HttpStatus.ok).json({ 
+      success: true,
+      data: result 
+    });
   }
 
   private async getById(req: Request, res: Response): Promise<void> {
