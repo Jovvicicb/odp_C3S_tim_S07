@@ -5,6 +5,7 @@ import { DbManager } from "../../connection/DbConnectionPool";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { UserMapper } from "../../../Shared/mappers/users/UserMapper";
 import { GetUsersDto } from "../../../Domain/DTOs/users/GetUsersDto";
+import { UserLogMessages } from "../../../Domain/constants/messages/user/UserLogMessages";
 
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
@@ -27,7 +28,7 @@ export class UserRepository implements IUserRepository {
       if (result.insertId === 0) return new User();
       return new User(result.insertId, user.username, user.email, user.role, user.passwordHash,user.fullname,user.bio,user.image);
     } catch (err) {
-      this.logger.error("UserRepository", "create failed", err);
+      this.logger.error("UserRepository", UserLogMessages.createFailed, err);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -39,7 +40,7 @@ export class UserRepository implements IUserRepository {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE id = ?`, [id]);
       return rows.length > 0 ? UserMapper.toModel(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", "findById failed", err);
+      this.logger.error("UserRepository", UserLogMessages.findByIdFailed, err);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -50,7 +51,7 @@ async findByUsername(username: string): Promise<User> {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE username = ?`, [username]);
       return rows.length > 0 ? UserMapper.toModel(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", "findByUsername failed", err);
+      this.logger.error("UserRepository", UserLogMessages.findByUsernameFailed, err);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -62,7 +63,7 @@ async findByUsername(username: string): Promise<User> {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE email = ?`, [email]);
       return rows.length > 0 ? UserMapper.toModel(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", "findByEmail failed", err);
+      this.logger.error("UserRepository", UserLogMessages.findByEmailFailed, err);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -90,7 +91,7 @@ async findByUsername(username: string): Promise<User> {
               users: rows.map((r) => UserMapper.toModel(r)),
               total: cnt[0]?.total ?? 0};
     } catch (err) {
-      this.logger.error("UserRepository", "findAll failed", err);
+      this.logger.error("UserRepository", UserLogMessages.findAllFailed, err);
       return {users : [] ,total:0};
     } finally { res.conn.release(); }
   }
@@ -105,7 +106,7 @@ async findByUsername(username: string): Promise<User> {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("UserRepository", "update failed", err);
+      this.logger.error("UserRepository", UserLogMessages.updateFailed, err);
       return false;
     } finally { res.conn.release(); }
   }
@@ -119,7 +120,7 @@ async findByUsername(username: string): Promise<User> {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("UserRepository", "deactivate failed", err);
+      this.logger.error("UserRepository", UserLogMessages.deactivateFailed, err);
       return false;
     } finally { res.conn.release(); }
   }
@@ -133,7 +134,7 @@ async findByUsername(username: string): Promise<User> {
       );
       return (rows[0]?.cnt ?? 0) > 0;
     } catch (err) {
-      this.logger.error("UserRepository", "exists failed", err);
+      this.logger.error("UserRepository", UserLogMessages.existsFailed, err);
       return false;
     } finally { res.conn.release(); }
   }

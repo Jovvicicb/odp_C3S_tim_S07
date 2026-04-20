@@ -6,5 +6,7 @@ export const CommunityMessages = {
   createFailed:  "Failed to create community",
   updateFailed:  "Failed to update community",
   deleteFailed:  "Failed to delete community",
+  fetchAllFailed: "Failed to fetch communities",
+  fetchOneFailed: "Failed to fetch community",
   invalidType:   "Invalid community type",
 } as const;

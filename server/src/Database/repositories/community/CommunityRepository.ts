@@ -8,6 +8,7 @@ import { CommunityMapper } from "../../../Shared/mappers/community/CommunityMapp
 import { GetCommunitiesDto } from "../../../Domain/DTOs/community/GetCommunitiesDto";
 import { GetCommunitiesByUserIdDto } from "../../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
 import { UpdateCommunityDto } from "../../../Domain/DTOs/community/UpdateCommunityDto";
+import { CommunityLogMessages } from "../../../Domain/constants/messages/community/CommunityLogMessages";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -28,7 +29,7 @@ export class CommunityRepository implements ICommunityRepository {
       );
       return rows.length > 0 ? CommunityMapper.toModel(rows[0]): new Community();
     } catch (err) {
-      this.logger.error("CommunityRepository", "findById failed", err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByIdFailed, err);
       return new Community();
     } finally { res.conn.release(); }
   }
@@ -63,7 +64,7 @@ export class CommunityRepository implements ICommunityRepository {
         communities: rows.map((r) => CommunityMapper.toModel(r)),
         total: cnt[0]?.total ?? 0};
     } catch (err) {
-      this.logger.error("CommunityRepository", "findAll failed", err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.findAllFailed, err);
       return {communities : [] ,total:0};
     } finally { res.conn.release(); }
   }
@@ -92,7 +93,7 @@ export class CommunityRepository implements ICommunityRepository {
         total: cnt[0]?.total ?? 0,
       };
     } catch (err) {
-      this.logger.error("CommunityRepository", "findByUserId failed", err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByUserIdFailed, err);
       return {communities:[] ,total:0};
     } finally { res.conn.release(); }
   }
@@ -124,7 +125,7 @@ export class CommunityRepository implements ICommunityRepository {
         dto.avatar
       );
     } catch (err) {
-      this.logger.error("CommunityRepository", "create failed", err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.createFailed, err);
       return new Community();
     } finally { res.conn.release(); }
   }
@@ -142,7 +143,7 @@ export class CommunityRepository implements ICommunityRepository {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommunityRepository", "update failed", err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.updateFailed, err);
       return false;
     } finally { res.conn.release(); }
   }
@@ -156,7 +157,7 @@ export class CommunityRepository implements ICommunityRepository {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommunityRepository", "delete failed", err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.deleteFailed, err);
       return false;
     } finally { res.conn.release(); }
   }

@@ -44,9 +44,9 @@ app.use("/uploads", express.static("uploads"));
 
 app.use(cors({ origin: process.env.CLIENT_URL ?? "*" }));
 
-app.use("/api/v1", new AuthController(authService).getRouter());
-app.use("/api/v1", new UserController(userService).getRouter());
-app.use("/api/v1", new CommunityController(communityService,userService).getRouter());
+app.use("/api/v1", new AuthController(authService,logger).getRouter());
+app.use("/api/v1", new UserController(userService,logger).getRouter());
+app.use("/api/v1", new CommunityController(communityService,userService,logger).getRouter());
 
 app.use(errorHandler);
 

@@ -3,4 +3,6 @@ export const AuthMessages = {
   loginSuccess: "Login successful",
   registerSuccess: "Registration successful",
   alreadyTaken: "Username or email already taken",
+  loginFailed:     "Failed to login",
+  registerFailed:  "Failed to register"
 } as const;

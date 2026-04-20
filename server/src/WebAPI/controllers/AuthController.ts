@@ -9,11 +9,15 @@ import { StringNormalizer } from "../../Shared/normalization/StringNormalizer";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { AuthMessages } from "../../Domain/constants/messages/auth/AuthMessages";
 import { RegisterInput } from "../types/auth/RegisterInput";
+import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
+import { AuthLogMessages } from "../../Domain/constants/messages/auth/AuthLogMessages";
 
 export class AuthController {
   private readonly router = Router();
 
-  public constructor(private readonly authService: IAuthService) {
+  public constructor(private readonly authService: IAuthService,
+    private readonly logger: ILoggerService
+  ) {
     this.router.post("/auth/login", this.login.bind(this));
     this.router.post(
         "/auth/register",
@@ -33,20 +37,34 @@ export class AuthController {
       res.status(HttpStatus.badRequest).json({ success: false, message: v.message }); 
       return; 
     }
-    const result = await this.authService.login(normalizedUserName, password!);
-    if (result.id === 0) {
-       res.status(HttpStatus.unauthorized).json({
-         success: false, 
-         message: AuthMessages.invalidCredentials
-        }); 
-        return; 
-      }
-    const token = jwt.sign(
-      { id: result.id, username: result.username, role: result.role },
-      process.env.JWT_SECRET ?? "",
-      { expiresIn: "24h" }
-    );
-    res.status(HttpStatus.ok).json({ success: true, message: AuthMessages.loginSuccess, data: token });
+      try{
+      const result = await this.authService.login(normalizedUserName, password!);
+      if (result.id === 0) {
+        res.status(HttpStatus.unauthorized).json({
+          success: false, 
+          message: AuthMessages.invalidCredentials
+          }); 
+          return; 
+        }
+      const token = jwt.sign(
+        { id: result.id, username: result.username, role: result.role },
+        process.env.JWT_SECRET ?? "",
+        { expiresIn: "24h" }
+      );
+      res.status(HttpStatus.ok).json({
+        success: true, 
+        message: AuthMessages.loginSuccess, 
+        data: token 
+      });
+    }catch(err){
+      this.logger.error(this.constructor.name, AuthLogMessages.loginFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: AuthMessages.loginFailed
+      });
+    }
+  
   }
 
   private async register(req: Request, res: Response): Promise<void> {
@@ -62,20 +80,33 @@ export class AuthController {
       });
       return;
     }
-    const result = await this.authService.register(dto);
-    if (result.id === 0) { 
-      res.status(HttpStatus.conflict).json({
-         success: false,
-         message: AuthMessages.alreadyTaken 
-      }); 
-      return; 
-    }
-    const token = jwt.sign(
-      { id: result.id, username: result.username, role: result.role },
-      process.env.JWT_SECRET ?? "",
-      { expiresIn: "24h" }
-    );
-    res.status(HttpStatus.created).json({ success: true, message: AuthMessages.registerSuccess, data: token });
+    try{
+      const result = await this.authService.register(dto);
+      if (result.id === 0) { 
+        res.status(HttpStatus.conflict).json({
+          success: false,
+          message: AuthMessages.alreadyTaken 
+        }); 
+        return; 
+      }
+      const token = jwt.sign(
+        { id: result.id, username: result.username, role: result.role },
+        process.env.JWT_SECRET ?? "",
+        { expiresIn: "24h" }
+      );
+      res.status(HttpStatus.created).json({ 
+        success: true, 
+        message: AuthMessages.registerSuccess, 
+        data: token 
+      });
+   }catch(err){
+      this.logger.error(this.constructor.name, AuthLogMessages.registerFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: AuthMessages.registerFailed,
+      });
+   }
   }
 
   public getRouter(): Router { return this.router; }

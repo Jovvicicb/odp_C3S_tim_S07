@@ -21,12 +21,15 @@ import { CommunityMessages } from "../../Domain/constants/messages/community/Com
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { CreateCommunityInput } from "../types/community/CreateCommunityInput";
 import { UpdateCommunityInput } from "../types/community/UpdateCommunityInput";
+import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
+import { CommunityLogMessages } from "../../Domain/constants/messages/community/CommunityLogMessages";
 
 export class CommunityController {
   private readonly router = Router();
 
   public constructor(private readonly communityService: ICommunityService,
-    private readonly userService: IUserService) {
+    private readonly userService: IUserService,
+    private readonly logger: ILoggerService) {
     this.router.get("/communities",          authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getAll.bind(this));
     this.router.get("/communities/user/:userId", authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getByUserId.bind(this));
     this.router.get("/communities/:id",      authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getById.bind(this));
@@ -50,11 +53,21 @@ export class CommunityController {
     const type =typeParam === ""? undefined : (typeParam as CommunityType);
 
     const dto = new GetCommunitiesDto(page,limit,type);
-    const result = await this.communityService.getAll(dto);
-    res.status(HttpStatus.ok).json({ 
-      success: true,
-      data: result 
-    });
+    try{
+      const result = await this.communityService.getAll(dto);
+      res.status(HttpStatus.ok).json({ 
+        success: true,
+        data: result 
+      });
+    }catch(err){
+      this.logger.error(this.constructor.name, CommunityLogMessages.getAllFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.fetchAllFailed
+      });
+
+    }
   }
 
   private async getById(req: Request, res: Response): Promise<void> {
@@ -66,9 +79,26 @@ export class CommunityController {
        res.status(HttpStatus.badRequest).json({ success: false, message: v.message });
       return;
     } 
-    const community = await this.communityService.getById(id);
-    if (!community) { res.status(HttpStatus.notFound).json({ success: false, message: CommunityMessages.notFound}); return; }
-    res.status(HttpStatus.ok).json({ success: true, data: community });
+    try{
+      const community = await this.communityService.getById(id);
+      if (!community) { 
+        res.status(HttpStatus.notFound).json({ 
+          success: false,
+          message: CommunityMessages.notFound});
+          return; 
+        }
+      res.status(HttpStatus.ok).json({ 
+        success: true, 
+        data: community
+      });
+    }catch(err){
+      this.logger.error(this.constructor.name, CommunityLogMessages.getByIdFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.fetchOneFailed
+      });
+    }
   }
 
   private async getByUserId(req: Request, res: Response): Promise<void> {
@@ -89,39 +119,61 @@ export class CommunityController {
        res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
       return;
     } 
+
+    try{
     const userExists = await this.userService.exists(userId);
 
     if (!userExists) {
       res.status(HttpStatus.notFound).json({ success: false, message: UserMessages.notFound });
       return;
     }
-
     const dto = new GetCommunitiesByUserIdDto(userId,page,limit);
     const items = await this.communityService.getByUserId(dto);
-    res.status(HttpStatus.ok).json({ success: true, data: items });
+    res.status(HttpStatus.ok).json({ 
+      success: true, 
+      data: items 
+    });
+    }catch(err){
+      this.logger.error(this.constructor.name, CommunityLogMessages.getByUserIdFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.fetchAllFailed
+      });
+    }
   }
 
 
   private async create(req: Request, res: Response): Promise<void> {
     const { validation, dto } = validateCreateCommunity(
-    {
-      ...(req.body as CreateCommunityInput),
-      ownerId: req.user!.id,
-    },
-    req.file
-  );
+      {
+        ...(req.body as CreateCommunityInput),
+        ownerId: req.user!.id,
+      },
+      req.file
+    );
 
-  if (!validation.valid || !dto) {
-    res.status(HttpStatus.badRequest).json({ success: false, message: validation.message });
-    return;
-  }
-    
+    if (!validation.valid || !dto) {
+      res.status(HttpStatus.badRequest).json({ success: false, message: validation.message });
+      return;
+    }
+
+    try{
     const created = await this.communityService.create(dto);
     if (!created) { 
-      res.status(HttpStatus.internalServerError).json({ success: false, message: CommunityMessages.createFailed });
+      res.status(HttpStatus.internalServerError).json({ 
+        success: false, 
+        message: CommunityMessages.createFailed });
       return; 
     }
     res.status(HttpStatus.created).json({ success: true, message: CommunityMessages.created, data: created });
+    }catch(err){
+      this.logger.error(this.constructor.name, CommunityLogMessages.createFailed, err);
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.createFailed
+      });
+    }
   }
 
   private async update(req: Request, res: Response): Promise<void> {
@@ -133,30 +185,40 @@ export class CommunityController {
        res.status(HttpStatus.badRequest).json({ success: false, message: v.message });
       return;
     } 
-    const existing = await this.communityService.getById(id);
-    if (!existing) {
-      res.status(HttpStatus.notFound).json({ success: false, message: CommunityMessages.notFound });
-      return;
-    }
-
     const { validation, dto } = validateUpdateCommunity(
       req.body as UpdateCommunityInput,
       req.file
     );
-
     if (!validation.valid || !dto) {
-      res.status(HttpStatus.badRequest).json({ success: false, message: validation.message });
-      return;
-    }
+        res.status(HttpStatus.badRequest).json({ success: false, message: validation.message });
+        return;
+      }
 
-    const ok = await this.communityService.update(id, dto);
-     if (!ok) {
-      res.status(HttpStatus.internalServerError).json({ success: false, message: CommunityMessages.updateFailed });
-    return;
+    try{
+      const existing = await this.communityService.getById(id);
+      if (!existing) {
+        res.status(HttpStatus.notFound).json({ success: false, message: CommunityMessages.notFound });
+        return;
+      }
+
+      const ok = await this.communityService.update(id, dto);
+      if (!ok) {
+        res.status(HttpStatus.internalServerError).json({ success: false, message: CommunityMessages.updateFailed });
+      return;
+      }
+      
+      res.status(HttpStatus.ok).json({ 
+        success: true, 
+        message: CommunityMessages.updated 
+      });
+    }catch(err){
+      this.logger.error(this.constructor.name,CommunityLogMessages.updateFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.updateFailed
+      });
     }
-    
-    res.status(HttpStatus.ok).json({ success: true, message: CommunityMessages.updated });
-   
   }
 
   private async delete(req: Request, res: Response): Promise<void> {
@@ -169,19 +231,30 @@ export class CommunityController {
       return;
     } 
 
-    const existing = await this.communityService.getById(id);
-    if (!existing) {
-      res.status(HttpStatus.notFound).json({ success: false, message: CommunityMessages.notFound });
+    try{
+      const existing = await this.communityService.getById(id);
+      if (!existing) {
+        res.status(HttpStatus.notFound).json({ success: false, message: CommunityMessages.notFound });
+        return;
+      }
+      const ok = await this.communityService.delete(id);
+      if (!ok) {
+        res.status(HttpStatus.internalServerError).json({ success: false, message: CommunityMessages.deleteFailed});
       return;
+      }
+      
+      res.status(HttpStatus.ok).json({ success: true, message: CommunityMessages.deleted });
+    }catch(err){
+      this.logger.error(this.constructor.name, CommunityLogMessages.deleteFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.deleteFailed
+      });
+      
     }
-    const ok = await this.communityService.delete(id);
-    if (!ok) {
-      res.status(HttpStatus.internalServerError).json({ success: false, message: CommunityMessages.deleteFailed});
-    return;
-    }
-    
-    res.status(HttpStatus.ok).json({ success: true, message: CommunityMessages.deleted });
-   }
+  
+  }
 
   public getRouter(): Router { return this.router; }
 }

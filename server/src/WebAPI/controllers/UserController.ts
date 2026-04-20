@@ -11,11 +11,15 @@ import { UserMessages } from "../../Domain/constants/messages/user/UserMessages"
 import { parsePagination } from "../parser/common/ParsePagination";
 import { validatePagination } from "../validators/common/ValidatePagination";
 import { GetUsersDto } from "../../Domain/DTOs/users/GetUsersDto";
+import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
+import { UserLogMessages } from "../../Domain/constants/messages/user/UserLogMessages";
 
 export class UserController {
   private readonly router = Router();
 
-  public constructor(private readonly userService: IUserService) {
+  public constructor(private readonly userService: IUserService,
+     private readonly logger: ILoggerService
+  ) {
     this.router.get("/users", authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
     this.router.get("/users/:id", authenticate, authorize(UserRole.ADMIN), this.getById.bind(this));
     this.router.patch("/users/:id/deactivate", authenticate, authorize(UserRole.ADMIN), this.deactivate.bind(this));
@@ -35,12 +39,20 @@ export class UserController {
 
     const dto = new GetUsersDto(page,limit);
     
+    try{
+      const users = await this.userService.getAll(dto);
+      res.status(HttpStatus.ok).json({ 
+        success: true, 
+        data: users 
+      });
+    }catch(err){
+      this.logger.error(this.constructor.name, UserLogMessages.getAllFailed, err);
 
-    const users = await this.userService.getAll(dto);
-    res.status(HttpStatus.ok).json({ 
-      success: true, 
-      data: users 
-    });
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: UserMessages.fetchAllFailed,
+      });
+    }
   }
 
   private async getById(req: Request, res: Response): Promise<void> {
@@ -56,18 +68,27 @@ export class UserController {
        return;
     } 
 
-    const user = await this.userService.getById(id);
-    if (!user) {
-     res.status(HttpStatus.notFound).json({
-       success: false, 
-       message: UserMessages.notFound
+    try{
+      const user = await this.userService.getById(id);
+      if (!user) {
+      res.status(HttpStatus.notFound).json({
+        success: false, 
+        message: UserMessages.notFound
+        });
+      return; 
+      }
+      res.status(HttpStatus.ok).json({ 
+        success: true, 
+        data: user
       });
-     return; 
+    }catch(err){
+      this.logger.error(this.constructor.name, UserLogMessages.getByIdFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: UserMessages.fetchOneFailed,
+      });
     }
-    res.status(HttpStatus.ok).json({ 
-      success: true, 
-      data: user
-     });
   }
 
   private async deactivate(req: Request, res: Response): Promise<void> {
@@ -82,29 +103,39 @@ export class UserController {
       });
       return;
     } 
-    const existing = await this.userService.getById(id);
 
-    if (!existing) {
-      res.status(HttpStatus.notFound).json({
+    try{
+      const existing = await this.userService.getById(id);
+
+      if (!existing) {
+        res.status(HttpStatus.notFound).json({
+          success: false,
+          message: UserMessages.notFound,
+        });
+        return;
+      }
+
+      const ok = await this.userService.deactivate(id);
+      if (!ok) {
+        res.status(HttpStatus.internalServerError).json({ 
+          success: false, 
+          message: UserMessages.deactivateFailed
+        });
+        return;
+      }
+      
+      res.status(HttpStatus.ok).json({
+        success: true,
+        message: UserMessages.deactivated 
+        });
+    }catch(err){
+       this.logger.error(this.constructor.name, UserLogMessages.deactivateFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
         success: false,
-        message: UserMessages.notFound,
+        message: UserMessages.deactivateFailed,
       });
-      return;
     }
-
-    const ok = await this.userService.deactivate(id);
-    if (!ok) {
-      res.status(HttpStatus.internalServerError).json({ 
-        success: false, 
-        message: UserMessages.deactivateFailed
-      });
-      return;
-    }
-    
-    res.status(HttpStatus.ok).json({
-      success: true,
-       message: UserMessages.deactivated 
-      });
   }
 
   public getRouter(): Router { return this.router; }
