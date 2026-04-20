@@ -12,6 +12,9 @@ import { RegisterInput } from "../types/auth/RegisterInput";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { AuthLogMessages } from "../../Domain/constants/messages/auth/AuthLogMessages";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
+import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
+import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
+import { UserRole } from "../../Domain/enums/UserRole";
 
 export class AuthController {
   private readonly router = Router();
@@ -20,12 +23,9 @@ export class AuthController {
     private readonly logger: ILoggerService
   ) {
     this.router.post("/auth/login", this.login.bind(this));
-    this.router.post(
-        "/auth/register",
-        upload.single("image"), 
-        this.register.bind(this)
-      );
-        }
+    this.router.post( "/auth/register", upload.single("image"), this.register.bind(this));
+    this.router.post("/auth/logout", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.logout.bind(this));
+     }
 
   private async login(req: Request, res: Response): Promise<void> {
     const { username, password } = req.body as { username?: string; password?: string };
@@ -111,6 +111,23 @@ export class AuthController {
       });
    }
   }
+  
+  private async logout(req: Request, res: Response): Promise<void> {
+      const ctx = IpHelper.buildAuditContext(req,req.user!.id);
+      try{
+        await this.authService.logout(ctx);
+      
+        res.status(HttpStatus.ok).json({ success: true, message: AuthMessages.logoutSuccess });
+      }catch(err){
+        this.logger.error(this.constructor.name, AuthLogMessages.logoutFailed, err);
+  
+        res.status(HttpStatus.internalServerError).json({
+          success: false,
+          message: AuthMessages.logoutFailed
+        });
+        
+      }
+    }
 
   public getRouter(): Router { return this.router; }
 }

@@ -56,4 +56,14 @@ export class AuthService implements IAuthService {
     );
     return AuthMapper.toAuthUserDto(created);
   }
+
+  async logout(ctx:AuditContext): Promise<void> {
+    await this.auditHelperService.safeCreate(
+          new CreateAuditDto(
+            ctx.userId, 
+            AuditActions.LOGOUT_SUCCESS, 
+            AuditDetails.LOGOUT_SUCCESS, 
+            ctx.ipAddress)
+        );
+  }
 }
