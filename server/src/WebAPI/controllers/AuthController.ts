@@ -11,6 +11,7 @@ import { AuthMessages } from "../../Domain/constants/messages/auth/AuthMessages"
 import { RegisterInput } from "../types/auth/RegisterInput";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { AuthLogMessages } from "../../Domain/constants/messages/auth/AuthLogMessages";
+import { IpHelper } from "../../Shared/helpers/IpHelper";
 
 export class AuthController {
   private readonly router = Router();
@@ -37,8 +38,9 @@ export class AuthController {
       res.status(HttpStatus.badRequest).json({ success: false, message: v.message }); 
       return; 
     }
-      try{
-      const result = await this.authService.login(normalizedUserName, password!);
+    const ctx = IpHelper.buildAuditContext(req);
+    try{
+      const result = await this.authService.login(normalizedUserName, password!,ctx);
       if (result.id === 0) {
         res.status(HttpStatus.unauthorized).json({
           success: false, 
@@ -80,8 +82,9 @@ export class AuthController {
       });
       return;
     }
+    const ctx = IpHelper.buildAuditContext(req);
     try{
-      const result = await this.authService.register(dto);
+      const result = await this.authService.register(dto,ctx);
       if (result.id === 0) { 
         res.status(HttpStatus.conflict).json({
           success: false,

@@ -23,6 +23,7 @@ import { CreateCommunityInput } from "../types/community/CreateCommunityInput";
 import { UpdateCommunityInput } from "../types/community/UpdateCommunityInput";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { CommunityLogMessages } from "../../Domain/constants/messages/community/CommunityLogMessages";
+import { IpHelper } from "../../Shared/helpers/IpHelper";
 
 export class CommunityController {
   private readonly router = Router();
@@ -158,8 +159,9 @@ export class CommunityController {
       return;
     }
 
+    const ctx = IpHelper.buildAuditContext(req,req.user!.id);
     try{
-    const created = await this.communityService.create(dto);
+    const created = await this.communityService.create(dto,ctx);
     if (!created) { 
       res.status(HttpStatus.internalServerError).json({ 
         success: false, 
@@ -194,6 +196,7 @@ export class CommunityController {
         return;
       }
 
+    const ctx = IpHelper.buildAuditContext(req,req.user!.id);
     try{
       const existing = await this.communityService.getById(id);
       if (!existing) {
@@ -201,7 +204,7 @@ export class CommunityController {
         return;
       }
 
-      const ok = await this.communityService.update(id, dto);
+      const ok = await this.communityService.update(id, dto,ctx);
       if (!ok) {
         res.status(HttpStatus.internalServerError).json({ success: false, message: CommunityMessages.updateFailed });
       return;
@@ -231,13 +234,14 @@ export class CommunityController {
       return;
     } 
 
+    const ctx = IpHelper.buildAuditContext(req,req.user!.id);
     try{
       const existing = await this.communityService.getById(id);
       if (!existing) {
         res.status(HttpStatus.notFound).json({ success: false, message: CommunityMessages.notFound });
         return;
       }
-      const ok = await this.communityService.delete(id);
+      const ok = await this.communityService.delete(id,ctx);
       if (!ok) {
         res.status(HttpStatus.internalServerError).json({ success: false, message: CommunityMessages.deleteFailed});
       return;

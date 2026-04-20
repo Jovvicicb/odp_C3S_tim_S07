@@ -8,9 +8,14 @@ import { GetCommunitiesDto } from "../../Domain/DTOs/community/GetCommunitiesDto
 import { GetCommunitiesByUserIdDto } from "../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
 import { UpdateCommunityDto } from "../../Domain/DTOs/community/UpdateCommunityDto";
 import { CreateCommunityResponseDto } from "../../Domain/DTOs/community/CreateCommunityResponseDto";
+import { AuditContext } from "../../Domain/types/audits/AuditContext";
+import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
+import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
+import { AuditActions } from "../../Domain/constants/messages/audits/AuditActions";
+import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
 
 export class CommunityService implements ICommunityService {
-  public constructor(private readonly communityRepo: ICommunityRepository) {}
+  public constructor(private readonly communityRepo: ICommunityRepository, private readonly auditHelperService: IAuditHelperService) {}
 
   async getAll(dto : GetCommunitiesDto): Promise<PaginatedListDto<CommunityDto>> {
     const items = await this.communityRepo.findAll(dto);
@@ -39,17 +44,34 @@ export class CommunityService implements ICommunityService {
     );
     }
 
-  async create(dto: CreateCommunityDto): Promise<CreateCommunityResponseDto | null> {
+  async create(dto: CreateCommunityDto,ctx: AuditContext): Promise<CreateCommunityResponseDto | null> {
     const created = await this.communityRepo.create(dto);
     if (created.id === 0) return null;
+
+    await this.auditHelperService.safeCreate(
+          new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_CREATED, AuditDetails.COMMUNITY_CREATED, ctx.ipAddress)
+        );
     return CommunityMapper.toCreateResponseDto(created);
   }
 
-  async update(id: number, dto: UpdateCommunityDto): Promise<boolean> {
-    return this.communityRepo.update(id, dto);
+  async update(id: number, dto: UpdateCommunityDto,ctx:AuditContext): Promise<boolean> {
+    const isUpdated = await this.communityRepo.update(id, dto);
+    if(isUpdated ){
+    await this.auditHelperService.safeCreate(
+          new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_UPDATED, AuditDetails.COMMUNITY_UPDATED, ctx.ipAddress)
+        );
+    }
+
+    return isUpdated;
   }
 
-  async delete(id: number): Promise<boolean> {
-    return this.communityRepo.delete(id);
+  async delete(id: number,ctx:AuditContext): Promise<boolean> {
+    const isDeleted  = await this.communityRepo.delete(id);
+    if(isDeleted ){
+    await this.auditHelperService.safeCreate(
+          new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_DELETED, AuditDetails.COMMUNITY_DELETED, ctx.ipAddress)
+        );
+    }
+    return isDeleted ;
   }
 }
