@@ -2,6 +2,7 @@ export const UserLogMessages = {
    // controller
   getAllFailed: "getAll failed",
   getByIdFailed: "getById failed",
+  getByUsernameFailed: "getByUsername failed",
 
   // repository
   findAllFailed: "findAll failed",

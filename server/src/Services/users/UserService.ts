@@ -18,10 +18,16 @@ export class UserService implements IUserService {
   );}
 
   async getById(id: number): Promise<UserDto | null> {
-    const u = await this.userRepo.findById(id);
-    if (u.id === 0) return null;
-    return UserMapper.toDto(u);
-    }
+    const user = await this.userRepo.findById(id);
+    if (user.id === 0) return null;
+    return UserMapper.toDto(user);
+  }
+
+  async getByUsername(username: string): Promise<UserDto | null> {
+  const user = await this.userRepo.findByUsername(username);
+  if (user.id === 0) return null;
+  return UserMapper.toDto(user);
+  }
 
   async deactivate(id: number): Promise<boolean> {
     return this.userRepo.deactivate(id);
