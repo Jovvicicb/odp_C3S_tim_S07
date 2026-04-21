@@ -14,6 +14,9 @@ import { GetUsersDto } from "../../Domain/DTOs/users/GetUsersDto";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { UserLogMessages } from "../../Domain/constants/messages/user/UserLogMessages";
 import { validateUsername } from "../validators/users/ValidateUsername";
+import { UpdateMeInput } from "../types/users/UpdateMeInput";
+import { validateUpdateMe } from "../validators/users/ValidateUpdateMe";
+import { IpHelper } from "../../Shared/helpers/IpHelper";
 
 export class UserController {
   private readonly router = Router();
@@ -22,6 +25,7 @@ export class UserController {
      private readonly logger: ILoggerService
   ) {
     this.router.get("/users", authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
+    this.router.put("/users/me", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.updateMe.bind(this));
     this.router.get("/users/search", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.search.bind(this));
     this.router.get("/users/:id", authenticate, authorize(UserRole.ADMIN), this.getById.bind(this));
     this.router.patch("/users/:id/deactivate", authenticate, authorize(UserRole.ADMIN), this.deactivate.bind(this));
@@ -174,6 +178,72 @@ export class UserController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: UserMessages.fetchOneFailed,
+      });
+    }
+  }
+
+  private async updateMe(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
+    const { validation, dto } = validateUpdateMe(
+      req.body as UpdateMeInput,
+      req.file
+    );
+
+    if (!validation.valid || !dto) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: validation.message,
+      });
+      return;
+    }
+
+    const ctx = IpHelper.buildAuditContext(req, userId);
+
+    try {
+      const result = await this.userService.update(dto, ctx);
+
+      if (result === "username_taken") {
+        res.status(HttpStatus.conflict).json({
+          success: false,
+          message: UserMessages.usernameTaken,
+        });
+        return;
+      }
+
+      if (result === "email_taken") {
+        res.status(HttpStatus.conflict).json({
+          success: false,
+          message: UserMessages.emailTaken,
+        });
+        return;
+      }
+
+      if (result === "failed") {
+        res.status(HttpStatus.internalServerError).json({
+          success: false,
+          message: UserMessages.updateFailed,
+        });
+        return;
+      }
+
+      res.status(HttpStatus.ok).json({
+        success: true,
+        message: UserMessages.updated,
+      });
+    } catch (err) {
+      this.logger.error(this.constructor.name, UserLogMessages.updateFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: UserMessages.updateFailed,
       });
     }
   }

@@ -11,7 +11,7 @@ USE pulse_net_db;
 CREATE TABLE IF NOT EXISTS users (
   id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   username         VARCHAR(40)  NOT NULL UNIQUE CHECK (CHAR_LENGTH(username) BETWEEN 3 AND 40 AND username REGEXP '^[A-Za-z0-9-]+$'),
-  fullname         VARCHAR(100) NULL CHECK(fullname IS NULL OR CHAR_LENGTH(fullname) BETWEEN 3 AND 100),
+  fullname         VARCHAR(100) NULL CHECK(fullname IS NULL OR CHAR_LENGTH(fullname) <= 100),
   email            VARCHAR(255) NOT NULL UNIQUE CHECK (email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
   password_hash    VARCHAR(255) NOT NULL,
   bio              VARCHAR(300) NULL CHECK(bio IS NULL OR CHAR_LENGTH(bio) <= 300),

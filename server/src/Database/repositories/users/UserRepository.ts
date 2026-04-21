@@ -6,6 +6,7 @@ import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { UserMapper } from "../../../Shared/mappers/users/UserMapper";
 import { GetUsersDto } from "../../../Domain/DTOs/users/GetUsersDto";
 import { UserLogMessages } from "../../../Domain/constants/messages/user/UserLogMessages";
+import { UpdateMeDto } from "../../../Domain/DTOs/users/UpdateMeDto";
 
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
@@ -96,20 +97,43 @@ async findByUsername(username: string): Promise<User> {
     } finally { res.conn.release(); }
   }
 
-  async update(user: User): Promise<boolean> {
-    const res = await this.db.getWriteConnection();
-    if (!res) return false;
-    try {
-      const [result] = await res.conn.execute<ResultSetHeader>(
-        `UPDATE users SET username = ?, email = ?, role = ?, is_active = ?, fullname = ?,bio = ?,profile_picture =? WHERE id = ?`,
-        [user.username, user.email, user.role, user.isActive, user.fullname ,user.bio,user.image,user.id]
-      );
-      return result.affectedRows > 0;
-    } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.updateFailed, err);
-      return false;
-    } finally { res.conn.release(); }
+  async update(userId: number, dto: UpdateMeDto): Promise<boolean> {
+  const res = await this.db.getWriteConnection();
+  if (!res) return false;
+
+  try {
+    const fieldMap: Record<string, string> = {
+      username: "username",
+      email: "email",
+      password: "password_hash",
+      fullname: "fullname",
+      bio: "bio",
+      profilePicture: "profile_picture",
+    };
+
+    const entries = Object.entries(dto)
+      .filter(([, v]) => v !== undefined)
+      .map(([key, value]) => [fieldMap[key], value] as const)
+      .filter(([column]) => !!column);
+
+    if (entries.length === 0) return false;
+
+    const setClause = entries.map(([column]) => `${column} = ?`).join(", ");
+    const values = entries.map(([, value]) => value);
+
+    const [result] = await res.conn.execute<ResultSetHeader>(
+      `UPDATE users SET ${setClause} WHERE id = ?`,
+      [...values, userId]
+    );
+
+    return result.affectedRows > 0;
+  } catch (err) {
+    this.logger.error("UserRepository", UserLogMessages.updateFailed, err);
+    return false;
+  } finally {
+    res.conn.release();
   }
+}
 
   async deactivate(id: number): Promise<boolean> {
     const res = await this.db.getWriteConnection();

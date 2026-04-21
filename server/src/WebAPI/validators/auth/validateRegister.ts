@@ -12,9 +12,9 @@ export const validateRegister = (
   file?: Express.Multer.File
 ): ValidateRegisterResult => {
   const normalizedUserName = StringNormalizer.trim(input.username);
-  const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname);
+  const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname)??"";
   const normalizedEmail = StringNormalizer.normalizeEmail(input.email);
-  const normalizedBio = StringNormalizer.trim(input.bio);
+  const normalizedBio = StringNormalizer.trim(input.bio)??"";
 
   if (!normalizedUserName){
     return {
@@ -33,19 +33,12 @@ export const validateRegister = (
       validation: { valid: false, message: AuthValidationMessages.usernameInvalid},
     };
   }
-  if(normalizedFullname){
-    if (normalizedFullname.length < 3 || normalizedFullname.length > 100) {
-      return {
-        validation: { valid: false, message: AuthValidationMessages.fullnameInvalid},
-      };
-    }
-    
-    if (!/^[A-Za-z\s]+$/.test(normalizedFullname)) {
-      return {
-       validation: { valid: false, message: AuthValidationMessages.fullnameInvalid},
-      };
-    }
-  } 
+
+  if (normalizedFullname.length > 100) {
+    return {
+      validation: { valid: false, message: AuthValidationMessages.fullnameInvalid },
+    };
+  }
 
   if (!normalizedEmail) {
     return {
@@ -110,8 +103,8 @@ export const validateRegister = (
       normalizedEmail,
       UserRole.USER,
       input.password,
-      normalizedFullname,
-      normalizedBio,
+      normalizedFullname??"",
+      normalizedBio??"",
       file?.filename ?? ""
     ),
   };

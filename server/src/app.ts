@@ -38,7 +38,7 @@ const auditRepo = new AuditRepository(db,logger);
 const auditService =new AuditService(auditRepo);
 const auditHelperService = new AuditHelperService(auditService,logger);
 const authService   = new AuthService(userRepo,auditHelperService);
-const userService   = new UserService(userRepo);
+const userService   = new UserService(userRepo,auditHelperService);
 const communityService = new CommunityService(communityRepo,auditHelperService);
 
 

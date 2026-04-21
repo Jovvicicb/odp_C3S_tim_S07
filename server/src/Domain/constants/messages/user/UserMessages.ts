@@ -5,4 +5,9 @@ export const UserMessages = {
   deactivated: "User deactivated successfully",
   fetchAllFailed: "Failed to fetch users",
   fetchOneFailed: "Failed to fetch user",
+  updated:       "User updated successfully",
+  updateFailed:  "Failed to update user",
+  unauthorized: "unauthorized",
+  usernameTaken : "Username is already taken",
+  emailTaken : "Email is already taken",
 } as const;

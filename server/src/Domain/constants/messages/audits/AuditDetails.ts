@@ -1,4 +1,6 @@
 export const AuditDetails = {
+// USERS
+  USER_UPDATED: "User profile updated",
 // AUTH
   LOGIN_SUCCESS: "User logged in",
   REGISTER_SUCCESS: "User registered",
