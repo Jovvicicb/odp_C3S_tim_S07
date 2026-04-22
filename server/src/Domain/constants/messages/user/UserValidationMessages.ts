@@ -8,4 +8,6 @@ export const UserValidationMessages = {
   fullnameInvalid: "FullName must be at most 100 characters long",
   bioTooLong: "Bio must be at most 300 characters long",
   noFieldsToUpdate: "No fields to update",
+  roleRequired: "Role is required",
+  invalidRole: "Invalid role",
 } as const;

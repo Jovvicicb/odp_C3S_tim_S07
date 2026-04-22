@@ -13,6 +13,7 @@ export const UserLogMessages = {
   // shared
   createFailed: "create failed",
   updateFailed: "update failed",
+  updateRoleFailed: "update user role failed",
   deactivateFailed: "deactivate failed",
   existsFailed: "exists failed",
 } as const;

@@ -7,6 +7,7 @@ import { UserMapper } from "../../../Shared/mappers/users/UserMapper";
 import { GetUsersDto } from "../../../Domain/DTOs/users/GetUsersDto";
 import { UserLogMessages } from "../../../Domain/constants/messages/user/UserLogMessages";
 import { UpdateMeDto } from "../../../Domain/DTOs/users/UpdateMeDto";
+import { UserRole } from "../../../Domain/enums/UserRole";
 
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
@@ -162,4 +163,23 @@ async findByUsername(username: string): Promise<User> {
       return false;
     } finally { res.conn.release(); }
   }
+
+  async updateRole(id: number, role: UserRole): Promise<boolean> {
+  const res = await this.db.getWriteConnection();
+  if (!res) return false;
+
+  try {
+    const [result] = await res.conn.execute<ResultSetHeader>(
+      `UPDATE users SET role = ? WHERE id = ?`,
+      [role, id]
+    );
+
+    return result.affectedRows > 0;
+  } catch (err) {
+    this.logger.error("UserRepository", UserLogMessages.updateRoleFailed, err);
+    return false;
+  } finally {
+    res.conn.release();
+  }
+}
 }

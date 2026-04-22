@@ -19,6 +19,7 @@ import { validateUpdateMe } from "../validators/users/ValidateUpdateMe";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { upload } from "../../Middlewares/multer/multer";
+import { validateUpdateUserRole } from "../validators/users/ValidateUpdateUserRole";
 
 export class UserController {
   private readonly router = Router();
@@ -26,11 +27,12 @@ export class UserController {
   public constructor(private readonly userService: IUserService,
      private readonly logger: ILoggerService
   ) {
-    this.router.get("/users", authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
+    this.router.get("/users/all", authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
     this.router.put("/users/me", authenticate, authorize(UserRole.USER,UserRole.ADMIN), upload.single("image"), this.updateMe.bind(this));
     this.router.get("/users/search", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.search.bind(this));
     this.router.get("/users/:id", authenticate, authorize(UserRole.ADMIN), this.getById.bind(this));
     this.router.patch("/users/:id/deactivate", authenticate, authorize(UserRole.ADMIN), this.deactivate.bind(this));
+    this.router.get("/users/:id/role", authenticate, authorize(UserRole.ADMIN), this.updateRole.bind(this));
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
@@ -189,6 +191,54 @@ export class UserController {
       });
     }
   }
+
+  private async updateRole(req: Request, res: Response): Promise<void> {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(HttpStatus.unauthorized).json({
+      success: false,
+      message: UserMessages.unauthorized,
+    });
+    return;
+  }
+
+  const idParam = parseStringValue(req.params.id);
+  const id = parseId(idParam);
+  
+  const idValidation = validateId(id);
+  if (!idValidation.valid) {
+    res.status(HttpStatus.badRequest).json({
+      success: false,
+      message: idValidation.message
+    });
+    return;
+  }
+
+  const { role } = req.body as { role?: string };
+  const parsedRole = parseStringValue(role);
+
+  const roleValidation = validateUpdateUserRole(parsedRole);
+  if (!roleValidation.valid) {
+    res.status(HttpStatus.badRequest).json({
+      success: false,
+      message: roleValidation.message
+    });
+    return;
+  }
+  
+  const ctx = IpHelper.buildAuditContext(req, userId);
+  try {
+    const result = await this.userService.updateRole(id, parsedRole as UserRole,ctx);
+    ResponseHelper.send(res, result);
+  } catch (err) {
+    this.logger.error(this.constructor.name, UserLogMessages.updateRoleFailed, err);
+
+    res.status(HttpStatus.internalServerError).json({
+      success: false,
+      message: UserMessages.roleUpdateFailed
+    });
+  }
+}
 
   public getRouter(): Router { return this.router; }
 }

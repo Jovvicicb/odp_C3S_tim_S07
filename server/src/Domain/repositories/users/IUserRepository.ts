@@ -1,5 +1,6 @@
 import { GetUsersDto } from "../../DTOs/users/GetUsersDto";
 import { UpdateMeDto } from "../../DTOs/users/UpdateMeDto";
+import { UserRole } from "../../enums/UserRole";
 import { User } from "../../models/User";
 
 export interface IUserRepository {
@@ -11,4 +12,5 @@ export interface IUserRepository {
   update(userId: number, dto: UpdateMeDto): Promise<boolean>;
   deactivate(id: number): Promise<boolean>;
   exists(id: number): Promise<boolean>;
+  updateRole(id: number, role: UserRole): Promise<boolean>;
 }

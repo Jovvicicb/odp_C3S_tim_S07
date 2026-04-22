@@ -9,7 +9,10 @@ export const UserMessages = {
   fetchOneFailed: "Failed to fetch user",
 
   updated: "User updated successfully",
+  roleUpdated: "User role updated successfully",
+
   updateFailed: "Failed to update user",
+  roleUpdateFailed: "Failed to update user role",
 
   deactivated: "User deactivated successfully",
   deactivateFailed: "Failed to deactivate user",

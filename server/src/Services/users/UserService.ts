@@ -15,6 +15,7 @@ import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
+import { UserRole } from "../../Domain/enums/UserRole";
 
 export class UserService implements IUserService {
   private readonly saltRounds = parseInt(process.env.SALT_ROUNDS ?? "10", 10);
@@ -124,6 +125,41 @@ export class UserService implements IUserService {
 
       return ServiceResultFactory.ok(UserMessages.updated, undefined, HttpStatus.ok);
   }
+
+  async updateRole(id: number, role: UserRole,ctx:AuditContext): Promise<ServiceResult> {
+  const exists = await this.userRepo.exists(id);
+
+  if (!exists) {
+    return ServiceResultFactory.fail(
+      UserMessages.notFound,
+      HttpStatus.notFound
+    );
+  }
+
+  const isUpdated = await this.userRepo.updateRole(id, role);
+
+  if (!isUpdated) {
+    return ServiceResultFactory.fail(
+      UserMessages.roleUpdateFailed,
+      HttpStatus.internalServerError
+    );
+  }
+
+  await this.auditHelperService.safeCreate(
+        new CreateAuditDto(
+          ctx.userId,
+          AuditActions.USER_ROLE_CHANGED,
+          AuditDetails.USER_ROLE_CHANGED,
+          ctx.ipAddress
+        )
+      );
+
+  return ServiceResultFactory.ok(
+    UserMessages.roleUpdated,
+    undefined,
+    HttpStatus.ok
+  );
+}
 
   async exists(id: number): Promise<boolean> {
     return this.userRepo.exists(id);
