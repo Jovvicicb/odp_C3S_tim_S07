@@ -17,19 +17,38 @@ export class UserFollowRepository implements IUserFollowRepository {
         if(!res) return new UserFollow();
 
         try {
-        const [result] = await res.conn.execute<ResultSetHeader>(
-            `INSERT INTO user_follows (follower_id, following_id) VALUES (?, ?)`,
-            [followerId, followingId]
-        );
+            const [result] = await res.conn.execute<ResultSetHeader>(
+                `INSERT INTO user_follows (follower_id, following_id) VALUES (?, ?)`,
+                [followerId, followingId]
+            );
 
-        if (result.insertId === 0) return new UserFollow();
+            if (result.insertId === 0) return new UserFollow();
 
-        return new UserFollow(result.insertId, followerId, followingId);
+            return new UserFollow(result.insertId, followerId, followingId);
         } catch (err) {
-        this.logger.error("UserFollowRepository", UserLogMessages.createFolowUserFaild, err);
-        return new UserFollow();
+             this.logger.error("UserFollowRepository", UserLogMessages.createFolowUserFaild, err);
+            return new UserFollow();
         } finally {
-        res.conn.release();
+            res.conn.release();
+        }
+    }
+
+    async delete(followerId: number, followingId: number): Promise<boolean> {
+        const res = await this.db.getWriteConnection();
+        if(!res) return false;
+
+        try {
+            const [result] = await res.conn.execute<ResultSetHeader>(
+                `DELETE FROM user_follows WHERE follower_id = ? AND following_id = ?`,
+                [followerId, followingId]
+            );
+            
+            return result.affectedRows > 0;
+        } catch (err) {
+            this.logger.error("UserFollowRepository", UserLogMessages.deleteFolowUserFaild, err);
+            return false;
+        } finally {
+            res.conn.release();
         }
     }
 

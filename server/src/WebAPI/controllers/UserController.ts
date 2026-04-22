@@ -37,6 +37,8 @@ export class UserController {
     this.router.patch("/users/:id/deactivate", authenticate, authorize(UserRole.ADMIN), this.deactivate.bind(this));
     this.router.get("/users/:id/role", authenticate, authorize(UserRole.ADMIN), this.updateRole.bind(this));
     this.router.post("/users/:id/follow", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.follow.bind(this));
+    this.router.delete("/users/:id/follow", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.unfollow.bind(this));
+
 
   }
 
@@ -281,9 +283,41 @@ private async follow(req: Request, res: Response): Promise<void> {
   }
 }
 
+private async unfollow(req: Request, res: Response): Promise<void> {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(HttpStatus.unauthorized).json({
+      success: false,
+      message: UserMessages.unauthorized,
+    });
+    return;
+  }
 
+  const idParam = parseStringValue(req.params.id);
+  const targetUserId = parseId(idParam);
+  
+  const idValidation = validateId(targetUserId);
+  if (!idValidation.valid) {
+    res.status(HttpStatus.badRequest).json({
+      success: false,
+      message: idValidation.message
+    });
+    return;
+  }
+  
+  const ctx = IpHelper.buildAuditContext(req, userId);
+  try {
+    const result = await this.userFollowService.unfollow(targetUserId,ctx);
+    ResponseHelper.send(res, result);
+  } catch (err) {
+    this.logger.error(this.constructor.name, UserLogMessages.unfollowFailed, err);
 
-
+    res.status(HttpStatus.internalServerError).json({
+      success: false,
+      message: UserMessages.followFailed
+    });
+  }
+}
 
 public getRouter(): Router { return this.router; }
 }

@@ -71,4 +71,56 @@ export class UserFollowService implements IUserFollowService{
         );
     }
 
+    async unfollow(targetUserId: number, ctx: AuditContext): Promise<ServiceResult> {
+        const followerId = ctx.userId;
+
+        if(!followerId){
+            return ServiceResultFactory.fail(
+                UserMessages.unauthorized,
+                HttpStatus.unauthorized
+            );
+        }
+
+        if(followerId === targetUserId){
+            return ServiceResultFactory.fail(
+                UserMessages.cannotUnFollowYourself,
+                HttpStatus.badRequest
+            );
+        }
+
+        const targetExists = await this.userService.exists(targetUserId);
+        if(!targetExists){
+            return ServiceResultFactory.fail(
+                UserMessages.notFound,
+                HttpStatus.notFound
+            );
+        }
+
+        const exists = await this.userFollowRepo.exists(followerId,targetUserId);
+        if(!exists){
+            return ServiceResultFactory.fail(
+                UserMessages.notFollowing,
+                HttpStatus.notFound
+            );
+        }
+
+        const deleted = await this.userFollowRepo.delete(followerId,targetUserId);
+        if(!deleted){
+            return ServiceResultFactory.fail(
+                UserMessages.unfollowFailed,
+                HttpStatus.internalServerError
+            );
+        }
+
+        await this.auditHelperService.safeCreate(
+            new CreateAuditDto(followerId, AuditActions.USER_UNFOLLOWED, AuditDetails.USER_UNFOLLOWED,ctx.ipAddress)
+        );
+
+        return ServiceResultFactory.ok(
+            UserMessages.unfollowedSuccessfully,
+            undefined,
+            HttpStatus.ok
+        );
+    }
+
 }

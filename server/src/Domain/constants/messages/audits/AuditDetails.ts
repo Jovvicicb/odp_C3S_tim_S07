@@ -4,6 +4,7 @@ export const AuditDetails = {
   USER_DEACTIVATED: "User is deactivated",
   USER_ROLE_CHANGED: "User role updated",
   USER_FOLLOWED: "User followed another user",
+  USER_UNFOLLOWED: "User unfollowed another user",
 
 // AUTH
   LOGIN_SUCCESS: "User logged in",
