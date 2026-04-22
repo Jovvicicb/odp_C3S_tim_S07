@@ -22,6 +22,8 @@ import { AuditRepository } from "./Database/repositories/audits/AuditRepository"
 import { AuditService } from "./Services/audits/AuditService";
 import { AuditController } from "./WebAPI/controllers/AuditController";
 import { AuditHelperService } from "./Services/common/AuditHelperService";
+import { UserFollowService } from "./Services/users/UserFollowService";
+import { UserFollowRepository } from "./Database/repositories/users/UserFollowRepository";
 
 
 export const logger = new ConsoleLoggerService();
@@ -33,6 +35,7 @@ export const db     = new DbManager(logger);
 const userRepo   = new UserRepository(db, logger);
 const communityRepo = new CommunityRepository(db, logger);
 const auditRepo = new AuditRepository(db,logger);
+const userFollowRepo = new UserFollowRepository(db,logger);
 
 // Services
 const auditService =new AuditService(auditRepo);
@@ -40,6 +43,8 @@ const auditHelperService = new AuditHelperService(auditService,logger);
 const authService   = new AuthService(userRepo,auditHelperService);
 const userService   = new UserService(userRepo,auditHelperService);
 const communityService = new CommunityService(communityRepo,userService,auditHelperService);
+const userFollowService   = new UserFollowService(userFollowRepo,userService,auditHelperService);
+
 
 
 // Express
@@ -55,7 +60,7 @@ app.use("/uploads", express.static("uploads"));
 app.use(cors({ origin: process.env.CLIENT_URL ?? "*" }));
 
 app.use("/api/v1", new AuthController(authService,logger).getRouter());
-app.use("/api/v1", new UserController(userService,logger).getRouter());
+app.use("/api/v1", new UserController(userService,userFollowService,logger).getRouter());
 app.use("/api/v1", new CommunityController(communityService,logger).getRouter());
 app.use("/api/v1", new AuditController(auditService,logger).getRouter());
 

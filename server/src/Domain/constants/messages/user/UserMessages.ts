@@ -20,5 +20,10 @@ export const UserMessages = {
   unauthorized: "Unauthorized",
 
   usernameTaken: "Username already taken",
-  emailTaken: "Email already taken"
+  emailTaken: "Email already taken",
+
+  cannotFollowYourself: "You cannot follow yourself",
+  alreadyFollowing: "You are already following this user",
+  followFailed: "Failed to follow user",
+  followedSuccessfully: "User followed successfully",
 } as const;
