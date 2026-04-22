@@ -21,6 +21,7 @@ import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { upload } from "../../Middlewares/multer/multer";
 import { validateUpdateUserRole } from "../validators/users/ValidateUpdateUserRole";
 import { IUserFollowService } from "../../Domain/services/users/IUserFollowService";
+import { GetFollowersDto } from "../../Domain/DTOs/users/GetFollowersDto";
 
 export class UserController {
   private readonly router = Router();
@@ -38,7 +39,8 @@ export class UserController {
     this.router.get("/users/:id/role", authenticate, authorize(UserRole.ADMIN), this.updateRole.bind(this));
     this.router.post("/users/:id/follow", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.follow.bind(this));
     this.router.delete("/users/:id/follow", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.unfollow.bind(this));
-
+    this.router.get("/users/:id/followers", this.getFollowers.bind(this));
+    
 
   }
 
@@ -318,6 +320,39 @@ private async unfollow(req: Request, res: Response): Promise<void> {
     });
   }
 }
+
+private async getFollowers(req: Request, res: Response): Promise<void> {
+    const idParam = parseStringValue(req.params.id);
+    const pageParam   = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+
+    const id = parseId(idParam);
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const idValidation  = validateId(id);
+    if (!idValidation .valid) {
+       res.status(HttpStatus.badRequest).json({ success: false, message: idValidation.message });
+      return;
+    } 
+    const paginationValidation  = validatePagination(page,limit);
+    if (!paginationValidation .valid) {
+       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+      return;
+    } 
+    const dto = new GetFollowersDto(id,page,limit);
+    try{
+      const result = await this.userFollowService.getFollowers(dto);
+      ResponseHelper.send(res, result);
+    }catch(err){
+      this.logger.error(this.constructor.name, UserLogMessages.getFollowersFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: UserMessages.followersFetchFailed
+      });
+    }
+  }
+
 
 public getRouter(): Router { return this.router; }
 }

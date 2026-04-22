@@ -3,9 +3,11 @@ export const UserMessages = {
   invalidId: "Invalid user ID",
 
   fetchAllSuccess: "Users fetched successfully",
+  followersFetchedSuccess: "Followers fetched successfully",
   fetchOneSuccess: "User fetched successfully",
 
   fetchAllFailed: "Failed to fetch users",
+  followersFetchFailed: "Failed to fetch followers",
   fetchOneFailed: "Failed to fetch user",
 
   updated: "User updated successfully",

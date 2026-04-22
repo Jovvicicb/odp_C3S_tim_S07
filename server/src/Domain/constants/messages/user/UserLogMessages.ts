@@ -5,11 +5,13 @@ export const UserLogMessages = {
   getByUsernameFailed: "getByUsername failed",
   followFailed: "Follow user failed",
   unfollowFailed: "Unfollow user failed",
+  getFollowersFailed: "Get followers failed",
   
 
   // repository
   findAllFailed: "findAll failed",
   findByIdFailed: "findById failed",
+  findByIdsFailed: "findByIds failed",
   findByUsernameFailed: "findByUsername failed",
   findByEmailFailed: "findByEmail failed",
   createFolowUserFaild: "create follow failed",

@@ -4,6 +4,9 @@ import { IUserFollowRepository } from "../../../Domain/repositories/users/IUserF
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { DbManager } from "../../connection/DbConnectionPool";
 import { UserLogMessages } from "../../../Domain/constants/messages/user/UserLogMessages";
+import { GetFollowersDto } from "../../../Domain/DTOs/users/GetFollowersDto";
+
+const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
 export class UserFollowRepository implements IUserFollowRepository {
     public constructor(
@@ -42,11 +45,46 @@ export class UserFollowRepository implements IUserFollowRepository {
                 `DELETE FROM user_follows WHERE follower_id = ? AND following_id = ?`,
                 [followerId, followingId]
             );
-            
+
             return result.affectedRows > 0;
         } catch (err) {
             this.logger.error("UserFollowRepository", UserLogMessages.deleteFolowUserFaild, err);
             return false;
+        } finally {
+            res.conn.release();
+        }
+    }
+
+    async getFollowers(dto: GetFollowersDto): Promise<{ followerIds: number[]; total: number }> {
+        const res = await this.db.getReadConnection();
+        if (!res) return { followerIds: [], total: 0 };
+
+        const {userId,page,limit} = dto;
+        const offset = safeInt((page - 1) * limit);
+        const lim = safeInt(limit);
+
+        try {
+            const [rows] = await res.conn.execute<RowDataPacket[]>(
+            `SELECT follower_id
+            FROM user_follows
+            WHERE following_id = ?
+            ORDER BY followed_at DESC
+            LIMIT ${lim} OFFSET ${offset}`,
+            [userId]
+            );
+
+            const [cnt] = await res.conn.execute<RowDataPacket[]>(
+            `SELECT COUNT(*) as total FROM user_follows WHERE following_id = ?`,
+            [userId]
+            );
+
+            return {
+            followerIds: rows.map((r) => Number(r.follower_id)),
+            total: cnt[0]?.total ?? 0,
+            };
+        } catch (err) {
+            this.logger.error("UserFollowRepository", "get followers failed", err);
+            return { followerIds: [], total: 0 };
         } finally {
             res.conn.release();
         }

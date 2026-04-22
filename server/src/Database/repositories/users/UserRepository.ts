@@ -46,6 +46,26 @@ export class UserRepository implements IUserRepository {
       return new User();
     } finally { res.conn.release(); }
   }
+
+  async findByIds(ids: number[]): Promise<User[]> {
+    const res = await this.db.getReadConnection();
+    if (!res || ids.length === 0) return [];
+
+    try {
+      const placeholders = ids.map(() => "?").join(",");
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM users WHERE id IN (${placeholders})`,
+        ids
+      );
+
+      return rows.map((r) => UserMapper.toModel(r));
+    } catch (err) {
+      this.logger.error("UserRepository", UserLogMessages.findByIdsFailed, err);
+      return [];
+    } finally {
+      res.conn.release();
+    }
+  }
 async findByUsername(username: string): Promise<User> {
     const res = await this.db.getReadConnection();
     if (!res) return new User();

@@ -3,17 +3,23 @@ import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetail
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
+import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
+import { GetFollowersDto } from "../../Domain/DTOs/users/GetFollowersDto";
+import { UserDto } from "../../Domain/DTOs/users/UserDto";
 import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
+import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
 import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
 import { IUserFollowService } from "../../Domain/services/users/IUserFollowService";
 import { IUserService } from "../../Domain/services/users/IUserService";
 import { AuditContext } from "../../Domain/types/audits/AuditContext";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
+import { UserMapper } from "../../Shared/mappers/users/UserMapper";
 
 export class UserFollowService implements IUserFollowService{
     public constructor(
         private readonly userFollowRepo:IUserFollowRepository,
+        private readonly userRepo: IUserRepository,
         private readonly userService: IUserService,
         private readonly auditHelperService: IAuditHelperService
     ){}
@@ -121,6 +127,30 @@ export class UserFollowService implements IUserFollowService{
             undefined,
             HttpStatus.ok
         );
+    }
+
+    async getFollowers(dto: GetFollowersDto): Promise<ServiceResult<PaginatedListDto<UserDto>>> {
+        const userExists = await this.userService.exists(dto.userId)
+
+        if(!userExists){
+            return ServiceResultFactory.fail<PaginatedListDto<UserDto>>(
+                UserMessages.notFound,
+                HttpStatus.notFound
+            );
+        }
+
+        const result = await this.userFollowRepo.getFollowers(dto);
+        const foundUsers = await this.userRepo.findByIds(result.followerIds);
+        const users = foundUsers.map((u) => UserMapper.toDto(u));
+
+        const data = new PaginatedListDto(
+            users,
+            result.total,
+            dto.page,
+            dto.limit
+        );
+
+        return ServiceResultFactory.ok(UserMessages.followersFetchedSuccess, data, HttpStatus.ok);
     }
 
 }
