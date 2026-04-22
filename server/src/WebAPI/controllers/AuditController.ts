@@ -11,6 +11,7 @@ import { IAuditService } from "../../Domain/services/audits/IAuditService";
 import { GetAuditsDto } from "../../Domain/DTOs/audits/GetAuditsDto";
 import { AuditLogMessages } from "../../Domain/constants/messages/audits/AuditLogMessages";
 import { AuditMessages } from "../../Domain/constants/messages/audits/AuditMessages";
+import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 
 export class AuditController {
   private readonly router = Router();
@@ -36,11 +37,8 @@ export class AuditController {
     const dto = new GetAuditsDto(page,limit);
     
     try{
-      const audits = await this.auditService.getAll(dto);
-      res.status(HttpStatus.ok).json({ 
-        success: true, 
-        data: audits 
-      });
+      const result = await this.auditService.getAll(dto);
+      ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, AuditLogMessages.getAllFailed, err);
 

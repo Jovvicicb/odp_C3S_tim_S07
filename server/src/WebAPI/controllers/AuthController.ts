@@ -15,6 +15,7 @@ import { IpHelper } from "../../Shared/helpers/IpHelper";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
+import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 
 export class AuthController {
   private readonly router = Router();
@@ -40,22 +41,22 @@ export class AuthController {
     }
     const ctx = IpHelper.buildAuditContext(req);
     try{
-      const result = await this.authService.login(normalizedUserName, password!,ctx);
-      if (result.id === 0) {
-        res.status(HttpStatus.unauthorized).json({
-          success: false, 
-          message: AuthMessages.invalidCredentials
-          }); 
-          return; 
-        }
+      const result = await this.authService.login(normalizedUserName!, password!,ctx);
+      
+      if (!result.success || !result.data) {
+      ResponseHelper.send(res, result);
+      return;
+      }
+
       const token = jwt.sign(
-        { id: result.id, username: result.username, role: result.role },
+        { id: result.data.id, username: result.data.username, role: result.data.role },
         process.env.JWT_SECRET ?? "",
         { expiresIn: "24h" }
       );
-      res.status(HttpStatus.ok).json({
-        success: true, 
-        message: AuthMessages.loginSuccess, 
+
+      res.status(result.status).json({
+        success: result.success, 
+        message: result.message, 
         data: token 
       });
     }catch(err){
@@ -85,21 +86,20 @@ export class AuthController {
     const ctx = IpHelper.buildAuditContext(req);
     try{
       const result = await this.authService.register(dto,ctx);
-      if (result.id === 0) { 
-        res.status(HttpStatus.conflict).json({
-          success: false,
-          message: AuthMessages.alreadyTaken 
-        }); 
-        return; 
+      if (!result.success || !result.data) {
+        ResponseHelper.send(res, result);
+        return;
       }
+
       const token = jwt.sign(
-        { id: result.id, username: result.username, role: result.role },
+        { id: result.data.id, username: result.data.username, role: result.data.role },
         process.env.JWT_SECRET ?? "",
         { expiresIn: "24h" }
       );
-      res.status(HttpStatus.created).json({ 
-        success: true, 
-        message: AuthMessages.registerSuccess, 
+
+      res.status(result.status).json({ 
+        success: result.success, 
+        message: result.message, 
         data: token 
       });
    }catch(err){
@@ -113,21 +113,28 @@ export class AuthController {
   }
   
   private async logout(req: Request, res: Response): Promise<void> {
-      const ctx = IpHelper.buildAuditContext(req,req.user!.id);
-      try{
-        await this.authService.logout(ctx);
-      
-        res.status(HttpStatus.ok).json({ success: true, message: AuthMessages.logoutSuccess });
-      }catch(err){
-        this.logger.error(this.constructor.name, AuthLogMessages.logoutFailed, err);
-  
-        res.status(HttpStatus.internalServerError).json({
-          success: false,
-          message: AuthMessages.logoutFailed
-        });
-        
-      }
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: AuthMessages.unauthorized,
+      });
+      return;
     }
+    const ctx = IpHelper.buildAuditContext(req,userId);
+    try{
+      const result =  await this.authService.logout(ctx);
+      ResponseHelper.send(res, result);
+    }catch(err){
+      this.logger.error(this.constructor.name, AuthLogMessages.logoutFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: AuthMessages.logoutFailed
+      });
+      
+    }
+  }
 
   public getRouter(): Router { return this.router; }
 }

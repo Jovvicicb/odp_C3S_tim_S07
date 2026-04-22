@@ -17,6 +17,8 @@ import { validateUsername } from "../validators/users/ValidateUsername";
 import { UpdateMeInput } from "../types/users/UpdateMeInput";
 import { validateUpdateMe } from "../validators/users/ValidateUpdateMe";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
+import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
+import { upload } from "../../Middlewares/multer/multer";
 
 export class UserController {
   private readonly router = Router();
@@ -25,7 +27,7 @@ export class UserController {
      private readonly logger: ILoggerService
   ) {
     this.router.get("/users", authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
-    this.router.put("/users/me", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.updateMe.bind(this));
+    this.router.put("/users/me", authenticate, authorize(UserRole.USER,UserRole.ADMIN), upload.single("image"), this.updateMe.bind(this));
     this.router.get("/users/search", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.search.bind(this));
     this.router.get("/users/:id", authenticate, authorize(UserRole.ADMIN), this.getById.bind(this));
     this.router.patch("/users/:id/deactivate", authenticate, authorize(UserRole.ADMIN), this.deactivate.bind(this));
@@ -46,11 +48,8 @@ export class UserController {
     const dto = new GetUsersDto(page,limit);
     
     try{
-      const users = await this.userService.getAll(dto);
-      res.status(HttpStatus.ok).json({ 
-        success: true, 
-        data: users 
-      });
+      const result = await this.userService.getAll(dto);
+      ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, UserLogMessages.getAllFailed, err);
 
@@ -75,18 +74,8 @@ export class UserController {
     } 
 
     try{
-      const user = await this.userService.getById(id);
-      if (!user) {
-      res.status(HttpStatus.notFound).json({
-        success: false, 
-        message: UserMessages.notFound
-        });
-      return; 
-      }
-      res.status(HttpStatus.ok).json({ 
-        success: true, 
-        data: user
-      });
+      const result = await this.userService.getById(id);
+      ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, UserLogMessages.getByIdFailed, err);
 
@@ -98,6 +87,15 @@ export class UserController {
   }
 
   private async deactivate(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
     const v = validateId(id);
@@ -110,30 +108,12 @@ export class UserController {
       return;
     } 
 
+    const ctx = IpHelper.buildAuditContext(req, userId);
+
     try{
-      const existing = await this.userService.getById(id);
+      const result = await this.userService.deactivate(id, ctx);
 
-      if (!existing) {
-        res.status(HttpStatus.notFound).json({
-          success: false,
-          message: UserMessages.notFound,
-        });
-        return;
-      }
-
-      const ok = await this.userService.deactivate(id);
-      if (!ok) {
-        res.status(HttpStatus.internalServerError).json({ 
-          success: false, 
-          message: UserMessages.deactivateFailed
-        });
-        return;
-      }
-      
-      res.status(HttpStatus.ok).json({
-        success: true,
-        message: UserMessages.deactivated 
-        });
+      ResponseHelper.send(res, result);
     }catch(err){
        this.logger.error(this.constructor.name, UserLogMessages.deactivateFailed, err);
 
@@ -147,9 +127,7 @@ export class UserController {
   private async search(req: Request, res: Response): Promise<void> {
     const username = parseStringValue(req.query.username);
     
-    const { validation, normalizedUsername } = validateUsername(
-      username
-    );
+    const { validation, normalizedUsername } = validateUsername(username);
 
     if (!validation.valid || !normalizedUsername) {
       res.status(HttpStatus.badRequest).json({
@@ -160,18 +138,8 @@ export class UserController {
     }
     
     try{
-      const user = await this.userService.getByUsername(normalizedUsername);
-      if (!user) {
-      res.status(HttpStatus.notFound).json({
-        success: false, 
-        message: UserMessages.notFound
-        });
-      return; 
-      }
-      res.status(HttpStatus.ok).json({ 
-        success: true, 
-        data: user
-      });
+      const result = await this.userService.getByUsername(normalizedUsername);
+      ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, UserLogMessages.getByUsernameFailed, err);
 
@@ -210,34 +178,8 @@ export class UserController {
     try {
       const result = await this.userService.update(dto, ctx);
 
-      if (result === "username_taken") {
-        res.status(HttpStatus.conflict).json({
-          success: false,
-          message: UserMessages.usernameTaken,
-        });
-        return;
-      }
+      ResponseHelper.send(res,result);
 
-      if (result === "email_taken") {
-        res.status(HttpStatus.conflict).json({
-          success: false,
-          message: UserMessages.emailTaken,
-        });
-        return;
-      }
-
-      if (result === "failed") {
-        res.status(HttpStatus.internalServerError).json({
-          success: false,
-          message: UserMessages.updateFailed,
-        });
-        return;
-      }
-
-      res.status(HttpStatus.ok).json({
-        success: true,
-        message: UserMessages.updated,
-      });
     } catch (err) {
       this.logger.error(this.constructor.name, UserLogMessages.updateFailed, err);
 

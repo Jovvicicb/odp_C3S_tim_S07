@@ -7,6 +7,7 @@ export const CommunityLogMessages = {
   // repository
   findAllFailed: "findAll failed",
   findByIdFailed: "findById failed",
+  findByName: "findByName failed",
   findByUserIdFailed: "findByUserId failed",
 
   // shared

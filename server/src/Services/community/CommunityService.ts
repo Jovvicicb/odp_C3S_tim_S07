@@ -13,65 +13,112 @@ import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperSe
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { AuditActions } from "../../Domain/constants/messages/audits/AuditActions";
 import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
+import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
+import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
+import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
+import { ServiceResult } from "../../Domain/types/service/ServiceResult";
+import { IUserService } from "../../Domain/services/users/IUserService";
+import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 
 export class CommunityService implements ICommunityService {
-  public constructor(private readonly communityRepo: ICommunityRepository, private readonly auditHelperService: IAuditHelperService) {}
+  public constructor(
+     private readonly communityRepo: ICommunityRepository,
+     private readonly userService: IUserService,
+     private readonly auditHelperService: IAuditHelperService) {}
 
-  async getAll(dto : GetCommunitiesDto): Promise<PaginatedListDto<CommunityDto>> {
+  async getAll(dto : GetCommunitiesDto): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
     const items = await this.communityRepo.findAll(dto);
-    return new PaginatedListDto(
+    const data = new PaginatedListDto(
       items.communities.map((c) => CommunityMapper.toDto(c)),
       items.total, 
       dto.page, 
       dto.limit
     );
+
+    return ServiceResultFactory.ok(CommunityMessages.fetchAllSuccess,data,HttpStatus.ok);
   }
 
-  async getById(id: number): Promise<CommunityDto | null> {
+  async getById(id: number): Promise<ServiceResult<CommunityDto>> {
     const community = await this.communityRepo.findById(id);
-    if (community.id === 0) return null;
+    if (community.id === 0) {
+      return ServiceResultFactory.fail<CommunityDto>(CommunityMessages.notFound, HttpStatus.notFound);
+    }
 
-    return CommunityMapper.toDto(community);
+    return ServiceResultFactory.ok(CommunityMessages.fetchOneSuccess, CommunityMapper.toDto(community),HttpStatus.ok);
   }
 
-  async getByUserId(dto:GetCommunitiesByUserIdDto):  Promise<PaginatedListDto<CommunityDto>> {
+  async getByUserId(dto:GetCommunitiesByUserIdDto):  Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
+    const userExists = await this.userService.exists(dto.userId);
+
+    if (!userExists) {
+      return ServiceResultFactory.fail(UserMessages.notFound,HttpStatus.notFound);
+    }
+
     const items = await this.communityRepo.findByUserId(dto);
-    return new PaginatedListDto(
+
+    const data = new PaginatedListDto(
       items.communities.map((c) => CommunityMapper.toDto(c)),
       items.total, 
       dto.page, 
       dto.limit
     );
-    }
-
-  async create(dto: CreateCommunityDto,ctx: AuditContext): Promise<CreateCommunityResponseDto | null> {
-    const created = await this.communityRepo.create(dto);
-    if (created.id === 0) return null;
-
-    await this.auditHelperService.safeCreate(
-          new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_CREATED, AuditDetails.COMMUNITY_CREATED, ctx.ipAddress)
-        );
-    return CommunityMapper.toCreateResponseDto(created);
+    return ServiceResultFactory.ok(CommunityMessages.fetchAllSuccess,data,HttpStatus.ok);
   }
 
-  async update(id: number, dto: UpdateCommunityDto,ctx:AuditContext): Promise<boolean> {
+  async create(dto: CreateCommunityDto,ctx: AuditContext): Promise<ServiceResult<CommunityDto>> {
+    const existing = await this.communityRepo.findByName(dto.name);
+    if (existing.id !== 0) {
+      return ServiceResultFactory.fail<CommunityDto>(CommunityMessages.nameTaken, HttpStatus.conflict);
+    }
+
+    const community = await this.communityRepo.create(dto);
+    if (community.id === 0) {
+       return ServiceResultFactory.fail<CommunityDto>(CommunityMessages.createFailed, HttpStatus.internalServerError);
+    }
+    const createdDto =  CommunityMapper.toDto(community);
+
+    await this.auditHelperService.safeCreate( new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_CREATED, AuditDetails.COMMUNITY_CREATED, ctx.ipAddress));
+
+    return ServiceResultFactory.ok(CommunityMessages.created, createdDto, HttpStatus.created);
+  }
+
+  async update(id: number, dto: UpdateCommunityDto,ctx:AuditContext): Promise<ServiceResult> {
+    const existing = await this.communityRepo.findById(id);
+    if (existing.id === 0) {
+      return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
+    }
+
+    if (dto.name !== undefined) {
+      const byName = await this.communityRepo.findByName(dto.name);
+      if (byName.id !== 0 && byName.id !== id) {
+        return ServiceResultFactory.fail(CommunityMessages.nameTaken, HttpStatus.conflict);
+      }
+    }
     const isUpdated = await this.communityRepo.update(id, dto);
-    if(isUpdated ){
-    await this.auditHelperService.safeCreate(
-          new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_UPDATED, AuditDetails.COMMUNITY_UPDATED, ctx.ipAddress)
-        );
+    
+    if (!isUpdated) {
+      return ServiceResultFactory.fail(CommunityMessages.updateFailed, HttpStatus.internalServerError);
     }
+    await this.auditHelperService.safeCreate( new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_UPDATED, AuditDetails.COMMUNITY_UPDATED, ctx.ipAddress));
+    
 
-    return isUpdated;
+    return ServiceResultFactory.ok(CommunityMessages.updated, undefined, HttpStatus.ok);
   }
 
-  async delete(id: number,ctx:AuditContext): Promise<boolean> {
-    const isDeleted  = await this.communityRepo.delete(id);
-    if(isDeleted ){
-    await this.auditHelperService.safeCreate(
-          new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_DELETED, AuditDetails.COMMUNITY_DELETED, ctx.ipAddress)
-        );
+  async delete(id: number,ctx:AuditContext): Promise<ServiceResult> {
+    const existing = await this.communityRepo.findById(id);
+    if (existing.id === 0) {
+      return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
     }
-    return isDeleted ;
+
+    const isDeleted  = await this.communityRepo.delete(id);
+    
+    if (!isDeleted) {
+      return ServiceResultFactory.fail(CommunityMessages.deleteFailed, HttpStatus.internalServerError);
+  }
+
+    await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_DELETED, AuditDetails.COMMUNITY_DELETED, ctx.ipAddress));
+    
+    return ServiceResultFactory.ok(CommunityMessages.deleted, undefined, HttpStatus.ok); 
   }
 }

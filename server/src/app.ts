@@ -39,7 +39,7 @@ const auditService =new AuditService(auditRepo);
 const auditHelperService = new AuditHelperService(auditService,logger);
 const authService   = new AuthService(userRepo,auditHelperService);
 const userService   = new UserService(userRepo,auditHelperService);
-const communityService = new CommunityService(communityRepo,auditHelperService);
+const communityService = new CommunityService(communityRepo,userService,auditHelperService);
 
 
 // Express
@@ -56,7 +56,7 @@ app.use(cors({ origin: process.env.CLIENT_URL ?? "*" }));
 
 app.use("/api/v1", new AuthController(authService,logger).getRouter());
 app.use("/api/v1", new UserController(userService,logger).getRouter());
-app.use("/api/v1", new CommunityController(communityService,userService,logger).getRouter());
+app.use("/api/v1", new CommunityController(communityService,logger).getRouter());
 app.use("/api/v1", new AuditController(auditService,logger).getRouter());
 
 app.use(errorHandler);

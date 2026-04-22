@@ -34,6 +34,22 @@ export class CommunityRepository implements ICommunityRepository {
     } finally { res.conn.release(); }
   }
 
+  async findByName(name: string): Promise<Community> {
+    const res = await this.db.getReadConnection();
+    if (!res) return new Community();
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM communities WHERE name = ?`,
+         [name]
+      );
+      return rows.length > 0 ? CommunityMapper.toModel(rows[0]): new Community();
+    } catch (err) {
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByName, err);
+      return new Community();
+    } finally { res.conn.release(); }
+  }
+
   async findAll(dto:GetCommunitiesDto): Promise<{communities:Community[];total:number}> {
     const res = await this.db.getReadConnection();
     if (!res) return {communities:[],total: 0};

@@ -4,14 +4,14 @@ import { PaginatedListDto } from "../../DTOs/common/PaginatedListDto";
 import { GetCommunitiesDto } from '../../DTOs/community/GetCommunitiesDto';
 import { GetCommunitiesByUserIdDto } from "../../DTOs/community/GetCommunitiesByUserIdDto";
 import { UpdateCommunityDto } from "../../DTOs/community/UpdateCommunityDto";
-import { CreateCommunityResponseDto } from "../../DTOs/community/CreateCommunityResponseDto";
 import { AuditContext } from "../../types/audits/AuditContext";
+import { ServiceResult } from "../../types/service/ServiceResult";
 
 export interface ICommunityService {
-  getAll(dto:GetCommunitiesDto): Promise<PaginatedListDto<CommunityDto>>;
-  getById(id: number): Promise<CommunityDto | null>;
-  getByUserId(dto:GetCommunitiesByUserIdDto): Promise<PaginatedListDto<CommunityDto>>;
-  create(dto: CreateCommunityDto,ctx:AuditContext): Promise<CreateCommunityResponseDto | null>;
-  update(id: number, dto: UpdateCommunityDto,ctx:AuditContext): Promise<boolean>;
-  delete(id: number,ctx:AuditContext): Promise<boolean>;
+  getAll(dto:GetCommunitiesDto): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
+  getById(id: number): Promise<ServiceResult<CommunityDto>>;
+  getByUserId(dto:GetCommunitiesByUserIdDto): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
+  create(dto: CreateCommunityDto,ctx:AuditContext): Promise<ServiceResult<CommunityDto>>;
+  update(id: number, dto: UpdateCommunityDto,ctx:AuditContext): Promise<ServiceResult>;
+  delete(id: number,ctx:AuditContext): Promise<ServiceResult>;
 }

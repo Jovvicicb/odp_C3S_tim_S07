@@ -14,7 +14,6 @@ import { validateId } from "../validators/common/ValidateId";
 import { parseStringValue } from "../parser/common/ParseStringValue";
 import { parsePagination } from "../parser/common/ParsePagination";
 import { validatePagination } from "../validators/common/ValidatePagination";
-import { IUserService } from "../../Domain/services/users/IUserService";
 import { validateUpdateCommunity } from "../validators/community/ValidateUpdateCommunity";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
@@ -24,12 +23,13 @@ import { UpdateCommunityInput } from "../types/community/UpdateCommunityInput";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { CommunityLogMessages } from "../../Domain/constants/messages/community/CommunityLogMessages";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
+import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 
 export class CommunityController {
   private readonly router = Router();
 
-  public constructor(private readonly communityService: ICommunityService,
-    private readonly userService: IUserService,
+  public constructor(
+    private readonly communityService: ICommunityService,
     private readonly logger: ILoggerService) {
     this.router.get("/communities",          authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getAll.bind(this));
     this.router.get("/communities/user/:userId", authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getByUserId.bind(this));
@@ -56,10 +56,7 @@ export class CommunityController {
     const dto = new GetCommunitiesDto(page,limit,type);
     try{
       const result = await this.communityService.getAll(dto);
-      res.status(HttpStatus.ok).json({ 
-        success: true,
-        data: result 
-      });
+      ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.getAllFailed, err);
 
@@ -81,17 +78,8 @@ export class CommunityController {
       return;
     } 
     try{
-      const community = await this.communityService.getById(id);
-      if (!community) { 
-        res.status(HttpStatus.notFound).json({ 
-          success: false,
-          message: CommunityMessages.notFound});
-          return; 
-        }
-      res.status(HttpStatus.ok).json({ 
-        success: true, 
-        data: community
-      });
+      const result = await this.communityService.getById(id);
+      ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.getByIdFailed, err);
 
@@ -120,20 +108,10 @@ export class CommunityController {
        res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
       return;
     } 
-
-    try{
-    const userExists = await this.userService.exists(userId);
-
-    if (!userExists) {
-      res.status(HttpStatus.notFound).json({ success: false, message: UserMessages.notFound });
-      return;
-    }
     const dto = new GetCommunitiesByUserIdDto(userId,page,limit);
-    const items = await this.communityService.getByUserId(dto);
-    res.status(HttpStatus.ok).json({ 
-      success: true, 
-      data: items 
-    });
+    try{
+    const result = await this.communityService.getByUserId(dto);
+    ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.getByUserIdFailed, err);
 
@@ -146,10 +124,19 @@ export class CommunityController {
 
 
   private async create(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
     const { validation, dto } = validateCreateCommunity(
       {
         ...(req.body as CreateCommunityInput),
-        ownerId: req.user!.id,
+        ownerId: userId,
       },
       req.file
     );
@@ -159,16 +146,10 @@ export class CommunityController {
       return;
     }
 
-    const ctx = IpHelper.buildAuditContext(req,req.user!.id);
+    const ctx = IpHelper.buildAuditContext(req,userId);
     try{
-    const created = await this.communityService.create(dto,ctx);
-    if (!created) { 
-      res.status(HttpStatus.internalServerError).json({ 
-        success: false, 
-        message: CommunityMessages.createFailed });
-      return; 
-    }
-    res.status(HttpStatus.created).json({ success: true, message: CommunityMessages.created, data: created });
+      const result = await this.communityService.create(dto,ctx);
+      ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.createFailed, err);
       res.status(HttpStatus.internalServerError).json({
@@ -179,6 +160,15 @@ export class CommunityController {
   }
 
   private async update(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
     const v = validateId(id);
@@ -196,24 +186,10 @@ export class CommunityController {
         return;
       }
 
-    const ctx = IpHelper.buildAuditContext(req,req.user!.id);
+    const ctx = IpHelper.buildAuditContext(req,userId);
     try{
-      const existing = await this.communityService.getById(id);
-      if (!existing) {
-        res.status(HttpStatus.notFound).json({ success: false, message: CommunityMessages.notFound });
-        return;
-      }
-
-      const ok = await this.communityService.update(id, dto,ctx);
-      if (!ok) {
-        res.status(HttpStatus.internalServerError).json({ success: false, message: CommunityMessages.updateFailed });
-      return;
-      }
-      
-      res.status(HttpStatus.ok).json({ 
-        success: true, 
-        message: CommunityMessages.updated 
-      });
+      const result = await this.communityService.update(id, dto,ctx);
+      ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name,CommunityLogMessages.updateFailed, err);
 
@@ -225,6 +201,15 @@ export class CommunityController {
   }
 
   private async delete(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
     const v = validateId(id);
@@ -234,20 +219,10 @@ export class CommunityController {
       return;
     } 
 
-    const ctx = IpHelper.buildAuditContext(req,req.user!.id);
+    const ctx = IpHelper.buildAuditContext(req,userId);
     try{
-      const existing = await this.communityService.getById(id);
-      if (!existing) {
-        res.status(HttpStatus.notFound).json({ success: false, message: CommunityMessages.notFound });
-        return;
-      }
-      const ok = await this.communityService.delete(id,ctx);
-      if (!ok) {
-        res.status(HttpStatus.internalServerError).json({ success: false, message: CommunityMessages.deleteFailed});
-      return;
-      }
-      
-      res.status(HttpStatus.ok).json({ success: true, message: CommunityMessages.deleted });
+      const result = await this.communityService.delete(id,ctx);
+      ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.deleteFailed, err);
 

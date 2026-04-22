@@ -3,13 +3,13 @@ import { GetUsersDto } from "../../DTOs/users/GetUsersDto";
 import { UpdateMeDto } from "../../DTOs/users/UpdateMeDto";
 import { UserDto } from "../../DTOs/users/UserDto";
 import { AuditContext } from "../../types/audits/AuditContext";
-import { UpdateMeResult } from "../../types/users/UpdateMeResult";
+import { ServiceResult } from "../../types/service/ServiceResult";
 
 export interface IUserService {
-  getAll(dto:GetUsersDto): Promise<PaginatedListDto<UserDto>>;
-  getById(id: number): Promise<UserDto | null>;
-  getByUsername(username:string): Promise<UserDto | null>;
-  deactivate(id: number): Promise<boolean>;
+  getAll(dto:GetUsersDto): Promise<ServiceResult<PaginatedListDto<UserDto>>>;
+  getById(id: number): Promise<ServiceResult<UserDto>>;
+  getByUsername(username:string): Promise<ServiceResult<UserDto>>;
+  deactivate(id: number,ctx:AuditContext): Promise<ServiceResult>;
   exists(id:number):Promise<boolean>;
-  update(dto: UpdateMeDto,ctx:AuditContext): Promise<UpdateMeResult>;
+  update(dto: UpdateMeDto,ctx:AuditContext): Promise<ServiceResult>;
 }

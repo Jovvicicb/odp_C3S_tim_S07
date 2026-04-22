@@ -10,4 +10,5 @@ export interface IUserRepository {
   create(user: User): Promise<User>;
   update(userId: number, dto: UpdateMeDto): Promise<boolean>;
   deactivate(id: number): Promise<boolean>;
+  exists(id: number): Promise<boolean>;
 }

@@ -5,8 +5,8 @@ import { Community } from "../../../Domain/models/Community";
 import { CreateCommunityResponseDto } from "../../../Domain/DTOs/community/CreateCommunityResponseDto";
 
 export class CommunityMapper {
-  public static toModel(row: RowDataPacket): CommunityDto {
-    return new CommunityDto(
+  public static toModel(row: RowDataPacket): Community {
+    return new Community(
       row.id,
       row.name,
       row.description,
