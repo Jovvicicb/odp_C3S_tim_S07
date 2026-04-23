@@ -271,9 +271,8 @@ private async follow(req: Request, res: Response): Promise<void> {
     return;
   }
   
-  const ctx = IpHelper.buildAuditContext(req, userId);
   try {
-    const result = await this.userFollowService.follow(targetUserId,ctx);
+    const result = await this.userFollowService.follow(targetUserId,userId);
     ResponseHelper.send(res, result);
   } catch (err) {
     this.logger.error(this.constructor.name, UserLogMessages.followFailed, err);
@@ -307,9 +306,8 @@ private async unfollow(req: Request, res: Response): Promise<void> {
     return;
   }
   
-  const ctx = IpHelper.buildAuditContext(req, userId);
   try {
-    const result = await this.userFollowService.unfollow(targetUserId,ctx);
+    const result = await this.userFollowService.unfollow(targetUserId,userId);
     ResponseHelper.send(res, result);
   } catch (err) {
     this.logger.error(this.constructor.name, UserLogMessages.unfollowFailed, err);

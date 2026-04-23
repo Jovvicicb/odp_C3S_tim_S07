@@ -1,17 +1,12 @@
-import { AuditActions } from "../../Domain/constants/messages/audits/AuditActions";
-import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
-import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { GetFollowersDto } from "../../Domain/DTOs/users/GetFollowersDto";
 import { UserDto } from "../../Domain/DTOs/users/UserDto";
 import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
 import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
-import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
 import { IUserFollowService } from "../../Domain/services/users/IUserFollowService";
 import { IUserService } from "../../Domain/services/users/IUserService";
-import { AuditContext } from "../../Domain/types/audits/AuditContext";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
 import { UserMapper } from "../../Shared/mappers/users/UserMapper";
@@ -20,20 +15,12 @@ export class UserFollowService implements IUserFollowService{
     public constructor(
         private readonly userFollowRepo:IUserFollowRepository,
         private readonly userRepo: IUserRepository,
-        private readonly userService: IUserService,
-        private readonly auditHelperService: IAuditHelperService
+        private readonly userService: IUserService
     ){}
 
 
-    async follow(targetUserId: number, ctx: AuditContext): Promise<ServiceResult> {
-        const followerId = ctx.userId;
-
-        if(!followerId){
-            return ServiceResultFactory.fail(
-                UserMessages.unauthorized,
-                HttpStatus.unauthorized
-            );
-        }
+    async follow(targetUserId: number, userId: number): Promise<ServiceResult> {
+        const followerId = userId;
 
         if(followerId === targetUserId){
             return ServiceResultFactory.fail(
@@ -66,10 +53,6 @@ export class UserFollowService implements IUserFollowService{
             );
         }
 
-        await this.auditHelperService.safeCreate(
-            new CreateAuditDto(followerId, AuditActions.USER_FOLLOWED, AuditDetails.USER_FOLLOWED,ctx.ipAddress)
-        );
-
         return ServiceResultFactory.ok(
             UserMessages.followedSuccessfully,
             undefined,
@@ -77,15 +60,8 @@ export class UserFollowService implements IUserFollowService{
         );
     }
 
-    async unfollow(targetUserId: number, ctx: AuditContext): Promise<ServiceResult> {
-        const followerId = ctx.userId;
-
-        if(!followerId){
-            return ServiceResultFactory.fail(
-                UserMessages.unauthorized,
-                HttpStatus.unauthorized
-            );
-        }
+    async unfollow(targetUserId: number, userId: number): Promise<ServiceResult> {
+        const followerId = userId;
 
         if(followerId === targetUserId){
             return ServiceResultFactory.fail(
@@ -117,10 +93,6 @@ export class UserFollowService implements IUserFollowService{
                 HttpStatus.internalServerError
             );
         }
-
-        await this.auditHelperService.safeCreate(
-            new CreateAuditDto(followerId, AuditActions.USER_UNFOLLOWED, AuditDetails.USER_UNFOLLOWED,ctx.ipAddress)
-        );
 
         return ServiceResultFactory.ok(
             UserMessages.unfollowedSuccessfully,

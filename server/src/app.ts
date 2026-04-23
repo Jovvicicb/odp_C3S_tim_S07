@@ -43,7 +43,7 @@ const auditHelperService = new AuditHelperService(auditService,logger);
 const authService   = new AuthService(userRepo,auditHelperService);
 const userService   = new UserService(userRepo,auditHelperService);
 const communityService = new CommunityService(communityRepo,userService,auditHelperService);
-const userFollowService   = new UserFollowService(userFollowRepo,userRepo,userService,auditHelperService);
+const userFollowService   = new UserFollowService(userFollowRepo,userRepo,userService);
 
 
 
