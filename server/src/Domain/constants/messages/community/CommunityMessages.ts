@@ -23,6 +23,12 @@ export const CommunityMessages = {
   joined: "Successfully joined community",
   requestSent: "Join request sent",
   joinFailed: "Failed to join community",
+
+  left: "Successfully left community",
+  leaveFailed: "Failed to leave community",
+  notMember: "User is not a member of this community",
+  ownerCannotLeave: "Community owner cannot leave the community",
+  requestCancelled: "Join request cancelled",
   
   invalidType:   "Invalid community type",
   nameTaken: "Community name is already taken"

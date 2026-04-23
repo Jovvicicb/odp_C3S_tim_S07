@@ -38,6 +38,7 @@ export class CommunityController {
     this.router.patch("/communities/:id",    authenticate, authorize(UserRole.ADMIN),upload.single("image"), this.update.bind(this));
     this.router.delete("/communities/:id",   authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
     this.router.post("/communities/:id/join",      authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.join.bind(this));
+    this.router.delete("/communities/:id/leave",      authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.leave.bind(this));
 
   }
 
@@ -291,6 +292,41 @@ export class CommunityController {
     res.status(HttpStatus.internalServerError).json({
       success: false,
       message: CommunityMessages.joinFailed,
+    });
+  }
+}
+
+private async leave(req: Request, res: Response): Promise<void> {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(HttpStatus.unauthorized).json({
+      success: false,
+      message: UserMessages.unauthorized,
+    });
+    return;
+  }
+
+  const idParam = parseStringValue(req.params.id);
+  const communityId = parseId(idParam);
+
+  const validation = validateId(communityId);
+  if (!validation.valid) {
+    res.status(HttpStatus.badRequest).json({
+      success: false,
+      message: validation.message,
+    });
+    return;
+  }
+
+  try {
+    const result = await this.communityMemberService.leave(communityId, userId);
+    ResponseHelper.send(res, result);
+  } catch (err) {
+    this.logger.error(this.constructor.name, CommunityLogMessages.leaveFailed, err);
+
+    res.status(HttpStatus.internalServerError).json({
+      success: false,
+      message: CommunityMessages.leaveFailed,
     });
   }
 }

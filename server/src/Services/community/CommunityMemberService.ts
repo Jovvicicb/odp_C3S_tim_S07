@@ -70,4 +70,52 @@ export class CommunityMemberService implements ICommunityMemberService {
     );
   }
 
+  async leave(communityId: number, userId: number): Promise<ServiceResult> {
+    const community = await this.communityRepo.findById(communityId);
+    if (community.id === 0){
+        return ServiceResultFactory.fail(
+            CommunityMessages.notFound,
+            HttpStatus.notFound
+        );
+    } 
+
+    if (community.ownerId === userId){
+        return ServiceResultFactory.fail(
+            CommunityMessages.ownerCannotLeave,
+            HttpStatus.badRequest
+        );
+    } 
+
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(userId, communityId);
+
+    if (membership.id === 0) {
+        return ServiceResultFactory.fail(
+            CommunityMessages.notMember,
+            HttpStatus.notFound
+        );
+    }
+
+    if (membership.status === CommunityMemberStatus.BANNED) {
+        return ServiceResultFactory.fail(
+            CommunityMessages.notMember,
+            HttpStatus.notFound
+        );
+    }
+    
+    const deleted = await this.communityMemberRepo.delete(userId, communityId);
+    if (!deleted) {
+        return ServiceResultFactory.fail(
+        CommunityMessages.leaveFailed,
+        HttpStatus.internalServerError
+        );
+    }
+    return ServiceResultFactory.ok(
+        membership.status === CommunityMemberStatus.PENDING
+            ? CommunityMessages.requestCancelled
+            : CommunityMessages.left,
+        undefined,
+        HttpStatus.ok
+    );
+  }
+
 }

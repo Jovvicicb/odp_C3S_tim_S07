@@ -34,6 +34,25 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
     }
   }
 
+  async delete(userId: number, communityId: number): Promise<boolean> {
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
+    try {
+      const [result] = await res.conn.execute<ResultSetHeader>(
+      `DELETE FROM community_members
+       WHERE user_id = ? AND community_id = ?`,
+      [userId, communityId]
+      );
+
+      return result.affectedRows > 0;
+    } catch (err) {
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.deleteFailed, err);
+      return false;
+    } finally { 
+      res.conn.release(); 
+    }
+  }
+
    async findByUserIdAndCommunityId(userId: number, communityId: number): Promise<CommunityMember> {
     const res = await this.db.getReadConnection();
     if (!res) return new CommunityMember();
