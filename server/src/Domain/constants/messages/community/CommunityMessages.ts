@@ -16,6 +16,13 @@ export const CommunityMessages = {
   fetchAllFailed: "Failed to fetch communities",
   fetchPublicFailed: "Failed to fetch public communities",
   fetchOneFailed: "Failed to fetch community",
+
+  alreadyMember: "User is already a member of this community",
+  requestAlreadySent: "Join request already sent",
+  bannedFromCommunity: "You are banned from this community",
+  joined: "Successfully joined community",
+  requestSent: "Join request sent",
+  joinFailed: "Failed to join community",
   
   invalidType:   "Invalid community type",
   nameTaken: "Community name is already taken"

@@ -1,6 +1,6 @@
 import { RowDataPacket } from "mysql2";
 import { CommunityDto } from "../../../Domain/DTOs/community/CommunityDto";
-import { CommunityType } from "../../../Domain/enums/CommunityType";
+import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
 import { Community } from "../../../Domain/models/Community";
 import { CreateCommunityResponseDto } from "../../../Domain/DTOs/community/CreateCommunityResponseDto";
 

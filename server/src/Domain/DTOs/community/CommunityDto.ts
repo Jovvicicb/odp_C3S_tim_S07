@@ -1,5 +1,5 @@
 // TODO: Replace with your domain-specific DTO fields
-import { CommunityType } from "../../enums/CommunityType";
+import { CommunityType } from "../../enums/communities/CommunityType";
 
 export class CommunityDto {
   constructor(

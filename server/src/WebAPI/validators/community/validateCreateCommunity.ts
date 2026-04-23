@@ -1,6 +1,6 @@
 import { FileValidationMessages } from "../../../Domain/constants/messages/common/FileValidationMessages";
 import { CommunityValidationMessages } from "../../../Domain/constants/messages/community/CommunityValidationMessages";
-import { CommunityType } from "../../../Domain/enums/CommunityType";
+import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 import { CreateCommunityInput } from "../../types/community/CreateCommunityInput";
 import { ValidateCreateCommunityResult } from "../../../Domain/types/community/ValidateCreateCommunityResult";

@@ -1,4 +1,4 @@
-import { CommunityType } from "../../enums/CommunityType";
+import { CommunityType } from "../../enums/communities/CommunityType";
 
 export class CreateCommunityDto {
   constructor(

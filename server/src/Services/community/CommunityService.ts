@@ -17,7 +17,7 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { IUserService } from "../../Domain/services/users/IUserService";
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
-import { CommunityType } from "../../Domain/enums/CommunityType";
+import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 
 export class CommunityService implements ICommunityService {
   public constructor(

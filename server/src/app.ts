@@ -24,6 +24,8 @@ import { AuditController } from "./WebAPI/controllers/AuditController";
 import { AuditHelperService } from "./Services/common/AuditHelperService";
 import { UserFollowService } from "./Services/users/UserFollowService";
 import { UserFollowRepository } from "./Database/repositories/users/UserFollowRepository";
+import { CommunityMemberRepository } from "./Database/repositories/community/CommunityMemberRepository";
+import { CommunityMemberService } from "./Services/community/CommunityMemberService";
 
 
 export const logger = new ConsoleLoggerService();
@@ -36,6 +38,8 @@ const userRepo   = new UserRepository(db, logger);
 const communityRepo = new CommunityRepository(db, logger);
 const auditRepo = new AuditRepository(db,logger);
 const userFollowRepo = new UserFollowRepository(db,logger);
+const communityMemberRepo = new CommunityMemberRepository(db,logger);
+
 
 // Services
 const auditService =new AuditService(auditRepo);
@@ -44,7 +48,7 @@ const authService   = new AuthService(userRepo,auditHelperService);
 const userService   = new UserService(userRepo,auditHelperService);
 const communityService = new CommunityService(communityRepo,userService,auditHelperService);
 const userFollowService   = new UserFollowService(userFollowRepo,userRepo,userService);
-
+const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo);
 
 
 // Express
@@ -61,7 +65,7 @@ app.use(cors({ origin: process.env.CLIENT_URL ?? "*" }));
 
 app.use("/api/v1", new AuthController(authService,logger).getRouter());
 app.use("/api/v1", new UserController(userService,userFollowService,logger).getRouter());
-app.use("/api/v1", new CommunityController(communityService,logger).getRouter());
+app.use("/api/v1", new CommunityController(communityService,communityMemberService,logger).getRouter());
 app.use("/api/v1", new AuditController(auditService,logger).getRouter());
 
 app.use(errorHandler);

@@ -21,12 +21,14 @@ import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { CommunityLogMessages } from "../../Domain/constants/messages/community/CommunityLogMessages";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
+import { ICommunityMemberService } from "../../Domain/services/community/ICommunityMemberService";
 
 export class CommunityController {
   private readonly router = Router();
 
   public constructor(
     private readonly communityService: ICommunityService,
+    private readonly communityMemberService: ICommunityMemberService,
     private readonly logger: ILoggerService) {
     this.router.get("/communities", this.getPublic.bind(this));
     this.router.get("/communities/all",          authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
@@ -35,6 +37,8 @@ export class CommunityController {
     this.router.post("/communities",         authenticate, authorize(UserRole.USER), upload.single("image"), this.create.bind(this));
     this.router.patch("/communities/:id",    authenticate, authorize(UserRole.ADMIN),upload.single("image"), this.update.bind(this));
     this.router.delete("/communities/:id",   authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
+    this.router.post("/communities/:id/join",      authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.join.bind(this));
+
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
@@ -255,6 +259,41 @@ export class CommunityController {
     }
   
   }
+
+  private async join(req: Request, res: Response): Promise<void> {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(HttpStatus.unauthorized).json({
+      success: false,
+      message: UserMessages.unauthorized,
+    });
+    return;
+  }
+
+  const idParam = parseStringValue(req.params.id);
+  const communityId = parseId(idParam);
+
+  const validation = validateId(communityId);
+  if (!validation.valid) {
+    res.status(HttpStatus.badRequest).json({
+      success: false,
+      message: validation.message,
+    });
+    return;
+  }
+
+  try {
+    const result = await this.communityMemberService.join(communityId, userId);
+    ResponseHelper.send(res, result);
+  } catch (err) {
+    this.logger.error(this.constructor.name, CommunityLogMessages.joinFailed, err);
+
+    res.status(HttpStatus.internalServerError).json({
+      success: false,
+      message: CommunityMessages.joinFailed,
+    });
+  }
+}
 
   public getRouter(): Router { return this.router; }
 }

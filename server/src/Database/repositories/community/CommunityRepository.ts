@@ -8,7 +8,7 @@ import { CommunityMapper } from "../../../Shared/mappers/community/CommunityMapp
 import { GetCommunitiesByUserIdDto } from "../../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
 import { UpdateCommunityDto } from "../../../Domain/DTOs/community/UpdateCommunityDto";
 import { CommunityLogMessages } from "../../../Domain/constants/messages/community/CommunityLogMessages";
-import { CommunityType } from "../../../Domain/enums/CommunityType";
+import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 

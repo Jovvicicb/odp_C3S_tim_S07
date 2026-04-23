@@ -1,7 +1,7 @@
 import { FileValidationMessages } from '../../../Domain/constants/messages/common/FileValidationMessages';
 import { CommunityValidationMessages } from '../../../Domain/constants/messages/community/CommunityValidationMessages';
 import { UpdateCommunityDto } from '../../../Domain/DTOs/community/UpdateCommunityDto';
-import { CommunityType } from '../../../Domain/enums/CommunityType';
+import { CommunityType } from '../../../Domain/enums/communities/CommunityType';
 import { StringNormalizer } from '../../../Shared/normalization/StringNormalizer';
 import { UpdateCommunityInput } from '../../types/community/UpdateCommunityInput';
 import { ValidateUpdateCommunityResult } from '../../../Domain/types/community/ValidateUpdateCommunityResult';

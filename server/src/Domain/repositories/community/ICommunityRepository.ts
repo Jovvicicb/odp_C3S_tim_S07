@@ -2,7 +2,7 @@ import { Community } from "../../models/Community";
 import { CreateCommunityDto } from "../../DTOs/community/CreateCommunityDto";
 import { GetCommunitiesByUserIdDto } from "../../DTOs/community/GetCommunitiesByUserIdDto";
 import { UpdateCommunityDto } from "../../DTOs/community/UpdateCommunityDto";
-import { CommunityType } from "../../enums/CommunityType";
+import { CommunityType } from "../../enums/communities/CommunityType";
 
 export interface ICommunityRepository {
   findById(id: number): Promise<Community>;
