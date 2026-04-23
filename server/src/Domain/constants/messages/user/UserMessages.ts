@@ -4,10 +4,12 @@ export const UserMessages = {
 
   fetchAllSuccess: "Users fetched successfully",
   followersFetchedSuccess: "Followers fetched successfully",
+  followingFetchedSuccess: "Following fetched successfully",
   fetchOneSuccess: "User fetched successfully",
 
   fetchAllFailed: "Failed to fetch users",
   followersFetchFailed: "Failed to fetch followers",
+  followingFetchFailed: "Failed to fetch following",
   fetchOneFailed: "Failed to fetch user",
 
   updated: "User updated successfully",
@@ -29,7 +31,7 @@ export const UserMessages = {
   followFailed: "Failed to follow user",
   followedSuccessfully: "User followed successfully",
 
-  cannotUnFollowYourself: "You cannot unfollow yourself",
+  cannotUnfollowYourself: "You cannot unfollow yourself",
   notFollowing: "You are not following this user",
   unfollowFailed: "Failed to unfollow user",
   unfollowedSuccessfully: "User unfollowed successfully",

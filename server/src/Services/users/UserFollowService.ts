@@ -2,6 +2,7 @@ import { UserMessages } from "../../Domain/constants/messages/user/UserMessages"
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { GetFollowersDto } from "../../Domain/DTOs/users/GetFollowersDto";
+import { GetFollowingDto } from "../../Domain/DTOs/users/GetFollowingDto";
 import { UserDto } from "../../Domain/DTOs/users/UserDto";
 import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
 import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
@@ -65,7 +66,7 @@ export class UserFollowService implements IUserFollowService{
 
         if(followerId === targetUserId){
             return ServiceResultFactory.fail(
-                UserMessages.cannotUnFollowYourself,
+                UserMessages.cannotUnfollowYourself,
                 HttpStatus.badRequest
             );
         }
@@ -113,16 +114,40 @@ export class UserFollowService implements IUserFollowService{
 
         const result = await this.userFollowRepo.getFollowers(dto);
         const foundUsers = await this.userRepo.findByIds(result.followerIds);
-        const users = foundUsers.map((u) => UserMapper.toDto(u));
+        const usersDto = foundUsers.map((u) => UserMapper.toDto(u));
 
         const data = new PaginatedListDto(
-            users,
+            usersDto,
             result.total,
             dto.page,
             dto.limit
         );
 
         return ServiceResultFactory.ok(UserMessages.followersFetchedSuccess, data, HttpStatus.ok);
+    }
+
+    async getFollowing(dto: GetFollowingDto): Promise<ServiceResult<PaginatedListDto<UserDto>>> {
+        const userExists = await this.userService.exists(dto.userId)
+
+        if(!userExists){
+            return ServiceResultFactory.fail<PaginatedListDto<UserDto>>(
+                UserMessages.notFound,
+                HttpStatus.notFound
+            );
+        }
+
+        const result = await this.userFollowRepo.getFollowing(dto);
+        const foundUsers = await this.userRepo.findByIds(result.followingIds);
+        const usersDto = foundUsers.map((u) => UserMapper.toDto(u));
+
+        const data = new PaginatedListDto(
+            usersDto,
+            result.total,
+            dto.page,
+            dto.limit
+        );
+
+        return ServiceResultFactory.ok(UserMessages.followingFetchedSuccess, data, HttpStatus.ok);
     }
 
 }

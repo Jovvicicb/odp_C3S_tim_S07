@@ -5,7 +5,7 @@ export const UserLogMessages = {
   getByUsernameFailed: "getByUsername failed",
   followFailed: "Follow user failed",
   unfollowFailed: "Unfollow user failed",
-  getFollowersFailed: "Get followers failed",
+ 
   
 
   // repository
@@ -25,5 +25,8 @@ export const UserLogMessages = {
   updateRoleFailed: "update user role failed",
   deactivateFailed: "deactivate failed",
   existsFailed: "exists failed",
+  getFollowersFailed: "Get followers failed",
+  getFollowingFailed: "Get following failed",
+
   
 } as const;
