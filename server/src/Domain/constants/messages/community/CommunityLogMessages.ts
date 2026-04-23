@@ -1,6 +1,7 @@
 export const CommunityLogMessages = {
   // controller
   getAllFailed: "getAll failed",
+  getPublicFailed: "get public failed",
   getByIdFailed: "getById failed",
   getByUserIdFailed: "getByUserId failed",
 

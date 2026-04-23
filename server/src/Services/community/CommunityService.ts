@@ -4,10 +4,8 @@ import { CommunityDto } from "../../Domain/DTOs/community/CommunityDto";
 import { CreateCommunityDto } from "../../Domain/DTOs/community/CreateCommunityDto";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { CommunityMapper } from "../../Shared/mappers/community/CommunityMapper";
-import { GetCommunitiesDto } from "../../Domain/DTOs/community/GetCommunitiesDto";
 import { GetCommunitiesByUserIdDto } from "../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
 import { UpdateCommunityDto } from "../../Domain/DTOs/community/UpdateCommunityDto";
-import { CreateCommunityResponseDto } from "../../Domain/DTOs/community/CreateCommunityResponseDto";
 import { AuditContext } from "../../Domain/types/audits/AuditContext";
 import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
@@ -19,20 +17,36 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { IUserService } from "../../Domain/services/users/IUserService";
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
+import { CommunityType } from "../../Domain/enums/CommunityType";
 
 export class CommunityService implements ICommunityService {
   public constructor(
      private readonly communityRepo: ICommunityRepository,
      private readonly userService: IUserService,
-     private readonly auditHelperService: IAuditHelperService) {}
+     private readonly auditHelperService: IAuditHelperService
+  ) {}
 
-  async getAll(dto : GetCommunitiesDto): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
-    const items = await this.communityRepo.findAll(dto);
+  async getPublic(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
+    const result = await this.communityRepo.findAll(page, limit,CommunityType.PUBLIC);
+
     const data = new PaginatedListDto(
-      items.communities.map((c) => CommunityMapper.toDto(c)),
-      items.total, 
-      dto.page, 
-      dto.limit
+      result.communities.map((c) => CommunityMapper.toDto(c)),
+      result.total, 
+      page, 
+      limit
+    );
+
+    return ServiceResultFactory.ok(CommunityMessages.fetchPublicSuccess,data,HttpStatus.ok);
+  }
+
+  async getAll(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
+    const result = await this.communityRepo.findAll(page, limit);
+
+    const data = new PaginatedListDto(
+      result.communities.map((c) => CommunityMapper.toDto(c)),
+      result.total, 
+      page, 
+      limit
     );
 
     return ServiceResultFactory.ok(CommunityMessages.fetchAllSuccess,data,HttpStatus.ok);

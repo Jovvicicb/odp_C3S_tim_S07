@@ -10,9 +10,11 @@ export const CommunityMessages = {
 
 
   fetchAllSuccess: "Communities fetched successfully",
+  fetchPublicSuccess: "Public communities fetched successfully",
   fetchOneSuccess : "Community fetched successfully",
 
   fetchAllFailed: "Failed to fetch communities",
+  fetchPublicFailed: "Failed to fetch public communities",
   fetchOneFailed: "Failed to fetch community",
   
   invalidType:   "Invalid community type",

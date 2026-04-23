@@ -4,11 +4,8 @@ import { authenticate } from "../../Middlewares/authentification/AuthMiddleware"
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { upload } from "../../Middlewares/multer/multer";
-import { CommunityType } from "../../Domain/enums/CommunityType";
 import { validateCreateCommunity } from "../validators/community/ValidateCreateCommunity";
-import { GetCommunitiesDto } from "../../Domain/DTOs/community/GetCommunitiesDto";
 import { GetCommunitiesByUserIdDto } from "../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
-import { validateGetAllCommunities } from "../validators/community/ValidateGetAllCommunities";
 import { parseId } from "../parser/common/ParseId";
 import { validateId } from "../validators/common/ValidateId";
 import { parseStringValue } from "../parser/common/ParseStringValue";
@@ -31,7 +28,8 @@ export class CommunityController {
   public constructor(
     private readonly communityService: ICommunityService,
     private readonly logger: ILoggerService) {
-    this.router.get("/communities",          authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getAll.bind(this));
+    this.router.get("/communities", this.getPublic.bind(this));
+    this.router.get("/communities/all",          authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
     this.router.get("/communities/user/:userId", authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getByUserId.bind(this));
     this.router.get("/communities/:id",      authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getById.bind(this));
     this.router.post("/communities",         authenticate, authorize(UserRole.USER), upload.single("image"), this.create.bind(this));
@@ -42,20 +40,17 @@ export class CommunityController {
   private async getAll(req: Request, res: Response): Promise<void> {
     const pageParam   = parseStringValue(req.query.page);
     const limitParam = parseStringValue(req.query.limit);
-    const typeParam = (parseStringValue(req.query.type) ?? "").trim();
    
     const { page, limit } = parsePagination(pageParam, limitParam);
    
-    const v = validateGetAllCommunities(page , limit, typeParam);
-    if (!v.valid) {
-      res.status(HttpStatus.badRequest).json({ success: false, message: v.message });
+    const paginationValidation  = validatePagination(page,limit);
+    if (!paginationValidation .valid) {
+       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
       return;
-    }
-    const type =typeParam === ""? undefined : (typeParam as CommunityType);
+    } 
 
-    const dto = new GetCommunitiesDto(page,limit,type);
     try{
-      const result = await this.communityService.getAll(dto);
+      const result = await this.communityService.getAll(page,limit);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.getAllFailed, err);
@@ -63,6 +58,32 @@ export class CommunityController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommunityMessages.fetchAllFailed
+      });
+
+    }
+  }
+
+  private async getPublic(req: Request, res: Response): Promise<void> {
+    const pageParam   = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+   
+    const { page, limit } = parsePagination(pageParam, limitParam);
+   
+    const paginationValidation  = validatePagination(page,limit);
+    if (!paginationValidation .valid) {
+       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+      return;
+    } 
+
+    try{
+      const result = await this.communityService.getPublic(page,limit);
+      ResponseHelper.send(res, result);
+    }catch(err){
+      this.logger.error(this.constructor.name, CommunityLogMessages.getPublicFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.fetchPublicFailed
       });
 
     }
