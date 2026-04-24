@@ -18,10 +18,15 @@ import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { IUserService } from "../../Domain/services/users/IUserService";
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
+import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
+import { CommunityMemberRole } from "../../Domain/DTOs/community/CommunityMemberRole";
+import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
+import { CreateCommunityResponseDto } from "../../Domain/DTOs/community/CreateCommunityResponseDto";
 
 export class CommunityService implements ICommunityService {
   public constructor(
      private readonly communityRepo: ICommunityRepository,
+     private readonly communityMemberRepo: ICommunityMemberRepository,
      private readonly userService: IUserService,
      private readonly auditHelperService: IAuditHelperService
   ) {}
@@ -52,6 +57,44 @@ export class CommunityService implements ICommunityService {
     return ServiceResultFactory.ok(CommunityMessages.fetchAllSuccess,data,HttpStatus.ok);
   }
 
+  async create(dto: CreateCommunityDto,ctx: AuditContext): Promise<ServiceResult<CreateCommunityResponseDto>> {
+    const existing = await this.communityRepo.findByName(dto.name);
+    if (existing.id !== 0) {
+      return ServiceResultFactory.fail<CreateCommunityResponseDto>(
+        CommunityMessages.nameTaken, 
+        HttpStatus.conflict
+      );
+    }
+
+    const community = await this.communityRepo.create(dto);
+    if (community.id === 0) {
+       return ServiceResultFactory.fail<CreateCommunityResponseDto>(
+        CommunityMessages.createFailed, 
+        HttpStatus.internalServerError
+      );
+    }
+
+    const memberCreated = await this.communityMemberRepo.create(
+      dto.ownerId,
+      community.id,
+      CommunityMemberRole.MODERATOR,
+      CommunityMemberStatus.ACTIVE
+    );
+
+    if (!memberCreated) {
+      return ServiceResultFactory.fail<CreateCommunityResponseDto>(
+        CommunityMessages.createFailed,
+        HttpStatus.internalServerError
+      );
+    }
+    
+    const createdDto =  CommunityMapper.toCreateResponseDto(community);
+
+    await this.auditHelperService.safeCreate( new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_CREATED, AuditDetails.COMMUNITY_CREATED, ctx.ipAddress));
+
+    return ServiceResultFactory.ok(CommunityMessages.created, createdDto, HttpStatus.created);
+  }
+
   async getById(id: number): Promise<ServiceResult<CommunityDto>> {
     const community = await this.communityRepo.findById(id);
     if (community.id === 0) {
@@ -79,22 +122,7 @@ export class CommunityService implements ICommunityService {
     return ServiceResultFactory.ok(CommunityMessages.fetchAllSuccess,data,HttpStatus.ok);
   }
 
-  async create(dto: CreateCommunityDto,ctx: AuditContext): Promise<ServiceResult<CommunityDto>> {
-    const existing = await this.communityRepo.findByName(dto.name);
-    if (existing.id !== 0) {
-      return ServiceResultFactory.fail<CommunityDto>(CommunityMessages.nameTaken, HttpStatus.conflict);
-    }
-
-    const community = await this.communityRepo.create(dto);
-    if (community.id === 0) {
-       return ServiceResultFactory.fail<CommunityDto>(CommunityMessages.createFailed, HttpStatus.internalServerError);
-    }
-    const createdDto =  CommunityMapper.toDto(community);
-
-    await this.auditHelperService.safeCreate( new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_CREATED, AuditDetails.COMMUNITY_CREATED, ctx.ipAddress));
-
-    return ServiceResultFactory.ok(CommunityMessages.created, createdDto, HttpStatus.created);
-  }
+  
 
   async update(id: number, dto: UpdateCommunityDto,ctx:AuditContext): Promise<ServiceResult> {
     const existing = await this.communityRepo.findById(id);

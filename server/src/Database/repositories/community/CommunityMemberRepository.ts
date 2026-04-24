@@ -6,6 +6,7 @@ import { CommunityMemberStatus } from "../../../Domain/enums/communities/Communi
 import { CommunityLogMessages } from "../../../Domain/constants/messages/community/CommunityLogMessages";
 import { CommunityMember } from "../../../Domain/models/CommunityMember";
 import { CommunityMemberMapper } from "../../../Shared/mappers/community/CommunityMemberMapper";
+import { CommunityMemberRole } from "../../../Domain/DTOs/community/CommunityMemberRole";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -52,14 +53,14 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
  }
 
   
-  async create(userId: number, communityId: number, status: CommunityMemberStatus): Promise<boolean> {
+  async create(userId: number, communityId: number, role: CommunityMemberRole, status: CommunityMemberStatus): Promise<boolean> {
     const res = await this.db.getWriteConnection();
     if (!res) return false;
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `INSERT INTO community_members (user_id, community_id, status)
-        VALUES (?, ?, ?)`,
-        [userId, communityId, status]
+        `INSERT INTO community_members (user_id, community_id, role, status)
+        VALUES (?, ?, ?, ?)`,
+        [userId, communityId, role, status]
       );
 
       return result.affectedRows > 0;

@@ -12,7 +12,7 @@ export const validateCreateCommunity = (
   const normalizedName = StringNormalizer.normalizeSpaces(input.name);
   const normalizedDescription = StringNormalizer.trim(input.description);
   const normalizedRules = StringNormalizer.trim(input.rules);
-  const normalizedType = StringNormalizer.trim(input.type) || "public";
+  const normalizedType = (StringNormalizer.trim(input.type) || "public").toLowerCase();
 
     if (!normalizedName) {
     return {
@@ -63,11 +63,11 @@ export const validateCreateCommunity = (
     validation: { valid: true },
     dto: {
       name: normalizedName,
-      description: normalizedDescription,
-      rules: normalizedRules,
+      description: normalizedDescription ? normalizedDescription : null,
+      rules: normalizedRules ? normalizedRules : null,
       type: normalizedType === "public" ? CommunityType.PUBLIC : CommunityType.PRIVATE,
       ownerId: input.ownerId,
-      avatar: file?.filename ?? "",
+      avatar: file?.filename ?? null,
     },
   };
 };

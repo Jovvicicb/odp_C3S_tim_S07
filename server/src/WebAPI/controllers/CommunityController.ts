@@ -33,9 +33,9 @@ export class CommunityController {
     this.router.get("/communities",                                                                                this.getPublic.bind(this));
     this.router.get("/communities/mine",           authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getMine.bind(this));
     this.router.get("/communities/all",            authenticate, authorize(UserRole.ADMIN),                        this.getAll.bind(this));
+    this.router.post("/communities",               authenticate, authorize(UserRole.USER), upload.single("image"), this.create.bind(this));
     this.router.get("/communities/user/:userId",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getByUserId.bind(this));
     this.router.get("/communities/:id",            authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getById.bind(this));
-    this.router.post("/communities",               authenticate, authorize(UserRole.USER), upload.single("image"), this.create.bind(this));
     this.router.patch("/communities/:id",          authenticate, authorize(UserRole.ADMIN),upload.single("image"), this.update.bind(this));
     this.router.delete("/communities/:id",         authenticate, authorize(UserRole.ADMIN),                        this.delete.bind(this));
     this.router.post("/communities/:id/join",      authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.join.bind(this));
@@ -132,6 +132,42 @@ export class CommunityController {
     }
   }
 
+  private async create(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
+    const { validation, dto } = validateCreateCommunity(
+      {
+        ...(req.body as CreateCommunityInput),
+        ownerId: userId,
+      },
+      req.file
+    );
+
+    if (!validation.valid || !dto) {
+      res.status(HttpStatus.badRequest).json({ success: false, message: validation.message });
+      return;
+    }
+
+    const ctx = IpHelper.buildAuditContext(req,userId);
+    try{
+      const result = await this.communityService.create(dto,ctx);
+      ResponseHelper.send(res, result);
+    }catch(err){
+      this.logger.error(this.constructor.name, CommunityLogMessages.createFailed, err);
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.createFailed
+      });
+    }
+  }
+
   private async getById(req: Request, res: Response): Promise<void> {
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -187,41 +223,7 @@ export class CommunityController {
   }
 
 
-  private async create(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
-
-    const { validation, dto } = validateCreateCommunity(
-      {
-        ...(req.body as CreateCommunityInput),
-        ownerId: userId,
-      },
-      req.file
-    );
-
-    if (!validation.valid || !dto) {
-      res.status(HttpStatus.badRequest).json({ success: false, message: validation.message });
-      return;
-    }
-
-    const ctx = IpHelper.buildAuditContext(req,userId);
-    try{
-      const result = await this.communityService.create(dto,ctx);
-      ResponseHelper.send(res, result);
-    }catch(err){
-      this.logger.error(this.constructor.name, CommunityLogMessages.createFailed, err);
-      res.status(HttpStatus.internalServerError).json({
-        success: false,
-        message: CommunityMessages.createFailed
-      });
-    }
-  }
+  
 
   private async update(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;

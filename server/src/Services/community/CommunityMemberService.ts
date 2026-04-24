@@ -2,6 +2,7 @@ import { CommunityMessages } from '../../Domain/constants/messages/community/Com
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { PaginatedListDto } from '../../Domain/DTOs/common/PaginatedListDto';
 import { CommunityDto } from '../../Domain/DTOs/community/CommunityDto';
+import { CommunityMemberRole } from '../../Domain/DTOs/community/CommunityMemberRole';
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
@@ -57,7 +58,7 @@ export class CommunityMemberService implements ICommunityMemberService {
             ? CommunityMemberStatus.ACTIVE
             : CommunityMemberStatus.PENDING;
 
-    const created = await this.communityMemberRepo.create(userId, communityId, status);
+    const created = await this.communityMemberRepo.create(userId, communityId, CommunityMemberRole.MEMBER, status);
     if (!created) {
         return ServiceResultFactory.fail(
         CommunityMessages.joinFailed,
