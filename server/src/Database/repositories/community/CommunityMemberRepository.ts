@@ -7,12 +7,49 @@ import { CommunityLogMessages } from "../../../Domain/constants/messages/communi
 import { CommunityMember } from "../../../Domain/models/CommunityMember";
 import { CommunityMemberMapper } from "../../../Shared/mappers/community/CommunityMemberMapper";
 
+const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
 export class CommunityMemberRepository implements ICommunityMemberRepository {
   public constructor(
     private readonly db: DbManager,
     private readonly logger: ILoggerService,
   ) {}
+
+  async findCommunityIdsByUserId(page: number, limit: number, userId: number): Promise<{ communityIds: number[]; total: number; }> {
+    const res = await this.db.getReadConnection();
+      if (!res) return { communityIds: [], total: 0 };
+
+    const offset = safeInt((page - 1) * limit);
+    const lim = safeInt(limit);
+
+    try {
+        const [rows] = await res.conn.execute<RowDataPacket[]>(
+         `SELECT community_id
+          FROM community_members
+          WHERE user_id = ? AND status = ?
+          ORDER BY joined_at DESC
+          LIMIT ${lim} OFFSET ${offset}`,
+          [userId, CommunityMemberStatus.ACTIVE]
+        );
+
+        const [cnt] = await res.conn.execute<RowDataPacket[]>(
+          `SELECT COUNT(*) as total
+          FROM community_members
+          WHERE user_id = ? AND status = ?`,
+          [userId, CommunityMemberStatus.ACTIVE]
+        );
+
+        return {
+        communityIds: rows.map((r) => Number(r.community_id)),
+        total: cnt[0]?.total ?? 0,
+        };
+    } catch (err) {
+        this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMyCommunitiesFailed, err);
+        return { communityIds: [], total: 0 };
+    } finally {
+        res.conn.release();
+    }   
+ }
 
   
   async create(userId: number, communityId: number, status: CommunityMemberStatus): Promise<boolean> {

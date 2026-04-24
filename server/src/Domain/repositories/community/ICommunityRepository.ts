@@ -6,6 +6,7 @@ import { CommunityType } from "../../enums/communities/CommunityType";
 
 export interface ICommunityRepository {
   findById(id: number): Promise<Community>;
+  findByIds(ids: number[]): Promise<Community[]>;
   findByName(name: string): Promise<Community>;
   findAll(page: number, limit: number, type?: CommunityType): Promise<{communities:Community[];total:number}>;
   findByUserId(dto:GetCommunitiesByUserIdDto): Promise<{communities:Community[];total:number}>;

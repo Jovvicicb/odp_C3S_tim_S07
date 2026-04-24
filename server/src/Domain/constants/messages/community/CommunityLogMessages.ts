@@ -1,5 +1,6 @@
 export const CommunityLogMessages = {
   // controller
+  getMyCommunitiesFailed: "Get my communities failed",
   getAllFailed: "getAll failed",
   getPublicFailed: "get public failed",
   getByIdFailed: "getById failed",
@@ -13,6 +14,8 @@ export const CommunityLogMessages = {
   findByName: "findByName failed",
   findByUserIdFailed: "findByUserId failed",
   findByUserIdAndCommunityid: "Find community member failed",
+  findByIdsFailed: "Find communities by ids failed",
+  findMyCommunitiesFailed: "Find my communities failed",
   exists: "exists failed",
 
 

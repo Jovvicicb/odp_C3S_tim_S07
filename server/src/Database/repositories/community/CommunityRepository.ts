@@ -34,6 +34,28 @@ export class CommunityRepository implements ICommunityRepository {
     } finally { res.conn.release(); }
   }
 
+  async findByIds(ids: number[]): Promise<Community[]> {
+    const res = await this.db.getReadConnection();
+    if (!res || ids.length === 0) return [];
+
+    try {
+      const placeholders = ids.map(() => "?").join(",");
+
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM communities
+        WHERE id IN (${placeholders})`,
+        ids
+      );
+
+      return rows.map((r) => CommunityMapper.toModel(r));
+    } catch (err) {
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByIdsFailed, err);
+      return [];
+    } finally { res.conn.release(); }
+  }
+
+
   async findByName(name: string): Promise<Community> {
     const res = await this.db.getReadConnection();
     if (!res) return new Community();

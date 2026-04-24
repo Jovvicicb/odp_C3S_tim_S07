@@ -30,42 +30,18 @@ export class CommunityController {
     private readonly communityService: ICommunityService,
     private readonly communityMemberService: ICommunityMemberService,
     private readonly logger: ILoggerService) {
-    this.router.get("/communities", this.getPublic.bind(this));
-    this.router.get("/communities/all",          authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
-    this.router.get("/communities/user/:userId", authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getByUserId.bind(this));
-    this.router.get("/communities/:id",      authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getById.bind(this));
-    this.router.post("/communities",         authenticate, authorize(UserRole.USER), upload.single("image"), this.create.bind(this));
-    this.router.patch("/communities/:id",    authenticate, authorize(UserRole.ADMIN),upload.single("image"), this.update.bind(this));
-    this.router.delete("/communities/:id",   authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
-    this.router.post("/communities/:id/join",      authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.join.bind(this));
-    this.router.delete("/communities/:id/leave",      authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.leave.bind(this));
+    this.router.get("/communities",                                                                                this.getPublic.bind(this));
+    this.router.get("/communities/mine",           authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getMine.bind(this));
+    this.router.get("/communities/all",            authenticate, authorize(UserRole.ADMIN),                        this.getAll.bind(this));
+    this.router.get("/communities/user/:userId",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getByUserId.bind(this));
+    this.router.get("/communities/:id",            authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getById.bind(this));
+    this.router.post("/communities",               authenticate, authorize(UserRole.USER), upload.single("image"), this.create.bind(this));
+    this.router.patch("/communities/:id",          authenticate, authorize(UserRole.ADMIN),upload.single("image"), this.update.bind(this));
+    this.router.delete("/communities/:id",         authenticate, authorize(UserRole.ADMIN),                        this.delete.bind(this));
+    this.router.post("/communities/:id/join",      authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.join.bind(this));
+    this.router.delete("/communities/:id/leave",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.leave.bind(this));
 
-  }
 
-  private async getAll(req: Request, res: Response): Promise<void> {
-    const pageParam   = parseStringValue(req.query.page);
-    const limitParam = parseStringValue(req.query.limit);
-   
-    const { page, limit } = parsePagination(pageParam, limitParam);
-   
-    const paginationValidation  = validatePagination(page,limit);
-    if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
-      return;
-    } 
-
-    try{
-      const result = await this.communityService.getAll(page,limit);
-      ResponseHelper.send(res, result);
-    }catch(err){
-      this.logger.error(this.constructor.name, CommunityLogMessages.getAllFailed, err);
-
-      res.status(HttpStatus.internalServerError).json({
-        success: false,
-        message: CommunityMessages.fetchAllFailed
-      });
-
-    }
   }
 
   private async getPublic(req: Request, res: Response): Promise<void> {
@@ -89,6 +65,68 @@ export class CommunityController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommunityMessages.fetchPublicFailed
+      });
+
+    }
+  }
+
+
+  private async getMine(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
+    const pageParam   = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+   
+    const { page, limit } = parsePagination(pageParam, limitParam);
+   
+    const paginationValidation  = validatePagination(page,limit);
+    if (!paginationValidation .valid) {
+       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+      return;
+    } 
+
+    try{
+      const result = await this.communityMemberService.getMine(page,limit,userId);
+      ResponseHelper.send(res, result);
+    }catch(err){
+      this.logger.error(this.constructor.name, CommunityLogMessages.getMyCommunitiesFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.fetchAllFailed
+      });
+
+    }
+  }
+
+  private async getAll(req: Request, res: Response): Promise<void> {
+    const pageParam   = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+   
+    const { page, limit } = parsePagination(pageParam, limitParam);
+   
+    const paginationValidation  = validatePagination(page,limit);
+    if (!paginationValidation .valid) {
+       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+      return;
+    } 
+
+    try{
+      const result = await this.communityService.getAll(page,limit);
+      ResponseHelper.send(res, result);
+    }catch(err){
+      this.logger.error(this.constructor.name, CommunityLogMessages.getAllFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.fetchMineFailed
       });
 
     }

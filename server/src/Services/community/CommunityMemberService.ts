@@ -1,5 +1,7 @@
 import { CommunityMessages } from '../../Domain/constants/messages/community/CommunityMessages';
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
+import { PaginatedListDto } from '../../Domain/DTOs/common/PaginatedListDto';
+import { CommunityDto } from '../../Domain/DTOs/community/CommunityDto';
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
@@ -7,6 +9,7 @@ import { ICommunityRepository } from "../../Domain/repositories/community/ICommu
 import { ICommunityMemberService } from "../../Domain/services/community/ICommunityMemberService";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
+import { CommunityMapper } from '../../Shared/mappers/community/CommunityMapper';
 
 export class CommunityMemberService implements ICommunityMemberService {
   public constructor(
@@ -114,6 +117,25 @@ export class CommunityMemberService implements ICommunityMemberService {
             ? CommunityMessages.requestCancelled
             : CommunityMessages.left,
         undefined,
+        HttpStatus.ok
+    );
+  }
+  
+  async getMine(page: number, limit: number, userId: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
+      const result = await this.communityMemberRepo.findCommunityIdsByUserId(page,limit,userId);
+
+      const communities =await this.communityRepo.findByIds(result.communityIds);
+
+      const data = new PaginatedListDto(
+        communities.map((c) => CommunityMapper.toDto(c)),
+        result.total,
+        page,
+        limit
+    );
+
+    return ServiceResultFactory.ok(
+        CommunityMessages.fetchMineSuccess,
+        data,
         HttpStatus.ok
     );
   }

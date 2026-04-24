@@ -2,6 +2,7 @@ import { CommunityMemberStatus } from "../../enums/communities/CommunityMemberSt
 import { CommunityMember } from "../../models/CommunityMember";
 
 export interface ICommunityMemberRepository {
+    findCommunityIdsByUserId(page: number, limit: number, userId: number): Promise<{communityIds: number[]; total: number;}>;
     create(userId: number, communityId: number, status: CommunityMemberStatus): Promise<boolean>;
     delete(userId: number, communityId: number): Promise<boolean>;
     findByUserIdAndCommunityId(userId: number, communityId: number): Promise<CommunityMember>;

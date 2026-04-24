@@ -12,10 +12,12 @@ export const CommunityMessages = {
   fetchAllSuccess: "Communities fetched successfully",
   fetchPublicSuccess: "Public communities fetched successfully",
   fetchOneSuccess : "Community fetched successfully",
+  fetchMineSuccess: "My communities fetched successfully",
 
   fetchAllFailed: "Failed to fetch communities",
   fetchPublicFailed: "Failed to fetch public communities",
   fetchOneFailed: "Failed to fetch community",
+  fetchMineFailed: "Failed to fetch my communities",
 
   alreadyMember: "User is already a member of this community",
   requestAlreadySent: "Join request already sent",
