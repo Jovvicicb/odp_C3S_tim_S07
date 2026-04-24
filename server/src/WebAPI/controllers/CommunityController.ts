@@ -5,7 +5,6 @@ import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { upload } from "../../Middlewares/multer/multer";
 import { validateCreateCommunity } from "../validators/community/ValidateCreateCommunity";
-import { GetCommunitiesByUserIdDto } from "../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
 import { parseId } from "../parser/common/ParseId";
 import { validateId } from "../validators/common/ValidateId";
 import { parseStringValue } from "../parser/common/ParseStringValue";
@@ -34,8 +33,7 @@ export class CommunityController {
     this.router.get("/communities/mine",           authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getMine.bind(this));
     this.router.get("/communities/all",            authenticate, authorize(UserRole.ADMIN),                        this.getAll.bind(this));
     this.router.post("/communities",               authenticate, authorize(UserRole.USER), upload.single("image"), this.create.bind(this));
-    this.router.get("/communities/user/:userId",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getByUserId.bind(this));
-    this.router.get("/communities/:id",            authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getById.bind(this));
+    this.router.get("/communities/:id",                                                                            this.getById.bind(this));
     this.router.patch("/communities/:id",          authenticate, authorize(UserRole.ADMIN),upload.single("image"), this.update.bind(this));
     this.router.delete("/communities/:id",         authenticate, authorize(UserRole.ADMIN),                        this.delete.bind(this));
     this.router.post("/communities/:id/join",      authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.join.bind(this));
@@ -132,6 +130,46 @@ export class CommunityController {
     }
   }
 
+  private async getById(req: Request, res: Response): Promise<void> {
+    const idParam = parseStringValue(req.params.id);
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+
+    const id = parseId(idParam);
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const idValidation = validateId(id);
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message,
+      });
+      return;
+    }
+
+    const paginationValidation = validatePagination(page, limit);
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    try {
+      const result = await this.communityService.getById(page, limit, id);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommunityLogMessages.getByIdFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.fetchOneFailed,
+      });
+    }
+  }
+
+
   private async create(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
     if (!userId) {
@@ -168,62 +206,6 @@ export class CommunityController {
     }
   }
 
-  private async getById(req: Request, res: Response): Promise<void> {
-    const idParam = parseStringValue(req.params.id);
-    const id = parseId(idParam);
-    const v = validateId(id);
-
-    if (!v.valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: v.message });
-      return;
-    } 
-    try{
-      const result = await this.communityService.getById(id);
-      ResponseHelper.send(res, result);
-    }catch(err){
-      this.logger.error(this.constructor.name, CommunityLogMessages.getByIdFailed, err);
-
-      res.status(HttpStatus.internalServerError).json({
-        success: false,
-        message: CommunityMessages.fetchOneFailed
-      });
-    }
-  }
-
-  private async getByUserId(req: Request, res: Response): Promise<void> {
-    const userIdParam = parseStringValue(req.params.userId);
-    const pageParam   = parseStringValue(req.query.page);
-    const limitParam = parseStringValue(req.query.limit);
-
-    const userId = parseId(userIdParam);
-    const { page, limit } = parsePagination(pageParam, limitParam);
-
-    const userValidation  = validateId(userId);
-    if (!userValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: userValidation .message });
-      return;
-    } 
-    const paginationValidation  = validatePagination(page,limit);
-    if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
-      return;
-    } 
-    const dto = new GetCommunitiesByUserIdDto(userId,page,limit);
-    try{
-    const result = await this.communityService.getByUserId(dto);
-    ResponseHelper.send(res, result);
-    }catch(err){
-      this.logger.error(this.constructor.name, CommunityLogMessages.getByUserIdFailed, err);
-
-      res.status(HttpStatus.internalServerError).json({
-        success: false,
-        message: CommunityMessages.fetchAllFailed
-      });
-    }
-  }
-
-
-  
 
   private async update(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;

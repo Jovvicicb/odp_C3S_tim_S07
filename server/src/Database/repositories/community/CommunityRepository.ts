@@ -5,7 +5,6 @@ import { CreateCommunityDto } from "../../../Domain/DTOs/community/CreateCommuni
 import { DbManager } from "../../connection/DbConnectionPool";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { CommunityMapper } from "../../../Shared/mappers/community/CommunityMapper";
-import { GetCommunitiesByUserIdDto } from "../../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
 import { UpdateCommunityDto } from "../../../Domain/DTOs/community/UpdateCommunityDto";
 import { CommunityLogMessages } from "../../../Domain/constants/messages/community/CommunityLogMessages";
 import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
@@ -102,35 +101,6 @@ export class CommunityRepository implements ICommunityRepository {
     } catch (err) {
       this.logger.error("CommunityRepository", CommunityLogMessages.findAllFailed, err);
       return {communities : [] ,total:0};
-    } finally { res.conn.release(); }
-  }
-
-  async findByUserId(dto:GetCommunitiesByUserIdDto): Promise<{communities:Community[];total:number}> {
-    const res = await this.db.getReadConnection();
-    if (!res) return {communities:[],total:0};
-    const {userId,page,limit} = dto;
-    const offset = safeInt((page - 1) * limit);
-    const lim = safeInt(limit);
-    try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT * FROM communities
-         WHERE  owner_id = ?
-         ORDER BY created_at DESC
-         LIMIT ${lim} OFFSET ${offset}`,
-        [userId],
-      );
-
-      const [cnt] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT COUNT(*) as total FROM communities WHERE owner_id = ?`,
-        [userId],
-      );
-      return {
-        communities: rows.map((r) => CommunityMapper.toModel(r)),
-        total: cnt[0]?.total ?? 0,
-      };
-    } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.findByUserIdFailed, err);
-      return {communities:[] ,total:0};
     } finally { res.conn.release(); }
   }
 

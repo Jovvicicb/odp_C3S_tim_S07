@@ -16,7 +16,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
     private readonly logger: ILoggerService,
   ) {}
 
-  async findCommunityIdsByUserId(page: number, limit: number, userId: number): Promise<{ communityIds: number[]; total: number; }> {
+  async findCommunityIdsByUserId(page: number, limit: number, userId: number): Promise<{ communityIds: number[]; total: number}> {
     const res = await this.db.getReadConnection();
       if (!res) return { communityIds: [], total: 0 };
 
@@ -47,6 +47,42 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
     } catch (err) {
         this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMyCommunitiesFailed, err);
         return { communityIds: [], total: 0 };
+    } finally {
+        res.conn.release();
+    }   
+ }
+
+ async findUserIdsByCommunityId(page: number, limit: number, communityId: number): Promise<{ usersIds: number[]; total: number}> {
+    const res = await this.db.getReadConnection();
+    if (!res) return { usersIds: [], total: 0 };
+
+    const offset = safeInt((page - 1) * limit);
+    const lim = safeInt(limit);
+
+    try {
+        const [rows] = await res.conn.execute<RowDataPacket[]>(
+         `SELECT user_id
+          FROM community_members
+          WHERE community_id = ? AND status = ?
+          ORDER BY joined_at DESC
+          LIMIT ${lim} OFFSET ${offset}`,
+          [communityId, CommunityMemberStatus.ACTIVE]
+        );
+
+        const [cnt] = await res.conn.execute<RowDataPacket[]>(
+          `SELECT COUNT(*) as total
+          FROM community_members
+          WHERE community_id = ? AND status = ?`,
+          [communityId, CommunityMemberStatus.ACTIVE]
+        );
+
+        return {
+          usersIds: rows.map((r) => Number(r.user_id)),
+          total: cnt[0]?.total ?? 0,
+        };
+    } catch (err) {
+        this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMembersFailed, err);
+        return { usersIds: [], total: 0 };
     } finally {
         res.conn.release();
     }   

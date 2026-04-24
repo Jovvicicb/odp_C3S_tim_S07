@@ -4,7 +4,6 @@ import { CommunityDto } from "../../Domain/DTOs/community/CommunityDto";
 import { CreateCommunityDto } from "../../Domain/DTOs/community/CreateCommunityDto";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { CommunityMapper } from "../../Shared/mappers/community/CommunityMapper";
-import { GetCommunitiesByUserIdDto } from "../../Domain/DTOs/community/GetCommunitiesByUserIdDto";
 import { UpdateCommunityDto } from "../../Domain/DTOs/community/UpdateCommunityDto";
 import { AuditContext } from "../../Domain/types/audits/AuditContext";
 import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
@@ -15,19 +14,20 @@ import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFa
 import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
-import { IUserService } from "../../Domain/services/users/IUserService";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
 import { CommunityMemberRole } from "../../Domain/DTOs/community/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CreateCommunityResponseDto } from "../../Domain/DTOs/community/CreateCommunityResponseDto";
+import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
+import { CommunityDetailsDto } from "../../Domain/DTOs/community/CommunityDetailsDto";
+import { UserMapper } from "../../Shared/mappers/users/UserMapper";
 
 export class CommunityService implements ICommunityService {
   public constructor(
      private readonly communityRepo: ICommunityRepository,
      private readonly communityMemberRepo: ICommunityMemberRepository,
-     private readonly userService: IUserService,
+     private readonly userRepo: IUserRepository,
      private readonly auditHelperService: IAuditHelperService
   ) {}
 
@@ -95,31 +95,43 @@ export class CommunityService implements ICommunityService {
     return ServiceResultFactory.ok(CommunityMessages.created, createdDto, HttpStatus.created);
   }
 
-  async getById(id: number): Promise<ServiceResult<CommunityDto>> {
-    const community = await this.communityRepo.findById(id);
+   async getById(page: number, limit: number, communityId: number): Promise<ServiceResult<CommunityDetailsDto>> {
+    const community = await this.communityRepo.findById(communityId);
     if (community.id === 0) {
-      return ServiceResultFactory.fail<CommunityDto>(CommunityMessages.notFound, HttpStatus.notFound);
+        return ServiceResultFactory.fail(
+            CommunityMessages.notFound,
+            HttpStatus.notFound
+        );
     }
 
-    return ServiceResultFactory.ok(CommunityMessages.fetchOneSuccess, CommunityMapper.toDto(community),HttpStatus.ok);
-  }
-
-  async getByUserId(dto:GetCommunitiesByUserIdDto):  Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
-    const userExists = await this.userService.exists(dto.userId);
-
-    if (!userExists) {
-      return ServiceResultFactory.fail(UserMessages.notFound,HttpStatus.notFound);
+    if (community.type === CommunityType.PRIVATE) {
+      return ServiceResultFactory.fail<CommunityDetailsDto>(
+        CommunityMessages.privateCommunity,
+        HttpStatus.forbidden
+      );
     }
 
-    const items = await this.communityRepo.findByUserId(dto);
+    const membersResult  = await this.communityMemberRepo.findUserIdsByCommunityId(page,limit,communityId);
 
-    const data = new PaginatedListDto(
-      items.communities.map((c) => CommunityMapper.toDto(c)),
-      items.total, 
-      dto.page, 
-      dto.limit
+    const users  = await this.userRepo.findByIds(membersResult.usersIds);
+
+    const members = new PaginatedListDto(
+        users.map((u) => UserMapper.toDto(u)),
+        membersResult.total,
+        page,
+        limit
     );
-    return ServiceResultFactory.ok(CommunityMessages.fetchAllSuccess,data,HttpStatus.ok);
+
+    const data = new CommunityDetailsDto(
+        CommunityMapper.toDto(community),
+        members
+    );
+
+    return ServiceResultFactory.ok(
+        CommunityMessages.fetchOneSuccess,
+        data,
+        HttpStatus.ok
+    );
   }
 
   
