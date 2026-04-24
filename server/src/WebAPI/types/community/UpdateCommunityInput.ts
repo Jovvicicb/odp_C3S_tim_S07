@@ -3,4 +3,5 @@ export type UpdateCommunityInput = {
   description?: string;
   rules?: string;
   type?: string;
+  removeAvatar?: boolean;
 };

@@ -32,6 +32,7 @@ export const CommunityMessages = {
   notMember: "User is not a member of this community",
   ownerCannotLeave: "Community owner cannot leave the community",
   requestCancelled: "Join request cancelled",
+  onlyModeratorCanUpdate: "Only community moderators can update this community",
   
   invalidType:   "Invalid community type",
   nameTaken: "Community name is already taken"

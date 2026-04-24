@@ -142,6 +142,19 @@ export class CommunityService implements ICommunityService {
       return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
     }
 
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(ctx.userId, id);
+    if (
+      membership.id === 0 ||
+      membership.role !== CommunityMemberRole.MODERATOR ||
+      membership.status !== CommunityMemberStatus.ACTIVE
+    ) {
+      return ServiceResultFactory.fail(
+        CommunityMessages.onlyModeratorCanUpdate,
+        HttpStatus.forbidden
+      );
+    }
+
+
     if (dto.name !== undefined) {
       const byName = await this.communityRepo.findByName(dto.name);
       if (byName.id !== 0 && byName.id !== id) {

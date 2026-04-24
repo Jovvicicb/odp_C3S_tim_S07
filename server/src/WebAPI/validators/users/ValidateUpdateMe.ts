@@ -128,7 +128,7 @@ export const validateUpdateMe = (
     dto.profilePicture = file.filename;
   }
 
-   if (input.removeImage === true) {
+  if (input.removeImage === true || String(input.removeImage) === "true") {
     dto.profilePicture = null;
   }
 

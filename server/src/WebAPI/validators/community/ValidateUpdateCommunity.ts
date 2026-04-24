@@ -45,7 +45,7 @@ export const validateUpdateCommunity = (
       };
     }
 
-    dto.description = normalizedDescription;
+    dto.description = normalizedDescription ? normalizedDescription : null;
   }
 
   if (input.rules !== undefined) {
@@ -60,7 +60,7 @@ export const validateUpdateCommunity = (
       };
     }
 
-    dto.rules = normalizedRules;
+    dto.rules = normalizedRules ? normalizedRules : null;
   }
   
   if (input.type !== undefined) {
@@ -103,6 +103,10 @@ export const validateUpdateCommunity = (
     }
 
     dto.avatar = file.filename;
+  }
+
+  if (input.removeAvatar === true || String(input.removeAvatar) === "true") {
+    dto.avatar = null;
   }
 
   if (Object.keys(dto).length === 0) {

@@ -29,12 +29,12 @@ export class CommunityController {
     private readonly communityService: ICommunityService,
     private readonly communityMemberService: ICommunityMemberService,
     private readonly logger: ILoggerService) {
-    this.router.get("/communities",                                                                                this.getPublic.bind(this));
-    this.router.get("/communities/mine",           authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.getMine.bind(this));
-    this.router.get("/communities/all",            authenticate, authorize(UserRole.ADMIN),                        this.getAll.bind(this));
-    this.router.post("/communities",               authenticate, authorize(UserRole.USER), upload.single("image"), this.create.bind(this));
+    this.router.get("/communities",                                                                                                this.getPublic.bind(this));
+    this.router.get("/communities/mine",           authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getMine.bind(this));
+    this.router.get("/communities/all",            authenticate, authorize(UserRole.ADMIN),                                        this.getAll.bind(this));
+    this.router.post("/communities",               authenticate, authorize(UserRole.USER),                 upload.single("image"), this.create.bind(this));
+    this.router.put("/communities/:id",            authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
     this.router.get("/communities/:id",                                                                            this.getById.bind(this));
-    this.router.patch("/communities/:id",          authenticate, authorize(UserRole.ADMIN),upload.single("image"), this.update.bind(this));
     this.router.delete("/communities/:id",         authenticate, authorize(UserRole.ADMIN),                        this.delete.bind(this));
     this.router.post("/communities/:id/join",      authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.join.bind(this));
     this.router.delete("/communities/:id/leave",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.leave.bind(this));
