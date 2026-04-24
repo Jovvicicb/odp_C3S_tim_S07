@@ -154,7 +154,6 @@ export class CommunityService implements ICommunityService {
       );
     }
 
-
     if (dto.name !== undefined) {
       const byName = await this.communityRepo.findByName(dto.name);
       if (byName.id !== 0 && byName.id !== id) {
@@ -176,6 +175,18 @@ export class CommunityService implements ICommunityService {
     const existing = await this.communityRepo.findById(id);
     if (existing.id === 0) {
       return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
+    }
+
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(ctx.userId, id);
+    if (
+      membership.id === 0 ||
+      membership.role !== CommunityMemberRole.MODERATOR ||
+      membership.status !== CommunityMemberStatus.ACTIVE
+    ) {
+      return ServiceResultFactory.fail(
+        CommunityMessages.onlyModeratorCanDelete,
+        HttpStatus.forbidden
+      );
     }
 
     const isDeleted  = await this.communityRepo.delete(id);
