@@ -4,5 +4,6 @@ export type UpdateMeInput = {
   email?: string;
   password?: string;
   bio?: string;
+  removeImage?: boolean;
 };
 

@@ -9,11 +9,11 @@ export class CommunityMapper {
     return new Community(
       row.id,
       row.name,
-      row.description,
-      row.rules,
+      row.description ?? null,
+      row.rules ?? null,
       row.type as CommunityType,
       row.owner_id,
-      row.avatar,
+      row.avatar ?? null,
       new Date(row.created_at),
       new Date(row.updated_at)
     );

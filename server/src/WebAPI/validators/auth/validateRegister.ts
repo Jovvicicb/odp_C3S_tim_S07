@@ -12,9 +12,9 @@ export const validateRegister = (
   file?: Express.Multer.File
 ): ValidateRegisterResult => {
   const normalizedUserName = StringNormalizer.trim(input.username);
-  const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname)??"";
+  const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname);
   const normalizedEmail = StringNormalizer.normalizeEmail(input.email);
-  const normalizedBio = StringNormalizer.trim(input.bio)??"";
+  const normalizedBio = StringNormalizer.trim(input.bio);
 
   if (!normalizedUserName){
     return {
@@ -103,9 +103,9 @@ export const validateRegister = (
       normalizedEmail,
       UserRole.USER,
       input.password,
-      normalizedFullname??"",
-      normalizedBio??"",
-      file?.filename ?? ""
+      normalizedFullname ? normalizedFullname : null,
+      normalizedBio ? normalizedBio : null,
+      file?.filename ?? null
     ),
   };
 };

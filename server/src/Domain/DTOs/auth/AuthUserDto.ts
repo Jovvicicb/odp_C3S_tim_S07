@@ -2,12 +2,8 @@ import { UserRole } from "../../enums/UserRole";
 
 export class AuthUserDto {
   constructor(
-    public id: number       = 0,
-    public username: string = "",
-    public role: UserRole   = UserRole.USER,
-    public fullname:string ="",
-    public bio:string ="",
-    public image:string =""
-
+    public id: number,
+    public username: string,
+    public role: UserRole,
   ) {}
 }

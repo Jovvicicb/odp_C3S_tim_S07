@@ -6,8 +6,8 @@ export class AuthRegisterDto {
     public email: string,
     public role: UserRole,
     public password: string,
-    public fullname: string,
-    public bio: string,
-    public image: string
+    public fullname: string | null,
+    public bio: string | null,
+    public image: string | null
   ) {}
 }

@@ -36,14 +36,14 @@ export const validateUpdateMe = (
   }
 
   if (input.fullname !== undefined) {
-        const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname) ?? "";
+        const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname);
 
         if (normalizedFullname.length > 100) {
             return {
             validation: { valid: false, message: UserValidationMessages.fullnameInvalid },
             };
         }
-        dto.fullname = normalizedFullname;
+        dto.fullname = normalizedFullname ? normalizedFullname : null;
    }
 
 
@@ -93,14 +93,14 @@ export const validateUpdateMe = (
   }
 
   if (input.bio !== undefined) {
-    const normalizedBio = StringNormalizer.trim(input.bio) ?? "";
+    const normalizedBio = StringNormalizer.trim(input.bio);
 
     if (normalizedBio.length > 300) {
         return {
         validation: { valid: false, message: UserValidationMessages.bioTooLong},
         };
     }
-    dto.bio = normalizedBio;
+    dto.bio = normalizedBio ? normalizedBio : null;
   }
 
 
@@ -126,6 +126,10 @@ export const validateUpdateMe = (
     }
 
     dto.profilePicture = file.filename;
+  }
+
+   if (input.removeImage === true) {
+    dto.profilePicture = null;
   }
 
   if (Object.keys(dto).length === 0) {

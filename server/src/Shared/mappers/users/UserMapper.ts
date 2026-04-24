@@ -12,10 +12,12 @@ export class UserMapper {
       row.email,
       row.role as UserRole,
       row.password_hash,
-      row.fullname,
-      row.bio,
-      row.profile_picture,
-      row.is_active
+      row.fullname ?? null,
+      row.bio ?? null,
+      row.profile_picture ?? null,
+      row.is_active,
+      new Date(row.created_at),
+      new Date(row.updated_at)
     );
   }
     
@@ -28,7 +30,9 @@ export class UserMapper {
       user.fullname,
       user.bio,
       user.image,
-      user.isActive
+      user.isActive,
+      user.createdAt,
+      user.updatedAt
     );
   }
 }

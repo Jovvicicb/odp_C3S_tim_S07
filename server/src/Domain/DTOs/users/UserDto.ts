@@ -2,14 +2,15 @@ import { UserRole } from "../../enums/UserRole";
 
 export class UserDto {
   constructor(
-    public id: number       = 0,
-    public username: string = "",
-    public email: string    = "",
-    public role: UserRole   = UserRole.USER,
-    public fullname:string ="",
-    public bio:string="",
-    public image:string="",
-    public isActive: number = 1
-    
+    public id: number,
+    public username: string,
+    public email: string,
+    public role: UserRole,
+    public fullname: string | null,
+    public bio: string | null,
+    public image: string | null,
+    public isActive: number,
+    public createdAt: Date,
+    public updatedAt: Date 
   ) {}
 }

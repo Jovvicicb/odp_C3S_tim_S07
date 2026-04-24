@@ -7,9 +7,11 @@ export class User {
     public email: string     = "",
     public role: UserRole    = UserRole.USER,
     public passwordHash: string = "",
-    public fullname:string ="",
-    public bio:string="",
-    public image:string="",
-    public isActive: number  = 1
+    public fullname: string | null = null,
+    public bio: string | null = null,
+    public image: string | null = null,
+    public isActive: number  = 1,
+    public createdAt: Date = new Date(),
+    public updatedAt: Date = new Date()
   ) {}
 }
