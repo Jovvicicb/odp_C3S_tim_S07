@@ -1,8 +1,9 @@
 import { CommunityValidationMessages } from "../../../Domain/constants/messages/community/CommunityValidationMessages";
 import { CommunityMemberRole } from "../../../Domain/enums/communities/CommunityMemberRole";
+import { ValidateUpdateCommunityMemberRoleResult } from "../../../Domain/types/community/ValidateUpdateCommunityMemberRoleResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
-export const validateUpdateCommunityMemberRole = (role?: string) => {
+export const validateUpdateCommunityMemberRole = (role?: string) : ValidateUpdateCommunityMemberRoleResult => {
   const normalizedRole = StringNormalizer.trim(role).toLowerCase();
 
   if (!normalizedRole) {
@@ -28,9 +29,6 @@ export const validateUpdateCommunityMemberRole = (role?: string) => {
 
   return {
     validation: { valid: true },
-    normalizedRole:
-      normalizedRole === CommunityMemberRole.MODERATOR
-        ? CommunityMemberRole.MODERATOR
-        : CommunityMemberRole.MEMBER,
+    normalizedRole: normalizedRole as CommunityMemberRole,
   };
 };

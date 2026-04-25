@@ -10,7 +10,6 @@ export interface IUserService {
   getAll(dto:GetUsersDto): Promise<ServiceResult<PaginatedListDto<UserDto>>>;
   getById(id: number): Promise<ServiceResult<UserDto>>;
   getByUsername(username:string): Promise<ServiceResult<UserDto>>;
-  deactivate(id: number,ctx:AuditContext): Promise<ServiceResult>;
   exists(id:number):Promise<boolean>;
   update(dto: UpdateMeDto,ctx:AuditContext): Promise<ServiceResult>;
   updateRole(id: number, role: UserRole,ctx:AuditContext): Promise<ServiceResult>;

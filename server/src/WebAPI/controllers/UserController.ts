@@ -15,7 +15,7 @@ import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { UserLogMessages } from "../../Domain/constants/messages/user/UserLogMessages";
 import { validateUsername } from "../validators/users/ValidateUsername";
 import { UpdateMeInput } from "../types/users/UpdateMeInput";
-import { validateUpdateMe } from "../validators/users/ValidateUpdateMe";
+import { validateUpdateMe } from "../validators/users/ValidateUpdateMeResult";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { upload } from "../../Middlewares/multer/multer";
@@ -32,18 +32,15 @@ export class UserController {
     private readonly userFollowService: IUserFollowService,
     private readonly logger: ILoggerService
   ) {
-    this.router.get("/users/all", authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
-    this.router.put("/users/me", authenticate, authorize(UserRole.USER,UserRole.ADMIN), upload.single("image"), this.updateMe.bind(this));
-    this.router.get("/users/search", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.search.bind(this));
-    this.router.get("/users/:id", authenticate, authorize(UserRole.ADMIN), this.getById.bind(this));
-    this.router.patch("/users/:id/deactivate", authenticate, authorize(UserRole.ADMIN), this.deactivate.bind(this));
-    this.router.put("/users/:id/role", authenticate, authorize(UserRole.ADMIN), this.updateRole.bind(this));
-    this.router.post("/users/:id/follow", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.follow.bind(this));
-    this.router.delete("/users/:id/follow", authenticate, authorize(UserRole.USER,UserRole.ADMIN), this.unfollow.bind(this));
-    this.router.get("/users/:id/followers", this.getFollowers.bind(this));
-    this.router.get("/users/:id/following", this.getFollowing.bind(this));
-
-    
+    this.router.get("/users/search",           authenticate, authorize(UserRole.USER,UserRole.ADMIN),                         this.search.bind(this));
+    this.router.get("/users/:id",                                                                                             this.getById.bind(this));
+    this.router.put("/users/me",               authenticate, authorize(UserRole.USER,UserRole.ADMIN), upload.single("image"), this.updateMe.bind(this));
+    this.router.get("/users/:id/followers",                                                                                   this.getFollowers.bind(this));
+    this.router.get("/users/:id/following",                                                                                   this.getFollowing.bind(this));
+    this.router.post("/users/:id/follow",      authenticate, authorize(UserRole.USER,UserRole.ADMIN),                         this.follow.bind(this));
+    this.router.delete("/users/:id/follow",    authenticate, authorize(UserRole.USER,UserRole.ADMIN),                         this.unfollow.bind(this));
+    this.router.get("/users/all",              authenticate, authorize(UserRole.ADMIN),                                       this.getAll.bind(this));
+    this.router.put("/users/:id/role",         authenticate, authorize(UserRole.ADMIN),                                       this.updateRole.bind(this));
 
   }
 
@@ -100,43 +97,6 @@ export class UserController {
     }
   }
 
-  private async deactivate(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
-
-    const idParam = parseStringValue(req.params.id);
-    const id = parseId(idParam);
-    const v = validateId(id);
-  
-    if (!v.valid) {
-      res.status(HttpStatus.badRequest).json({
-         success: false,
-         message: v.message 
-      });
-      return;
-    } 
-
-    const ctx = IpHelper.buildAuditContext(req, userId);
-
-    try{
-      const result = await this.userService.deactivate(id, ctx);
-
-      ResponseHelper.send(res, result);
-    }catch(err){
-       this.logger.error(this.constructor.name, UserLogMessages.deactivateFailed, err);
-
-      res.status(HttpStatus.internalServerError).json({
-        success: false,
-        message: UserMessages.deactivateFailed,
-      });
-    }
-  }
 
   private async search(req: Request, res: Response): Promise<void> {
     const username = parseStringValue(req.query.username);
@@ -229,18 +189,16 @@ export class UserController {
   const { role } = req.body as { role?: string };
   const parsedRole = parseStringValue(role);
 
-  const roleValidation = validateUpdateUserRole(parsedRole);
-  if (!roleValidation.valid) {
-    res.status(HttpStatus.badRequest).json({
-      success: false,
-      message: roleValidation.message
-    });
+  const {validation, normalizedRole} = validateUpdateUserRole(parsedRole);
+  
+  if (!validation.valid || !normalizedRole) {
+    res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
     return;
   }
   
   const ctx = IpHelper.buildAuditContext(req, userId);
   try {
-    const result = await this.userService.updateRole(id, parsedRole as UserRole,ctx);
+    const result = await this.userService.updateRole(id, normalizedRole, ctx);
     ResponseHelper.send(res, result);
   } catch (err) {
     this.logger.error(this.constructor.name, UserLogMessages.updateRoleFailed, err);
@@ -332,12 +290,12 @@ private async getFollowers(req: Request, res: Response): Promise<void> {
 
     const idValidation  = validateId(id);
     if (!idValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: idValidation.message });
+      res.status(HttpStatus.badRequest).json({ success: false, message: idValidation.message });
       return;
     } 
     const paginationValidation  = validatePagination(page,limit);
     if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+      res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
       return;
     } 
     const dto = new GetFollowersDto(id,page,limit);

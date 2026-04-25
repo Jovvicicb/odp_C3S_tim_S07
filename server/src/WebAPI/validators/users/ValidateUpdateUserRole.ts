@@ -1,15 +1,25 @@
 import { UserRole } from "../../../Domain/enums/UserRole";
-import { ValidationResult } from "../../../Domain/types/ValidationResult";
 import { UserValidationMessages } from "../../../Domain/constants/messages/user/UserValidationMessages";
+import { ValidateUpdateRoleResult } from "../../../Domain/types/users/ValidateUpdateRoleResult";
+import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
-export const validateUpdateUserRole = (role?: string): ValidationResult => {
-  if (!role) {
-    return { valid: false, message: UserValidationMessages.roleRequired };
+export const validateUpdateUserRole = (role?: string): ValidateUpdateRoleResult => {
+  const normalizedRole = (StringNormalizer.trim(role)).toLowerCase();
+  
+  if (!normalizedRole) {
+    return {
+        validation: { valid: false, message: UserValidationMessages.roleRequired }
+    };
   }
 
-  if (!Object.values(UserRole).includes(role as UserRole)) {
-    return { valid: false, message: UserValidationMessages.invalidRole };
+  if (!Object.values(UserRole).includes(normalizedRole as UserRole)) {
+    return {
+        validation: { valid: false, message: UserValidationMessages.invalidRole }
+    };
   }
 
-  return { valid: true };
+  return {
+    validation: { valid: true },
+    normalizedRole: normalizedRole === "user" ? UserRole.USER : UserRole.ADMIN
+  };
 };

@@ -1,4 +1,4 @@
-import { AuthValidationMessages } from '../../../Domain/constants/messages/auth/AuthValidationMessages';
+import { UserValidationMessages } from '../../../Domain/constants/messages/user/UserValidationMessages';
 import { ValidateUsernameResult } from '../../../Domain/types/users/ValidateUsernameResult';
 import { StringNormalizer } from '../../../Shared/normalization/StringNormalizer';
 
@@ -9,19 +9,19 @@ export const validateUsername = (
 
   if (!normalizedUserName){
     return {
-      validation: { valid: false, message: AuthValidationMessages.usernameRequired},
+      validation: { valid: false, message: UserValidationMessages.usernameRequired},
     };
   }
 
   if (normalizedUserName.length < 3 || normalizedUserName.length > 40) {
     return {
-      validation: { valid: false, message: AuthValidationMessages.usernameInvalid},
+      validation: { valid: false, message: UserValidationMessages.usernameInvalid},
     };
   }
 
   if (!/^[A-Za-z0-9-]+$/.test(normalizedUserName)) {
      return {
-      validation: { valid: false, message: AuthValidationMessages.usernameInvalid},
+      validation: { valid: false, message: UserValidationMessages.usernameInvalid},
     };
   }
   

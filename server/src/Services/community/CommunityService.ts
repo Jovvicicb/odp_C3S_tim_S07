@@ -54,38 +54,23 @@ export class CommunityService implements ICommunityService {
       limit
     );
 
-    return ServiceResultFactory.ok(CommunityMessages.fetchAllSuccess,data,HttpStatus.ok);
+    return ServiceResultFactory.ok(CommunityMessages.fetchAllSuccess, data, HttpStatus.ok);
   }
 
   async create(dto: CreateCommunityDto,ctx: AuditContext): Promise<ServiceResult<CreateCommunityResponseDto>> {
     const existing = await this.communityRepo.findByName(dto.name);
     if (existing.id !== 0) {
-      return ServiceResultFactory.fail<CreateCommunityResponseDto>(
-        CommunityMessages.nameTaken, 
-        HttpStatus.conflict
-      );
+      return ServiceResultFactory.fail<CreateCommunityResponseDto>(CommunityMessages.nameTaken,  HttpStatus.conflict);
     }
 
     const community = await this.communityRepo.create(dto);
     if (community.id === 0) {
-       return ServiceResultFactory.fail<CreateCommunityResponseDto>(
-        CommunityMessages.createFailed, 
-        HttpStatus.internalServerError
-      );
+       return ServiceResultFactory.fail<CreateCommunityResponseDto>(CommunityMessages.createFailed, HttpStatus.internalServerError);
     }
 
-    const memberCreated = await this.communityMemberRepo.create(
-      dto.ownerId,
-      community.id,
-      CommunityMemberRole.MODERATOR,
-      CommunityMemberStatus.ACTIVE
-    );
-
-    if (!memberCreated) {
-      return ServiceResultFactory.fail<CreateCommunityResponseDto>(
-        CommunityMessages.createFailed,
-        HttpStatus.internalServerError
-      );
+    const communityMemberCreated = await this.communityMemberRepo.create(dto.ownerId, community.id, CommunityMemberRole.MODERATOR, CommunityMemberStatus.ACTIVE);
+    if (!communityMemberCreated) {
+      return ServiceResultFactory.fail<CreateCommunityResponseDto>(CommunityMessages.createFailed, HttpStatus.internalServerError);
     }
     
     const createdDto =  CommunityMapper.toCreateResponseDto(community);
@@ -98,17 +83,11 @@ export class CommunityService implements ICommunityService {
    async getById(page: number, limit: number, communityId: number): Promise<ServiceResult<CommunityDetailsDto>> {
     const community = await this.communityRepo.findById(communityId);
     if (community.id === 0) {
-        return ServiceResultFactory.fail(
-            CommunityMessages.notFound,
-            HttpStatus.notFound
-        );
+        return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
     }
 
     if (community.type === CommunityType.PRIVATE) {
-      return ServiceResultFactory.fail<CommunityDetailsDto>(
-        CommunityMessages.privateCommunity,
-        HttpStatus.forbidden
-      );
+      return ServiceResultFactory.fail<CommunityDetailsDto>(CommunityMessages.privateCommunity, HttpStatus.forbidden);
     }
 
     const membersResult  = await this.communityMemberRepo.findUserIdsByCommunityId(page,limit,communityId);
@@ -127,11 +106,7 @@ export class CommunityService implements ICommunityService {
         members
     );
 
-    return ServiceResultFactory.ok(
-        CommunityMessages.fetchOneSuccess,
-        data,
-        HttpStatus.ok
-    );
+    return ServiceResultFactory.ok(CommunityMessages.fetchOneSuccess, data, HttpStatus.ok);
   }
 
   
@@ -148,10 +123,7 @@ export class CommunityService implements ICommunityService {
       membership.role !== CommunityMemberRole.MODERATOR ||
       membership.status !== CommunityMemberStatus.ACTIVE
     ) {
-      return ServiceResultFactory.fail(
-        CommunityMessages.onlyModeratorCanUpdate,
-        HttpStatus.forbidden
-      );
+      return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanUpdate, HttpStatus.forbidden);
     }
 
     if (dto.name !== undefined) {
@@ -161,13 +133,12 @@ export class CommunityService implements ICommunityService {
       }
     }
     const isUpdated = await this.communityRepo.update(id, dto);
-    
     if (!isUpdated) {
       return ServiceResultFactory.fail(CommunityMessages.updateFailed, HttpStatus.internalServerError);
     }
+
     await this.auditHelperService.safeCreate( new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_UPDATED, AuditDetails.COMMUNITY_UPDATED, ctx.ipAddress));
     
-
     return ServiceResultFactory.ok(CommunityMessages.updated, undefined, HttpStatus.ok);
   }
 
@@ -183,17 +154,13 @@ export class CommunityService implements ICommunityService {
       membership.role !== CommunityMemberRole.MODERATOR ||
       membership.status !== CommunityMemberStatus.ACTIVE
     ) {
-      return ServiceResultFactory.fail(
-        CommunityMessages.onlyModeratorCanDelete,
-        HttpStatus.forbidden
-      );
+      return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanDelete, HttpStatus.forbidden);
     }
 
     const isDeleted  = await this.communityRepo.delete(id);
-    
     if (!isDeleted) {
       return ServiceResultFactory.fail(CommunityMessages.deleteFailed, HttpStatus.internalServerError);
-  }
+    }
 
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.COMMUNITY_DELETED, AuditDetails.COMMUNITY_DELETED, ctx.ipAddress));
     

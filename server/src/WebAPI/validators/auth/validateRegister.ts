@@ -106,6 +106,6 @@ export const validateRegister = (
       normalizedFullname ? normalizedFullname : null,
       normalizedBio ? normalizedBio : null,
       file?.filename ?? null
-    ),
+    )
   };
 };

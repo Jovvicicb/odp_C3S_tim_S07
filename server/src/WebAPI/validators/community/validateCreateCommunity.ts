@@ -14,7 +14,7 @@ export const validateCreateCommunity = (
   const normalizedRules = StringNormalizer.trim(input.rules);
   const normalizedType = (StringNormalizer.trim(input.type) || "public").toLowerCase();
 
-    if (!normalizedName) {
+  if (!normalizedName) {
     return {
       validation: { valid: false, message: CommunityValidationMessages.nameRequired },
     };

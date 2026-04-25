@@ -54,22 +54,6 @@ export class UserService implements IUserService {
     }
 
     return ServiceResultFactory.ok(UserMessages.fetchOneSuccess,UserMapper.toDto(user),HttpStatus.ok);
-    }
-
-  async deactivate(id: number,ctx:AuditContext): Promise<ServiceResult> {
-    const exists = await this.userRepo.exists(id);
-
-    if (!exists) {
-      return ServiceResultFactory.fail(UserMessages.notFound,HttpStatus.notFound);
-    }
-    const ok = await this.userRepo.deactivate(id);
-      if (!ok) {
-        return ServiceResultFactory.fail(UserMessages.deactivateFailed, HttpStatus.internalServerError);
-      }
-
-    await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId,AuditActions.USER_DEACTIVATED,AuditDetails.USER_DEACTIVATED,ctx.ipAddress));
-
-    return ServiceResultFactory.ok( UserMessages.deactivated,undefined, HttpStatus.ok);
   }
 
   async update(dto: UpdateMeDto,ctx:AuditContext): Promise<ServiceResult> {

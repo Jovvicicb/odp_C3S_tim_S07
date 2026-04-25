@@ -6,6 +6,6 @@ export class StringNormalizer{
         return (value ?? "").trim().replace(/\s+/g, " ");
     }
     public static normalizeEmail(value?:string):string{
-        return (value ?? "").trim().toLocaleLowerCase();
+        return (value ?? "").trim().toLowerCase().replace(/\s+/g, "");
     }
 }

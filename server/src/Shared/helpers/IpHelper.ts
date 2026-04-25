@@ -3,12 +3,17 @@ import { AuditContext } from "../../Domain/types/audits/AuditContext";
 
 export class IpHelper {
   public static getRawIp(req: Request): string {
-    return (
-      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
-      req.socket.remoteAddress ||
-      req.ip ||
-      ""
-    );
+    const forwarded = req.headers["x-forwarded-for"];
+
+    if (Array.isArray(forwarded)) {
+      return forwarded[0];
+    }
+
+    if (typeof forwarded === "string") {
+      return forwarded.split(",")[0].trim();
+    }
+
+    return req.ip || req.socket.remoteAddress || "";
   }
 
   public static normalize(ip: string): string {

@@ -30,34 +30,21 @@ export class CommunityMemberService implements ICommunityMemberService {
   async join(communityId: number, userId: number): Promise<ServiceResult> {
     const community = await this.communityRepo.findById(communityId);
     if (community.id === 0){
-        return ServiceResultFactory.fail(
-            CommunityMessages.notFound,
-            HttpStatus.notFound
-        );
+        return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
     } 
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(userId, communityId);
-
     if (membership.id !== 0) {
         if (membership.status === CommunityMemberStatus.ACTIVE) {
-        return ServiceResultFactory.fail(
-            CommunityMessages.alreadyMember,
-            HttpStatus.conflict
-        );
+            return ServiceResultFactory.fail(CommunityMessages.alreadyMember, HttpStatus.conflict);
         }
 
         if (membership.status === CommunityMemberStatus.PENDING) {
-        return ServiceResultFactory.fail(
-            CommunityMessages.requestAlreadySent,
-            HttpStatus.conflict
-        );
+            return ServiceResultFactory.fail(CommunityMessages.requestAlreadySent, HttpStatus.conflict);
         }
 
         if (membership.status === CommunityMemberStatus.BANNED) {
-        return ServiceResultFactory.fail(
-            CommunityMessages.bannedFromCommunity,
-            HttpStatus.forbidden
-        );
+            return ServiceResultFactory.fail(CommunityMessages.bannedFromCommunity, HttpStatus.forbidden);
         }
     }
     
@@ -67,10 +54,7 @@ export class CommunityMemberService implements ICommunityMemberService {
 
     const created = await this.communityMemberRepo.create(userId, communityId, CommunityMemberRole.MEMBER, status);
     if (!created) {
-        return ServiceResultFactory.fail(
-        CommunityMessages.joinFailed,
-        HttpStatus.internalServerError
-        );
+        return ServiceResultFactory.fail(CommunityMessages.joinFailed, HttpStatus.internalServerError);
     }
     return ServiceResultFactory.ok(
         status === CommunityMemberStatus.ACTIVE
@@ -84,41 +68,25 @@ export class CommunityMemberService implements ICommunityMemberService {
   async leave(communityId: number, userId: number): Promise<ServiceResult> {
     const community = await this.communityRepo.findById(communityId);
     if (community.id === 0){
-        return ServiceResultFactory.fail(
-            CommunityMessages.notFound,
-            HttpStatus.notFound
-        );
+        return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
     } 
 
     if (community.ownerId === userId){
-        return ServiceResultFactory.fail(
-            CommunityMessages.ownerCannotLeave,
-            HttpStatus.badRequest
-        );
+        return ServiceResultFactory.fail(CommunityMessages.ownerCannotLeave, HttpStatus.badRequest);
     } 
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(userId, communityId);
-
     if (membership.id === 0) {
-        return ServiceResultFactory.fail(
-            CommunityMessages.notMember,
-            HttpStatus.notFound
-        );
+        return ServiceResultFactory.fail(CommunityMessages.notMember, HttpStatus.notFound);
     }
 
     if (membership.status === CommunityMemberStatus.BANNED) {
-        return ServiceResultFactory.fail(
-            CommunityMessages.notMember,
-            HttpStatus.notFound
-        );
+        return ServiceResultFactory.fail(CommunityMessages.notMember, HttpStatus.notFound);
     }
     
     const deleted = await this.communityMemberRepo.delete(userId, communityId);
     if (!deleted) {
-        return ServiceResultFactory.fail(
-        CommunityMessages.leaveFailed,
-        HttpStatus.internalServerError
-        );
+        return ServiceResultFactory.fail(CommunityMessages.leaveFailed, HttpStatus.internalServerError);
     }
     return ServiceResultFactory.ok(
         membership.status === CommunityMemberStatus.PENDING
@@ -141,11 +109,7 @@ export class CommunityMemberService implements ICommunityMemberService {
         limit
     );
 
-    return ServiceResultFactory.ok(
-        CommunityMessages.fetchMineSuccess,
-        data,
-        HttpStatus.ok
-    );
+    return ServiceResultFactory.ok(CommunityMessages.fetchMineSuccess, data, HttpStatus.ok);
   }
 
   async updateMemberRole(communityId: number, targetUserId: number, role: CommunityMemberRole, ctx: AuditContext): Promise<ServiceResult> {

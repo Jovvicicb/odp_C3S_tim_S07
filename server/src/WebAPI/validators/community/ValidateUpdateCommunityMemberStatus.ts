@@ -1,8 +1,9 @@
 import { CommunityValidationMessages } from "../../../Domain/constants/messages/community/CommunityValidationMessages";
 import { CommunityMemberStatusAction } from "../../../Domain/enums/communities/CommunityMemberStatusAction";
+import { ValidateUpdateCommunityMemberStatusResult } from "../../../Domain/types/community/ValidateUpdateCommunityMemberStatusResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
-export const validateUpdateCommunityMemberStatus = (action?: string) => {
+export const validateUpdateCommunityMemberStatus = (action?: string) : ValidateUpdateCommunityMemberStatusResult => {
   const normalizedAction = StringNormalizer.trim(action).toLowerCase();
 
   if (!normalizedAction) {
@@ -28,9 +29,6 @@ export const validateUpdateCommunityMemberStatus = (action?: string) => {
 
   return {
     validation: { valid: true },
-    normalizedAction:
-      normalizedAction === CommunityMemberStatusAction.ACCEPT
-        ? CommunityMemberStatusAction.ACCEPT
-        : CommunityMemberStatusAction.DENY,
+    normalizedAction: normalizedAction as CommunityMemberStatusAction,
   };
 };

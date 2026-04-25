@@ -34,7 +34,7 @@ export class CommunityController {
     this.router.get("/communities",                                                                                                              this.getPublic.bind(this));
     this.router.get("/communities/mine",                         authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getMine.bind(this));
     this.router.get("/communities/all",                          authenticate, authorize(UserRole.ADMIN),                                        this.getAll.bind(this));
-    this.router.post("/communities",                             authenticate, authorize(UserRole.USER),                 upload.single("image"), this.create.bind(this));
+    this.router.post("/communities",                             authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
     this.router.get("/communities/:id",                                                                                                          this.getById.bind(this));
     this.router.put("/communities/:id",                          authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
     this.router.delete("/communities/:id",                       authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
@@ -43,10 +43,6 @@ export class CommunityController {
     this.router.patch("/communities/:id/members/:userId/role",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.updateMemberRole.bind(this));
     this.router.patch("/communities/:id/members/:userId/status", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.updateMemberStatus.bind(this));
     this.router.delete("/communities/:id/members/:userId",       authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeMember.bind(this));
-
-
-
-
   }
 
   private async getPublic(req: Request, res: Response): Promise<void> {
@@ -55,14 +51,14 @@ export class CommunityController {
    
     const { page, limit } = parsePagination(pageParam, limitParam);
    
-    const paginationValidation  = validatePagination(page,limit);
+    const paginationValidation  = validatePagination(page, limit);
     if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
       return;
     } 
 
     try{
-      const result = await this.communityService.getPublic(page,limit);
+      const result = await this.communityService.getPublic(page, limit);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.getPublicFailed, err);
@@ -91,9 +87,9 @@ export class CommunityController {
    
     const { page, limit } = parsePagination(pageParam, limitParam);
    
-    const paginationValidation  = validatePagination(page,limit);
+    const paginationValidation  = validatePagination(page, limit);
     if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
       return;
     } 
 
@@ -105,7 +101,7 @@ export class CommunityController {
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
-        message: CommunityMessages.fetchAllFailed
+        message: CommunityMessages.fetchMineFailed
       });
 
     }
@@ -117,21 +113,21 @@ export class CommunityController {
    
     const { page, limit } = parsePagination(pageParam, limitParam);
    
-    const paginationValidation  = validatePagination(page,limit);
+    const paginationValidation  = validatePagination(page, limit);
     if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
       return;
     } 
 
     try{
-      const result = await this.communityService.getAll(page,limit);
+      const result = await this.communityService.getAll(page, limit);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.getAllFailed, err);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
-        message: CommunityMessages.fetchMineFailed
+        message: CommunityMessages.fetchAllFailed
       });
 
     }
@@ -243,7 +239,7 @@ export class CommunityController {
 
     const ctx = IpHelper.buildAuditContext(req,userId);
     try{
-      const result = await this.communityService.update(id, dto,ctx);
+      const result = await this.communityService.update(id, dto, ctx);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name,CommunityLogMessages.updateFailed, err);
@@ -388,9 +384,8 @@ private async updateMemberRole(req: Request, res: Response): Promise<void> {
   }
 
   const { role } = req.body as { role?: string };
-  const parsedRole = parseStringValue(role);
 
-  const {validation, normalizedRole} = validateUpdateCommunityMemberRole(parsedRole);
+  const {validation, normalizedRole} = validateUpdateCommunityMemberRole(role);
 
   if (!validation.valid || !normalizedRole) {
     res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
@@ -419,8 +414,8 @@ private async updateMemberStatus(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const communityidParam = parseStringValue(req.params.id);
-  const communityId = parseId(communityidParam);
+  const communityIdParam = parseStringValue(req.params.id);
+  const communityId = parseId(communityIdParam);
 
   const communityIdValidation = validateId(communityId);
   if (!communityIdValidation.valid) {

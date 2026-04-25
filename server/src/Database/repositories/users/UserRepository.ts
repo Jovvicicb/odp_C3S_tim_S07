@@ -156,20 +156,6 @@ async findByUsername(username: string): Promise<User> {
   }
 }
 
-  async deactivate(id: number): Promise<boolean> {
-    const res = await this.db.getWriteConnection();
-    if (!res) return false;
-    try {
-      const [result] = await res.conn.execute<ResultSetHeader>(
-        `UPDATE users SET is_active = 0 WHERE id = ?`, [id]
-      );
-      return result.affectedRows > 0;
-    } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.deactivateFailed, err);
-      return false;
-    } finally { res.conn.release(); }
-  }
-
   async exists(id: number): Promise<boolean> {
     const res = await this.db.getReadConnection();
     if (!res) return false;

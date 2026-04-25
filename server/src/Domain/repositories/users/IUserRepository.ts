@@ -11,7 +11,6 @@ export interface IUserRepository {
   findAll(dto:GetUsersDto):Promise<{users:User[];total:number}>;
   create(user: User): Promise<User>;
   update(userId: number, dto: UpdateMeDto): Promise<boolean>;
-  deactivate(id: number): Promise<boolean>;
   exists(id: number): Promise<boolean>;
   updateRole(id: number, role: UserRole): Promise<boolean>;
 }
