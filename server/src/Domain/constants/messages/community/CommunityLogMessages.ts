@@ -7,6 +7,7 @@ export const CommunityLogMessages = {
   getByUserIdFailed: "getByUserId failed",
   joinFailed: "Join community failed",
   leaveFailed: "Leave community failed",
+  removeMemberFailed: "Failed to remove member",
 
   // repository
   findAllFailed: "findAll failed",

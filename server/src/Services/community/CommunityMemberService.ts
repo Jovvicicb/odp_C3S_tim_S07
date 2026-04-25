@@ -243,4 +243,46 @@ export class CommunityMemberService implements ICommunityMemberService {
     return ServiceResultFactory.ok(CommunityMessages.joinRequestDenied, undefined, HttpStatus.ok);
   }
 
+  async removeMember(communityId: number, targetUserId: number, ctx: AuditContext): Promise<ServiceResult> {
+    const community = await this.communityRepo.findById(communityId);
+    if (community.id === 0){
+        return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
+    } 
+
+    const requesterId = ctx.userId;
+    const requesterMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, communityId);
+    if (
+        requesterMembership.id === 0 ||
+        requesterMembership.role !== CommunityMemberRole.MODERATOR ||
+        requesterMembership.status !== CommunityMemberStatus.ACTIVE
+    ) {
+        return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanRemoveMember, HttpStatus.forbidden);
+    }
+
+    const targetMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(targetUserId, communityId);
+    if(targetMembership.id === 0){
+        return ServiceResultFactory.fail(CommunityMessages.memberNotFound, HttpStatus.notFound);
+    }
+
+    if (community.ownerId === targetUserId) {
+        return ServiceResultFactory.fail(CommunityMessages.ownerCannotBeRemoved, HttpStatus.badRequest);
+    }
+
+
+    if (requesterId === targetUserId) {
+        return ServiceResultFactory.fail(CommunityMessages.cannotRemoveYourself, HttpStatus.badRequest);
+    }
+
+    const deleted = await this.communityMemberRepo.delete(targetUserId, communityId);
+    if(!deleted){
+        return ServiceResultFactory.fail(CommunityMessages.removeMemberFailed, HttpStatus.internalServerError);
+    }
+
+    await this.auditHelperService.safeCreate( new CreateAuditDto(
+        requesterId, AuditActions.COMMUNITY_MEMBER_REMOVED, AuditDetails.COMMUNITY_MEMBER_REMOVED, ctx.ipAddress)
+    );
+    
+    return ServiceResultFactory.ok(CommunityMessages.memberRemoved, undefined, HttpStatus.ok);
+  }
+
 }

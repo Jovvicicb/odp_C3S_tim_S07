@@ -11,4 +11,5 @@ export interface ICommunityMemberService {
   getMine(page: number, limit: number, userId: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
   updateMemberRole(communityId: number, targetUserId: number, role: CommunityMemberRole, ctx: AuditContext): Promise<ServiceResult>;
   updateMemberStatus(communityId: number, targetUserId: number, action: CommunityMemberStatusAction, ctx: AuditContext): Promise<ServiceResult>;
+  removeMember(communityId: number, targetUserId: number, ctx: AuditContext): Promise<ServiceResult>;
 }

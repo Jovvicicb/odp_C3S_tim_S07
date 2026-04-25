@@ -15,7 +15,8 @@ export const AuditDetails = {
   COMMUNITY_UPDATED: "Community updated",
   COMMUNITY_MEMBER_ROLE_UPDATED: "Community member role updated",
   COMMUNITY_JOIN_REQUEST_ACCEPTED: "Community join request accepted",
- COMMUNITY_JOIN_REQUEST_DENIED: "Community join request denied",
+  COMMUNITY_JOIN_REQUEST_DENIED: "Community join request denied",
+  COMMUNITY_MEMBER_REMOVED: "Community member removed",
 } as const;
 
 

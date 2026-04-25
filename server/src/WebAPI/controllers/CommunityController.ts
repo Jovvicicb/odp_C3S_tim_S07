@@ -42,6 +42,8 @@ export class CommunityController {
     this.router.delete("/communities/:id/leave",                 authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.leave.bind(this));
     this.router.patch("/communities/:id/members/:userId/role",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.updateMemberRole.bind(this));
     this.router.patch("/communities/:id/members/:userId/status", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.updateMemberStatus.bind(this));
+    this.router.delete("/communities/:id/members/:userId",       authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeMember.bind(this));
+
 
 
 
@@ -454,6 +456,46 @@ private async updateMemberStatus(req: Request, res: Response): Promise<void> {
     res.status(HttpStatus.internalServerError).json({
       success: false,
       message: CommunityMessages.updateMemberStatusFailed,
+    });
+  }
+}
+
+
+private async removeMember(req: Request, res: Response): Promise<void> {
+  const requesterId  = req.user?.id;
+  if (!requesterId) {
+    res.status(HttpStatus.unauthorized).json({success: false, message: UserMessages.unauthorized});
+    return;
+  }
+
+  const communityidParam = parseStringValue(req.params.id);
+  const communityId = parseId(communityidParam);
+
+  const communityIdValidation = validateId(communityId);
+  if (!communityIdValidation.valid) {
+    res.status(HttpStatus.badRequest).json({success: false, message: communityIdValidation.message,});
+    return;
+  }
+
+  const targetUserIdParam = parseStringValue(req.params.userId);
+  const targetUserId = parseId(targetUserIdParam);
+
+  const targetUserIdValidation = validateId(targetUserId);
+  if (!targetUserIdValidation.valid) {
+    res.status(HttpStatus.badRequest).json({success: false, message: targetUserIdValidation.message,});
+    return;
+  }
+
+  const ctx = IpHelper.buildAuditContext(req, requesterId);
+  try {
+    const result = await this.communityMemberService.removeMember(communityId, targetUserId, ctx);
+    ResponseHelper.send(res, result);
+  } catch (err) {
+    this.logger.error(this.constructor.name, CommunityLogMessages.removeMemberFailed, err);
+
+    res.status(HttpStatus.internalServerError).json({
+      success: false,
+      message: CommunityMessages.removeMemberFailed,
     });
   }
 }
