@@ -21,6 +21,7 @@ import { CommunityLogMessages } from "../../Domain/constants/messages/community/
 import { IpHelper } from "../../Shared/helpers/IpHelper";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { ICommunityMemberService } from "../../Domain/services/community/ICommunityMemberService";
+import { validateUpdateCommunityMemberRole } from "../validators/community/ValidateUpdateCommunityMemberRole";
 
 export class CommunityController {
   private readonly router = Router();
@@ -36,8 +37,10 @@ export class CommunityController {
     this.router.get("/communities/:id",                                                                                            this.getById.bind(this));
     this.router.put("/communities/:id",            authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
     this.router.delete("/communities/:id",         authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
-    this.router.post("/communities/:id/join",      authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.join.bind(this));
-    this.router.delete("/communities/:id/leave",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),         this.leave.bind(this));
+    this.router.post("/communities/:id/join",      authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.join.bind(this));
+    this.router.delete("/communities/:id/leave",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.leave.bind(this));
+    this.router.patch("/communities/:id/members/:userId/role", authenticate, authorize(UserRole.ADMIN, UserRole.USER),             this.updateMemberRole.bind(this));
+
 
   }
 
@@ -351,6 +354,60 @@ private async leave(req: Request, res: Response): Promise<void> {
     });
   }
 }
+
+
+
+private async updateMemberRole(req: Request, res: Response): Promise<void> {
+  const requesterId  = req.user?.id;
+  if (!requesterId) {
+    res.status(HttpStatus.unauthorized).json({success: false, message: UserMessages.unauthorized});
+    return;
+  }
+
+  const communityidParam = parseStringValue(req.params.id);
+  const communityId = parseId(communityidParam);
+
+  const communityIdValidation = validateId(communityId);
+  if (!communityIdValidation.valid) {
+    res.status(HttpStatus.badRequest).json({success: false, message: communityIdValidation.message,});
+    return;
+  }
+
+  const targetUserIdParam = parseStringValue(req.params.userId);
+  const targetUserId = parseId(targetUserIdParam);
+
+  const targetUserIdValidation = validateId(targetUserId);
+  if (!targetUserIdValidation.valid) {
+    res.status(HttpStatus.badRequest).json({success: false, message: targetUserIdValidation.message,});
+    return;
+  }
+
+  const { role} = req.body as { role?: string };
+  const parsedRole = parseStringValue(role);
+
+  const {validation, normalizedRole} = validateUpdateCommunityMemberRole(parsedRole);
+
+  if (!validation.valid || !normalizedRole) {
+    res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
+    return;
+  }
+
+  const ctx = IpHelper.buildAuditContext(req, requesterId);
+  try {
+    const result = await this.communityMemberService.updateMemberRole(communityId, targetUserId, normalizedRole, ctx);
+    ResponseHelper.send(res, result);
+  } catch (err) {
+    this.logger.error(this.constructor.name, CommunityLogMessages.updateMemberRoleFailed, err);
+
+    res.status(HttpStatus.internalServerError).json({
+      success: false,
+      message: CommunityMessages.updateMemberRoleFailed,
+    });
+  }
+}
+
+
+
 
   public getRouter(): Router { return this.router; }
 }

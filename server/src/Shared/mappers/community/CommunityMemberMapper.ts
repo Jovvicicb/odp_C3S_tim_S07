@@ -1,6 +1,6 @@
 import { RowDataPacket } from "mysql2";
 import { CommunityMember } from "../../../Domain/models/CommunityMember";
-import { CommunityMemberRole } from "../../../Domain/DTOs/community/CommunityMemberRole";
+import { CommunityMemberRole } from "../../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../../Domain/enums/communities/CommunityMemberStatus";
 
 export class CommunityMemberMapper {

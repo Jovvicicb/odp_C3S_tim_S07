@@ -6,7 +6,7 @@ import { CommunityMemberStatus } from "../../../Domain/enums/communities/Communi
 import { CommunityLogMessages } from "../../../Domain/constants/messages/community/CommunityLogMessages";
 import { CommunityMember } from "../../../Domain/models/CommunityMember";
 import { CommunityMemberMapper } from "../../../Shared/mappers/community/CommunityMemberMapper";
-import { CommunityMemberRole } from "../../../Domain/DTOs/community/CommunityMemberRole";
+import { CommunityMemberRole } from "../../../Domain/enums/communities/CommunityMemberRole";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -102,6 +102,26 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
       return result.affectedRows > 0;
     } catch (err) {
       this.logger.error("CommunityMemberRepository", CommunityLogMessages.createFailed, err);
+      return false;
+    } finally { 
+      res.conn.release(); 
+    }
+  }
+
+  async updateRole(userId: number, communityId: number, role: CommunityMemberRole): Promise<boolean> {
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
+    try {
+       const [result] = await res.conn.execute<ResultSetHeader>(
+          `UPDATE community_members
+          SET role = ?
+          WHERE user_id = ? AND community_id = ?`,
+          [role, userId, communityId]
+        );
+
+      return result.affectedRows > 0;
+    } catch (err) {
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.updateMemberRoleFailed, err);
       return false;
     } finally { 
       res.conn.release(); 

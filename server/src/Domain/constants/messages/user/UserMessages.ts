@@ -1,6 +1,6 @@
 export const UserMessages = {
   notFound: "User not found",
-  invalidId: "Invalid user ID",
+  invalidId: "Invalid ID",
 
   fetchAllSuccess: "Users fetched successfully",
   followersFetchedSuccess: "Followers fetched successfully",

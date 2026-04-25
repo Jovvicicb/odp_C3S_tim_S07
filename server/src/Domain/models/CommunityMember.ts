@@ -1,4 +1,4 @@
-import { CommunityMemberRole } from "../DTOs/community/CommunityMemberRole";
+import { CommunityMemberRole } from "../enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../enums/communities/CommunityMemberStatus";
 
 export class CommunityMember {

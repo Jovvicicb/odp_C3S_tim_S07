@@ -48,7 +48,7 @@ const authService   = new AuthService(userRepo,auditHelperService);
 const userService   = new UserService(userRepo,auditHelperService);
 const communityService = new CommunityService(communityRepo,communityMemberRepo,userRepo,auditHelperService);
 const userFollowService   = new UserFollowService(userFollowRepo,userRepo,userService);
-const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo);
+const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo,auditHelperService);
 
 
 // Express

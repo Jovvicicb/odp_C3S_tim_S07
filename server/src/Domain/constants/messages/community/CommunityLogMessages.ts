@@ -18,6 +18,7 @@ export const CommunityLogMessages = {
   findMyCommunitiesFailed: "Find my communities failed",
   findMembersFailed: "Find community members failed",
   exists: "exists failed",
+  updateMemberRoleFailed: "Update community member role failed",
 
 
   

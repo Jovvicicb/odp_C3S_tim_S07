@@ -13,6 +13,7 @@ export const AuditDetails = {
   COMMUNITY_CREATED: "Community created",
   COMMUNITY_DELETED: "Community deleted",
   COMMUNITY_UPDATED: "Community updated",
+  COMMUNITY_MEMBER_ROLE_UPDATED: "Community member role updated"
 } as const;
 
 

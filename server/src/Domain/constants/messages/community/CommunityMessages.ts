@@ -34,7 +34,16 @@ export const CommunityMessages = {
   requestCancelled: "Join request cancelled",
   onlyModeratorCanUpdate: "Only community moderators can update this community",
   onlyModeratorCanDelete: "Only community moderators can delete this community",
-  
+
+  onlyModeratorCanChangeMemberRole: "Only community moderators can change member roles",
+  memberNotFound: "Community member not found",
+  memberNotActive: "Only active members can have their role changed",
+  ownerRoleCannotBeChanged: "Community owner role cannot be changed",
+  cannotChangeOwnMemberRole: "You cannot change your own community role",
+  memberRoleAlreadySet: "Community member already has this role",
+  memberRoleUpdated: "Community member role updated successfully",
+  updateMemberRoleFailed: "Failed to update community member role",
+    
   invalidType:   "Invalid community type",
   nameTaken: "Community name is already taken"
 } as const;

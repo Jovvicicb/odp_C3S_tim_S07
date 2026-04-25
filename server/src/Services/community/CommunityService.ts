@@ -16,7 +16,7 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
-import { CommunityMemberRole } from "../../Domain/DTOs/community/CommunityMemberRole";
+import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CreateCommunityResponseDto } from "../../Domain/DTOs/community/CreateCommunityResponseDto";
 import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";

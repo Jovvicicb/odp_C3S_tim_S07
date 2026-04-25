@@ -5,4 +5,6 @@ export const CommunityValidationMessages = {
   rulesTooLong: "Rules must be at most 500 characters",
   invalidType: "Invalid community type",
   noFieldsToUpdate: "No fields to update",
+  roleRequired: "Role is required",
+  invalidMemberRole: "Invalid community member role",
 } as const;
