@@ -7,4 +7,6 @@ export const CommunityValidationMessages = {
   noFieldsToUpdate: "No fields to update",
   roleRequired: "Role is required",
   invalidMemberRole: "Invalid community member role",
+  statusActionRequired: "Status action (accept / deny) is required",
+  invalidStatusAction: "Invalid status action",
 } as const;

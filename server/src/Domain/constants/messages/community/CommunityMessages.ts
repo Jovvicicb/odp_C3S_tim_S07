@@ -43,6 +43,13 @@ export const CommunityMessages = {
   memberRoleAlreadySet: "Community member already has this role",
   memberRoleUpdated: "Community member role updated successfully",
   updateMemberRoleFailed: "Failed to update community member role",
+
+  onlyModeratorCanChangeMemberStatus: "Only community moderators can process join requests",
+  onlyPendingRequestCanBeProcessed: "Only pending join requests can be processed",
+  joinRequestAccepted: "Join request accepted successfully",
+  joinRequestDenied: "Join request denied successfully",
+  updateMemberStatusFailed: "Failed to update community member status",
+  joinRequestRemovalFailed: "Failed to remove join request",
     
   invalidType:   "Invalid community type",
   nameTaken: "Community name is already taken"

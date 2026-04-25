@@ -6,6 +6,7 @@ import { CreateAuditDto } from '../../Domain/DTOs/audits/CreateAuditDto';
 import { PaginatedListDto } from '../../Domain/DTOs/common/PaginatedListDto';
 import { CommunityDto } from '../../Domain/DTOs/community/CommunityDto';
 import { CommunityMemberRole } from '../../Domain/enums/communities/CommunityMemberRole';
+import { CommunityMemberStatusAction } from '../../Domain/enums/communities/CommunityMemberStatusAction';
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
@@ -154,11 +155,11 @@ export class CommunityMemberService implements ICommunityMemberService {
     } 
 
     const requesterId = ctx.userId;
-    const userMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, communityId);
+    const requesterMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, communityId);
     if (
-        userMembership.id === 0 ||
-        userMembership.role !== CommunityMemberRole.MODERATOR ||
-        userMembership.status !== CommunityMemberStatus.ACTIVE
+        requesterMembership.id === 0 ||
+        requesterMembership.role !== CommunityMemberRole.MODERATOR ||
+        requesterMembership.status !== CommunityMemberStatus.ACTIVE
     ) {
         return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanChangeMemberRole, HttpStatus.forbidden);
     }
@@ -180,8 +181,8 @@ export class CommunityMemberService implements ICommunityMemberService {
         return ServiceResultFactory.ok(CommunityMessages.memberRoleAlreadySet, undefined, HttpStatus.ok);
     }
 
-    const update =await this.communityMemberRepo.updateRole(targetUserId,communityId,role);
-    if(!update){
+    const updated  =await this.communityMemberRepo.updateRole(targetUserId,communityId,role);
+    if(!updated ){
         return ServiceResultFactory.fail(CommunityMessages.updateMemberRoleFailed, HttpStatus.internalServerError);
     }
 
@@ -190,6 +191,56 @@ export class CommunityMemberService implements ICommunityMemberService {
     );
 
     return ServiceResultFactory.ok(CommunityMessages.memberRoleUpdated, undefined, HttpStatus.ok);
+  }
+
+  async updateMemberStatus(communityId: number, targetUserId: number, action: CommunityMemberStatusAction, ctx: AuditContext): Promise<ServiceResult> {
+    const community = await this.communityRepo.findById(communityId);
+    if (community.id === 0){
+        return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
+    } 
+
+    const requesterId = ctx.userId;
+    const requesterMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, communityId);
+    if (
+        requesterMembership.id === 0 ||
+        requesterMembership.role !== CommunityMemberRole.MODERATOR ||
+        requesterMembership.status !== CommunityMemberStatus.ACTIVE
+    ) {
+        return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanChangeMemberStatus, HttpStatus.forbidden);
+    }
+
+    const targetMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(targetUserId, communityId);
+    if(targetMembership.id === 0){
+        return ServiceResultFactory.fail(CommunityMessages.memberNotFound, HttpStatus.notFound);
+    }
+
+    if(targetMembership.status !== CommunityMemberStatus.PENDING){
+        return ServiceResultFactory.fail(CommunityMessages.onlyPendingRequestCanBeProcessed, HttpStatus.conflict);
+    }
+
+    if(action === CommunityMemberStatusAction.ACCEPT){
+        const updated  = await this.communityMemberRepo.updateStatus(targetUserId, communityId, CommunityMemberStatus.ACTIVE);
+        if(!updated){
+            return ServiceResultFactory.fail(CommunityMessages.updateMemberStatusFailed, HttpStatus.internalServerError);
+        }
+
+        await this.auditHelperService.safeCreate( new CreateAuditDto(
+            requesterId, AuditActions.COMMUNITY_JOIN_REQUEST_ACCEPTED, AuditDetails.COMMUNITY_JOIN_REQUEST_ACCEPTED, ctx.ipAddress)
+        );
+
+        return ServiceResultFactory.ok(CommunityMessages.joinRequestAccepted, undefined, HttpStatus.ok);
+    }
+
+    const deleted = await this.communityMemberRepo.delete(targetUserId, communityId);
+    if(!deleted){
+        return ServiceResultFactory.fail(CommunityMessages.joinRequestRemovalFailed, HttpStatus.internalServerError);
+    }
+
+    await this.auditHelperService.safeCreate( new CreateAuditDto(
+        requesterId, AuditActions.COMMUNITY_JOIN_REQUEST_DENIED, AuditDetails.COMMUNITY_JOIN_REQUEST_DENIED, ctx.ipAddress)
+    );
+    
+    return ServiceResultFactory.ok(CommunityMessages.joinRequestDenied, undefined, HttpStatus.ok);
   }
 
 }

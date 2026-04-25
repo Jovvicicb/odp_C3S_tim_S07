@@ -128,6 +128,26 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
     }
   }
 
+  async updateStatus(userId: number, communityId: number, status: CommunityMemberStatus): Promise<boolean> {
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
+    try {
+       const [result] = await res.conn.execute<ResultSetHeader>(
+         `UPDATE community_members
+          SET status = ?
+          WHERE user_id = ? AND community_id = ?`,
+          [status, userId, communityId]
+        );
+
+      return result.affectedRows > 0;
+    } catch (err) {
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.updateMemberStatusFailed, err);
+      return false;
+    } finally { 
+      res.conn.release(); 
+    }
+  }
+
   async delete(userId: number, communityId: number): Promise<boolean> {
     const res = await this.db.getWriteConnection();
     if (!res) return false;
