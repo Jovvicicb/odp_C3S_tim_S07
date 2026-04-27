@@ -26,6 +26,9 @@ import { UserFollowService } from "./Services/users/UserFollowService";
 import { UserFollowRepository } from "./Database/repositories/users/UserFollowRepository";
 import { CommunityMemberRepository } from "./Database/repositories/community/CommunityMemberRepository";
 import { CommunityMemberService } from "./Services/community/CommunityMemberService";
+import { TagRepository } from "./Database/repositories/tags/TagRepository";
+import { TagService } from "./Services/tags/TagService";
+import { TagController } from "./WebAPI/controllers/TagController";
 
 
 export const logger = new ConsoleLoggerService();
@@ -39,6 +42,8 @@ const communityRepo = new CommunityRepository(db, logger);
 const auditRepo = new AuditRepository(db,logger);
 const userFollowRepo = new UserFollowRepository(db,logger);
 const communityMemberRepo = new CommunityMemberRepository(db,logger);
+const tagRepo = new TagRepository(db,logger);
+
 
 
 // Services
@@ -49,6 +54,8 @@ const userService   = new UserService(userRepo,auditHelperService);
 const communityService = new CommunityService(communityRepo,communityMemberRepo,userRepo,auditHelperService);
 const userFollowService   = new UserFollowService(userFollowRepo,userRepo,userService);
 const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo,auditHelperService);
+const tagService = new TagService(tagRepo);
+
 
 
 // Express
@@ -67,6 +74,8 @@ app.use("/api/v1", new AuthController(authService,logger).getRouter());
 app.use("/api/v1", new UserController(userService,userFollowService,logger).getRouter());
 app.use("/api/v1", new CommunityController(communityService,communityMemberService,logger).getRouter());
 app.use("/api/v1", new AuditController(auditService,logger).getRouter());
+app.use("/api/v1", new TagController(tagService,logger).getRouter());
+
 
 app.use(errorHandler);
 
