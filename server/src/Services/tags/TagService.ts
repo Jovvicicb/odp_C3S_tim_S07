@@ -3,6 +3,7 @@ import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetail
 import { TagMessages } from "../../Domain/constants/messages/tags/TagMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
+import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { CreateTagDto } from "../../Domain/DTOs/tags/CreateTagDto";
 import { TagDto } from "../../Domain/DTOs/tags/TagDto";
 import { ITagRepository } from "../../Domain/repositories/tags/ITagRepository";
@@ -50,6 +51,19 @@ export class TagService implements ITagService {
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.TAG_DELETED, AuditDetails.TAG_DELETED, ctx.ipAddress));
 
     return ServiceResultFactory.ok(TagMessages.deleted, undefined, HttpStatus.ok);
+  }
+
+  async getAll(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<TagDto>>> {
+    const result  = await this.tagRepo.findAll(page, limit);
+
+    const data = new PaginatedListDto(
+        result.tags.map((t) => TagMapper.toDto(t)),
+        result.total,
+        page,
+        limit
+    );
+
+    return ServiceResultFactory.ok(TagMessages.fetchAllSuccess, data, HttpStatus.ok);
   }
  
 }

@@ -5,4 +5,6 @@ export const TagMessages = {
   notFound: "Tag not found",
   deleted: "Tag deleted successfully",
   deleteFailed: "Failed to delete tag",
+  fetchAllSuccess: "Tags fetched successfully",
+  fetchAllFailed: "Failed to fetch tags",
 } as const;

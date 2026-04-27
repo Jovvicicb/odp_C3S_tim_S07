@@ -6,4 +6,5 @@ export interface ITagRepository {
     delete(id: number): Promise<boolean>;
     findById(id: number): Promise<Tag>;
     findByName(name: string): Promise<Tag>;
+    findAll(page: number, limit: number): Promise<{ tags: Tag[]; total: number }>;
 }

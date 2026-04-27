@@ -14,6 +14,8 @@ import { parseStringValue } from "../parser/common/ParseStringValue";
 import { parseId } from "../parser/common/ParseId";
 import { validateId } from "../validators/common/ValidateId";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
+import { parsePagination } from "../parser/common/ParsePagination";
+import { validatePagination } from "../validators/common/ValidatePagination";
 
 export class TagController {
   private readonly router = Router();
@@ -22,10 +24,40 @@ export class TagController {
     private readonly tagService: ITagService,
     private readonly logger: ILoggerService
   ) {
+    this.router.get("/tags",                                                 this.getAll.bind(this));
     this.router.post("/tags",       authenticate, authorize(UserRole.ADMIN), this.create.bind(this));
     this.router.delete("/tags/:id", authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
 
   }
+
+
+  private async getAll(req: Request, res: Response): Promise<void> {
+  const pageParam = parseStringValue(req.query.page);
+  const limitParam = parseStringValue(req.query.limit);
+
+  const { page, limit } = parsePagination(pageParam, limitParam);
+
+  const paginationValidation = validatePagination(page, limit);
+  if (!paginationValidation.valid) {
+    res.status(HttpStatus.badRequest).json({
+      success: false,
+      message: paginationValidation.message,
+    });
+    return;
+  }
+
+  try {
+    const result = await this.tagService.getAll(page, limit);
+    ResponseHelper.send(res, result);
+  } catch (err) {
+    this.logger.error(this.constructor.name, TagLogMessages.findAllFailed, err);
+
+    res.status(HttpStatus.internalServerError).json({
+      success: false,
+      message: TagMessages.fetchAllFailed,
+    });
+  }
+}
 
   private async create(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;

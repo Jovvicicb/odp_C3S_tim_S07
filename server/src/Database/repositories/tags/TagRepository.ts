@@ -7,6 +7,7 @@ import { Tag } from "../../../Domain/models/Tag";
 import { TagLogMessages } from "../../../Domain/constants/messages/tags/TagLogMessages";
 import { TagMapper } from "../../../Shared/mappers/tags/TagMapper";
 
+const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
 export class TagRepository implements ITagRepository {
   public constructor(
@@ -14,7 +15,6 @@ export class TagRepository implements ITagRepository {
     private readonly logger: ILoggerService,
   ) {}
 
- 
   async create(dto: CreateTagDto): Promise<Tag> {
     const res = await this.db.getWriteConnection();
     if (!res) return new Tag();
@@ -85,6 +85,32 @@ export class TagRepository implements ITagRepository {
     } catch (err) {
       this.logger.error("TagRepository", TagLogMessages.findByNameFailed, err);
       return new Tag();
+    } finally { res.conn.release(); }
+  }
+
+
+  async findAll(page: number, limit: number): Promise<{ tags: Tag[]; total: number; }> {
+   const res = await this.db.getReadConnection();
+    if (!res) return {tags:[],total: 0};
+
+    const offset = safeInt((page - 1) * limit);
+    const lim = safeInt(limit);
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+       `SELECT * FROM tags ORDER BY name ASC
+        LIMIT ${lim} OFFSET ${offset}`
+    );
+
+    const [cnt] = await res.conn.execute<RowDataPacket[]>(
+      `SELECT COUNT(*) as total FROM tags`
+    );
+
+    return {
+            tags: rows.map((r) => TagMapper.toModel(r)),
+            total: cnt[0]?.total ?? 0};
+    } catch (err) {
+      this.logger.error("TagRepository", TagLogMessages.findAllFailed, err);
+      return {tags : [] ,total:0};
     } finally { res.conn.release(); }
   }
 
