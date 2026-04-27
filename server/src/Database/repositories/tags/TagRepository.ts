@@ -34,8 +34,45 @@ export class TagRepository implements ITagRepository {
     } finally { res.conn.release(); }
   }
 
+  async delete(id: number): Promise<boolean> {
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
+    try {
+      const [result] = await res.conn.execute<ResultSetHeader>(
+        `DELETE FROM tags WHERE id = ?`,
+        [id]
+      );
 
-   async findByName(name: string): Promise<Tag> {
+      return result.affectedRows > 0;
+    } catch (err) {
+      this.logger.error("TagRepository", TagLogMessages.deleteFailed, err);
+      return false;
+    } finally { res.conn.release(); }   
+  }
+
+
+
+  async findById(id: number): Promise<Tag> {
+    const res = await this.db.getReadConnection();
+    if (!res) return new Tag();
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM tags WHERE id = ? LIMIT 1`,
+        [id]
+      );
+
+      return rows.length > 0 ? TagMapper.toModel(rows[0]) : new Tag();
+    } catch (err) {
+      this.logger.error("TagRepository", TagLogMessages.findByIdFailed, err);
+      return new Tag();
+    } finally {
+      res.conn.release();
+    }
+  }
+
+
+  async findByName(name: string): Promise<Tag> {
     const res = await this.db.getReadConnection();
     if (!res) return new Tag();
 

@@ -17,6 +17,10 @@ export const AuditDetails = {
   COMMUNITY_JOIN_REQUEST_ACCEPTED: "Community join request accepted",
   COMMUNITY_JOIN_REQUEST_DENIED: "Community join request denied",
   COMMUNITY_MEMBER_REMOVED: "Community member removed",
+
+  // TAGS
+  TAG_CREATED: "Global tag created",
+  TAG_DELETED: "Global tag deleted",
 } as const;
 
 

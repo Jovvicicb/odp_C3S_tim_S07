@@ -54,7 +54,7 @@ const userService   = new UserService(userRepo,auditHelperService);
 const communityService = new CommunityService(communityRepo,communityMemberRepo,userRepo,auditHelperService);
 const userFollowService   = new UserFollowService(userFollowRepo,userRepo,userService);
 const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo,auditHelperService);
-const tagService = new TagService(tagRepo);
+const tagService = new TagService(tagRepo,auditHelperService);
 
 
 
