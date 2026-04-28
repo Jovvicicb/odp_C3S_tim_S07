@@ -22,6 +22,10 @@ export const AuditActions = {
   TAG_CREATED: "TAG_CREATED",
   TAG_DELETED: "TAG_DELETED",
 
+  //POSTS
+  POST_CREATED: "POST_CREATED",
+
+
 } as const;
 
 

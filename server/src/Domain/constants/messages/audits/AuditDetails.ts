@@ -21,6 +21,12 @@ export const AuditDetails = {
   // TAGS
   TAG_CREATED: "Global tag created",
   TAG_DELETED: "Global tag deleted",
+
+  // POSTS
+  POST_CREATED: "Post created",
+
+
+
 } as const;
 
 
