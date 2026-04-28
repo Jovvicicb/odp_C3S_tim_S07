@@ -24,6 +24,8 @@ export const AuditActions = {
 
   //POSTS
   POST_CREATED: "POST_CREATED",
+  POST_DELETED: "POST_DELETED",
+
 
 
 } as const;

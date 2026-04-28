@@ -3,4 +3,9 @@ export const PostMessages = {
     createFailed: "Failed to create post",
     communityNotFound: "Community not found",
     notMember: "You must be a member of this community",
+
+    notFound: "Post not found",
+    deleted: "Post deleted successfully",
+    deleteFailed: "Failed to delete post",
+    onlyAuthorOrModeratorCanDelete: "Only post author or community moderator can delete this post",
 } as const;

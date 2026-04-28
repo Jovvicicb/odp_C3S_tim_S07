@@ -13,6 +13,9 @@ import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { PostLogMessages } from "../../Domain/constants/messages/posts/PostLogMessages";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
 import { validateCreatePost } from "../validators/posts/ValidateCreatePost";
+import { parseStringValue } from "../parser/common/ParseStringValue";
+import { parseId } from "../parser/common/ParseId";
+import { validateId } from "../validators/common/ValidateId";
 
 export class PostController {
   private readonly router = Router();
@@ -20,7 +23,9 @@ export class PostController {
   public constructor(
     private readonly postService: IPostService,
     private readonly logger: ILoggerService) {
-        this.router.post("/posts", authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
+        this.router.post("/posts",     authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
+        this.router.delete("/posts/:id", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
+
     }
 
 
@@ -59,6 +64,41 @@ export class PostController {
       });
     }
   }
+
+
+  private async delete(req: Request, res: Response): Promise<void> {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HttpStatus.unauthorized).json({
+          success: false,
+          message: UserMessages.unauthorized,
+        });
+        return;
+      }
+  
+      const idParam = parseStringValue(req.params.id);
+      const id = parseId(idParam);
+      const v = validateId(id);
+  
+      if (!v.valid) {
+        res.status(HttpStatus.badRequest).json({ success: false, message: v.message });
+        return;
+      } 
+  
+      const ctx = IpHelper.buildAuditContext(req,userId);
+      try{
+        const result = await this.postService.delete(id,ctx);
+        ResponseHelper.send(res, result);
+      }catch(err){
+        this.logger.error(this.constructor.name, PostLogMessages.deleteFailed, err);
+  
+        res.status(HttpStatus.internalServerError).json({
+          success: false,
+          message: PostMessages.deleteFailed
+        });
+      }
+    }
+
 
 
   public getRouter(): Router { return this.router; }

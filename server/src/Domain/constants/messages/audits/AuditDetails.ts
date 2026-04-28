@@ -24,6 +24,8 @@ export const AuditDetails = {
 
   // POSTS
   POST_CREATED: "Post created",
+  POST_DELETED: "Post deleted",
+
 
 
 

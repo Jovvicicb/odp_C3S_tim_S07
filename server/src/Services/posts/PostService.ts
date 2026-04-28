@@ -5,6 +5,7 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { CreatePostDto } from "../../Domain/DTOs/Posts/CreatePostDto";
 import { PostDto } from "../../Domain/DTOs/Posts/PostDto";
+import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
 import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
@@ -48,4 +49,36 @@ export class PostService implements IPostService {
     return ServiceResultFactory.ok(PostMessages.created, postDto, HttpStatus.created);
   }
 
+
+  async delete(id: number, ctx: AuditContext): Promise<ServiceResult> {
+    const post = await this.postRepo.findById(id);
+    if(post.id === 0){
+        return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+    }
+    const requesterId = ctx.userId;
+
+    const isAuthor = post.authorId === requesterId;
+
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
+    const isModerator =
+        membership.id !== 0 &&
+        membership.role === CommunityMemberRole.MODERATOR &&
+        membership.status === CommunityMemberStatus.ACTIVE;
+
+  if (!isAuthor && !isModerator) {
+    return ServiceResultFactory.fail(
+      PostMessages.onlyAuthorOrModeratorCanDelete,
+      HttpStatus.forbidden
+    );
+  }
+
+    const deleted = await this.postRepo.delete(id);
+    if (!deleted) {
+        return ServiceResultFactory.fail(PostMessages.deleteFailed, HttpStatus.internalServerError);
+    }
+
+    await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.POST_DELETED, AuditDetails.POST_DELETED, ctx.ipAddress));
+
+    return ServiceResultFactory.ok(PostMessages.deleted, undefined, HttpStatus.ok);
+  }
 }
