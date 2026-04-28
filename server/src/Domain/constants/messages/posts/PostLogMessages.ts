@@ -6,6 +6,7 @@ export const PostLogMessages = {
 
   // shared
   createFailed: "Failed to create post",
+  updateFailed: "Update post failed",
   deleteFailed: "Delete post failed",
 
 } as const;

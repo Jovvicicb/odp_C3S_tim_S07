@@ -6,6 +6,7 @@ import { CreatePostDto } from "../../../Domain/DTOs/Posts/CreatePostDto";
 import { Post } from "../../../Domain/models/Post";
 import { PostLogMessages } from "../../../Domain/constants/messages/posts/PostLogMessages";
 import { PostMapper } from "../../../Shared/mappers/posts/PostMapper";
+import { UpdatePostDto } from "../../../Domain/DTOs/Posts/UpdatePostDto";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -65,6 +66,44 @@ async findById(id: number): Promise<Post> {
       return new Post();
     } finally { res.conn.release(); }
   }
+
+
+
+  async update(userId: number, dto: UpdatePostDto): Promise<boolean> {
+  const res = await this.db.getWriteConnection();
+  if (!res) return false;
+
+  try {
+    const fieldMap: Record<string, string> = {
+      title: "title",
+      content: "content",
+      mediaUrl: "media_url",
+    };
+
+    const entries = Object.entries(dto)
+      .filter(([, v]) => v !== undefined)
+      .map(([key, value]) => [fieldMap[key], value] as const)
+      .filter(([column]) => !!column);
+
+    if (entries.length === 0) return false;
+
+    const setClause = entries.map(([column]) => `${column} = ?`).join(", ");
+    const values = entries.map(([, value]) => value);
+
+    const [result] = await res.conn.execute<ResultSetHeader>(
+      `UPDATE posts SET ${setClause} WHERE id = ?`,
+      [...values, userId]
+    );
+
+    return result.affectedRows > 0;
+  } catch (err) {
+    this.logger.error("PostRepository", PostLogMessages.updateFailed, err);
+    return false;
+  } finally {
+    res.conn.release();
+  }
+}
+
 
   async delete(id: number): Promise<boolean> {
     const res = await this.db.getWriteConnection();

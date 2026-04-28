@@ -8,4 +8,6 @@ export const PostValidationMessages = {
   communityIdRequired: "Post communityId is required",
   communityInvalid: "Invalid community ID",
 
+  noFieldsToUpdate: "No fields to update",
+
 } as const;
