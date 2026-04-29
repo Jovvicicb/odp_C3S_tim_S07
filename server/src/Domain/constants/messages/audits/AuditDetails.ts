@@ -26,7 +26,7 @@ export const AuditDetails = {
   POST_CREATED: "Post created",
   POST_DELETED: "Post deleted",
   POST_UPDATED: "Post updated",
-
+  POST_TAG_ADDED: "Tag added to post",
 
 
 

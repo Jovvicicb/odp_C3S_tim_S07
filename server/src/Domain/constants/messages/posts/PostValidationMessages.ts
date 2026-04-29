@@ -10,4 +10,6 @@ export const PostValidationMessages = {
 
   noFieldsToUpdate: "No fields to update",
 
+  invalidTagId: "Invalid tag ID",
+
 } as const;

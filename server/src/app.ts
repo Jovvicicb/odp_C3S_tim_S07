@@ -32,6 +32,7 @@ import { TagController } from "./WebAPI/controllers/TagController";
 import { PostService } from "./Services/posts/PostService";
 import { PostRepository } from "./Database/repositories/posts/PostRepository";
 import { PostController } from "./WebAPI/controllers/PostConntroler";
+import { PostTagRepository } from "./Database/repositories/posts/PostTagRepository";
 
 
 export const logger = new ConsoleLoggerService();
@@ -47,6 +48,8 @@ const userFollowRepo = new UserFollowRepository(db,logger);
 const communityMemberRepo = new CommunityMemberRepository(db,logger);
 const tagRepo = new TagRepository(db,logger);
 const postRepo = new PostRepository(db,logger);
+const postTagRepo = new PostTagRepository(db,logger);
+
 
 
 
@@ -60,7 +63,7 @@ const communityService = new CommunityService(communityRepo,communityMemberRepo,
 const userFollowService   = new UserFollowService(userFollowRepo,userRepo,userService);
 const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo,auditHelperService);
 const tagService = new TagService(tagRepo,auditHelperService);
-const postService = new PostService(postRepo,communityRepo,communityMemberRepo,auditHelperService);
+const postService = new PostService(postRepo,communityRepo,communityMemberRepo,tagRepo,postTagRepo,auditHelperService);
 
 
 

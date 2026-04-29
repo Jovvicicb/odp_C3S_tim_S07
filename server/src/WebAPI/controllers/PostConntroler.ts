@@ -18,6 +18,7 @@ import { parseId } from "../parser/common/ParseId";
 import { validateId } from "../validators/common/ValidateId";
 import { UpdatePostInput } from "../types/posts/UpdatePostInput";
 import { validateUpdatePost } from "../validators/posts/ValidateUpdatePost";
+import { validateAddTag } from "../validators/posts/ValidateAddTag";
 
 export class PostController {
   private readonly router = Router();
@@ -28,6 +29,7 @@ export class PostController {
         this.router.post("/posts",       authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
         this.router.put("/posts/:id",    authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
         this.router.delete("/posts/:id", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
+        this.router.post("/posts/:id/tags",    authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.addTag.bind(this));
 
     }
 
@@ -145,6 +147,46 @@ export class PostController {
       });
     }
   }
+
+  private async addTag(req: Request, res: Response): Promise<void> {
+    const userId  = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({success: false, message: UserMessages.unauthorized});
+      return;
+    }
+  
+    const postIdParam = parseStringValue(req.params.id);
+    const postId = parseId(postIdParam);
+  
+    const postIdValidation = validateId(postId);
+    if (!postIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({success: false, message: postIdValidation.message,});
+      return;
+    }
+  
+    const {validation, tagId} = validateAddTag(
+      req.body as { tagId? : string}
+    );
+  
+    if (!validation.valid || !tagId) {
+      res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
+      return;
+    }
+  
+    const ctx = IpHelper.buildAuditContext(req, userId);
+    try {
+      const result = await this.postService.addTag(postId, tagId, ctx);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, PostLogMessages.addTagFailed, err);
+  
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: PostMessages.addTagFailed,
+      });
+    }
+  }
+  
 
   public getRouter(): Router { return this.router; }
 }

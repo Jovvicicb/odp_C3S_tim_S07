@@ -13,4 +13,10 @@ export const PostMessages = {
     updated: "Post updated successfully",
     updateFailed: "Failed to update post",
     onlyAuthorOrModeratorCanUpdate: "Only post author or community moderator can update this post",
+
+    tagNotFound: "Tag not found",
+    tagAlreadyAdded: "Tag is already added to this post",
+    tagAdded: "Tag added to post successfully",
+    addTagFailed: "Failed to add tag to post",
+    onlyAuthorOrModeratorCanAddTag: "Only post author or community moderator can add tags to this post",
 } as const;
