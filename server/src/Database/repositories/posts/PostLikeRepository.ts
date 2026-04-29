@@ -35,6 +35,27 @@ export class PostLikeRepository implements IPostLikeRepository {
         }
     }
 
+    
+    async delete(userId: number, postId: number): Promise<boolean> {
+        const res = await this.db.getWriteConnection();
+        if(!res) return false;
+
+        try {
+            const [result] = await res.conn.execute<ResultSetHeader>(
+            `DELETE FROM post_likes
+            WHERE user_id = ? AND post_id = ?`,
+            [userId, postId]
+            );
+
+            return result.affectedRows > 0;
+        } catch (err) {
+            this.logger.error("PostLikeRepository", PostLogMessages.unlikeFailed, err);
+            return false;
+        } finally {
+            res.conn.release();
+        }
+    }
+
     async exists(userId: number, postId: number): Promise<boolean> {
         const res = await this.db.getWriteConnection();
         if(!res) return false;

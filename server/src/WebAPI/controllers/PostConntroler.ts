@@ -34,6 +34,7 @@ export class PostController {
         this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
         this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
         this.router.post("/posts/:id/like",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.like.bind(this));
+        this.router.delete("/posts/:id/like",        authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.unlike.bind(this));
         this.router.post("/posts/:id/tags",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.addTag.bind(this));
         this.router.delete("/posts/:id/tags/:tagId", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeTag.bind(this));
     }
@@ -186,6 +187,43 @@ export class PostController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: PostMessages.likeFailed
+      });
+    }
+  }
+
+
+  
+  private async unlike(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
+    const postIdParam = parseStringValue(req.params.id);
+    const postId = parseId(postIdParam);
+    
+    const postIdValidation = validateId(postId);
+    if (!postIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: postIdValidation.message
+      });
+      return;
+    }
+    
+    try {
+      const result = await this.postLikeService.unlike(userId,postId);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, PostLogMessages.unlikeFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: PostMessages.unlikeFailed
       });
     }
   }

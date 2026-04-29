@@ -30,4 +30,8 @@ export const PostMessages = {
     alreadyLiked: "Post is already liked by this user",
     likeFailed: "Failed to like post",
 
+    unliked: "Post unliked successfully",
+    notLiked: "Post is not liked by this user",
+    unlikeFailed: "Failed to unlike post",
+
 } as const;

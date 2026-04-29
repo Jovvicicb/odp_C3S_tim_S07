@@ -56,4 +56,24 @@ export class PostLikeService implements IPostLikeService {
     return ServiceResultFactory.ok(PostMessages.liked, undefined, HttpStatus.ok);
   }
 
+
+  async unlike(userId: number, postId: number): Promise<ServiceResult> {
+    const post = await this.postRepo.findById(postId);
+    if(post.id === 0){
+        return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+    }
+
+    const exists = await this.postLikeRepo.exists(userId,postId)
+    if(!exists){
+        return ServiceResultFactory.fail(PostMessages.notLiked, HttpStatus.notFound);
+    }
+
+    const deleted = await this.postLikeRepo.delete(userId,postId);
+    if (!deleted) {
+        return ServiceResultFactory.fail(PostMessages.unlikeFailed, HttpStatus.internalServerError);
+    }
+
+    return ServiceResultFactory.ok(PostMessages.unliked, undefined, HttpStatus.ok);
+  }
+
 }
