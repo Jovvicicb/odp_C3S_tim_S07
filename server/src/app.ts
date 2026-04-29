@@ -33,6 +33,7 @@ import { PostService } from "./Services/posts/PostService";
 import { PostRepository } from "./Database/repositories/posts/PostRepository";
 import { PostController } from "./WebAPI/controllers/PostConntroler";
 import { PostTagRepository } from "./Database/repositories/posts/PostTagRepository";
+import { PostTagService } from "./Services/posts/PostTagService";
 
 
 export const logger = new ConsoleLoggerService();
@@ -63,7 +64,9 @@ const communityService = new CommunityService(communityRepo,communityMemberRepo,
 const userFollowService   = new UserFollowService(userFollowRepo,userRepo,userService);
 const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo,auditHelperService);
 const tagService = new TagService(tagRepo,auditHelperService);
-const postService = new PostService(postRepo,communityRepo,communityMemberRepo,tagRepo,postTagRepo,auditHelperService);
+const postService = new PostService(postRepo,communityRepo,communityMemberRepo,auditHelperService);
+const postTagService = new PostTagService(postRepo,communityMemberRepo,tagRepo,postTagRepo,auditHelperService);
+
 
 
 
@@ -85,7 +88,7 @@ app.use("/api/v1", new UserController(userService,userFollowService,logger).getR
 app.use("/api/v1", new CommunityController(communityService,communityMemberService,logger).getRouter());
 app.use("/api/v1", new AuditController(auditService,logger).getRouter());
 app.use("/api/v1", new TagController(tagService,logger).getRouter());
-app.use("/api/v1", new PostController(postService,logger).getRouter());
+app.use("/api/v1", new PostController(postService,postTagService,logger).getRouter());
 
 
 

@@ -19,4 +19,10 @@ export const PostMessages = {
     tagAdded: "Tag added to post successfully",
     addTagFailed: "Failed to add tag to post",
     onlyAuthorOrModeratorCanAddTag: "Only post author or community moderator can add tags to this post",
+
+    tagNotAdded: "Tag is not added to this post",
+    tagRemoved: "Tag removed from post successfully",
+    removeTagFailed: "Failed to remove tag from post",
+    onlyAuthorOrModeratorCanRemoveTag: "Only post author or community moderator can remove tags from this post",
+
 } as const;

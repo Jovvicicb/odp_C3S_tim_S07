@@ -11,6 +11,7 @@ export const PostLogMessages = {
   updateFailed: "Update post failed",
   deleteFailed: "Delete post failed",
   addTagFailed: "Add tag to post failed",
+  removeTagFailed: "Remove tag from post failed",
   
   
 

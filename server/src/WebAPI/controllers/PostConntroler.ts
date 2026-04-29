@@ -19,17 +19,21 @@ import { validateId } from "../validators/common/ValidateId";
 import { UpdatePostInput } from "../types/posts/UpdatePostInput";
 import { validateUpdatePost } from "../validators/posts/ValidateUpdatePost";
 import { validateAddTag } from "../validators/posts/ValidateAddTag";
+import { IPostTagService } from "../../Domain/services/posts/IPostTagService";
 
 export class PostController {
   private readonly router = Router();
 
   public constructor(
     private readonly postService: IPostService,
+    private readonly postTagService: IPostTagService,
     private readonly logger: ILoggerService) {
-        this.router.post("/posts",       authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
-        this.router.put("/posts/:id",    authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
-        this.router.delete("/posts/:id", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
-        this.router.post("/posts/:id/tags",    authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.addTag.bind(this));
+        this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
+        this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
+        this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
+        this.router.post("/posts/:id/tags",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.addTag.bind(this));
+        this.router.delete("/posts/:id/tags/:tagId", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeTag.bind(this));
+
 
     }
 
@@ -175,7 +179,7 @@ export class PostController {
   
     const ctx = IpHelper.buildAuditContext(req, userId);
     try {
-      const result = await this.postService.addTag(postId, tagId, ctx);
+      const result = await this.postTagService.addTag(postId, tagId, ctx);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, PostLogMessages.addTagFailed, err);
@@ -186,6 +190,47 @@ export class PostController {
       });
     }
   }
+
+
+  private async removeTag(req: Request, res: Response): Promise<void> {
+    const requesterId  = req.user?.id;
+    if (!requesterId) {
+      res.status(HttpStatus.unauthorized).json({success: false, message: UserMessages.unauthorized});
+      return;
+    }
+  
+    const postIdParam = parseStringValue(req.params.id);
+    const postId = parseId(postIdParam);
+  
+    const postIdValidation = validateId(postId);
+    if (!postIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({success: false, message: postIdValidation.message,});
+      return;
+    }
+  
+    const tagIdParam = parseStringValue(req.params.tagId);
+    const tagId = parseId(tagIdParam);
+  
+    const tagIdValidation = validateId(tagId);
+    if (!tagIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({success: false, message: tagIdValidation.message,});
+      return;
+    }
+  
+    const ctx = IpHelper.buildAuditContext(req, requesterId);
+    try {
+      const result = await this.postTagService.removeTag(postId, tagId, ctx);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, PostLogMessages.removeTagFailed, err);
+  
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: PostMessages.removeTagFailed,
+      });
+    }
+  }
+  
   
 
   public getRouter(): Router { return this.router; }

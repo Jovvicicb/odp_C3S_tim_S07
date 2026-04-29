@@ -1,7 +1,6 @@
 import { AuditActions } from "../../Domain/constants/messages/audits/AuditActions";
 import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
-import { TagMessages } from "../../Domain/constants/messages/tags/TagMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { CreatePostDto } from "../../Domain/DTOs/Posts/CreatePostDto";
@@ -12,8 +11,6 @@ import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityM
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
 import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
 import { IPostRepository } from "../../Domain/repositories/posts/IPostRepository";
-import { IPostTagRepository } from "../../Domain/repositories/posts/IPostTagRepository";
-import { ITagRepository } from "../../Domain/repositories/tags/ITagRepository";
 import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
 import { IPostService } from "../../Domain/services/posts/IPostService";
 import { AuditContext } from "../../Domain/types/audits/AuditContext";
@@ -27,8 +24,6 @@ export class PostService implements IPostService {
     private readonly postRepo: IPostRepository,
     private readonly communityRepo: ICommunityRepository,
     private readonly communityMemberRepo: ICommunityMemberRepository,
-    private readonly tagRepo: ITagRepository,
-    private readonly postTagRepo: IPostTagRepository,
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
@@ -118,50 +113,6 @@ export class PostService implements IPostService {
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.POST_DELETED, AuditDetails.POST_DELETED, ctx.ipAddress));
 
     return ServiceResultFactory.ok(PostMessages.deleted, undefined, HttpStatus.ok);
-  }
-
-
-
-  async addTag(postId: number, tagId: number, ctx: AuditContext): Promise<ServiceResult> {
-    const post = await this.postRepo.findById(postId);
-    if(post.id === 0){
-        return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
-    }
-
-    const tag = await this.tagRepo.findById(tagId);
-    if(tag.id === 0){
-        return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
-    }
-  
-    const requesterId = ctx.userId;
-    const isAuthor = post.authorId === requesterId;
-
-    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
-    const isModerator =
-        membership.id !== 0 &&
-        membership.role === CommunityMemberRole.MODERATOR &&
-        membership.status === CommunityMemberStatus.ACTIVE;
-
-    if (!isAuthor && !isModerator) {
-      return ServiceResultFactory.fail(
-        PostMessages.onlyAuthorOrModeratorCanAddTag,
-        HttpStatus.forbidden
-      );
-    }
-
-    const alreadyExists = await this.postTagRepo.exists(postId,tagId)
-    if(alreadyExists){
-      return ServiceResultFactory.fail(PostMessages.tagAlreadyAdded, HttpStatus.conflict);
-    }
-
-    const created = await this.postTagRepo.create(postId,tagId);
-    if (created.id === 0) {
-        return ServiceResultFactory.fail(PostMessages.addTagFailed, HttpStatus.internalServerError);
-    }
-
-    await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.POST_TAG_ADDED, AuditDetails.POST_TAG_ADDED, ctx.ipAddress));
-
-    return ServiceResultFactory.ok(PostMessages.tagAdded, undefined, HttpStatus.created);
   }
 
 }
