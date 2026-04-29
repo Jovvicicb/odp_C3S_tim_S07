@@ -25,4 +25,9 @@ export const PostMessages = {
     removeTagFailed: "Failed to remove tag from post",
     onlyAuthorOrModeratorCanRemoveTag: "Only post author or community moderator can remove tags from this post",
 
+    cannotLikePost: "You cannot like this post",
+    liked: "Post liked successfully",
+    alreadyLiked: "Post is already liked by this user",
+    likeFailed: "Failed to like post",
+
 } as const;

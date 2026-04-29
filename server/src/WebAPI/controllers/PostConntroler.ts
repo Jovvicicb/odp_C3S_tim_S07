@@ -20,6 +20,7 @@ import { UpdatePostInput } from "../types/posts/UpdatePostInput";
 import { validateUpdatePost } from "../validators/posts/ValidateUpdatePost";
 import { validateAddTag } from "../validators/posts/ValidateAddTag";
 import { IPostTagService } from "../../Domain/services/posts/IPostTagService";
+import { IPostLikeService } from "../../Domain/services/posts/IPostLikeService";
 
 export class PostController {
   private readonly router = Router();
@@ -27,14 +28,14 @@ export class PostController {
   public constructor(
     private readonly postService: IPostService,
     private readonly postTagService: IPostTagService,
+    private readonly postLikeService: IPostLikeService,
     private readonly logger: ILoggerService) {
         this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
         this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
         this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
+        this.router.post("/posts/:id/like",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.like.bind(this));
         this.router.post("/posts/:id/tags",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.addTag.bind(this));
         this.router.delete("/posts/:id/tags/:tagId", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeTag.bind(this));
-
-
     }
 
 
@@ -152,6 +153,44 @@ export class PostController {
     }
   }
 
+
+
+  private async like(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
+    const postIdParam = parseStringValue(req.params.id);
+    const postId = parseId(postIdParam);
+    
+    const postIdValidation = validateId(postId);
+    if (!postIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: postIdValidation.message
+      });
+      return;
+    }
+    
+    try {
+      const result = await this.postLikeService.like(userId,postId);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, PostLogMessages.likeFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: PostMessages.likeFailed
+      });
+    }
+  }
+
+
   private async addTag(req: Request, res: Response): Promise<void> {
     const userId  = req.user?.id;
     if (!userId) {
@@ -230,6 +269,10 @@ export class PostController {
       });
     }
   }
+
+
+
+
   
   
 
