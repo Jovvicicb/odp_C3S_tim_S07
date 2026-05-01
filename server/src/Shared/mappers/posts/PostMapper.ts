@@ -1,6 +1,8 @@
 import { RowDataPacket } from "mysql2";
 import { Post } from "../../../Domain/models/Post";
 import { PostDto } from "../../../Domain/DTOs/Posts/PostDto";
+import { PostTagDto } from "../../../Domain/DTOs/tags/PostTagDto";
+import { PostWithDetailsDto } from "../../../Domain/DTOs/Posts/PostWithDetailsDto";
 
 
 export class PostMapper {
@@ -27,6 +29,23 @@ export class PostMapper {
       community.communityId,
       community.createdAt,
       community.updatedAt
+    );
+  }
+
+
+  public static toWithDetailsDto(post: Post, tags: PostTagDto[], likeCount: number, commentCount: number): PostWithDetailsDto {
+    return new PostWithDetailsDto(
+      post.id,
+      post.title,
+      post.content,
+      post.mediaUrl,
+      post.authorId,
+      post.communityId,
+      post.createdAt,
+      post.updatedAt,
+      tags,
+      likeCount,
+      commentCount
     );
   }
 

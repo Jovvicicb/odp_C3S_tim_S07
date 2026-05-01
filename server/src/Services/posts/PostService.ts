@@ -1,16 +1,27 @@
 import { AuditActions } from "../../Domain/constants/messages/audits/AuditActions";
 import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
+import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
+import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { CreatePostDto } from "../../Domain/DTOs/Posts/CreatePostDto";
+import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommunityDto";
 import { PostDto } from "../../Domain/DTOs/Posts/PostDto";
+import { PostWithDetailsDto } from "../../Domain/DTOs/Posts/PostWithDetailsDto";
 import { UpdatePostDto } from "../../Domain/DTOs/Posts/UpdatePostDto";
+import { PostTagDto } from "../../Domain/DTOs/tags/PostTagDto";
 import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
+import { CommunityType } from "../../Domain/enums/communities/CommunityType";
+import { UserRole } from "../../Domain/enums/UserRole";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
 import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
+import { IPostCommentRepository } from "../../Domain/repositories/posts/IPostCommentRepository";
+import { IPostLikeRepository } from "../../Domain/repositories/posts/IPostLikeRepository";
 import { IPostRepository } from "../../Domain/repositories/posts/IPostRepository";
+import { IPostTagRepository } from "../../Domain/repositories/posts/IPostTagRepository";
+import { ITagRepository } from "../../Domain/repositories/tags/ITagRepository";
 import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
 import { IPostService } from "../../Domain/services/posts/IPostService";
 import { AuditContext } from "../../Domain/types/audits/AuditContext";
@@ -24,6 +35,10 @@ export class PostService implements IPostService {
     private readonly postRepo: IPostRepository,
     private readonly communityRepo: ICommunityRepository,
     private readonly communityMemberRepo: ICommunityMemberRepository,
+    private readonly postTagRepo: IPostTagRepository,
+    private readonly postLikeRepo: IPostLikeRepository,
+    private readonly tagRepo: ITagRepository,
+    private readonly postCommentRepo: IPostCommentRepository,
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
@@ -113,6 +128,74 @@ export class PostService implements IPostService {
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.POST_DELETED, AuditDetails.POST_DELETED, ctx.ipAddress));
 
     return ServiceResultFactory.ok(PostMessages.deleted, undefined, HttpStatus.ok);
+  }
+
+  async getByCommunity(dto: GetPostsByCommunityDto, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<PaginatedListDto<PostWithDetailsDto>>> {
+    const community = await this.communityRepo.findById(dto.communityId);
+    if (community.id === 0) {
+      return ServiceResultFactory.fail<PaginatedListDto<PostWithDetailsDto>>(CommunityMessages.notFound, HttpStatus.notFound);
+    }
+
+    const isAdmin = viewerRole === UserRole.ADMIN;
+
+    const membership = viewerId ? await this.communityMemberRepo.findByUserIdAndCommunityId(viewerId, dto.communityId) : undefined;
+    if (!isAdmin && membership && membership.id !== 0 &&
+      (
+        membership.status === CommunityMemberStatus.BANNED ||
+        membership.status === CommunityMemberStatus.PENDING
+      )
+    ) {
+      return ServiceResultFactory.fail<PaginatedListDto<PostWithDetailsDto>>(PostMessages.communityPostsForbidden, HttpStatus.forbidden);
+    }
+
+    if (community.type === CommunityType.PRIVATE && !isAdmin) {
+      if (!viewerId || !membership || membership.id === 0 || membership.status !== CommunityMemberStatus.ACTIVE) {
+        return ServiceResultFactory.fail<PaginatedListDto<PostWithDetailsDto>>(PostMessages.privateCommunityPostsForbidden, HttpStatus.forbidden);
+      }
+    }
+
+    const result = await this.postRepo.findByCommunity(dto);
+    const postIds = result.posts.map((p) => p.id);
+
+    const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds(postIds);
+
+    const uniqueTagIds = Array.from(
+      new Set(Object.values(tagIdsByPostId).flat())
+    );
+
+    const tags = await this.tagRepo.findByIds(uniqueTagIds);
+
+    const tagsById = tags.reduce<Record<number, PostTagDto>>((acc, tag) => {
+      return {
+        ...acc,
+        [tag.id]: new PostTagDto(tag.id, tag.name),
+      };
+    }, {});
+
+    const likeCounts = await this.postLikeRepo.countByPostIds(postIds);
+    const commentCounts = await this.postCommentRepo.countByPostIds(postIds);
+
+    const items = result.posts.map((post) => {
+      const postTags = (tagIdsByPostId[post.id] ?? [])
+        .map((tagId) => tagsById[tagId])
+        .filter((tag): tag is PostTagDto => tag !== undefined);
+
+      return PostMapper.toWithDetailsDto(
+        post,
+        postTags,
+        likeCounts[post.id] ?? 0,
+        commentCounts[post.id] ?? 0
+      );
+    });
+
+    const data = new PaginatedListDto(
+      items,
+      result.total,
+      dto.page,
+      dto.limit
+    );
+
+    return ServiceResultFactory.ok(PostMessages.postsFetched, data, HttpStatus.ok);
   }
 
 }

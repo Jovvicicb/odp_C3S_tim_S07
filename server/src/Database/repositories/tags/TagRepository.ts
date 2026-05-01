@@ -15,6 +15,29 @@ export class TagRepository implements ITagRepository {
     private readonly logger: ILoggerService,
   ) {}
 
+  async findByIds(ids: number[]): Promise<Tag[]> {
+  const res = await this.db.getReadConnection();
+  if (!res || ids.length === 0) return [];
+
+  const placeholders = ids.map(() => "?").join(",");
+
+  try {
+    const [rows] = await res.conn.execute<RowDataPacket[]>(
+      `SELECT *
+       FROM tags
+       WHERE id IN (${placeholders})`,
+      ids
+    );
+
+    return rows.map((r) => TagMapper.toModel(r));
+  } catch (err) {
+    this.logger.error("TagRepository", TagLogMessages.findByIdsFailed, err);
+    return [];
+  } finally {
+    res.conn.release();
+  }
+}
+
   async create(dto: CreateTagDto): Promise<Tag> {
     const res = await this.db.getWriteConnection();
     if (!res) return new Tag();

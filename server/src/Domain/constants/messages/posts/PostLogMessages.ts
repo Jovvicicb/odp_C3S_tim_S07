@@ -6,6 +6,10 @@ export const PostLogMessages = {
   findByIdFailed: "Find post by id failed",
   findPostTagFailed: "Find post tag failed",
   findLikeFailed: "Find post like failed",
+  findByCommunityFailed : "Find posts by community failed.",
+  findPostTagsFailed : "Find post tags failed.",
+  countLikesFailed : "Count post likes failed.",
+  countCommentsFailed : "Count comments failed.",
 
   // shared
   createFailed: "Failed to create post",

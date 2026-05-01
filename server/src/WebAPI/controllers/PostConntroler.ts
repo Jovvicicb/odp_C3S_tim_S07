@@ -21,6 +21,12 @@ import { validateUpdatePost } from "../validators/posts/ValidateUpdatePost";
 import { validateAddTag } from "../validators/posts/ValidateAddTag";
 import { IPostTagService } from "../../Domain/services/posts/IPostTagService";
 import { IPostLikeService } from "../../Domain/services/posts/IPostLikeService";
+import { parsePagination } from "../parser/common/ParsePagination";
+import { validatePagination } from "../validators/common/ValidatePagination";
+import { PostSortType } from "../../Domain/enums/posts/PostSortType";
+import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommunityDto";
+import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
+import { validatePostSort } from "../validators/posts/ValidatePostSort";
 
 export class PostController {
   private readonly router = Router();
@@ -30,6 +36,7 @@ export class PostController {
     private readonly postTagService: IPostTagService,
     private readonly postLikeService: IPostLikeService,
     private readonly logger: ILoggerService) {
+        this.router.get("/posts/community/:communityId",                                                                             this.getByCommunity.bind(this));
         this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
         this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
         this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
@@ -38,6 +45,59 @@ export class PostController {
         this.router.post("/posts/:id/tags",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.addTag.bind(this));
         this.router.delete("/posts/:id/tags/:tagId", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeTag.bind(this));
     }
+
+
+
+  private async getByCommunity(req: Request, res: Response): Promise<void> {
+    const communityIdParam = parseStringValue(req.params.communityId);
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+    const sortParam = parseStringValue(req.query.sort);
+
+    const communityId = parseId(communityIdParam);
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const communityIdValidation = validateId(communityId);
+    if (!communityIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: communityIdValidation.message,
+      });
+      return;
+    }
+
+    const paginationValidation = validatePagination(page, limit);
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    const sort = validatePostSort(sortParam);
+    
+    const dto = new GetPostsByCommunityDto(
+      communityId,
+      page,
+      limit,
+      sort
+    );
+
+    const viewer = OptionalAuthHelper.getUser(req);
+
+    try {
+      const result = await this.postService.getByCommunity(dto, viewer?.id, viewer?.role);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, PostLogMessages.findByCommunityFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: PostMessages.fetchByCommunityFailed,
+      });
+    }
+  }
 
 
   private async create(req: Request, res: Response): Promise<void> {

@@ -34,4 +34,9 @@ export const PostMessages = {
     notLiked: "Post is not liked by this user",
     unlikeFailed: "Failed to unlike post",
 
+    postsFetched : "Posts fetched successfully.",
+    fetchByCommunityFailed : "Failed to fetch community posts.",
+    communityPostsForbidden : "You cannot view posts from this community.",
+    privateCommunityPostsForbidden : "You cannot view posts from this private community.",
+
 } as const;

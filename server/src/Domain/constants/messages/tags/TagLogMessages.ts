@@ -3,5 +3,6 @@ export const TagLogMessages = {
   findByIdFailed: "Find tag by id failed",
   findByNameFailed: "Find tag by name failed",
   findAllFailed: "Find all tags failed",
+  findByIdsFailed : "Find tags by ids failed.",
   deleteFailed: "Delete tag failed",
 } as const;

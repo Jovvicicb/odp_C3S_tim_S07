@@ -1,10 +1,15 @@
+import { PaginatedListDto } from "../../DTOs/common/PaginatedListDto";
 import { CreatePostDto } from "../../DTOs/Posts/CreatePostDto";
+import { GetPostsByCommunityDto } from "../../DTOs/Posts/GetPostsByCommunityDto";
 import { PostDto } from "../../DTOs/Posts/PostDto";
+import { PostWithDetailsDto } from "../../DTOs/Posts/PostWithDetailsDto";
 import { UpdatePostDto } from "../../DTOs/Posts/UpdatePostDto";
+import { UserRole } from "../../enums/UserRole";
 import { AuditContext } from "../../types/audits/AuditContext";
 import { ServiceResult } from "../../types/service/ServiceResult";
 
 export interface IPostService {
+    getByCommunity(dto: GetPostsByCommunityDto, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<PaginatedListDto<PostWithDetailsDto>>>;
     create(dto: CreatePostDto, ctx:AuditContext): Promise<ServiceResult<PostDto>>;
     update(id: number, dto: UpdatePostDto, ctx: AuditContext): Promise<ServiceResult>;
     delete(id: number, ctx: AuditContext): Promise<ServiceResult>;

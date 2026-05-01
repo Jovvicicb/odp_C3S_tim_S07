@@ -7,6 +7,8 @@ import { Post } from "../../../Domain/models/Post";
 import { PostLogMessages } from "../../../Domain/constants/messages/posts/PostLogMessages";
 import { PostMapper } from "../../../Shared/mappers/posts/PostMapper";
 import { UpdatePostDto } from "../../../Domain/DTOs/Posts/UpdatePostDto";
+import { GetPostsByCommunityDto } from "../../../Domain/DTOs/Posts/GetPostsByCommunityDto";
+import { PostSortType } from "../../../Domain/enums/posts/PostSortType";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -66,10 +68,63 @@ async findById(id: number): Promise<Post> {
       return new Post();
     } finally { res.conn.release(); }
   }
+  
+  async findByCommunity(dto: GetPostsByCommunityDto): Promise<{ posts: Post[]; total: number }> {
+    const res = await this.db.getReadConnection();
+    if (!res) return { posts: [], total: 0 };
+
+    const offset = safeInt((dto.page - 1) * dto.limit);
+    const lim = safeInt(dto.limit);
+
+    const orderByMap: Record<PostSortType, string> = {
+      [PostSortType.NEWEST]: "posts.created_at DESC",
+      [PostSortType.POPULAR]: `
+        (SELECT COUNT(*)
+        FROM post_likes
+        WHERE post_likes.post_id = posts.id) DESC,
+        posts.created_at DESC
+      `,
+      [PostSortType.MOST_COMMENTED]: `
+        (SELECT COUNT(*)
+        FROM comments
+        WHERE comments.post_id = posts.id) DESC,
+        posts.created_at DESC
+      `,
+    };
+
+    const orderByClause = orderByMap[dto.sort] ?? orderByMap[PostSortType.NEWEST];
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM posts
+        WHERE community_id = ?
+        ORDER BY ${orderByClause}
+        LIMIT ${lim} OFFSET ${offset}`,
+        [dto.communityId]
+      );
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total
+        FROM posts
+        WHERE community_id = ?`,
+        [dto.communityId]
+      );
+
+      return {
+        posts: rows.map((r) => PostMapper.toModel(r)),
+        total: cnt[0]?.total ?? 0,
+      };
+    } catch (err) {
+      this.logger.error("PostRepository", PostLogMessages.findByCommunityFailed, err);
+      return { posts: [], total: 0 };
+    } finally {
+      res.conn.release();
+    }
+  }
 
 
-
-  async update(userId: number, dto: UpdatePostDto): Promise<boolean> {
+  async update(postId: number, dto: UpdatePostDto): Promise<boolean> {
   const res = await this.db.getWriteConnection();
   if (!res) return false;
 
@@ -92,7 +147,7 @@ async findById(id: number): Promise<Post> {
 
     const [result] = await res.conn.execute<ResultSetHeader>(
       `UPDATE posts SET ${setClause} WHERE id = ?`,
-      [...values, userId]
+      [...values, postId]
     );
 
     return result.affectedRows > 0;

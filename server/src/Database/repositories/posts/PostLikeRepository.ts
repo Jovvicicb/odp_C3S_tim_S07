@@ -13,6 +13,34 @@ export class PostLikeRepository implements IPostLikeRepository {
         private readonly logger: ILoggerService
     ){}
 
+    async countByPostIds(postIds: number[]): Promise<Record<number, number>> {
+        const res = await this.db.getReadConnection();
+        if (!res || postIds.length === 0) return {};
+
+        const placeholders = postIds.map(() => "?").join(",");
+
+        try {
+            const [rows] = await res.conn.execute<RowDataPacket[]>(
+            `SELECT post_id, COUNT(*) as total
+            FROM post_likes
+            WHERE post_id IN (${placeholders})
+            GROUP BY post_id`,
+            postIds
+            );
+
+            return rows.reduce<Record<number, number>>((acc, row) => {
+            return {
+                ...acc,
+                [Number(row.post_id)]: Number(row.total),
+            };
+            }, {});
+        } catch (err) {
+            this.logger.error("PostLikeRepository", PostLogMessages.countLikesFailed, err);
+            return {};
+        } finally {
+            res.conn.release();
+        }
+    }
 
     async create(userId: number, postId: number): Promise<PostLike> {
         const res = await this.db.getWriteConnection();

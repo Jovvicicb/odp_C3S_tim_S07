@@ -13,6 +13,36 @@ export class PostTagRepository implements IPostTagRepository {
         private readonly logger: ILoggerService
     ){}
 
+    async findTagIdsByPostIds(postIds: number[]): Promise<Record<number, number[]>> {
+        const res = await this.db.getReadConnection();
+        if (!res || postIds.length === 0) return {};
+
+        const placeholders = postIds.map(() => "?").join(",");
+
+        try {
+            const [rows] = await res.conn.execute<RowDataPacket[]>(
+            `SELECT post_id, tag_id
+            FROM post_tags
+            WHERE post_id IN (${placeholders})`,
+            postIds
+            );
+
+            return rows.reduce<Record<number, number[]>>((acc, row) => {
+            const postId = Number(row.post_id);
+            const tagId = Number(row.tag_id);
+
+            return {
+                ...acc,
+                [postId]: [...(acc[postId] ?? []), tagId],
+            };
+            }, {});
+        } catch (err) {
+            this.logger.error("PostTagRepository", PostLogMessages.findPostTagsFailed, err);
+            return {};
+        } finally {
+            res.conn.release();
+        }
+    }
 
     async create(postId: number, tagId: number): Promise<PostTag> {
         const res = await this.db.getWriteConnection();

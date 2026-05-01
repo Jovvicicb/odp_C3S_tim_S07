@@ -36,12 +36,11 @@ import { PostTagRepository } from "./Database/repositories/posts/PostTagReposito
 import { PostTagService } from "./Services/posts/PostTagService";
 import { PostLikeRepository } from "./Database/repositories/posts/PostLikeRepository";
 import { PostLikeService } from "./Services/posts/PostLikeService";
+import { PostCommentRepository } from "./Database/repositories/posts/PostCommentRepository";
 
 
 export const logger = new ConsoleLoggerService();
 export const db     = new DbManager(logger);
-
-
 
 // Repositories
 const userRepo   = new UserRepository(db, logger);
@@ -53,11 +52,7 @@ const tagRepo = new TagRepository(db,logger);
 const postRepo = new PostRepository(db,logger);
 const postTagRepo = new PostTagRepository(db,logger);
 const postLikeRepo = new PostLikeRepository(db,logger);
-
-
-
-
-
+const postCommentRepo = new PostCommentRepository(db,logger);
 
 // Services
 const auditService =new AuditService(auditRepo);
@@ -68,14 +63,9 @@ const communityService = new CommunityService(communityRepo,communityMemberRepo,
 const userFollowService   = new UserFollowService(userFollowRepo,userRepo,userService);
 const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo,auditHelperService);
 const tagService = new TagService(tagRepo,auditHelperService);
-const postService = new PostService(postRepo,communityRepo,communityMemberRepo,auditHelperService);
+const postService = new PostService(postRepo,communityRepo,communityMemberRepo,postTagRepo,postLikeRepo,tagRepo,postCommentRepo,auditHelperService);
 const postTagService = new PostTagService(postRepo,communityMemberRepo,tagRepo,postTagRepo,auditHelperService);
 const postLikeService = new PostLikeService(postRepo,postLikeRepo,communityRepo,communityMemberRepo);
-
-
-
-
-
 
 // Express
 const app = express();
