@@ -29,6 +29,9 @@ export const AuditActions = {
   POST_TAG_ADDED: "POST_TAG_ADDED",
   POST_TAG_REMOVED: "POST_TAG_REMOVED",
 
+  //COMMENTS
+  COMMENT_CREATED: "COMMENT_CREATED",
+
 
 
 } as const;

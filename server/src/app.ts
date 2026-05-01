@@ -37,6 +37,9 @@ import { PostTagService } from "./Services/posts/PostTagService";
 import { PostLikeRepository } from "./Database/repositories/posts/PostLikeRepository";
 import { PostLikeService } from "./Services/posts/PostLikeService";
 import { PostCommentRepository } from "./Database/repositories/posts/PostCommentRepository";
+import { CommentRepository } from "./Database/repositories/comments/CommentRepository";
+import { CommentService } from "./Services/comments/CommentService";
+import { CommentController } from "./WebAPI/controllers/CommentControler";
 
 
 export const logger = new ConsoleLoggerService();
@@ -53,6 +56,8 @@ const postRepo = new PostRepository(db,logger);
 const postTagRepo = new PostTagRepository(db,logger);
 const postLikeRepo = new PostLikeRepository(db,logger);
 const postCommentRepo = new PostCommentRepository(db,logger);
+const commentRepo = new CommentRepository(db,logger);
+
 
 // Services
 const auditService =new AuditService(auditRepo);
@@ -66,6 +71,8 @@ const tagService = new TagService(tagRepo,auditHelperService);
 const postService = new PostService(postRepo,communityRepo,communityMemberRepo,postTagRepo,postLikeRepo,tagRepo,postCommentRepo,userFollowRepo,auditHelperService);
 const postTagService = new PostTagService(postRepo,communityMemberRepo,tagRepo,postTagRepo,auditHelperService);
 const postLikeService = new PostLikeService(postRepo,postLikeRepo,communityRepo,communityMemberRepo);
+const commentService = new CommentService(commentRepo,postRepo,communityRepo,communityMemberRepo,auditHelperService);
+
 
 // Express
 const app = express();
@@ -85,6 +92,8 @@ app.use("/api/v1", new CommunityController(communityService,communityMemberServi
 app.use("/api/v1", new AuditController(auditService,logger).getRouter());
 app.use("/api/v1", new TagController(tagService,logger).getRouter());
 app.use("/api/v1", new PostController(postService,postTagService,postLikeService,logger).getRouter());
+app.use("/api/v1", new CommentController(commentService,logger).getRouter());
+
 
 
 

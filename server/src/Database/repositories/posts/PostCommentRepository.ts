@@ -5,8 +5,6 @@ import { PostLogMessages } from "../../../Domain/constants/messages/posts/PostLo
 import { IPostCommentRepository } from "../../../Domain/repositories/posts/IPostCommentRepository";
 
 
-const safeInt = (n: number): number => Math.max(0, Math.floor(n));
-
 export class PostCommentRepository implements IPostCommentRepository {
     public constructor(
         private readonly db: DbManager,
