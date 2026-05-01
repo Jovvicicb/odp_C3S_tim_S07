@@ -22,6 +22,7 @@ import { IPostLikeRepository } from "../../Domain/repositories/posts/IPostLikeRe
 import { IPostRepository } from "../../Domain/repositories/posts/IPostRepository";
 import { IPostTagRepository } from "../../Domain/repositories/posts/IPostTagRepository";
 import { ITagRepository } from "../../Domain/repositories/tags/ITagRepository";
+import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
 import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
 import { IPostService } from "../../Domain/services/posts/IPostService";
 import { AuditContext } from "../../Domain/types/audits/AuditContext";
@@ -39,6 +40,7 @@ export class PostService implements IPostService {
     private readonly postLikeRepo: IPostLikeRepository,
     private readonly tagRepo: ITagRepository,
     private readonly postCommentRepo: IPostCommentRepository,
+    private readonly userFollowRepo: IUserFollowRepository,
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
@@ -196,6 +198,53 @@ export class PostService implements IPostService {
     );
 
     return ServiceResultFactory.ok(PostMessages.postsFetched, data, HttpStatus.ok);
+  }
+
+
+
+  async getFeed(userId: number, page: number, limit: number): Promise<ServiceResult<PaginatedListDto<PostWithDetailsDto>>> {
+    const activeCommunityIds = await this.communityMemberRepo.findActiveCommunityIdsByUserId(userId);
+    const followingUserIds = await this.userFollowRepo.findFollowingIdsByUserId(userId);
+    const publicCommunityIds = await this.communityRepo.findIdsByType(CommunityType.PUBLIC);
+
+    const result = await this.postRepo.findFeed(page,limit,activeCommunityIds,followingUserIds,publicCommunityIds);
+
+    const postIds = result.posts.map((p) => p.id);
+    
+    const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds(postIds);
+    const uniqueTagIds = Array.from(new Set(Object.values(tagIdsByPostId).flat()));
+    const tags = await this.tagRepo.findByIds(uniqueTagIds);
+    const tagsById = tags.reduce<Record<number, PostTagDto>>((acc, tag) => {
+      return {
+        ...acc,
+        [tag.id]: new PostTagDto(tag.id, tag.name),
+      };
+    }, {});
+
+    const likeCounts = await this.postLikeRepo.countByPostIds(postIds);
+    const commentCounts = await this.postCommentRepo.countByPostIds(postIds);
+
+    const items = result.posts.map((post) => {
+      const postTags = (tagIdsByPostId[post.id] ?? [])
+        .map((tagId) => tagsById[tagId])
+        .filter((tag): tag is PostTagDto => tag !== undefined);
+
+      return PostMapper.toWithDetailsDto(
+        post,
+        postTags,
+        likeCounts[post.id] ?? 0,
+        commentCounts[post.id] ?? 0
+      );
+    });
+
+    const data = new PaginatedListDto(
+      items,
+      result.total,
+      page,
+      limit
+    );
+
+    return ServiceResultFactory.ok(PostMessages.feedFetched, data, HttpStatus.ok);
   }
 
 }

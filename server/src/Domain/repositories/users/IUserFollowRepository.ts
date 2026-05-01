@@ -7,5 +7,6 @@ export interface IUserFollowRepository {
     delete(followerId: number,followingId: number):Promise<boolean>;
     getFollowers(dto: GetFollowersDto):Promise<{followerIds: number[]; total: number}>;
     getFollowing(dto: GetFollowingDto):Promise<{followingIds: number[]; total: number}>;
+    findFollowingIdsByUserId(userId: number): Promise<number[]>;
     exists(followerId: number,followingId: number):Promise<boolean>;
 }

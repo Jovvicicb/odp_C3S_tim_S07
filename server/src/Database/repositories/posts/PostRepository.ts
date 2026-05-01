@@ -124,6 +124,74 @@ async findById(id: number): Promise<Post> {
   }
 
 
+
+  async findFeed(page: number, limit: number, activeCommunityIds: number[], followingUserIds: number[], publicCommunityIds: number[]): Promise<{ posts: Post[]; total: number }> {
+    const res = await this.db.getReadConnection();
+    if (!res) return { posts: [], total: 0 };
+
+    const offset = safeInt((page - 1) * limit);
+    const lim = safeInt(limit);
+
+    const allowedCommunityIdsForFollowedPosts = Array.from(
+      new Set([...activeCommunityIds, ...publicCommunityIds])
+    );
+
+    const whereParts: string[] = [];
+    const values: number[] = [];
+
+    if (activeCommunityIds.length > 0) {
+      const placeholders = activeCommunityIds.map(() => "?").join(",");
+      whereParts.push(`community_id IN (${placeholders})`);
+      values.push(...activeCommunityIds);
+    }
+
+    if (followingUserIds.length > 0 && allowedCommunityIdsForFollowedPosts.length > 0) {
+      const userPlaceholders = followingUserIds.map(() => "?").join(",");
+      const communityPlaceholders = allowedCommunityIdsForFollowedPosts.map(() => "?").join(",");
+
+      whereParts.push(
+        `(author_id IN (${userPlaceholders}) AND community_id IN (${communityPlaceholders}))`
+      );
+
+      values.push(...followingUserIds, ...allowedCommunityIdsForFollowedPosts);
+    }
+
+    if (whereParts.length === 0) {
+      return { posts: [], total: 0 };
+    }
+
+    const whereClause = `WHERE ${whereParts.join(" OR ")}`;
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM posts
+        ${whereClause}
+        ORDER BY created_at DESC
+        LIMIT ${lim} OFFSET ${offset}`,
+        values
+      );
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total
+        FROM posts
+        ${whereClause}`,
+        values
+      );
+
+      return {
+        posts: rows.map((r) => PostMapper.toModel(r)),
+        total: Number(cnt[0]?.total ?? 0),
+      };
+    } catch (err) {
+      this.logger.error("PostRepository", PostLogMessages.findFeedFailed, err);
+      return { posts: [], total: 0 };
+    } finally {
+      res.conn.release();
+    }
+  }
+
+
   async update(postId: number, dto: UpdatePostDto): Promise<boolean> {
   const res = await this.db.getWriteConnection();
   if (!res) return false;

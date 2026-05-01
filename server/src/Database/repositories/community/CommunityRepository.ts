@@ -71,6 +71,27 @@ export class CommunityRepository implements ICommunityRepository {
     } finally { res.conn.release(); }
   }
 
+  async findIdsByType(type: CommunityType): Promise<number[]> {
+    const res = await this.db.getReadConnection();
+    if (!res) return [];
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT id
+        FROM communities
+        WHERE type = ?`,
+        [type]
+      );
+
+      return rows.map((r) => Number(r.id));
+    } catch (err) {
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByIdsFailed, err);
+      return [];
+    } finally {
+      res.conn.release();
+    }
+  }
+
   async findAll(page: number, limit: number, type?: CommunityType): Promise<{communities:Community[];total:number}> {
     const res = await this.db.getReadConnection();
     if (!res) return {communities:[],total: 0};

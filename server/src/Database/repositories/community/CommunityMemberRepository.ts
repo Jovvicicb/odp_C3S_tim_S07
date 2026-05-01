@@ -52,6 +52,27 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
     }   
  }
 
+ async findActiveCommunityIdsByUserId(userId: number): Promise<number[]> {
+  const res = await this.db.getReadConnection();
+  if (!res) return [];
+
+  try {
+    const [rows] = await res.conn.execute<RowDataPacket[]>(
+      `SELECT community_id
+       FROM community_members
+       WHERE user_id = ? AND status = ?`,
+      [userId, CommunityMemberStatus.ACTIVE]
+    );
+
+    return rows.map((r) => Number(r.community_id));
+  } catch (err) {
+    this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMyCommunitiesFailed, err);
+    return [];
+  } finally {
+    res.conn.release();
+  }
+}
+
  async findUserIdsByCommunityId(page: number, limit: number, communityId: number): Promise<{ usersIds: number[]; total: number}> {
     const res = await this.db.getReadConnection();
     if (!res) return { usersIds: [], total: 0 };

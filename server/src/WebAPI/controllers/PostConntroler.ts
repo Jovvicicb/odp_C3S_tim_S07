@@ -37,6 +37,7 @@ export class PostController {
     private readonly postLikeService: IPostLikeService,
     private readonly logger: ILoggerService) {
         this.router.get("/posts/community/:communityId",                                                                             this.getByCommunity.bind(this));
+        this.router.get("/posts/feed",               authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getFeed.bind(this));
         this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
         this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
         this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
@@ -76,7 +77,7 @@ export class PostController {
     }
 
     const sort = validatePostSort(sortParam);
-    
+
     const dto = new GetPostsByCommunityDto(
       communityId,
       page,
@@ -95,6 +96,45 @@ export class PostController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: PostMessages.fetchByCommunityFailed,
+      });
+    }
+  }
+
+
+  private async getFeed(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const paginationValidation = validatePagination(page, limit);
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    try {
+      const result = await this.postService.getFeed(userId, page, limit);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, PostLogMessages.getFeedFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: PostMessages.feedFetchFailed,
       });
     }
   }

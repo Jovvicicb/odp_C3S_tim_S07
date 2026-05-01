@@ -39,4 +39,7 @@ export const PostMessages = {
     communityPostsForbidden : "You cannot view posts from this community.",
     privateCommunityPostsForbidden : "You cannot view posts from this private community.",
 
+     feedFetched : "Feed fetched successfully.",
+     feedFetchFailed : "Failed to fetch feed.",
+
 } as const;
