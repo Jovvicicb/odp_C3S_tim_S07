@@ -6,4 +6,5 @@ export const CommentLogMessages = {
   updateFailed: "Update comment failed",
   likeFailed: "Like comment failed",
   findLikeFailed: "Find comment like failed",
+  unlikeFailed: "Unlike comment failed",
 } as const;

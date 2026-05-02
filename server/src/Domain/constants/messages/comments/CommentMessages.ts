@@ -27,4 +27,8 @@ export const CommentMessages = {
   cannotLikeComment: "You cannot like this comment",
   cannotLikeDeletedComment: "You cannot like a deleted comment",
 
+  unliked: "Comment unliked successfully",
+  unlikeFailed: "Failed to unlike comment",
+  notLiked: "Comment is not liked",
+
 } as const;

@@ -31,7 +31,9 @@ export class CommentController {
     this.router.post("/comments",                    authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.create.bind(this));
     this.router.put("/comments/:id",                 authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.update.bind(this));
     this.router.delete("/comments/:id",              authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.delete.bind(this));
-    this.router.post("/comments/:id/like",       authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.like.bind(this));
+    this.router.post("/comments/:id/like",           authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.like.bind(this));
+    this.router.delete("/comments/:id/like",         authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.unlike.bind(this));
+
   }
 
 
@@ -196,6 +198,43 @@ export class CommentController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommentMessages.likeFailed,
+      });
+    }
+  }
+
+  private async unlike(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
+    const commentIdParam = parseStringValue(req.params.id);
+    const commentId = parseId(commentIdParam);
+
+    const commentIdValidation = validateId(commentId);
+
+    if (!commentIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: commentIdValidation.message,
+      });
+      return;
+    }
+
+    try {
+      const result = await this.commentLikeService.unlike(userId, commentId);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommentLogMessages.unlikeFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommentMessages.unlikeFailed,
       });
     }
   }

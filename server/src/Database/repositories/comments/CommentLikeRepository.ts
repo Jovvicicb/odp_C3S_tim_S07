@@ -39,6 +39,26 @@ export class CommentLikeRepository implements ICommentLikeRepository {
     }
   }
 
+  async delete(userId: number, commentId: number): Promise<boolean> {
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
+
+    try {
+        const [result] = await res.conn.execute<ResultSetHeader>(
+        `DELETE FROM comment_likes
+        WHERE user_id = ? AND comment_id = ?`,
+        [userId, commentId]
+        );
+
+        return result.affectedRows > 0;
+    } catch (err) {
+        this.logger.error("CommentLikeRepository", CommentLogMessages.unlikeFailed, err);
+        return false;
+    } finally {
+        res.conn.release();
+    }
+    }
+
    async exists(userId: number, commentId: number): Promise<boolean> {
     const res = await this.db.getReadConnection();
     if (!res) return false;
