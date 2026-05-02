@@ -17,18 +17,21 @@ import { parseId } from "../parser/common/ParseId";
 import { validateId } from "../validators/common/ValidateId";
 import { validateUpdateComment } from "../validators/comments/ValidateUpdateComment";
 import { UpdateCommentInput } from "../types/comments/UpdateCommentInput";
+import { ICommentLikeService } from "../../Domain/services/comments/ICommentLikeService";
 
 export class CommentController {
   private readonly router = Router();
 
   public constructor(
     private readonly commentService: ICommentService,
+    private readonly commentLikeService: ICommentLikeService,
     private readonly logger: ILoggerService
+    
   ) {
-    this.router.post("/comments",             authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.create.bind(this));
-    this.router.put("/comments/:id",          authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.update.bind(this));
-    this.router.delete("/comments/:id",       authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.delete.bind(this));
-
+    this.router.post("/comments",                    authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.create.bind(this));
+    this.router.put("/comments/:id",                 authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.update.bind(this));
+    this.router.delete("/comments/:id",              authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.delete.bind(this));
+    this.router.post("/comments/:id/like",       authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.like.bind(this));
   }
 
 
@@ -122,44 +125,80 @@ export class CommentController {
   }
 
   private async delete(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
+    const userId = req.user?.id;
 
-  if (!userId) {
-    res.status(HttpStatus.unauthorized).json({
-      success: false,
-      message: UserMessages.unauthorized,
-    });
-    return;
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
+    const idParam = parseStringValue(req.params.id);
+    const id = parseId(idParam);
+
+    const idValidation = validateId(id);
+
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message,
+      });
+      return;
+    }
+
+    const ctx = IpHelper.buildAuditContext(req, userId);
+
+    try {
+      const result = await this.commentService.delete(id, ctx);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommentLogMessages.deleteFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommentMessages.deleteFailed,
+      });
+    }
   }
 
-  const idParam = parseStringValue(req.params.id);
-  const id = parseId(idParam);
+  private async like(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
 
-  const idValidation = validateId(id);
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
 
-  if (!idValidation.valid) {
-    res.status(HttpStatus.badRequest).json({
-      success: false,
-      message: idValidation.message,
-    });
-    return;
+    const commentIdParam = parseStringValue(req.params.id);
+    const commentId = parseId(commentIdParam);
+
+    const commentIdValidation = validateId(commentId);
+
+    if (!commentIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: commentIdValidation.message,
+      });
+      return;
+    }
+
+    try {
+      const result = await this.commentLikeService.like(userId, commentId);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommentLogMessages.likeFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommentMessages.likeFailed,
+      });
+    }
   }
-
-  const ctx = IpHelper.buildAuditContext(req, userId);
-
-  try {
-    const result = await this.commentService.delete(id, ctx);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, CommentLogMessages.deleteFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: CommentMessages.deleteFailed,
-    });
-  }
-}
-
 
   public getRouter(): Router { return this.router; }
 }

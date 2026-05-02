@@ -21,4 +21,10 @@ export const CommentMessages = {
   onlyAuthorCanUpdate: "Only comment author can update this comment",
   cannotUpdateDeleted: "You cannot update a deleted comment",
 
+  liked: "Comment liked successfully",
+  likeFailed: "Failed to like comment",
+  alreadyLiked: "Comment is already liked",
+  cannotLikeComment: "You cannot like this comment",
+  cannotLikeDeletedComment: "You cannot like a deleted comment",
+
 } as const;

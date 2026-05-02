@@ -4,4 +4,6 @@ export const CommentLogMessages = {
   deleteFailed: "Delete comment failed",
   softDeleteFailed: "Soft delete comment failed",
   updateFailed: "Update comment failed",
+  likeFailed: "Like comment failed",
+  findLikeFailed: "Find comment like failed",
 } as const;
