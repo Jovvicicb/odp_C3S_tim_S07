@@ -6,6 +6,7 @@ import { CreateCommentDto } from "../../../Domain/DTOs/comments/CreateCommentDto
 import { Comment } from "../../../Domain/models/Comment";
 import { CommentLogMessages } from "../../../Domain/constants/messages/comments/CommentLogMessages";
 import { CommentMapper } from "../../../Shared/mappers/comments/CommentMpper";
+import { UpdateCommentDto } from "../../../Domain/DTOs/comments/UpdateCommentDto";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -43,6 +44,27 @@ export class CommentRepository implements ICommentRepository {
     } catch (err) {
       this.logger.error("CommentRepository", CommentLogMessages.createFailed, err);
       return new Comment();
+    } finally {
+      res.conn.release();
+    }
+  }
+
+  async update(id: number, dto: UpdateCommentDto): Promise<boolean> {
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
+
+    try {
+      const [result] = await res.conn.execute<ResultSetHeader>(
+        `UPDATE comments
+        SET content = ?
+        WHERE id = ?`,
+        [dto.content, id]
+      );
+
+      return result.affectedRows > 0;
+    } catch (err) {
+      this.logger.error("CommentRepository", CommentLogMessages.updateFailed, err);
+      return false;
     } finally {
       res.conn.release();
     }

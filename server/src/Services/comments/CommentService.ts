@@ -7,6 +7,7 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { CommentDto } from "../../Domain/DTOs/comments/CommentDto";
 import { CreateCommentDto } from "../../Domain/DTOs/comments/CreateCommentDto";
+import { UpdateCommentDto } from "../../Domain/DTOs/comments/UpdateCommentDto";
 import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
@@ -78,6 +79,33 @@ export class CommentService implements ICommentService {
     await this.auditHelperService.safeCreate( new CreateAuditDto(ctx.userId, AuditActions.COMMENT_CREATED, AuditDetails.COMMENT_CREATED, ctx.ipAddress));
     
     return ServiceResultFactory.ok(CommentMessages.created, CommentMapper.toDto(created), HttpStatus.created);
+  }
+
+  async update(id: number, dto: UpdateCommentDto, ctx: AuditContext): Promise<ServiceResult> {
+    const comment = await this.commentRepo.findById(id);
+    if (comment.id === 0) {
+      return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
+    }
+
+    if (comment.userId !== ctx.userId) {
+      return ServiceResultFactory.fail(CommentMessages.onlyAuthorCanUpdate, HttpStatus.forbidden);
+    }
+
+    if (comment.isDeleted) {
+      return ServiceResultFactory.fail(CommentMessages.cannotUpdateDeleted, HttpStatus.conflict);
+    }
+
+    const updated = await this.commentRepo.update(id, dto);
+    if (!updated) {
+      return ServiceResultFactory.fail(CommentMessages.updateFailed, HttpStatus.internalServerError);
+    }
+
+    await this.auditHelperService.safeCreate(
+      new CreateAuditDto(ctx.userId, AuditActions.COMMENT_UPDATED, AuditDetails.COMMENT_UPDATED, ctx.ipAddress)
+    );
+
+    return ServiceResultFactory.ok(
+      CommentMessages.updated, undefined, HttpStatus.ok);
   }
 
   async delete(id: number, ctx: AuditContext): Promise<ServiceResult> {

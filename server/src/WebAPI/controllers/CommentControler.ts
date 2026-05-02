@@ -15,6 +15,8 @@ import { CommentMessages } from "../../Domain/constants/messages/comments/Commen
 import { parseStringValue } from "../parser/common/ParseStringValue";
 import { parseId } from "../parser/common/ParseId";
 import { validateId } from "../validators/common/ValidateId";
+import { validateUpdateComment } from "../validators/comments/ValidateUpdateComment";
+import { UpdateCommentInput } from "../types/comments/UpdateCommentInput";
 
 export class CommentController {
   private readonly router = Router();
@@ -24,6 +26,7 @@ export class CommentController {
     private readonly logger: ILoggerService
   ) {
     this.router.post("/comments",             authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.create.bind(this));
+    this.router.put("/comments/:id",          authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.update.bind(this));
     this.router.delete("/comments/:id",       authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.delete.bind(this));
 
   }
@@ -63,6 +66,57 @@ export class CommentController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommentMessages.createFailed,
+      });
+    }
+  }
+
+  private async update(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(HttpStatus.unauthorized).json({
+        success: false,
+        message: UserMessages.unauthorized,
+      });
+      return;
+    }
+
+    const idParam = parseStringValue(req.params.id);
+    const id = parseId(idParam);
+
+    const idValidation = validateId(id);
+
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message,
+      });
+      return;
+    }
+
+    const { validation, dto } = validateUpdateComment(
+      req.body as UpdateCommentInput
+    );
+
+    if (!validation.valid || !dto) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: validation.message,
+      });
+      return;
+    }
+
+    const ctx = IpHelper.buildAuditContext(req, userId);
+
+    try {
+      const result = await this.commentService.update(id, dto, ctx);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommentLogMessages.updateFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommentMessages.updateFailed,
       });
     }
   }

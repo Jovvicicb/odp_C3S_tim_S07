@@ -16,4 +16,9 @@ export const CommentMessages = {
   alreadyDeleted: "Comment is already deleted",
   onlyAuthorOrModeratorCanDelete: "Only comment author or community moderator can delete this comment",
 
+  updated: "Comment updated successfully",
+  updateFailed: "Failed to update comment",
+  onlyAuthorCanUpdate: "Only comment author can update this comment",
+  cannotUpdateDeleted: "You cannot update a deleted comment",
+
 } as const;
