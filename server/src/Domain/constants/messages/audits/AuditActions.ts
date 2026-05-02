@@ -31,6 +31,7 @@ export const AuditActions = {
 
   //COMMENTS
   COMMENT_CREATED: "COMMENT_CREATED",
+  COMMENT_DELETED: "COMMENT_DELETED",
 
 
 

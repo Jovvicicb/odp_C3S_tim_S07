@@ -5,4 +5,5 @@ import { AuditContext } from "../../types/audits/AuditContext";
 
 export interface ICommentService {
   create(dto: CreateCommentDto, ctx: AuditContext): Promise<ServiceResult<CommentDto>>;
+  delete(id: number, ctx: AuditContext): Promise<ServiceResult>;
 }

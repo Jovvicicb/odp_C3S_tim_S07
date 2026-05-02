@@ -10,4 +10,10 @@ export const CommentMessages = {
 
   notAllowed: "You cannot comment on this post",
 
+
+  deleted: "Comment deleted successfully",
+  deleteFailed: "Failed to delete comment",
+  alreadyDeleted: "Comment is already deleted",
+  onlyAuthorOrModeratorCanDelete: "Only comment author or community moderator can delete this comment",
+
 } as const;

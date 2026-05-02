@@ -7,6 +7,7 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { CommentDto } from "../../Domain/DTOs/comments/CommentDto";
 import { CreateCommentDto } from "../../Domain/DTOs/comments/CreateCommentDto";
+import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { ICommentRepository } from "../../Domain/repositories/comments/ICommentRepository";
@@ -77,5 +78,46 @@ export class CommentService implements ICommentService {
     await this.auditHelperService.safeCreate( new CreateAuditDto(ctx.userId, AuditActions.COMMENT_CREATED, AuditDetails.COMMENT_CREATED, ctx.ipAddress));
     
     return ServiceResultFactory.ok(CommentMessages.created, CommentMapper.toDto(created), HttpStatus.created);
+  }
+
+  async delete(id: number, ctx: AuditContext): Promise<ServiceResult> {
+    const comment = await this.commentRepo.findById(id);
+    if (comment.id === 0) {
+      return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
+    }
+
+    const post = await this.postRepo.findById(comment.postId);
+    if (post.id === 0) {
+      return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+    }
+
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(ctx.userId, post.communityId);
+
+    const isAuthor = comment.userId === ctx.userId;
+    const isModerator =
+      membership.id !== 0 &&
+      membership.role === CommunityMemberRole.MODERATOR &&
+      membership.status === CommunityMemberStatus.ACTIVE;
+
+    if (!isAuthor && !isModerator) {
+      return ServiceResultFactory.fail(
+        CommentMessages.onlyAuthorOrModeratorCanDelete,
+        HttpStatus.forbidden
+      );
+    }
+
+     if (comment.isDeleted) {
+      return ServiceResultFactory.fail(CommentMessages.alreadyDeleted, HttpStatus.conflict);
+    }
+
+    const deleted = await this.commentRepo.softDelete(id);
+
+    if (!deleted) {
+      return ServiceResultFactory.fail(CommentMessages.deleteFailed, HttpStatus.internalServerError);
+    }
+
+    await this.auditHelperService.safeCreate( new CreateAuditDto(ctx.userId,AuditActions.COMMENT_DELETED, AuditDetails.COMMENT_DELETED,ctx.ipAddress) );
+
+    return ServiceResultFactory.ok(CommentMessages.deleted, undefined, HttpStatus.ok);
   }
 }

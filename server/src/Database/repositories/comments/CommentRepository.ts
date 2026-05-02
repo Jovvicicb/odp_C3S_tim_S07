@@ -70,5 +70,26 @@ export class CommentRepository implements ICommentRepository {
       res.conn.release();
     }
   }
+
+  async softDelete(id: number): Promise<boolean> {
+  const res = await this.db.getWriteConnection();
+  if (!res) return false;
+
+  try {
+    const [result] = await res.conn.execute<ResultSetHeader>(
+      `UPDATE comments
+       SET is_deleted = 1
+       WHERE id = ?`,
+      [id]
+    );
+
+    return result.affectedRows > 0;
+  } catch (err) {
+    this.logger.error("CommentRepository", CommentLogMessages.softDeleteFailed, err);
+    return false;
+  } finally {
+    res.conn.release();
+  }
+}
   
 }
