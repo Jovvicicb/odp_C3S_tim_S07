@@ -75,7 +75,7 @@ const tagService = new TagService(tagRepo,auditHelperService);
 const postService = new PostService(postRepo,communityRepo,communityMemberRepo,postTagRepo,postLikeRepo,tagRepo,postCommentRepo,userFollowRepo,auditHelperService);
 const postTagService = new PostTagService(postRepo,communityMemberRepo,tagRepo,postTagRepo,auditHelperService);
 const postLikeService = new PostLikeService(postRepo,postLikeRepo,communityRepo,communityMemberRepo);
-const commentService = new CommentService(commentRepo,postRepo,communityRepo,communityMemberRepo,auditHelperService);
+const commentService = new CommentService(commentRepo,postRepo,communityRepo,communityMemberRepo,commentLikeRepo,auditHelperService);
 const commentLikeService = new CommentLikeService(commentRepo,commentLikeRepo,postRepo,communityRepo,communityMemberRepo);
 
 

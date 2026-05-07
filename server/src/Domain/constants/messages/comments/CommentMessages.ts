@@ -31,4 +31,8 @@ export const CommentMessages = {
   unlikeFailed: "Failed to unlike comment",
   notLiked: "Comment is not liked",
 
+  fetched: "Comments fetched successfully",
+  fetchByPostFailed: "Failed to fetch comments",
+  commentsAccessForbidden: "You cannot view comments for this post",
+
 } as const;

@@ -6,11 +6,16 @@ import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { CommentDto } from "../../Domain/DTOs/comments/CommentDto";
+import { CommentTreeDto } from "../../Domain/DTOs/comments/CommentTreeDto";
 import { CreateCommentDto } from "../../Domain/DTOs/comments/CreateCommentDto";
+import { GetCommentsByPostDto } from "../../Domain/DTOs/comments/GetCommentsByPostDto";
 import { UpdateCommentDto } from "../../Domain/DTOs/comments/UpdateCommentDto";
+import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
+import { UserRole } from "../../Domain/enums/UserRole";
+import { ICommentLikeRepository } from "../../Domain/repositories/comments/ICommentLikeRepository";
 import { ICommentRepository } from "../../Domain/repositories/comments/ICommentRepository";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
 import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
@@ -28,6 +33,7 @@ export class CommentService implements ICommentService {
     private readonly postRepo: IPostRepository,
     private readonly communityRepo: ICommunityRepository,
     private readonly communityMemberRepo: ICommunityMemberRepository,
+    private readonly commentLikeRepo: ICommentLikeRepository,
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
@@ -147,5 +153,92 @@ export class CommentService implements ICommentService {
     await this.auditHelperService.safeCreate( new CreateAuditDto(ctx.userId,AuditActions.COMMENT_DELETED, AuditDetails.COMMENT_DELETED,ctx.ipAddress) );
 
     return ServiceResultFactory.ok(CommentMessages.deleted, undefined, HttpStatus.ok);
+  }
+
+
+  async getByPost(dto: GetCommentsByPostDto, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<PaginatedListDto<CommentTreeDto>>> {
+    const post = await this.postRepo.findById(dto.postId);
+    if (post.id === 0) {
+      return ServiceResultFactory.fail<PaginatedListDto<CommentTreeDto>>(PostMessages.notFound, HttpStatus.notFound);
+    }
+
+    const community = await this.communityRepo.findById(post.communityId);
+    if (community.id === 0) {
+      return ServiceResultFactory.fail<PaginatedListDto<CommentTreeDto>>(CommunityMessages.notFound, HttpStatus.notFound);
+    }
+
+    const isAdmin = viewerRole === UserRole.ADMIN;
+
+    const membership = viewerId
+      ? await this.communityMemberRepo.findByUserIdAndCommunityId(viewerId, post.communityId)
+      : undefined;
+
+    if (
+      !isAdmin &&
+      membership &&
+      membership.id !== 0 &&
+      (
+        membership.status === CommunityMemberStatus.BANNED ||
+        membership.status === CommunityMemberStatus.PENDING
+      )
+    ) {
+      return ServiceResultFactory.fail<PaginatedListDto<CommentTreeDto>>(CommentMessages.commentsAccessForbidden, HttpStatus.forbidden);
+    }
+
+    if (community.type === CommunityType.PRIVATE && !isAdmin) {
+      if (
+        !viewerId ||
+        !membership ||
+        membership.id === 0 ||
+        membership.status !== CommunityMemberStatus.ACTIVE
+      ) {
+        return ServiceResultFactory.fail<PaginatedListDto<CommentTreeDto>>(CommentMessages.commentsAccessForbidden, HttpStatus.forbidden);
+      }
+    }
+
+    const rootResult = await this.commentRepo.findRootByPost(dto);
+    const rootIds = rootResult.comments.map((c) => c.id);
+
+    const replies = await this.commentRepo.findRepliesByParentIds(rootIds);
+
+    const allCommentIds = [
+      ...rootIds,
+      ...replies.map((r) => r.id),
+    ];
+
+    const likeCounts = await this.commentLikeRepo.countByCommentIds(allCommentIds);
+
+    const repliesByParentId = replies.reduce<Record<number, CommentTreeDto[]>>((acc, reply) => {
+      const replyDto = CommentMapper.toTreeDto(
+        reply,
+        likeCounts[reply.id] ?? 0,
+        []
+      );
+
+      return {
+        ...acc,
+        [reply.parentId as number]: [
+          ...(acc[reply.parentId as number] ?? []),
+          replyDto,
+        ],
+      };
+    }, {});
+
+    const items = rootResult.comments.map((root) => {
+      return CommentMapper.toTreeDto(
+        root,
+        likeCounts[root.id] ?? 0,
+        repliesByParentId[root.id] ?? []
+      );
+    });
+
+    const data = new PaginatedListDto(
+      items,
+      rootResult.total,
+      dto.page,
+      dto.limit
+    );
+
+    return ServiceResultFactory.ok(CommentMessages.fetched, data,HttpStatus.ok);
   }
 }

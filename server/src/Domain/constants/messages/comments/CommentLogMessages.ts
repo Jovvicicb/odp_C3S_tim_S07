@@ -7,4 +7,9 @@ export const CommentLogMessages = {
   likeFailed: "Like comment failed",
   findLikeFailed: "Find comment like failed",
   unlikeFailed: "Unlike comment failed",
-} as const;
+
+  fetchByPostFailed: "Fetch comments by post failed",
+  findRootByPostFailed: "Find root comments by post failed",
+  findRepliesFailed: "Find replies failed",
+  countLikesFailed: "Count comment likes failed",
+  } as const;

@@ -81,4 +81,35 @@ export class CommentLikeRepository implements ICommentLikeRepository {
     }
   }
 
+
+   async countByCommentIds(commentIds: number[]): Promise<Record<number, number>> {
+    const res = await this.db.getReadConnection();
+    if (!res || commentIds.length === 0) return {};
+
+    const placeholders = commentIds.map(() => "?").join(",");
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT comment_id, COUNT(*) as total
+         FROM comment_likes
+         WHERE comment_id IN (${placeholders})
+         GROUP BY comment_id`,
+        commentIds
+      );
+
+      return rows.reduce<Record<number, number>>((acc, row) => {
+        return {
+          ...acc,
+          [Number(row.comment_id)]: Number(row.total),
+        };
+      }, {});
+    } catch (err) {
+      this.logger.error("CommentLikeRepository", CommentLogMessages.countLikesFailed, err);
+      return {};
+    } finally {
+      res.conn.release();
+    }
+  }
+  
+
 }
