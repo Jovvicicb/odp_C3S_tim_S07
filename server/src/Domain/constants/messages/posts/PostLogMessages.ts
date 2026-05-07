@@ -10,8 +10,8 @@ export const PostLogMessages = {
   findPostTagsFailed : "Find post tags failed.",
   countLikesFailed : "Count post likes failed.",
   countCommentsFailed : "Count comments failed.",
-  //getFeedFailed : "Get feed failed.",
   findFeedFailed : "Find feed posts failed.",
+  findDetailsFailed: "Find post details failed",
 
   // shared
   createFailed: "Failed to create post",

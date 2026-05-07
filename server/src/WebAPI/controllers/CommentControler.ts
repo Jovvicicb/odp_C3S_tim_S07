@@ -23,6 +23,7 @@ import { validatePagination } from "../validators/common/ValidatePagination";
 import { CommentSortType } from "../../Domain/enums/comments/CommentSortType";
 import { GetCommentsByPostDto } from "../../Domain/DTOs/comments/GetCommentsByPostDto";
 import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
+import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
 
 export class CommentController {
   private readonly router = Router();
@@ -41,9 +42,6 @@ export class CommentController {
     this.router.delete("/comments/:id/like",         authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.unlike.bind(this));
 
   }
-
-
-
 
   private async getByPost(req: Request, res: Response): Promise<void> {
     const postIdParam = parseStringValue(req.params.postId);
@@ -74,11 +72,8 @@ export class CommentController {
       return;
     }
 
-    const sort =
-      sortParam === CommentSortType.POPULAR
-        ? CommentSortType.POPULAR
-        : CommentSortType.NEWEST;
-
+    const sort =  validateCommentSort(sortParam);
+    
     const dto = new GetCommentsByPostDto(
       postId,
       page,

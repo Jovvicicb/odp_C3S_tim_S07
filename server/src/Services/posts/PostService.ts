@@ -4,13 +4,16 @@ import { CommunityMessages } from "../../Domain/constants/messages/community/Com
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
+import { GetCommentsByPostDto } from "../../Domain/DTOs/comments/GetCommentsByPostDto";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { CreatePostDto } from "../../Domain/DTOs/Posts/CreatePostDto";
 import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommunityDto";
+import { PostDetailsDto } from "../../Domain/DTOs/Posts/PostDetailsDto";
 import { PostDto } from "../../Domain/DTOs/Posts/PostDto";
 import { PostWithDetailsDto } from "../../Domain/DTOs/Posts/PostWithDetailsDto";
 import { UpdatePostDto } from "../../Domain/DTOs/Posts/UpdatePostDto";
 import { PostTagDto } from "../../Domain/DTOs/tags/PostTagDto";
+import { CommentSortType } from "../../Domain/enums/comments/CommentSortType";
 import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
@@ -23,6 +26,7 @@ import { IPostRepository } from "../../Domain/repositories/posts/IPostRepository
 import { IPostTagRepository } from "../../Domain/repositories/posts/IPostTagRepository";
 import { ITagRepository } from "../../Domain/repositories/tags/ITagRepository";
 import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
+import { ICommentService } from "../../Domain/services/comments/ICommentService";
 import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
 import { IPostService } from "../../Domain/services/posts/IPostService";
 import { AuditContext } from "../../Domain/types/audits/AuditContext";
@@ -41,6 +45,7 @@ export class PostService implements IPostService {
     private readonly tagRepo: ITagRepository,
     private readonly postCommentRepo: IPostCommentRepository,
     private readonly userFollowRepo: IUserFollowRepository,
+    private readonly commentService: ICommentService,
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
@@ -245,6 +250,84 @@ export class PostService implements IPostService {
     );
 
     return ServiceResultFactory.ok(PostMessages.feedFetched, data, HttpStatus.ok);
+  }
+
+  async getById(id: number, commentsPage: number, commentsLimit: number, commentsSort: CommentSortType, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<PostDetailsDto>> {
+    const post = await this.postRepo.findById(id);
+    if (post.id === 0) {
+      return ServiceResultFactory.fail<PostDetailsDto>(PostMessages.notFound, HttpStatus.notFound);
+    }
+
+    const community = await this.communityRepo.findById(post.communityId);
+    if (community.id === 0) {
+      return ServiceResultFactory.fail<PostDetailsDto>(CommunityMessages.notFound, HttpStatus.notFound);
+    }
+
+    const isAdmin = viewerRole === UserRole.ADMIN;
+
+    const membership = viewerId
+      ? await this.communityMemberRepo.findByUserIdAndCommunityId(viewerId, post.communityId)
+      : undefined;
+
+    if (
+      !isAdmin &&
+      membership &&
+      membership.id !== 0 &&
+      (
+        membership.status === CommunityMemberStatus.BANNED ||
+        membership.status === CommunityMemberStatus.PENDING
+      )
+    ) {
+      return ServiceResultFactory.fail<PostDetailsDto>(PostMessages.postAccessForbidden, HttpStatus.forbidden);
+    }
+
+    if (community.type === CommunityType.PRIVATE && !isAdmin) {
+      if (
+        !viewerId ||
+        !membership ||
+        membership.id === 0 ||
+        membership.status !== CommunityMemberStatus.ACTIVE
+      ) {
+        return ServiceResultFactory.fail<PostDetailsDto>(PostMessages.postAccessForbidden, HttpStatus.forbidden);
+      }
+    }
+
+    const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds([post.id]);
+    const tagIds = tagIdsByPostId[post.id] ?? [];
+
+    const tags = await this.tagRepo.findByIds(tagIds);
+
+    const postTags = tags.map((tag) => new PostTagDto(tag.id, tag.name));
+
+    const likeCounts = await this.postLikeRepo.countByPostIds([post.id]);
+    const commentCounts = await this.postCommentRepo.countByPostIds([post.id]);
+
+    const commentsResult = await this.commentService.getByPost(
+      new GetCommentsByPostDto(
+        post.id,
+        commentsPage,
+        commentsLimit,
+        commentsSort
+      ),
+      viewerId,
+      viewerRole
+    );
+
+    if (!commentsResult.success) {
+      return ServiceResultFactory.fail<PostDetailsDto>(PostMessages.fetchDetailsFailed, HttpStatus.internalServerError);
+    }
+
+    const comments = commentsResult.data?.items ?? [];
+
+    const data = PostMapper.toDetailsDto(
+      post,
+      postTags,
+      likeCounts[post.id] ?? 0,
+      commentCounts[post.id] ?? 0,
+      comments
+    );
+
+    return ServiceResultFactory.ok(PostMessages.detailsFetched,data,HttpStatus.ok);
   }
 
 }

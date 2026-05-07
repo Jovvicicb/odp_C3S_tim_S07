@@ -27,6 +27,8 @@ import { PostSortType } from "../../Domain/enums/posts/PostSortType";
 import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommunityDto";
 import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 import { validatePostSort } from "../validators/posts/ValidatePostSort";
+import { CommentSortType } from "../../Domain/enums/comments/CommentSortType";
+import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
 
 export class PostController {
   private readonly router = Router();
@@ -39,6 +41,7 @@ export class PostController {
         this.router.get("/posts/community/:communityId",                                                                             this.getByCommunity.bind(this));
         this.router.get("/posts/feed",               authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getFeed.bind(this));
         this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
+        this.router.get("/posts/:id",                                                                                                this.getById.bind(this));
         this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
         this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
         this.router.post("/posts/:id/like",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.like.bind(this));
@@ -172,6 +175,52 @@ export class PostController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: PostMessages.createFailed
+      });
+    }
+  }
+
+  private async getById(req: Request, res: Response): Promise<void> {
+    const commentsPageParam = parseStringValue(req.query.commentsPage);
+    const commentsLimitParam = parseStringValue(req.query.commentsLimit);
+    const commentsSortParam = parseStringValue(req.query.commentsSort);
+
+    const { page: commentsPage, limit: commentsLimit } = parsePagination(commentsPageParam, commentsLimitParam);
+
+    const commentsPaginationValidation = validatePagination(commentsPage, commentsLimit);
+    if (!commentsPaginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: commentsPaginationValidation.message,
+      });
+      return;
+    }
+
+    const commentsSort = validateCommentSort(commentsSortParam);
+
+    const idParam = parseStringValue(req.params.id);
+    const id = parseId(idParam);
+
+    const idValidation = validateId(id);
+
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message,
+      });
+      return;
+    }
+
+    const viewer = OptionalAuthHelper.getUser(req);
+
+    try {
+      const result = await this.postService.getById(id, commentsPage, commentsLimit, commentsSort, viewer?.id, viewer?.role);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, PostLogMessages.findDetailsFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: PostMessages.fetchDetailsFailed,
       });
     }
   }
