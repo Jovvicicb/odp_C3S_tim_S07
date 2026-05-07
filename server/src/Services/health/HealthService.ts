@@ -14,10 +14,19 @@ export class HealthService implements IHealthService {
 
   async getDbHealth(): Promise<ServiceResult<DbNodeHealthDto[]>> {
     const nodes = this.db.getNodes();
-
     const data = nodes.map((node) => HealthMapper.toDbNodeHealthDto(node));
-
     return ServiceResultFactory.ok(HealthMessages.dbHealthFetched, data, HttpStatus.ok);
   }
-  
+
+  async triggerFailover(): Promise<ServiceResult<DbNodeHealthDto>> {
+    const newMaster = await this.db.triggerFailover();
+    if (!newMaster) {
+        return ServiceResultFactory.fail( HealthMessages.noHealthySlave, HttpStatus.internalServerError);
+    }
+
+    const data = HealthMapper.toDbNodeHealthDto(newMaster);
+
+    return ServiceResultFactory.ok(HealthMessages.failoverSuccess, data, HttpStatus.ok);
+    }
+
 }

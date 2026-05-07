@@ -45,13 +45,13 @@ const slave2Pool: Pool = mysql.createPool({
 interface NodeInfo { name: string; pool: Pool; node: DbNode; }
 
 export class DbManager {
-  private readonly master: NodeInfo;
+  private currentMaster: NodeInfo;
   private readonly slaves: NodeInfo[];
   private slaveRrIndex: number = 0;
   private healthTimer: NodeJS.Timeout | null = null;
 
   public constructor(private readonly logger: ILoggerService) {
-    this.master = {
+    this.currentMaster  = {
       name: "master", pool: masterPool,
       node: new DbNode("master", process.env.DB_MASTER_HOST ?? "localhost", parseInt(process.env.DB_MASTER_PORT ?? "3306", 10)),
     };
@@ -80,8 +80,8 @@ export class DbManager {
   }
 
   public async runHealthCheck(): Promise<void> {
-    await Promise.all([this.master, ...this.slaves].map((n) => this.checkNode(n)));
-    this.logger.info("DB", [this.master, ...this.slaves].map((n) => `${n.name}=${n.node.status}`).join(" | "));
+    await Promise.all([this.currentMaster, ...this.slaves].map((n) => this.checkNode(n)));
+    this.logger.info("DB", [this.currentMaster, ...this.slaves].map((n) => `${n.name}=${n.node.status}`).join(" | "));
   }
 
   public async init(): Promise<void> {
@@ -91,17 +91,17 @@ export class DbManager {
 
   /** All writes (INSERT/UPDATE/DELETE) → Master only */
   public async getWriteConnection(): Promise<{ conn: PoolConnection; nodeName: string } | null> {
-    if (this.master.node.status === NodeStatus.OFFLINE) {
+    if (this.currentMaster.node.status === NodeStatus.OFFLINE) {
       this.logger.error("DB", "Master is OFFLINE — write not possible");
       return null;
     }
     try {
-      const conn = await this.master.pool.getConnection();
-      this.master.node.successfulWrites++;
-      return { conn, nodeName: this.master.name };
+      const conn = await this.currentMaster.pool.getConnection();
+      this.currentMaster.node.successfulWrites++;
+      return { conn, nodeName: this.currentMaster.name };
     } catch (err) {
-      this.master.node.status = NodeStatus.OFFLINE;
-      this.master.node.failedWrites++;
+      this.currentMaster.node.status = NodeStatus.OFFLINE;
+      this.currentMaster.node.failedWrites++;
       this.logger.error("DB", "Failed to connect to master", err);
       return null;
     }
@@ -127,22 +127,53 @@ export class DbManager {
     }
     // Fallback to master
     this.logger.warn("DB", "All slaves offline — falling back to master for read");
-    if (this.master.node.status === NodeStatus.OFFLINE) {
+    if (this.currentMaster.node.status === NodeStatus.OFFLINE) {
       this.logger.error("DB", "Master also offline — read not possible");
       return null;
     }
     try {
-      const conn = await this.master.pool.getConnection();
-      this.master.node.successfulWrites++;
-      return { conn, nodeName: this.master.name };
+      const conn = await this.currentMaster.pool.getConnection();
+      this.currentMaster.node.successfulWrites++;
+      return { conn, nodeName: this.currentMaster.name };
     } catch (err) {
-      this.master.node.status = NodeStatus.OFFLINE;
+      this.currentMaster.node.status = NodeStatus.OFFLINE;
       this.logger.error("DB", "Failed to connect to master for fallback read", err);
       return null;
     }
   }
 
-  public getNodes(): DbNode[] { return [this.master.node, ...this.slaves.map((s) => s.node)]; }
+  public async triggerFailover(): Promise<DbNode | null> {
+    const healthySlave = this.slaves.find(
+      (slave) => slave.node.status === NodeStatus.HEALTHY
+    );
+
+    if (!healthySlave) {
+      this.logger.error("DB", "Failover failed - no healthy slave available");
+      return null;
+    }
+
+    const oldMaster = this.currentMaster;
+
+    this.currentMaster = healthySlave;
+
+    const updatedSlaves = this.slaves.filter(
+      (slave) => slave.name !== healthySlave.name
+    );
+
+    updatedSlaves.push(oldMaster);
+
+    this.slaves.length = 0;
+    this.slaves.push(...updatedSlaves);
+
+    this.logger.warn(
+      "DB",
+      `Failover completed. New master: ${this.currentMaster.name}`
+    );
+
+    return this.currentMaster.node;
+  }
+
+  public getNodes(): DbNode[] { return [this.currentMaster.node, ...this.slaves.map((s) => s.node)]; }
   public getSlaveRrIndex(): number { return this.slaveRrIndex; }
   public stop(): void { if (this.healthTimer) clearInterval(this.healthTimer); }
 }

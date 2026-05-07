@@ -16,9 +16,9 @@ export class HealthController {
     private readonly healthService: IHealthService,
     private readonly logger: ILoggerService
   ) {
-    this.router.get("/health",                                             this.getHealth.bind(this));
-    this.router.get("/health/db", authenticate, authorize(UserRole.ADMIN), this.getDbHealth.bind(this)
-  );
+    this.router.get("/health",                                                    this.getHealth.bind(this));
+    this.router.get("/health/db",        authenticate, authorize(UserRole.ADMIN), this.getDbHealth.bind(this));
+    this.router.post("/health/failover", authenticate, authorize(UserRole.ADMIN), this.triggerFailover.bind(this));
   }
 
   private async getHealth(req: Request, res: Response): Promise<void> {
@@ -53,6 +53,20 @@ export class HealthController {
         success: false,
         message: HealthMessages.dbHealthFetchFailed,
         });
+    }
+  }
+
+  private async triggerFailover(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await this.healthService.triggerFailover();
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, HealthLogMessages.failoverFailed, err);
+      
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: HealthMessages.failoverFailed,
+      });
     }
   }
 
