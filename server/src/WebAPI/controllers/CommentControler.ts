@@ -20,7 +20,6 @@ import { UpdateCommentInput } from "../types/comments/UpdateCommentInput";
 import { ICommentLikeService } from "../../Domain/services/comments/ICommentLikeService";
 import { parsePagination } from "../parser/common/ParsePagination";
 import { validatePagination } from "../validators/common/ValidatePagination";
-import { CommentSortType } from "../../Domain/enums/comments/CommentSortType";
 import { GetCommentsByPostDto } from "../../Domain/DTOs/comments/GetCommentsByPostDto";
 import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 import { validateCommentSort } from "../validators/comments/ValidateCommentSort";

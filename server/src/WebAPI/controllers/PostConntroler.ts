@@ -23,11 +23,9 @@ import { IPostTagService } from "../../Domain/services/posts/IPostTagService";
 import { IPostLikeService } from "../../Domain/services/posts/IPostLikeService";
 import { parsePagination } from "../parser/common/ParsePagination";
 import { validatePagination } from "../validators/common/ValidatePagination";
-import { PostSortType } from "../../Domain/enums/posts/PostSortType";
 import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommunityDto";
 import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 import { validatePostSort } from "../validators/posts/ValidatePostSort";
-import { CommentSortType } from "../../Domain/enums/comments/CommentSortType";
 import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
 
 export class PostController {
