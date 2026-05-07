@@ -42,7 +42,8 @@ import { CommentService } from "./Services/comments/CommentService";
 import { CommentController } from "./WebAPI/controllers/CommentControler";
 import { CommentLikeRepository } from "./Database/repositories/comments/CommentLikeRepository";
 import { CommentLikeService } from "./Services/comments/CommentLikeService";
-import { HealthController } from "./WebAPI/controllers/HelthController";
+import { HealthController } from "./WebAPI/controllers/HealthController";
+import { HealthService } from "./Services/health/HealthService";
 
 
 export const logger = new ConsoleLoggerService();
@@ -78,6 +79,7 @@ const postService = new PostService(postRepo,communityRepo,communityMemberRepo,p
 const postTagService = new PostTagService(postRepo,communityMemberRepo,tagRepo,postTagRepo,auditHelperService);
 const postLikeService = new PostLikeService(postRepo,postLikeRepo,communityRepo,communityMemberRepo);
 const commentLikeService = new CommentLikeService(commentRepo,commentLikeRepo,postRepo,communityRepo,communityMemberRepo);
+const healthService = new HealthService(db); 
 
 
 
@@ -93,7 +95,7 @@ app.use("/uploads", express.static("uploads"));
 
 app.use(cors({ origin: process.env.CLIENT_URL ?? "*" }));
 
-app.use("/api/v1", new HealthController(logger).getRouter());
+app.use("/api/v1", new HealthController(healthService,logger).getRouter());
 app.use("/api/v1", new AuthController(authService,logger).getRouter());
 app.use("/api/v1", new UserController(userService,userFollowService,logger).getRouter());
 app.use("/api/v1", new CommunityController(communityService,communityMemberService,logger).getRouter());
