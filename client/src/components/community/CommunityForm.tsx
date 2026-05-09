@@ -1,23 +1,21 @@
 import { useState } from "react";
 import { ErrorBox, SuccessBox } from "../ui/UI";
-import { communityApi } from "../../api_services/community/CommunityAPIService";
-import { useNavigate } from "react-router-dom";
-import type { CommunityType } from "../../types/community/CommunityTypes";
+import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
+import { useCreateCommunity } from "../../hooks/community/useCreateCommunity";
+import { validateCreateCommunity } from "../../validators/community/validateCreateCommunity";
+import type { CommunityType } from "../../types/community/CommunityType";
 
 export default function CommunityForm() {
-  const navigate = useNavigate();
-
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [rules, setRules] = useState("");
   const [type, setType] = useState<CommunityType>("public");
   const [avatar, setAvatar] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string>("");
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState("");
   const [fileKey, setFileKey] = useState(0);
+
+  const { createCommunity, loading, error, success, setError } =
+    useCreateCommunity();
 
   const resetForm = () => {
     setName("");
@@ -26,92 +24,40 @@ export default function CommunityForm() {
     setType("public");
     setAvatar(null);
     setPreview("");
-  };
-
-  const validate = () => {
-    const normalizedName = name.trim().replace(/\s+/g, " ");
-    const normalizedDescription = (description ?? "").trim();
-    const normalizedRules = (rules ?? "").trim();
-    const normalizedType = (type ?? "public").trim();
-
-    if (!normalizedName) {
-      return "Community name is required";
-    }
-
-    if (normalizedName.length < 2 || normalizedName.length > 80) {
-      return "Community name must be between 2 and 80 characters";
-    }
-
-    if (normalizedDescription.length > 500) {
-      return "Description must be at most 500 characters";
-    }
-
-    if (normalizedRules.length > 500) {
-      return "Rules must be at most 500 characters";
-    }
-
-    if (normalizedType !== "public" && normalizedType !== "private") {
-      return "Invalid community type";
-    }
-
-    if (avatar) {
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-      if (!allowedTypes.includes(avatar.type)) {
-        return "Only JPG, PNG or WEBP images are allowed";
-      }
-
-      if (avatar.size > 2 * 1024 * 1024) {
-        return "Image must be smaller than 2MB";
-      }
-    }
-    return null;
+    setFileKey((prev) => prev + 1);
   };
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
 
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
-      setLoading(false);
+    const validation = validateCreateCommunity({
+      name,
+      description,
+      rules,
+      type,
+      avatar,
+    });
+
+    if (!validation.valid) {
+      setError(validation.message);
       return;
     }
 
-    const normalizedName = name.trim().replace(/\s+/g, " ");
-    const normalizedDescription = (description ?? "").trim();
-    const normalizedRules = (rules ?? "").trim();
-    const normalizedType = type ?? "public";
-
     const formData = new FormData();
 
-    formData.append("name", normalizedName);
-    formData.append("description", normalizedDescription);
-    formData.append("rules", normalizedRules);
-    formData.append("type", normalizedType);
+    formData.append("name", StringNormalizer.normalizeSpaces(name));
+    formData.append("description", StringNormalizer.trim(description));
+    formData.append("rules", StringNormalizer.trim(rules));
+    formData.append("type", type);
 
     if (avatar) {
       formData.append("image", avatar);
     }
 
-    try {
-      const res = await communityApi.create(formData);
-      if (!res.success || !res.data) {
-        setError(res.message ?? "Create community failed");
-        return;
-      }
-      setSuccess("Community created successfuly");
+    const created = await createCommunity(formData);
+
+    if (created) {
       resetForm();
-      setTimeout(() => {
-        navigate(`/communities/${res.data?.id}`);
-      }, 500);
-    } catch {
-      setError("Something went wrong");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -122,6 +68,7 @@ export default function CommunityForm() {
           Start a new public or private community and define its rules.
         </p>
       </div>
+
       <form
         noValidate
         onSubmit={submit}
@@ -134,6 +81,7 @@ export default function CommunityForm() {
           <label className="text-xs text-white/40 mb-2 block">
             Community Name
           </label>
+
           <input
             type="text"
             value={name}
@@ -150,6 +98,7 @@ export default function CommunityForm() {
           <label className="text-xs text-white/40 mb-2 block">
             Description
           </label>
+
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -162,6 +111,7 @@ export default function CommunityForm() {
 
         <div>
           <label className="text-xs text-white/40 mb-2 block">Rules</label>
+
           <textarea
             value={rules}
             onChange={(e) => setRules(e.target.value)}
@@ -202,74 +152,76 @@ export default function CommunityForm() {
               Private
             </button>
           </div>
-
-          <div>
-            <label className="block text-xs text-white/40 mb-2 font-medium">
-              Profile image
-            </label>
-
-            <input
-              key={fileKey}
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) {
-                  setAvatar(null);
-                  setPreview("");
-                  return;
-                }
-
-                const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-                if (!allowedTypes.includes(file.type)) {
-                  setError("Only JPG, PNG or WEBP images are allowed");
-                  setAvatar(null);
-                  setPreview("");
-                  setFileKey((prev) => prev + 1);
-                  return;
-                }
-
-                if (file.size > 2 * 1024 * 1024) {
-                  setError("Image must be smaller than 2MB");
-                  setAvatar(null);
-                  setPreview("");
-                  setFileKey((prev) => prev + 1);
-                  return;
-                }
-
-                setError("");
-
-                setAvatar(file);
-
-                const reader = new FileReader();
-                reader.onload = () => {
-                  setPreview(reader.result as string);
-                };
-                reader.readAsDataURL(file);
-              }}
-              className="w-full bg-white/4 border border-white/10 rounded-xl px-3 py-2 text-white text-sm file:bg-white/10 file:border-0 file:text-white file:px-3 file:py-1 file:rounded-lg"
-            />
-          </div>
-
-          {preview && (
-            <div className="mt-3 flex items-center gap-3">
-              <img
-                src={preview}
-                alt="preview"
-                className="w-16 h-16 rounded-full object-cover border border-white/20"
-              />
-              <span className="text-xs text-white/40">Preview</span>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-2 bg-white hover:bg-white/90 disabled:opacity-50 text-black font-semibold rounded-xl py-5 px-1 text-sm transition-colors"
-          >
-            {loading ? "Creating community..." : "Create Community"}
-          </button>
         </div>
+
+        <div>
+          <label className="block text-xs text-white/40 mb-2 font-medium">
+            Community image
+          </label>
+
+          <input
+            key={fileKey}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+
+              if (!file) {
+                setAvatar(null);
+                setPreview("");
+                return;
+              }
+
+              const validation = validateCreateCommunity({
+                name: name || "aa",
+                description,
+                rules,
+                type,
+                avatar: file,
+              });
+
+              if (!validation.valid) {
+                setError(validation.message);
+                setAvatar(null);
+                setPreview("");
+                setFileKey((prev) => prev + 1);
+                return;
+              }
+
+              setError("");
+              setAvatar(file);
+
+              const reader = new FileReader();
+
+              reader.onload = () => {
+                setPreview(reader.result as string);
+              };
+
+              reader.readAsDataURL(file);
+            }}
+            className="w-full bg-white/4 border border-white/10 rounded-xl px-3 py-2 text-white text-sm file:bg-white/10 file:border-0 file:text-white file:px-3 file:py-1 file:rounded-lg"
+          />
+        </div>
+
+        {preview && (
+          <div className="mt-1 flex items-center gap-3">
+            <img
+              src={preview}
+              alt="preview"
+              className="w-16 h-16 rounded-full object-cover border border-white/20"
+            />
+
+            <span className="text-xs text-white/40">Preview</span>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-2 bg-white hover:bg-white/90 disabled:opacity-50 text-black font-semibold rounded-xl py-4 px-1 text-sm transition-colors"
+        >
+          {loading ? "Creating community..." : "Create Community"}
+        </button>
       </form>
     </section>
   );

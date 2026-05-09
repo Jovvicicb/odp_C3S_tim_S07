@@ -1,9 +1,10 @@
 import axios from "axios";
 import type { IUsersAPIService } from "./IUsersAPIService";
-import type { UserDto } from "../../models/user/UserTypes";
+import type { UserDto } from "../../models/user/UserDto";
 import { readItem } from "../../helpers/local_storage";
-import type { PaginatedListDto } from "../../types/community/CommunityTypes";
 import type { ApiResponse } from "../../types/common/ApiResponse";
+import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
+import { UserMessages } from "../../constants/messages/user/UserMessages";
 
 const BASE = import.meta.env.VITE_API_URL + "users";
 
@@ -25,15 +26,6 @@ export const usersApi: IUsersAPIService = {
         params: { page, limit },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, "Failed to load users"));
-  },
-
-  async getById(id) {
-    return axios.get<ApiResponse<UserDto>>(`${BASE}/${id}`, { headers: authHeader() })
-      .then(r => r.data).catch(e => err(e, "Failed to load user"));
-  },
-  async deactivate(id) {
-    return axios.patch<ApiResponse<void>>(`${BASE}/${id}/deactivate`, {}, { headers: authHeader() })
-      .then(r => r.data).catch(e => err(e, "Failed to deactivate user"));
+      .catch((e) => err(e, UserMessages.fetchAllFailed));
   },
 };

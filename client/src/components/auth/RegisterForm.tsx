@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import type { IAuthAPIService } from "../../api_services/auth/IAuthAPIService";
+import { validateRegister } from "../../validators/auth/validateRegister";
+import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
+import { AuthMessages } from "../../constants/messages/auth/AuthMessages";
+import { CommonMessages } from "../../constants/messages/common/CommonMessages";
 
 export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
   const { login } = useAuth();
@@ -15,116 +19,53 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
   const [loading, setLoading] = useState(false);
   const [fileKey, setFileKey] = useState(0);
 
-  const validate = () => {
-    const normalizedUsername = username.trim();
-    const normalizedFullname = fullname.trim().replace(/\s+/g, " ");
-    const normalizedEmail = email.trim();
-    const normalizedBio = bio.trim();
-    if (!normalizedUsername) return "Username is required";
-    if (normalizedUsername.length < 3 || normalizedUsername.length > 40) {
-      return "Username must be between 3 and 40 characters";
-    }
-    if (!/^[A-Za-z0-9-]+$/.test(normalizedUsername)) {
-      return "Username can contain only letters, numbers and dash";
-    }
-
-    if (normalizedFullname) {
-      if (normalizedFullname.length < 3 || normalizedFullname.length > 100) {
-        return "FullName must  be between 3 and 100 characters";
-      }
-
-      if (!/^[A-Za-z\s]+$/.test(normalizedFullname)) {
-        return "Full name can contain only letters and spaces";
-      }
-    }
-
-    if (!normalizedEmail) {
-      return "Email is required";
-    }
-    if (
-      !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(normalizedEmail)
-    ) {
-      return "Email format is not valid";
-    }
-
-    if (!password) {
-      return "Password is required";
-    }
-
-    if (password.length < 8) {
-      return "Password must be at least 8 characters";
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one uppercase letter";
-    }
-
-    if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one number";
-    }
-    if (normalizedBio) {
-      if (normalizedBio.length > 300) {
-        return "Bio must be at most 300 characters";
-      }
-    }
-
-    if (imageFile) {
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-      if (!allowedTypes.includes(imageFile.type)) {
-        return "Only JPG, PNG or WEBP images are allowed";
-      }
-
-      if (imageFile.size > 2 * 1024 * 1024) {
-        return "Image must be smaller than 2MB";
-      }
-    }
-
-    return null;
-  };
-
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
+    const validation = validateRegister({
+      username,
+      fullname,
+      email,
+      password,
+      bio,
+      imageFile,
+    });
+
+    if (!validation.valid) {
+      setError(validation.message);
       setLoading(false);
       return;
     }
 
-    const normalizedUsername = username.trim();
-    const normalizedFullname = fullname.trim().replace(/\s+/g, " ");
-    const normalizedEmail = email.trim();
-    const normalizedBio = bio.trim();
-
     const formData = new FormData();
 
-    formData.append("username", normalizedUsername);
-    formData.append("email", normalizedEmail);
+    formData.append("username", StringNormalizer.trim(username));
+    formData.append("email", StringNormalizer.normalizeEmail(email));
     formData.append("password", password);
-    formData.append("fullname", normalizedFullname);
-    formData.append("bio", normalizedBio);
+    formData.append("fullname", StringNormalizer.normalizeSpaces(fullname));
+    formData.append("bio", StringNormalizer.trim(bio));
 
     if (imageFile) {
       formData.append("image", imageFile);
     }
+
     try {
       const res = await authApi.register(formData);
+
       if (!res.success || !res.data) {
-        setError(res.message ?? "Registration failed");
+        setError(res.message ?? AuthMessages.registerFailed);
         return;
       }
+
       login(res.data);
     } catch {
-      setError("Something went wrong");
+      setError(CommonMessages.unexpectedError);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="w-full max-w-sm">
       <div className="text-center mb-10">
@@ -166,7 +107,6 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
             type="text"
             value={fullname}
             onChange={(e) => setFullName(e.target.value)}
-            minLength={3}
             maxLength={100}
             className="w-full bg-white/4 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
             placeholder="your_fullname"

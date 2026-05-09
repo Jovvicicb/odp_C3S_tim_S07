@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { usersApi } from "../../api_services/users/UsersAPIService";
-import type { UserDto } from "../../models/user/UserTypes";
+import type { UserDto } from "../../models/user/UserDto";
 
 export function useUsers(initialPage = 1, initialLimit = 10) {
   const [users, setUsers] = useState<UserDto[]>([]);

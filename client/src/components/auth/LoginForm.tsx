@@ -1,64 +1,46 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import type { IAuthAPIService } from "../../api_services/auth/IAuthAPIService";
+import { validateLogin } from "../../validators/auth/validateLogin";
+import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
+import { AuthMessages } from "../../constants/messages/auth/AuthMessages";
+import { CommonMessages } from "../../constants/messages/common/CommonMessages";
 
 export function LoginForm({ authApi }: { authApi: IAuthAPIService }) {
   const { login } = useAuth();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const validate = () => {
-    const normalizedUsername = username.trim();
-
-    if (!normalizedUsername) return "Username is required";
-    if (normalizedUsername.length < 3 || normalizedUsername.length > 40) {
-      return "Username must be between 3 and 40 characters";
-    }
-    if (!/^[A-Za-z0-9-]+$/.test(normalizedUsername)) {
-      return "Username can contain only letters, numbers and dash";
-    }
-    if (!password) {
-      return "Password is required";
-    }
-
-    if (password.length < 8) {
-      return "Password must be at least 8 characters";
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one uppercase letter";
-    }
-
-    if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one number";
-    }
-    return null;
-  };
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
+    const validation = validateLogin({ username, password });
+
+    if (!validation.valid) {
+      setError(validation.message);
       setLoading(false);
       return;
     }
-    const normalizedUsername = username.trim();
 
     try {
-      const res = await authApi.login(normalizedUsername, password);
+      const res = await authApi.login(
+        StringNormalizer.normalizeSpaces(username),
+        password,
+      );
+
       if (!res.success || !res.data) {
-        setError(res.message ?? "Invalid credentials");
+        setError(res.message ?? AuthMessages.loginFailed);
         return;
       }
+
       login(res.data);
     } catch {
-      setError("Something went wrong");
+      setError(CommonMessages.unexpectedError);
     } finally {
       setLoading(false);
     }

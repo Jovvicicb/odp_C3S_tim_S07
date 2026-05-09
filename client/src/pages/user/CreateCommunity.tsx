@@ -12,7 +12,6 @@ export default function CreateCommunity() {
           <ActionButton type="back" label="Back" to="/dashboard" size="md" />
         }
       />
-      <p className="text-white/30 text-sm">Your form content goes here.</p>
       <CommunityForm />
     </div>
   );
