@@ -18,13 +18,13 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 export class AuthService implements IAuthService {
   private readonly saltRounds = parseInt(process.env.SALT_ROUNDS ?? "10", 10);
 
-  public constructor(private readonly userRepo: IUserRepository,
-                     private readonly auditHelperService: IAuditHelperService,
+  public constructor(
+    private readonly userRepo: IUserRepository,
+    private readonly auditHelperService: IAuditHelperService,
   ) {}
 
   async login(username: string, password: string,ctx: AuditContext): Promise<ServiceResult<AuthUserDto>> {
     const user = await this.userRepo.findByUsername(username);
-
     if (user.id === 0 || user.isActive === 0) {
       return ServiceResultFactory.fail<AuthUserDto>(AuthMessages.invalidCredentials,HttpStatus.unauthorized);
     }
@@ -34,9 +34,7 @@ export class AuthService implements IAuthService {
       return ServiceResultFactory.fail<AuthUserDto>(AuthMessages.invalidCredentials,HttpStatus.unauthorized);
     }
 
-    await this.auditHelperService.safeCreate(
-      new CreateAuditDto(user.id, AuditActions.LOGIN_SUCCESS, AuditDetails.LOGIN_SUCCESS, ctx.ipAddress)
-    );
+    await this.auditHelperService.safeCreate(new CreateAuditDto(user.id, AuditActions.LOGIN_SUCCESS, AuditDetails.LOGIN_SUCCESS, ctx.ipAddress));
 
     return ServiceResultFactory.ok( AuthMessages.loginSuccess,AuthMapper.toAuthUserDto(user),HttpStatus.ok);
   }
@@ -44,12 +42,12 @@ export class AuthService implements IAuthService {
   async register(dto: AuthRegisterDto,ctx: AuditContext): Promise<ServiceResult<AuthUserDto>> {
     const byName = await this.userRepo.findByUsername(dto.username);
     if (byName.id !== 0) {
-      return ServiceResultFactory.fail<AuthUserDto>(AuthMessages.alreadyTaken,HttpStatus.conflict);
+      return ServiceResultFactory.fail<AuthUserDto>(AuthMessages.usernameTaken,HttpStatus.conflict);
     }
 
     const byEmail = await this.userRepo.findByEmail(dto.email);
     if (byEmail.id !== 0) {
-      return ServiceResultFactory.fail<AuthUserDto>(AuthMessages.alreadyTaken,HttpStatus.conflict);
+      return ServiceResultFactory.fail<AuthUserDto>(AuthMessages.emailTaken,HttpStatus.conflict);
     }
 
     const hash = await bcrypt.hash(dto.password, this.saltRounds).catch(() => "");
@@ -74,17 +72,13 @@ export class AuthService implements IAuthService {
       return ServiceResultFactory.fail<AuthUserDto>(AuthMessages.registerFailed, HttpStatus.internalServerError);
     }
 
-    await this.auditHelperService.safeCreate(
-      new CreateAuditDto(created.id, AuditActions.REGISTER_SUCCESS, AuditDetails.REGISTER_SUCCESS, ctx.ipAddress)
-    );
+    await this.auditHelperService.safeCreate(new CreateAuditDto(created.id, AuditActions.REGISTER_SUCCESS, AuditDetails.REGISTER_SUCCESS, ctx.ipAddress));
 
     return ServiceResultFactory.ok(AuthMessages.registerSuccess, AuthMapper.toAuthUserDto(created), HttpStatus.created);
   }
 
   async logout(ctx:AuditContext): Promise<ServiceResult> {
-    await this.auditHelperService.safeCreate(
-      new CreateAuditDto(ctx.userId, AuditActions.LOGOUT_SUCCESS, AuditDetails.LOGOUT_SUCCESS, ctx.ipAddress)
-    );
+    await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.LOGOUT_SUCCESS, AuditDetails.LOGOUT_SUCCESS, ctx.ipAddress));
 
     return ServiceResultFactory.ok(AuthMessages.logoutSuccess, undefined, HttpStatus.ok);
   }

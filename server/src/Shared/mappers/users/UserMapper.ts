@@ -7,15 +7,15 @@ export class UserMapper {
 
   public static toModel(row: RowDataPacket): User {
     return new User(
-      row.id,
-      row.username,
-      row.email,
+      Number(row.id),
+      String(row.username),
+      String(row.email),
       row.role as UserRole,
-      row.password_hash,
-      row.fullname ?? null,
-      row.bio ?? null,
-      row.profile_picture ?? null,
-      row.is_active,
+      String(row.password_hash),
+      row.fullname === null ? null : String(row.fullname),
+      row.bio === null ? null : String(row.bio),
+      row.profile_picture === null ? null : String(row.profile_picture),
+      Number(row.is_active),
       new Date(row.created_at),
       new Date(row.updated_at)
     );

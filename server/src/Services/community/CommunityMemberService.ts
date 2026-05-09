@@ -20,9 +20,9 @@ import { CommunityMapper } from '../../Shared/mappers/community/CommunityMapper'
 
 export class CommunityMemberService implements ICommunityMemberService {
   public constructor(
-     private readonly communityMemberRepo: ICommunityMemberRepository,
-     private readonly communityRepo: ICommunityRepository,
-     private readonly auditHelperService: IAuditHelperService
+    private readonly communityMemberRepo: ICommunityMemberRepository,
+    private readonly communityRepo: ICommunityRepository,
+    private readonly auditHelperService: IAuditHelperService
   ) {}
 
   
@@ -49,8 +49,8 @@ export class CommunityMemberService implements ICommunityMemberService {
     }
     
     const status = community.type === CommunityType.PUBLIC
-            ? CommunityMemberStatus.ACTIVE
-            : CommunityMemberStatus.PENDING;
+        ? CommunityMemberStatus.ACTIVE
+        : CommunityMemberStatus.PENDING;
 
     const created = await this.communityMemberRepo.create(userId, communityId, CommunityMemberRole.MEMBER, status);
     if (!created) {
@@ -102,8 +102,19 @@ export class CommunityMemberService implements ICommunityMemberService {
 
     const communities =await this.communityRepo.findByIds(result.communityIds);
 
+    const communitiesById = communities.reduce<Record<number, CommunityDto>>((acc, community) => {
+    return {
+        ...acc,
+        [community.id]: CommunityMapper.toDto(community),
+    };
+    }, {});
+
+    const communitiesDto = result.communityIds
+    .map((id) => communitiesById[id])
+    .filter((community): community is CommunityDto => community !== undefined);
+
     const data = new PaginatedListDto(
-        communities.map((c) => CommunityMapper.toDto(c)),
+        communitiesDto,
         result.total,
         page,
         limit
@@ -145,7 +156,7 @@ export class CommunityMemberService implements ICommunityMemberService {
         return ServiceResultFactory.ok(CommunityMessages.memberRoleAlreadySet, undefined, HttpStatus.ok);
     }
 
-    const updated  =await this.communityMemberRepo.updateRole(targetUserId,communityId,role);
+    const updated = await this.communityMemberRepo.updateRole(targetUserId,communityId,role);
     if(!updated ){
         return ServiceResultFactory.fail(CommunityMessages.updateMemberRoleFailed, HttpStatus.internalServerError);
     }

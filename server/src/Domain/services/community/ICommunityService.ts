@@ -6,11 +6,12 @@ import { AuditContext } from "../../types/audits/AuditContext";
 import { ServiceResult } from "../../types/service/ServiceResult";
 import { CreateCommunityResponseDto } from "../../DTOs/community/CreateCommunityResponseDto";
 import { CommunityDetailsDto } from "../../DTOs/community/CommunityDetailsDto";
+import { UserRole } from "../../enums/UserRole";
 
 export interface ICommunityService {
   getPublic(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
   getAll(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
-  getById(page: number, limit: number, communityId: number): Promise<ServiceResult<CommunityDetailsDto>>;
+  getById(page: number, limit: number, communityId: number, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<CommunityDetailsDto>>;
   create(dto: CreateCommunityDto, ctx:AuditContext): Promise<ServiceResult<CreateCommunityResponseDto>>;
   update(id: number, dto: UpdateCommunityDto, ctx:AuditContext): Promise<ServiceResult>;
   delete(id: number, ctx:AuditContext): Promise<ServiceResult>;

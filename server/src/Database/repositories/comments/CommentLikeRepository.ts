@@ -7,11 +7,10 @@ import { CommentLogMessages } from "../../../Domain/constants/messages/comments/
 
 
 export class CommentLikeRepository implements ICommentLikeRepository {
-    public constructor(
-        private readonly db: DbManager,
-        private readonly logger: ILoggerService
-    ){}
-
+  public constructor(
+    private readonly db: DbManager,
+    private readonly logger: ILoggerService
+  ){}
 
   async create(userId: number, commentId: number): Promise<CommentLike> {
     const res = await this.db.getWriteConnection();
@@ -32,7 +31,7 @@ export class CommentLikeRepository implements ICommentLikeRepository {
         commentId
       );
     } catch (err) {
-      this.logger.error("CommentLikeRepository", CommentLogMessages.likeFailed, err);
+      this.logger.error("CommentLikeRepository", CommentLogMessages.createLikeFailed, err);
       return new CommentLike();
     } finally {
       res.conn.release();
@@ -52,14 +51,14 @@ export class CommentLikeRepository implements ICommentLikeRepository {
 
         return result.affectedRows > 0;
     } catch (err) {
-        this.logger.error("CommentLikeRepository", CommentLogMessages.unlikeFailed, err);
+        this.logger.error("CommentLikeRepository", CommentLogMessages.deleteLikeFailed, err);
         return false;
     } finally {
         res.conn.release();
     }
-    }
+  }
 
-   async exists(userId: number, commentId: number): Promise<boolean> {
+  async exists(userId: number, commentId: number): Promise<boolean> {
     const res = await this.db.getReadConnection();
     if (!res) return false;
 
@@ -74,7 +73,7 @@ export class CommentLikeRepository implements ICommentLikeRepository {
 
       return rows.length > 0;
     } catch (err) {
-      this.logger.error("CommentLikeRepository", CommentLogMessages.findLikeFailed, err);
+      this.logger.error("CommentLikeRepository", CommentLogMessages.existsLikeFailed, err);
       return false;
     } finally {
       res.conn.release();
@@ -82,7 +81,7 @@ export class CommentLikeRepository implements ICommentLikeRepository {
   }
 
 
-   async countByCommentIds(commentIds: number[]): Promise<Record<number, number>> {
+  async countByCommentIds(commentIds: number[]): Promise<Record<number, number>> {
     const res = await this.db.getReadConnection();
     if (!res || commentIds.length === 0) return {};
 
@@ -98,10 +97,8 @@ export class CommentLikeRepository implements ICommentLikeRepository {
       );
 
       return rows.reduce<Record<number, number>>((acc, row) => {
-        return {
-          ...acc,
-          [Number(row.comment_id)]: Number(row.total),
-        };
+        acc[Number(row.comment_id)] = Number(row.total);
+        return acc;
       }, {});
     } catch (err) {
       this.logger.error("CommentLikeRepository", CommentLogMessages.countLikesFailed, err);
@@ -111,5 +108,4 @@ export class CommentLikeRepository implements ICommentLikeRepository {
     }
   }
   
-
 }

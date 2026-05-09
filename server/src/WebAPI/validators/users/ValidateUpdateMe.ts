@@ -5,10 +5,7 @@ import { ValidateUpdateMeResult } from '../../../Domain/types/users/ValidateUpda
 import { UpdateMeDto } from '../../../Domain/DTOs/users/UpdateMeDto';
 import { UserValidationMessages } from '../../../Domain/constants/messages/user/UserValidationMessages';
 
-export const validateUpdateMe = (
-  input: UpdateMeInput,
-  file?: Express.Multer.File
-): ValidateUpdateMeResult => {
+export const validateUpdateMe = (input: UpdateMeInput, file?: Express.Multer.File): ValidateUpdateMeResult => {
     const dto: UpdateMeDto = {};
 
   if (input.username !== undefined) {

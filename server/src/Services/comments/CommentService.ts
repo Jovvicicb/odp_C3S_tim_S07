@@ -25,7 +25,7 @@ import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperSe
 import { AuditContext } from "../../Domain/types/audits/AuditContext";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
-import { CommentMapper } from "../../Shared/mappers/comments/CommentMpper";
+import { CommentMapper } from "../../Shared/mappers/comments/CommentMapper";
 
 export class CommentService implements ICommentService {
   public constructor(
@@ -120,6 +120,10 @@ export class CommentService implements ICommentService {
       return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
     }
 
+    if (comment.isDeleted) {
+      return ServiceResultFactory.fail(CommentMessages.alreadyDeleted, HttpStatus.conflict);
+    }
+
     const post = await this.postRepo.findById(comment.postId);
     if (post.id === 0) {
       return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
@@ -138,10 +142,6 @@ export class CommentService implements ICommentService {
         CommentMessages.onlyAuthorOrModeratorCanDelete,
         HttpStatus.forbidden
       );
-    }
-
-     if (comment.isDeleted) {
-      return ServiceResultFactory.fail(CommentMessages.alreadyDeleted, HttpStatus.conflict);
     }
 
     const deleted = await this.commentRepo.softDelete(id);

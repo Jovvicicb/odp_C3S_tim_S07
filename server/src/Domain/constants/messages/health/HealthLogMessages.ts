@@ -1,5 +1,5 @@
 export const HealthLogMessages = {
-  getHealthFailed: "Get health failed",
+  getHealthFailed: "Get server health failed",
   getDbHealthFailed: "Get database health failed",
-  failoverFailed: "Failover failed",
+  failoverFailed: "Database failover failed",
 } as const;

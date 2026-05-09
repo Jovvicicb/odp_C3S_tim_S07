@@ -8,23 +8,20 @@ import { GetAuditsDto } from '../../../Domain/DTOs/audits/GetAuditsDto';
 import { AuditMapper } from '../../../Shared/mappers/audits/AuditMapper';
 import { CreateAuditDto } from '../../../Domain/DTOs/audits/CreateAuditDto';
 
-
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
-
 export class AuditRepository implements IAuditRepository {
-    public constructor(
-        private readonly db: DbManager,
-        private readonly logger: ILoggerService,
-      ) {}
+  public constructor(
+    private readonly db: DbManager,
+    private readonly logger: ILoggerService,
+  ) {}
 
-    
-    async create(dto: CreateAuditDto): Promise<Audit> {
+  async create(dto: CreateAuditDto): Promise<Audit> {
     const res = await this.db.getWriteConnection();
     if (!res) return new Audit();
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-       `INSERT INTO audit_logs (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO audit_logs (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)`,
         [
           dto.userId,
           dto.action,
@@ -57,16 +54,16 @@ export class AuditRepository implements IAuditRepository {
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
       `SELECT * FROM audit_logs
-       ORDER BY id ASC
+       ORDER BY created_at DESC
        LIMIT ${lim} OFFSET ${offset}`
-    );
+      );
 
       const [cnt] = await res.conn.execute<RowDataPacket[]>(
         `SELECT COUNT(*) as total FROM audit_logs`
       );
       return {
               audits: rows.map((r) => AuditMapper.toModel(r)),
-              total: cnt[0]?.total ?? 0};
+              total: Number(cnt[0]?.total ?? 0)};
     } catch (err) {
       this.logger.error("AuditRepository", AuditLogMessages.findAllFailed, err);
       return {audits : [] ,total:0};

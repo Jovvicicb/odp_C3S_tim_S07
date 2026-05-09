@@ -9,7 +9,8 @@ export const AuthMessages = {
   registerFailed:  "Failed to register",
   logoutFailed: "Failed to logout",
 
-  alreadyTaken: "Username or email already taken",
+  usernameTaken: "Username is already taken",
+  emailTaken: "Email is already taken",
 
   unauthorized: "Unauthorized",
 } as const;

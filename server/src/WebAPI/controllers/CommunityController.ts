@@ -23,6 +23,7 @@ import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { ICommunityMemberService } from "../../Domain/services/community/ICommunityMemberService";
 import { validateUpdateCommunityMemberRole } from "../validators/community/ValidateUpdateCommunityMemberRole";
 import { validateUpdateCommunityMemberStatus } from "../validators/community/ValidateUpdateCommunityMemberStatus";
+import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 
 export class CommunityController {
   private readonly router = Router();
@@ -73,14 +74,7 @@ export class CommunityController {
 
 
   private async getMine(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const pageParam   = parseStringValue(req.query.page);
     const limitParam = parseStringValue(req.query.limit);
@@ -94,7 +88,7 @@ export class CommunityController {
     } 
 
     try{
-      const result = await this.communityMemberService.getMine(page,limit,userId);
+      const result = await this.communityMemberService.getMine(page, limit, userId);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.getMyCommunitiesFailed, err);
@@ -159,8 +153,9 @@ export class CommunityController {
       return;
     }
 
+    const viewer = OptionalAuthHelper.getUser(req);
     try {
-      const result = await this.communityService.getById(page, limit, id);
+      const result = await this.communityService.getById(page, limit, id, viewer?.id, viewer?.role);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, CommunityLogMessages.getByIdFailed, err);
@@ -174,14 +169,7 @@ export class CommunityController {
 
 
   private async create(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const { validation, dto } = validateCreateCommunity(
       {
@@ -211,14 +199,7 @@ export class CommunityController {
 
 
   private async update(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -252,14 +233,7 @@ export class CommunityController {
   }
 
   private async delete(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -287,213 +261,187 @@ export class CommunityController {
   }
 
   private async join(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
-  if (!userId) {
-    res.status(HttpStatus.unauthorized).json({
-      success: false,
-      message: UserMessages.unauthorized,
-    });
-    return;
+    const userId = req.user!.id;
+
+    const idParam = parseStringValue(req.params.id);
+    const communityId = parseId(idParam);
+
+    const validation = validateId(communityId);
+    if (!validation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: validation.message,
+      });
+      return;
+    }
+
+    try {
+      const result = await this.communityMemberService.join(communityId, userId);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommunityLogMessages.joinFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.joinFailed,
+      });
+    }
   }
 
-  const idParam = parseStringValue(req.params.id);
-  const communityId = parseId(idParam);
+  private async leave(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.id;
 
-  const validation = validateId(communityId);
-  if (!validation.valid) {
-    res.status(HttpStatus.badRequest).json({
-      success: false,
-      message: validation.message,
-    });
-    return;
+    const idParam = parseStringValue(req.params.id);
+    const communityId = parseId(idParam);
+
+    const validation = validateId(communityId);
+    if (!validation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: validation.message,
+      });
+      return;
+    }
+
+    try {
+      const result = await this.communityMemberService.leave(communityId, userId);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommunityLogMessages.leaveFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.leaveFailed,
+      });
+    }
   }
 
-  try {
-    const result = await this.communityMemberService.join(communityId, userId);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, CommunityLogMessages.joinFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: CommunityMessages.joinFailed,
-    });
-  }
-}
-
-private async leave(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
-  if (!userId) {
-    res.status(HttpStatus.unauthorized).json({
-      success: false,
-      message: UserMessages.unauthorized,
-    });
-    return;
-  }
-
-  const idParam = parseStringValue(req.params.id);
-  const communityId = parseId(idParam);
-
-  const validation = validateId(communityId);
-  if (!validation.valid) {
-    res.status(HttpStatus.badRequest).json({
-      success: false,
-      message: validation.message,
-    });
-    return;
-  }
-
-  try {
-    const result = await this.communityMemberService.leave(communityId, userId);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, CommunityLogMessages.leaveFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: CommunityMessages.leaveFailed,
-    });
-  }
-}
 
 
+  private async updateMemberRole(req: Request, res: Response): Promise<void> {
+    const requesterId = req.user!.id;
 
-private async updateMemberRole(req: Request, res: Response): Promise<void> {
-  const requesterId  = req.user?.id;
-  if (!requesterId) {
-    res.status(HttpStatus.unauthorized).json({success: false, message: UserMessages.unauthorized});
-    return;
+    const communityIdParam = parseStringValue(req.params.id);
+    const communityId = parseId(communityIdParam);
+
+    const communityIdValidation = validateId(communityId);
+    if (!communityIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({success: false, message: communityIdValidation.message,});
+      return;
+    }
+
+    const targetUserIdParam = parseStringValue(req.params.userId);
+    const targetUserId = parseId(targetUserIdParam);
+
+    const targetUserIdValidation = validateId(targetUserId);
+    if (!targetUserIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({success: false, message: targetUserIdValidation.message,});
+      return;
+    }
+
+    const { role } = req.body as { role?: string };
+
+    const {validation, normalizedRole} = validateUpdateCommunityMemberRole(role);
+
+    if (!validation.valid || !normalizedRole) {
+      res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
+      return;
+    }
+
+    const ctx = IpHelper.buildAuditContext(req, requesterId);
+    try {
+      const result = await this.communityMemberService.updateMemberRole(communityId, targetUserId, normalizedRole, ctx);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommunityLogMessages.updateMemberRoleFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.updateMemberRoleFailed,
+      });
+    }
   }
 
-  const communityidParam = parseStringValue(req.params.id);
-  const communityId = parseId(communityidParam);
 
-  const communityIdValidation = validateId(communityId);
-  if (!communityIdValidation.valid) {
-    res.status(HttpStatus.badRequest).json({success: false, message: communityIdValidation.message,});
-    return;
+  private async updateMemberStatus(req: Request, res: Response): Promise<void> {
+    const requesterId = req.user!.id;
+
+    const communityIdParam = parseStringValue(req.params.id);
+    const communityId = parseId(communityIdParam);
+
+    const communityIdValidation = validateId(communityId);
+    if (!communityIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({success: false, message: communityIdValidation.message,});
+      return;
+    }
+
+    const targetUserIdParam = parseStringValue(req.params.userId);
+    const targetUserId = parseId(targetUserIdParam);
+
+    const targetUserIdValidation = validateId(targetUserId);
+    if (!targetUserIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({success: false, message: targetUserIdValidation.message,});
+      return;
+    }
+
+    const { action } = req.body as { action?: string };
+
+    const {validation, normalizedAction} = validateUpdateCommunityMemberStatus(action);
+
+    if (!validation.valid || !normalizedAction) {
+      res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
+      return;
+    }
+
+    const ctx = IpHelper.buildAuditContext(req, requesterId);
+    try {
+      const result = await this.communityMemberService.updateMemberStatus(communityId, targetUserId, normalizedAction, ctx);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommunityLogMessages.updateMemberStatusFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.updateMemberStatusFailed,
+      });
+    }
   }
 
-  const targetUserIdParam = parseStringValue(req.params.userId);
-  const targetUserId = parseId(targetUserIdParam);
 
-  const targetUserIdValidation = validateId(targetUserId);
-  if (!targetUserIdValidation.valid) {
-    res.status(HttpStatus.badRequest).json({success: false, message: targetUserIdValidation.message,});
-    return;
+  private async removeMember(req: Request, res: Response): Promise<void> {
+    const requesterId = req.user!.id;
+
+    const communityIdParam = parseStringValue(req.params.id);
+    const communityId = parseId(communityIdParam);
+
+    const communityIdValidation = validateId(communityId);
+    if (!communityIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({success: false, message: communityIdValidation.message,});
+      return;
+    }
+
+    const targetUserIdParam = parseStringValue(req.params.userId);
+    const targetUserId = parseId(targetUserIdParam);
+
+    const targetUserIdValidation = validateId(targetUserId);
+    if (!targetUserIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({success: false, message: targetUserIdValidation.message,});
+      return;
+    }
+
+    const ctx = IpHelper.buildAuditContext(req, requesterId);
+    try {
+      const result = await this.communityMemberService.removeMember(communityId, targetUserId, ctx);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommunityLogMessages.removeMemberFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.removeMemberFailed,
+      });
+    }
   }
-
-  const { role } = req.body as { role?: string };
-
-  const {validation, normalizedRole} = validateUpdateCommunityMemberRole(role);
-
-  if (!validation.valid || !normalizedRole) {
-    res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
-    return;
-  }
-
-  const ctx = IpHelper.buildAuditContext(req, requesterId);
-  try {
-    const result = await this.communityMemberService.updateMemberRole(communityId, targetUserId, normalizedRole, ctx);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, CommunityLogMessages.updateMemberRoleFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: CommunityMessages.updateMemberRoleFailed,
-    });
-  }
-}
-
-
-private async updateMemberStatus(req: Request, res: Response): Promise<void> {
-  const requesterId  = req.user?.id;
-  if (!requesterId) {
-    res.status(HttpStatus.unauthorized).json({success: false, message: UserMessages.unauthorized});
-    return;
-  }
-
-  const communityIdParam = parseStringValue(req.params.id);
-  const communityId = parseId(communityIdParam);
-
-  const communityIdValidation = validateId(communityId);
-  if (!communityIdValidation.valid) {
-    res.status(HttpStatus.badRequest).json({success: false, message: communityIdValidation.message,});
-    return;
-  }
-
-  const targetUserIdParam = parseStringValue(req.params.userId);
-  const targetUserId = parseId(targetUserIdParam);
-
-  const targetUserIdValidation = validateId(targetUserId);
-  if (!targetUserIdValidation.valid) {
-    res.status(HttpStatus.badRequest).json({success: false, message: targetUserIdValidation.message,});
-    return;
-  }
-
-  const { action } = req.body as { action?: string };
-
-  const {validation, normalizedAction} = validateUpdateCommunityMemberStatus(action);
-
-  if (!validation.valid || !normalizedAction) {
-    res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
-    return;
-  }
-
-  const ctx = IpHelper.buildAuditContext(req, requesterId);
-  try {
-    const result = await this.communityMemberService.updateMemberStatus(communityId, targetUserId, normalizedAction, ctx);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, CommunityLogMessages.updateMemberStatusFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: CommunityMessages.updateMemberStatusFailed,
-    });
-  }
-}
-
-
-private async removeMember(req: Request, res: Response): Promise<void> {
-  const requesterId  = req.user?.id;
-  if (!requesterId) {
-    res.status(HttpStatus.unauthorized).json({success: false, message: UserMessages.unauthorized});
-    return;
-  }
-
-  const communityidParam = parseStringValue(req.params.id);
-  const communityId = parseId(communityidParam);
-
-  const communityIdValidation = validateId(communityId);
-  if (!communityIdValidation.valid) {
-    res.status(HttpStatus.badRequest).json({success: false, message: communityIdValidation.message,});
-    return;
-  }
-
-  const targetUserIdParam = parseStringValue(req.params.userId);
-  const targetUserId = parseId(targetUserIdParam);
-
-  const targetUserIdValidation = validateId(targetUserId);
-  if (!targetUserIdValidation.valid) {
-    res.status(HttpStatus.badRequest).json({success: false, message: targetUserIdValidation.message,});
-    return;
-  }
-
-  const ctx = IpHelper.buildAuditContext(req, requesterId);
-  try {
-    const result = await this.communityMemberService.removeMember(communityId, targetUserId, ctx);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, CommunityLogMessages.removeMemberFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: CommunityMessages.removeMemberFailed,
-    });
-  }
-}
 
   public getRouter(): Router { return this.router; }
 }

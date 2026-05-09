@@ -9,7 +9,6 @@ import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { TagLogMessages } from "../../Domain/constants/messages/tags/TagLogMessages";
 import { TagMessages } from "../../Domain/constants/messages/tags/TagMessages";
 import { validateCreateTag } from "../validators/tags/ValidateCreateTag";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { parseStringValue } from "../parser/common/ParseStringValue";
 import { parseId } from "../parser/common/ParseId";
 import { validateId } from "../validators/common/ValidateId";
@@ -27,49 +26,43 @@ export class TagController {
     this.router.get("/tags",                                                 this.getAll.bind(this));
     this.router.post("/tags",       authenticate, authorize(UserRole.ADMIN), this.create.bind(this));
     this.router.delete("/tags/:id", authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
-
   }
 
 
   private async getAll(req: Request, res: Response): Promise<void> {
-  const pageParam = parseStringValue(req.query.page);
-  const limitParam = parseStringValue(req.query.limit);
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
 
-  const { page, limit } = parsePagination(pageParam, limitParam);
+    const { page, limit } = parsePagination(pageParam, limitParam);
 
-  const paginationValidation = validatePagination(page, limit);
-  if (!paginationValidation.valid) {
-    res.status(HttpStatus.badRequest).json({
-      success: false,
-      message: paginationValidation.message,
-    });
-    return;
+    const paginationValidation = validatePagination(page, limit);
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    try {
+      const result = await this.tagService.getAll(page, limit);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, TagLogMessages.findAllFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: TagMessages.fetchAllFailed,
+      });
+    }
   }
-
-  try {
-    const result = await this.tagService.getAll(page, limit);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, TagLogMessages.findAllFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: TagMessages.fetchAllFailed,
-    });
-  }
-}
 
   private async create(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-      if (!userId) {
-        res.status(HttpStatus.unauthorized).json({
-          success: false,
-          message: UserMessages.unauthorized,
-        });
-        return;
-      }
+    const userId = req.user!.id;
 
-    const { validation, dto } = validateCreateTag(req.body as { name?: string });
+    const { validation, dto } = validateCreateTag(
+      req.body as { name?: string }
+    );
 
     if (!validation.valid || !dto) {
       res.status(HttpStatus.badRequest).json({
@@ -95,37 +88,30 @@ export class TagController {
 
 
   private async delete(req: Request, res: Response): Promise<void> {
-      const userId = req.user?.id;
-      if (!userId) {
-        res.status(HttpStatus.unauthorized).json({
-          success: false,
-          message: UserMessages.unauthorized,
-        });
-        return;
-      }
-  
-      const idParam = parseStringValue(req.params.id);
-      const id = parseId(idParam);
-      const v = validateId(id);
-  
-      if (!v.valid) {
-        res.status(HttpStatus.badRequest).json({ success: false, message: v.message });
-        return;
-      } 
-  
-      const ctx = IpHelper.buildAuditContext(req,userId);
-      try{
-        const result = await this.tagService.delete(id,ctx);
-        ResponseHelper.send(res, result);
-      }catch(err){
-        this.logger.error(this.constructor.name, TagLogMessages.deleteFailed, err);
-  
-        res.status(HttpStatus.internalServerError).json({
-          success: false,
-          message: TagMessages.deleteFailed
-        });
-      }
+    const userId = req.user!.id;
+
+    const idParam = parseStringValue(req.params.id);
+    const id = parseId(idParam);
+    const idValidation  = validateId(id);
+
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({ success: false, message: idValidation.message });
+      return;
+    } 
+
+    const ctx = IpHelper.buildAuditContext(req,userId);
+    try{
+      const result = await this.tagService.delete(id,ctx);
+      ResponseHelper.send(res, result);
+    }catch(err){
+      this.logger.error(this.constructor.name, TagLogMessages.deleteFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: TagMessages.deleteFailed
+      });
     }
+  }
 
   public getRouter(): Router { return this.router; }
 }

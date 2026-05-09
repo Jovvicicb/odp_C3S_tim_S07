@@ -7,7 +7,6 @@ import { UserDto } from "../../Domain/DTOs/users/UserDto";
 import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
 import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
 import { IUserFollowService } from "../../Domain/services/users/IUserFollowService";
-import { IUserService } from "../../Domain/services/users/IUserService";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
 import { UserMapper } from "../../Shared/mappers/users/UserMapper";
@@ -15,106 +14,74 @@ import { UserMapper } from "../../Shared/mappers/users/UserMapper";
 export class UserFollowService implements IUserFollowService{
     public constructor(
         private readonly userFollowRepo:IUserFollowRepository,
-        private readonly userRepo: IUserRepository,
-        private readonly userService: IUserService
+        private readonly userRepo: IUserRepository
     ){}
 
 
     async follow(targetUserId: number, userId: number): Promise<ServiceResult> {
-        const followerId = userId;
-
-        if(followerId === targetUserId){
-            return ServiceResultFactory.fail(
-                UserMessages.cannotFollowYourself,
-                HttpStatus.badRequest
-            );
+        if(userId === targetUserId){
+            return ServiceResultFactory.fail(UserMessages.cannotFollowYourself, HttpStatus.badRequest);
         }
 
-        const targetExists = await this.userService.exists(targetUserId);
+        const targetExists = await this.userRepo.exists(targetUserId);
         if(!targetExists){
-            return ServiceResultFactory.fail(
-                UserMessages.notFound,
-                HttpStatus.notFound
-            );
+            return ServiceResultFactory.fail(UserMessages.notFound, HttpStatus.notFound);
         }
 
-        const alreadyExists = await this.userFollowRepo.exists(followerId,targetUserId);
+        const alreadyExists = await this.userFollowRepo.exists(userId,targetUserId);
         if(alreadyExists){
-            return ServiceResultFactory.fail(
-                UserMessages.alreadyFollowing,
-                HttpStatus.conflict
-            );
+            return ServiceResultFactory.fail(UserMessages.alreadyFollowing, HttpStatus.conflict);
         }
 
-        const created = await this.userFollowRepo.create(followerId,targetUserId);
+        const created = await this.userFollowRepo.create(userId,targetUserId);
         if(created.id === 0){
-            return ServiceResultFactory.fail(
-                UserMessages.followFailed,
-                HttpStatus.internalServerError
-            );
+            return ServiceResultFactory.fail(UserMessages.followFailed, HttpStatus.internalServerError);
         }
 
-        return ServiceResultFactory.ok(
-            UserMessages.followedSuccessfully,
-            undefined,
-            HttpStatus.ok
-        );
+        return ServiceResultFactory.ok(UserMessages.followed, undefined, HttpStatus.ok);
     }
 
     async unfollow(targetUserId: number, userId: number): Promise<ServiceResult> {
-        const followerId = userId;
-
-        if(followerId === targetUserId){
-            return ServiceResultFactory.fail(
-                UserMessages.cannotUnfollowYourself,
-                HttpStatus.badRequest
-            );
+        if(userId === targetUserId){
+            return ServiceResultFactory.fail(UserMessages.cannotUnfollowYourself, HttpStatus.badRequest);
         }
 
-        const targetExists = await this.userService.exists(targetUserId);
+        const targetExists = await this.userRepo.exists(targetUserId);
         if(!targetExists){
-            return ServiceResultFactory.fail(
-                UserMessages.notFound,
-                HttpStatus.notFound
-            );
+            return ServiceResultFactory.fail(UserMessages.notFound, HttpStatus.notFound);
         }
 
-        const exists = await this.userFollowRepo.exists(followerId,targetUserId);
+        const exists = await this.userFollowRepo.exists(userId,targetUserId);
         if(!exists){
-            return ServiceResultFactory.fail(
-                UserMessages.notFollowing,
-                HttpStatus.notFound
-            );
+            return ServiceResultFactory.fail(UserMessages.notFollowing, HttpStatus.notFound);
         }
 
-        const deleted = await this.userFollowRepo.delete(followerId,targetUserId);
+        const deleted = await this.userFollowRepo.delete(userId,targetUserId);
         if(!deleted){
-            return ServiceResultFactory.fail(
-                UserMessages.unfollowFailed,
-                HttpStatus.internalServerError
-            );
+            return ServiceResultFactory.fail(UserMessages.unfollowFailed, HttpStatus.internalServerError);
         }
 
-        return ServiceResultFactory.ok(
-            UserMessages.unfollowedSuccessfully,
-            undefined,
-            HttpStatus.ok
-        );
+        return ServiceResultFactory.ok(UserMessages.unfollowed, undefined, HttpStatus.ok);
     }
 
     async getFollowers(dto: GetFollowersDto): Promise<ServiceResult<PaginatedListDto<UserDto>>> {
-        const userExists = await this.userService.exists(dto.userId)
-
+        const userExists = await this.userRepo.exists(dto.userId)
         if(!userExists){
-            return ServiceResultFactory.fail<PaginatedListDto<UserDto>>(
-                UserMessages.notFound,
-                HttpStatus.notFound
-            );
+            return ServiceResultFactory.fail<PaginatedListDto<UserDto>>(UserMessages.notFound, HttpStatus.notFound );
         }
 
         const result = await this.userFollowRepo.getFollowers(dto);
         const foundUsers = await this.userRepo.findByIds(result.followerIds);
-        const usersDto = foundUsers.map((u) => UserMapper.toDto(u));
+        const usersById = foundUsers.reduce<Record<number, UserDto>>((acc, user) => {
+            return {
+            ...acc,
+            [user.id]: UserMapper.toDto(user),
+            };
+        }, {});
+
+         const usersDto = result.followerIds
+            .map((id) => usersById[id])
+            .filter((user): user is UserDto => user !== undefined);
 
         const data = new PaginatedListDto(
             usersDto,
@@ -127,18 +94,24 @@ export class UserFollowService implements IUserFollowService{
     }
 
     async getFollowing(dto: GetFollowingDto): Promise<ServiceResult<PaginatedListDto<UserDto>>> {
-        const userExists = await this.userService.exists(dto.userId)
-
+        const userExists = await this.userRepo.exists(dto.userId)
         if(!userExists){
-            return ServiceResultFactory.fail<PaginatedListDto<UserDto>>(
-                UserMessages.notFound,
-                HttpStatus.notFound
-            );
+            return ServiceResultFactory.fail<PaginatedListDto<UserDto>>( UserMessages.notFound, HttpStatus.notFound);
         }
 
         const result = await this.userFollowRepo.getFollowing(dto);
         const foundUsers = await this.userRepo.findByIds(result.followingIds);
-        const usersDto = foundUsers.map((u) => UserMapper.toDto(u));
+        const usersById = foundUsers.reduce<Record<number, UserDto>>((acc, user) => {
+            return {
+            ...acc,
+            [user.id]: UserMapper.toDto(user),
+            };
+        }, {});
+
+        const usersDto = result.followingIds
+            .map((id) => usersById[id])
+            .filter((user): user is UserDto => user !== undefined);
+
 
         const data = new PaginatedListDto(
             usersDto,

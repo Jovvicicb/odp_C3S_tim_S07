@@ -7,13 +7,13 @@ import { CreateCommunityResponseDto } from "../../../Domain/DTOs/community/Creat
 export class CommunityMapper {
   public static toModel(row: RowDataPacket): Community {
     return new Community(
-      row.id,
-      row.name,
-      row.description ?? null,
-      row.rules ?? null,
+      Number(row.id),
+      String(row.name),
+      row.description === null ? null : String(row.description),
+      row.rules === null ? null : String(row.rules),
       row.type as CommunityType,
-      row.owner_id,
-      row.avatar ?? null,
+      Number(row.owner_id),
+      row.avatar === null ? null : String(row.avatar),
       new Date(row.created_at),
       new Date(row.updated_at)
     );
@@ -32,7 +32,7 @@ export class CommunityMapper {
     );
   }
 
-   public static toCreateResponseDto(community: Community): CreateCommunityResponseDto {
+  public static toCreateResponseDto(community: Community): CreateCommunityResponseDto {
     return new CreateCommunityResponseDto(
       community.id,
     );

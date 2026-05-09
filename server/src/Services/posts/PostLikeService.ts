@@ -31,25 +31,21 @@ export class PostLikeService implements IPostLikeService {
     }
   
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(userId, post.communityId);
-    if (membership.status === CommunityMemberStatus.BANNED) {
+    if( membership.status === CommunityMemberStatus.BANNED || membership.status === CommunityMemberStatus.PENDING) {
         return ServiceResultFactory.fail(PostMessages.cannotLikePost, HttpStatus.forbidden);
     }
 
-    if (membership.status === CommunityMemberStatus.PENDING) {
+    if(community.type === CommunityType.PRIVATE && ( membership.id === 0 || membership.status !== CommunityMemberStatus.ACTIVE )){
         return ServiceResultFactory.fail(PostMessages.cannotLikePost, HttpStatus.forbidden);
     }
 
-    if (community.type === CommunityType.PRIVATE && ( membership.id === 0 || membership.status !== CommunityMemberStatus.ACTIVE )){
-        return ServiceResultFactory.fail(PostMessages.cannotLikePost, HttpStatus.forbidden);
-    }
-
-    const alreadyLiked = await this.postLikeRepo.exists(userId,postId)
+    const alreadyLiked = await this.postLikeRepo.exists(userId,postId);
     if(alreadyLiked){
       return ServiceResultFactory.fail(PostMessages.alreadyLiked, HttpStatus.conflict);
     }
 
     const created = await this.postLikeRepo.create(userId,postId);
-    if (created.id === 0) {
+    if(created.id === 0) {
         return ServiceResultFactory.fail(PostMessages.likeFailed, HttpStatus.internalServerError);
     }
 
@@ -63,13 +59,13 @@ export class PostLikeService implements IPostLikeService {
         return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
 
-    const exists = await this.postLikeRepo.exists(userId,postId)
+    const exists = await this.postLikeRepo.exists(userId,postId);
     if(!exists){
         return ServiceResultFactory.fail(PostMessages.notLiked, HttpStatus.notFound);
     }
 
     const deleted = await this.postLikeRepo.delete(userId,postId);
-    if (!deleted) {
+    if(!deleted) {
         return ServiceResultFactory.fail(PostMessages.unlikeFailed, HttpStatus.internalServerError);
     }
 

@@ -11,12 +11,12 @@ export const CommunityMessages = {
 
   fetchAllSuccess: "Communities fetched successfully",
   fetchPublicSuccess: "Public communities fetched successfully",
-  fetchOneSuccess: "Community details with members fetched successfully",
+  fetchOneSuccess: "Community details and members fetched successfully",
   fetchMineSuccess: "My communities fetched successfully",
 
   fetchAllFailed: "Failed to fetch communities",
   fetchPublicFailed: "Failed to fetch public communities",
-  fetchOneFailed: "Failed to fetch community details with members",
+  fetchOneFailed: "Failed to fetch community details and members",
   fetchMineFailed: "Failed to fetch my communities",
 
   alreadyMember: "User is already a member of this community",
@@ -31,7 +31,7 @@ export const CommunityMessages = {
   leaveFailed: "Failed to leave community",
   notMember: "User is not a member of this community",
   ownerCannotLeave: "Community owner cannot leave the community",
-  requestCancelled: "Join request cancelled",
+  requestCancelled: "Join request cancelled successfully",
   onlyModeratorCanUpdate: "Only community moderators can update this community",
   onlyModeratorCanDelete: "Only community moderators can delete this community",
 
@@ -40,7 +40,7 @@ export const CommunityMessages = {
   memberNotActive: "Only active members can have their role changed",
   ownerRoleCannotBeChanged: "Community owner role cannot be changed",
   cannotChangeOwnMemberRole: "You cannot change your own community role",
-  memberRoleAlreadySet: "Community member already has this role",
+  memberRoleAlreadySet: "Member already has this role",
   memberRoleUpdated: "Community member role updated successfully",
   updateMemberRoleFailed: "Failed to update community member role",
 
@@ -51,7 +51,7 @@ export const CommunityMessages = {
   updateMemberStatusFailed: "Failed to update community member status",
   joinRequestRemovalFailed: "Failed to remove join request",
 
-  onlyModeratorCanRemoveMember: "Only moderators can remove members",
+  onlyModeratorCanRemoveMember: "Only community moderators can remove members",
   memberRemoved: "Member removed successfully",
   removeMemberFailed: "Failed to remove member",
   ownerCannotBeRemoved: "Community owner cannot be removed",

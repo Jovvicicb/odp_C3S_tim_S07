@@ -22,6 +22,8 @@ import { CreateCommunityResponseDto } from "../../Domain/DTOs/community/CreateCo
 import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
 import { CommunityDetailsDto } from "../../Domain/DTOs/community/CommunityDetailsDto";
 import { UserMapper } from "../../Shared/mappers/users/UserMapper";
+import { UserRole } from "../../Domain/enums/UserRole";
+import { UserDto } from "../../Domain/DTOs/users/UserDto";
 
 export class CommunityService implements ICommunityService {
   public constructor(
@@ -80,22 +82,46 @@ export class CommunityService implements ICommunityService {
     return ServiceResultFactory.ok(CommunityMessages.created, createdDto, HttpStatus.created);
   }
 
-   async getById(page: number, limit: number, communityId: number): Promise<ServiceResult<CommunityDetailsDto>> {
+   async getById(page: number, limit: number, communityId: number, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<CommunityDetailsDto>> {
     const community = await this.communityRepo.findById(communityId);
     if (community.id === 0) {
-        return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
+      return ServiceResultFactory.fail<CommunityDetailsDto>(CommunityMessages.notFound, HttpStatus.notFound);
     }
 
-    if (community.type === CommunityType.PRIVATE) {
-      return ServiceResultFactory.fail<CommunityDetailsDto>(CommunityMessages.privateCommunity, HttpStatus.forbidden);
+    const isAdmin = viewerRole === UserRole.ADMIN;
+
+    if (community.type === CommunityType.PRIVATE && !isAdmin) {
+        if (!viewerId) {
+          return ServiceResultFactory.fail<CommunityDetailsDto>(CommunityMessages.privateCommunity, HttpStatus.forbidden);
+        }
+
+        const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(viewerId, communityId);
+        if (
+          membership.id === 0 ||
+          membership.status !== CommunityMemberStatus.ACTIVE
+        ) {
+          return ServiceResultFactory.fail<CommunityDetailsDto>(CommunityMessages.privateCommunity, HttpStatus.forbidden);
+        }
     }
+
 
     const membersResult  = await this.communityMemberRepo.findUserIdsByCommunityId(page,limit,communityId);
 
-    const users  = await this.userRepo.findByIds(membersResult.usersIds);
+    const users  = await this.userRepo.findByIds(membersResult.userIds);
+
+    const usersById = users.reduce<Record<number, UserDto>>((acc, user) => {
+      return {
+        ...acc,
+        [user.id]: UserMapper.toDto(user),
+      };
+    }, {});
+
+    const membersDto = membersResult.userIds
+      .map((id) => usersById[id])
+      .filter((user): user is UserDto => user !== undefined);
 
     const members = new PaginatedListDto(
-        users.map((u) => UserMapper.toDto(u)),
+        membersDto,
         membersResult.total,
         page,
         limit

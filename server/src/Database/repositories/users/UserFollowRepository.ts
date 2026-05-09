@@ -30,7 +30,7 @@ export class UserFollowRepository implements IUserFollowRepository {
 
             return new UserFollow(result.insertId, followerId, followingId);
         } catch (err) {
-             this.logger.error("UserFollowRepository", UserLogMessages.createFolowUserFaild, err);
+             this.logger.error("UserFollowRepository", UserLogMessages.createFollowUserFailed, err);
             return new UserFollow();
         } finally {
             res.conn.release();
@@ -49,7 +49,7 @@ export class UserFollowRepository implements IUserFollowRepository {
 
             return result.affectedRows > 0;
         } catch (err) {
-            this.logger.error("UserFollowRepository", UserLogMessages.deleteFolowUserFaild, err);
+            this.logger.error("UserFollowRepository", UserLogMessages.deleteFollowUserFailed, err);
             return false;
         } finally {
             res.conn.release();
@@ -153,15 +153,15 @@ export class UserFollowRepository implements IUserFollowRepository {
 
         try {
         const [rows] = await res.conn.execute<RowDataPacket[]>(
-            `SELECT COUNT(*) as cnt
+            `SELECT 1
             FROM user_follows
-            WHERE follower_id = ? AND following_id = ?`,
+            WHERE follower_id = ? AND following_id = ? LIMIT 1`,
             [followerId, followingId]
         );
 
-        return (rows[0]?.cnt ?? 0) > 0;
+        return rows.length > 0;
         } catch (err) {
-        this.logger.error("UserFollowRepository", UserLogMessages.existsFolowUserFaild, err);
+        this.logger.error("UserFollowRepository", UserLogMessages.existsFollowUserFailed, err);
         return false;
         } finally {
         res.conn.release();

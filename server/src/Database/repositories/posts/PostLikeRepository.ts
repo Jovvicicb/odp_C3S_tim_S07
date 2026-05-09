@@ -5,8 +5,6 @@ import { PostLogMessages } from "../../../Domain/constants/messages/posts/PostLo
 import { IPostLikeRepository } from "../../../Domain/repositories/posts/IPostLikeRepository";
 import { PostLike } from "../../../Domain/models/PostLike";
 
-const safeInt = (n: number): number => Math.max(0, Math.floor(n));
-
 export class PostLikeRepository implements IPostLikeRepository {
     public constructor(
         private readonly db: DbManager,
@@ -29,10 +27,8 @@ export class PostLikeRepository implements IPostLikeRepository {
             );
 
             return rows.reduce<Record<number, number>>((acc, row) => {
-            return {
-                ...acc,
-                [Number(row.post_id)]: Number(row.total),
-            };
+                acc[Number(row.post_id)] = Number(row.total);
+                return acc;
             }, {});
         } catch (err) {
             this.logger.error("PostLikeRepository", PostLogMessages.countLikesFailed, err);
@@ -85,7 +81,7 @@ export class PostLikeRepository implements IPostLikeRepository {
     }
 
     async exists(userId: number, postId: number): Promise<boolean> {
-        const res = await this.db.getWriteConnection();
+        const res = await this.db.getReadConnection();
         if(!res) return false;
 
         try {

@@ -5,7 +5,6 @@ import { authenticate } from "../../Middlewares/authentification/AuthMiddleware"
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { validateCreateComment } from "../validators/comments/ValidateCreateComment";
 import { CreateCommentInput } from "../types/comments/CreateCommentInput";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
@@ -71,7 +70,7 @@ export class CommentController {
       return;
     }
 
-    const sort =  validateCommentSort(sortParam);
+    const sort = validateCommentSort(sortParam);
     
     const dto = new GetCommentsByPostDto(
       postId,
@@ -102,16 +101,9 @@ export class CommentController {
 
 
   private async create(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-      if (!userId) {
-        res.status(HttpStatus.unauthorized).json({
-          success: false,
-          message: UserMessages.unauthorized,
-        });
-        return;
-      }
+    const userId = req.user!.id;
 
-     const { validation, dto } = validateCreateComment({
+    const { validation, dto } = validateCreateComment({
       ...(req.body as CreateCommentInput),
       userId,
     });
@@ -139,15 +131,7 @@ export class CommentController {
   }
 
   private async update(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -175,7 +159,6 @@ export class CommentController {
     }
 
     const ctx = IpHelper.buildAuditContext(req, userId);
-
     try {
       const result = await this.commentService.update(id, dto, ctx);
       ResponseHelper.send(res, result);
@@ -190,15 +173,7 @@ export class CommentController {
   }
 
   private async delete(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -214,7 +189,6 @@ export class CommentController {
     }
 
     const ctx = IpHelper.buildAuditContext(req, userId);
-
     try {
       const result = await this.commentService.delete(id, ctx);
       ResponseHelper.send(res, result);
@@ -229,15 +203,7 @@ export class CommentController {
   }
 
   private async like(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const commentIdParam = parseStringValue(req.params.id);
     const commentId = parseId(commentIdParam);
@@ -266,15 +232,7 @@ export class CommentController {
   }
 
   private async unlike(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const commentIdParam = parseStringValue(req.params.id);
     const commentId = parseId(commentIdParam);

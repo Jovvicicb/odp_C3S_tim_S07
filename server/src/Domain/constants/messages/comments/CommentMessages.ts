@@ -8,24 +8,23 @@ export const CommentMessages = {
   parentPostMismatch: "Parent comment does not belong to this post",
   maxDepthReached: "Replies can only be one level deep",
 
-  notAllowed: "You cannot comment on this post",
-
+  notAllowed: "You are not allowed to comment on this post",
 
   deleted: "Comment deleted successfully",
   deleteFailed: "Failed to delete comment",
   alreadyDeleted: "Comment is already deleted",
-  onlyAuthorOrModeratorCanDelete: "Only comment author or community moderator can delete this comment",
+  onlyAuthorOrModeratorCanDelete: "Only the comment author or a community moderator can delete this comment",
 
   updated: "Comment updated successfully",
   updateFailed: "Failed to update comment",
-  onlyAuthorCanUpdate: "Only comment author can update this comment",
-  cannotUpdateDeleted: "You cannot update a deleted comment",
+  onlyAuthorCanUpdate: "Only the comment author can update this comment",
+  cannotUpdateDeleted: "Deleted comments cannot be updated",
 
   liked: "Comment liked successfully",
   likeFailed: "Failed to like comment",
   alreadyLiked: "Comment is already liked",
-  cannotLikeComment: "You cannot like this comment",
-  cannotLikeDeletedComment: "You cannot like a deleted comment",
+  cannotLikeComment: "You are not allowed to like this comment",
+  cannotLikeDeletedComment: "Deleted comments cannot be liked",
 
   unliked: "Comment unliked successfully",
   unlikeFailed: "Failed to unlike comment",
@@ -33,6 +32,6 @@ export const CommentMessages = {
 
   fetched: "Comments fetched successfully",
   fetchByPostFailed: "Failed to fetch comments",
-  commentsAccessForbidden: "You cannot view comments for this post",
+  commentsAccessForbidden: "You are not allowed to view comments for this post",
 
 } as const;

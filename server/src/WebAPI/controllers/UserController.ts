@@ -15,7 +15,7 @@ import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { UserLogMessages } from "../../Domain/constants/messages/user/UserLogMessages";
 import { validateUsername } from "../validators/users/ValidateUsername";
 import { UpdateMeInput } from "../types/users/UpdateMeInput";
-import { validateUpdateMe } from "../validators/users/ValidateUpdateMeResult";
+import { validateUpdateMe } from "../validators/users/ValidateUpdateMe";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { upload } from "../../Middlewares/multer/multer";
@@ -41,7 +41,6 @@ export class UserController {
     this.router.delete("/users/:id/follow",    authenticate, authorize(UserRole.USER,UserRole.ADMIN),                         this.unfollow.bind(this));
     this.router.get("/users/all",              authenticate, authorize(UserRole.ADMIN),                                       this.getAll.bind(this));
     this.router.put("/users/:id/role",         authenticate, authorize(UserRole.ADMIN),                                       this.updateRole.bind(this));
-
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
@@ -57,7 +56,6 @@ export class UserController {
     }
 
     const dto = new GetUsersDto(page,limit);
-    
     try{
       const result = await this.userService.getAll(dto);
       ResponseHelper.send(res, result);
@@ -100,7 +98,7 @@ export class UserController {
 
   private async search(req: Request, res: Response): Promise<void> {
     const username = parseStringValue(req.query.username);
-    
+
     const { validation, normalizedUsername } = validateUsername(username);
 
     if (!validation.valid || !normalizedUsername) {
@@ -125,14 +123,7 @@ export class UserController {
   }
 
   private async updateMe(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const { validation, dto } = validateUpdateMe(
       req.body as UpdateMeInput,
@@ -151,9 +142,7 @@ export class UserController {
 
     try {
       const result = await this.userService.update(dto, ctx);
-
       ResponseHelper.send(res,result);
-
     } catch (err) {
       this.logger.error(this.constructor.name, UserLogMessages.updateFailed, err);
 
@@ -165,185 +154,164 @@ export class UserController {
   }
 
   private async updateRole(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
-  if (!userId) {
-    res.status(HttpStatus.unauthorized).json({
-      success: false,
-      message: UserMessages.unauthorized,
-    });
-    return;
-  }
+    const userId = req.user!.id;
 
-  const idParam = parseStringValue(req.params.id);
-  const id = parseId(idParam);
-  
-  const idValidation = validateId(id);
-  if (!idValidation.valid) {
-    res.status(HttpStatus.badRequest).json({
-      success: false,
-      message: idValidation.message
-    });
-    return;
-  }
-
-  const { role } = req.body as { role?: string };
-  const parsedRole = parseStringValue(role);
-
-  const {validation, normalizedRole} = validateUpdateUserRole(parsedRole);
-  
-  if (!validation.valid || !normalizedRole) {
-    res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
-    return;
-  }
-  
-  const ctx = IpHelper.buildAuditContext(req, userId);
-  try {
-    const result = await this.userService.updateRole(id, normalizedRole, ctx);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, UserLogMessages.updateRoleFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: UserMessages.roleUpdateFailed
-    });
-  }
-}
-
-private async follow(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
-  if (!userId) {
-    res.status(HttpStatus.unauthorized).json({
-      success: false,
-      message: UserMessages.unauthorized,
-    });
-    return;
-  }
-
-  const idParam = parseStringValue(req.params.id);
-  const targetUserId = parseId(idParam);
-  
-  const idValidation = validateId(targetUserId);
-  if (!idValidation.valid) {
-    res.status(HttpStatus.badRequest).json({
-      success: false,
-      message: idValidation.message
-    });
-    return;
-  }
-  
-  try {
-    const result = await this.userFollowService.follow(targetUserId,userId);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, UserLogMessages.followFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: UserMessages.followFailed
-    });
-  }
-}
-
-private async unfollow(req: Request, res: Response): Promise<void> {
-  const userId = req.user?.id;
-  if (!userId) {
-    res.status(HttpStatus.unauthorized).json({
-      success: false,
-      message: UserMessages.unauthorized,
-    });
-    return;
-  }
-
-  const idParam = parseStringValue(req.params.id);
-  const targetUserId = parseId(idParam);
-  
-  const idValidation = validateId(targetUserId);
-  if (!idValidation.valid) {
-    res.status(HttpStatus.badRequest).json({
-      success: false,
-      message: idValidation.message
-    });
-    return;
-  }
-  
-  try {
-    const result = await this.userFollowService.unfollow(targetUserId,userId);
-    ResponseHelper.send(res, result);
-  } catch (err) {
-    this.logger.error(this.constructor.name, UserLogMessages.unfollowFailed, err);
-
-    res.status(HttpStatus.internalServerError).json({
-      success: false,
-      message: UserMessages.unfollowFailed
-    });
-  }
-}
-
-private async getFollowers(req: Request, res: Response): Promise<void> {
     const idParam = parseStringValue(req.params.id);
-    const pageParam   = parseStringValue(req.query.page);
-    const limitParam = parseStringValue(req.query.limit);
-
     const id = parseId(idParam);
-    const { page, limit } = parsePagination(pageParam, limitParam);
+    
+    const idValidation = validateId(id);
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message
+      });
+      return;
+    }
 
-    const idValidation  = validateId(id);
-    if (!idValidation .valid) {
-      res.status(HttpStatus.badRequest).json({ success: false, message: idValidation.message });
+    const { role } = req.body as { role?: string };
+    const parsedRole = parseStringValue(role);
+
+    const {validation, normalizedRole} = validateUpdateUserRole(parsedRole);
+    
+    if (!validation.valid || !normalizedRole) {
+      res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
       return;
-    } 
-    const paginationValidation  = validatePagination(page,limit);
-    if (!paginationValidation .valid) {
-      res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
-      return;
-    } 
-    const dto = new GetFollowersDto(id,page,limit);
-    try{
-      const result = await this.userFollowService.getFollowers(dto);
+    }
+    
+    const ctx = IpHelper.buildAuditContext(req, userId);
+    try {
+      const result = await this.userService.updateRole(id, normalizedRole, ctx);
       ResponseHelper.send(res, result);
-    }catch(err){
-      this.logger.error(this.constructor.name, UserLogMessages.getFollowersFailed, err);
+    } catch (err) {
+      this.logger.error(this.constructor.name, UserLogMessages.updateRoleFailed, err);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
-        message: UserMessages.followersFetchFailed
+        message: UserMessages.roleUpdateFailed
       });
     }
-}
+  }
 
-private async getFollowing(req: Request, res: Response): Promise<void> {
+  private async follow(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.id;
+
     const idParam = parseStringValue(req.params.id);
-    const pageParam   = parseStringValue(req.query.page);
-    const limitParam = parseStringValue(req.query.limit);
-
-    const id = parseId(idParam);
-    const { page, limit } = parsePagination(pageParam, limitParam);
-
-    const idValidation  = validateId(id);
-    if (!idValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: idValidation.message });
+    const targetUserId = parseId(idParam);
+    
+    const idValidation = validateId(targetUserId);
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message
+      });
       return;
-    } 
-    const paginationValidation  = validatePagination(page,limit);
-    if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
-      return;
-    } 
-    const dto = new GetFollowingDto(id,page,limit);
-    try{
-      const result = await this.userFollowService.getFollowing(dto);
+    }
+    
+    try {
+      const result = await this.userFollowService.follow(targetUserId,userId);
       ResponseHelper.send(res, result);
-    }catch(err){
-      this.logger.error(this.constructor.name, UserLogMessages.getFollowingFailed, err);
+    } catch (err) {
+      this.logger.error(this.constructor.name, UserLogMessages.followFailed, err);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
-        message: UserMessages.followingFetchFailed
+        message: UserMessages.followFailed
       });
     }
-}
+  }
+
+  private async unfollow(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.id;
+
+    const idParam = parseStringValue(req.params.id);
+    const targetUserId = parseId(idParam);
+    
+    const idValidation = validateId(targetUserId);
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message
+      });
+      return;
+    }
+    
+    try {
+      const result = await this.userFollowService.unfollow(targetUserId,userId);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, UserLogMessages.unfollowFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: UserMessages.unfollowFailed
+      });
+    }
+  }
+
+  private async getFollowers(req: Request, res: Response): Promise<void> {
+      const idParam = parseStringValue(req.params.id);
+      const pageParam  = parseStringValue(req.query.page);
+      const limitParam = parseStringValue(req.query.limit);
+
+      const id = parseId(idParam);
+      const { page, limit } = parsePagination(pageParam, limitParam);
+
+      const idValidation  = validateId(id);
+      if (!idValidation .valid) {
+        res.status(HttpStatus.badRequest).json({ success: false, message: idValidation.message });
+        return;
+      } 
+      const paginationValidation  = validatePagination(page,limit);
+      if (!paginationValidation .valid) {
+        res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+        return;
+      } 
+      const dto = new GetFollowersDto(id,page,limit);
+      try{
+        const result = await this.userFollowService.getFollowers(dto);
+        ResponseHelper.send(res, result);
+      }catch(err){
+        this.logger.error(this.constructor.name, UserLogMessages.getFollowersFailed, err);
+
+        res.status(HttpStatus.internalServerError).json({
+          success: false,
+          message: UserMessages.followersFetchFailed
+        });
+      }
+  }
+
+  private async getFollowing(req: Request, res: Response): Promise<void> {
+      const idParam = parseStringValue(req.params.id);
+      const pageParam  = parseStringValue(req.query.page);
+      const limitParam = parseStringValue(req.query.limit);
+
+      const id = parseId(idParam);
+      const { page, limit } = parsePagination(pageParam, limitParam);
+
+      const idValidation  = validateId(id);
+      if (!idValidation .valid) {
+        res.status(HttpStatus.badRequest).json({ success: false, message: idValidation.message });
+        return;
+      } 
+      const paginationValidation  = validatePagination(page,limit);
+      if (!paginationValidation .valid) {
+        res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation .message });
+        return;
+      } 
+      const dto = new GetFollowingDto(id,page,limit);
+      try{
+        const result = await this.userFollowService.getFollowing(dto);
+        ResponseHelper.send(res, result);
+      }catch(err){
+        this.logger.error(this.constructor.name, UserLogMessages.getFollowingFailed, err);
+
+        res.status(HttpStatus.internalServerError).json({
+          success: false,
+          message: UserMessages.followingFetchFailed
+        });
+      }
+  }
 
 
-public getRouter(): Router { return this.router; }
+  public getRouter(): Router { return this.router; }
 }

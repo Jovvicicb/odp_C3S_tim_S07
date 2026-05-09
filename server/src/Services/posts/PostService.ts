@@ -4,6 +4,7 @@ import { CommunityMessages } from "../../Domain/constants/messages/community/Com
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
+import { CommentTreeDto } from "../../Domain/DTOs/comments/CommentTreeDto";
 import { GetCommentsByPostDto } from "../../Domain/DTOs/comments/GetCommentsByPostDto";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { CreatePostDto } from "../../Domain/DTOs/Posts/CreatePostDto";
@@ -18,6 +19,7 @@ import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMem
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { UserRole } from "../../Domain/enums/UserRole";
+import { Post } from "../../Domain/models/Post";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
 import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
 import { IPostCommentRepository } from "../../Domain/repositories/posts/IPostCommentRepository";
@@ -49,8 +51,57 @@ export class PostService implements IPostService {
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
+  private async buildPostsWithDetails(posts: Post[]): Promise<PostWithDetailsDto[]> {
+    const postIds = posts.map((post) => post.id);
+
+    const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds(postIds);
+    const uniqueTagIds = Array.from(new Set(Object.values(tagIdsByPostId).flat()));
+    const tags = await this.tagRepo.findByIds(uniqueTagIds);
+
+    const tagsById = tags.reduce<Record<number, PostTagDto>>((acc, tag) => {
+      return {
+        ...acc,
+        [tag.id]: new PostTagDto(tag.id, tag.name),
+      };
+    }, {});
+
+    const likeCounts = await this.postLikeRepo.countByPostIds(postIds);
+    const commentCounts = await this.postCommentRepo.countByPostIds(postIds);
+
+    return posts.map((post) => {
+      const postTags = (tagIdsByPostId[post.id] ?? [])
+        .map((tagId) => tagsById[tagId])
+        .filter((tag): tag is PostTagDto => tag !== undefined);
+
+      return PostMapper.toWithDetailsDto(
+        post,
+        postTags,
+        likeCounts[post.id] ?? 0,
+        commentCounts[post.id] ?? 0
+      );
+    });
+  }
+
+  private async buildPostDetails(post: Post, comments: CommentTreeDto[]): Promise<PostDetailsDto> {
+    const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds([post.id]);
+    const tagIds = tagIdsByPostId[post.id] ?? [];
+
+    const tags = await this.tagRepo.findByIds(tagIds);
+    const postTags = tags.map((tag) => new PostTagDto(tag.id, tag.name));
+
+    const likeCounts = await this.postLikeRepo.countByPostIds([post.id]);
+    const commentCounts = await this.postCommentRepo.countByPostIds([post.id]);
+
+    return PostMapper.toDetailsDto(
+      post,
+      postTags,
+      likeCounts[post.id] ?? 0,
+      commentCounts[post.id] ?? 0,
+      comments
+    );
+  }
   
-  async create(dto: CreatePostDto,ctx: AuditContext): Promise<ServiceResult<PostDto>> {
+  async create(dto: CreatePostDto, ctx: AuditContext): Promise<ServiceResult<PostDto>> {
     const community = await this.communityRepo.findById(dto.communityId);
     if (community.id === 0) {
       return ServiceResultFactory.fail<PostDto>(PostMessages.communityNotFound,  HttpStatus.notFound);
@@ -75,7 +126,7 @@ export class PostService implements IPostService {
   async update(id: number, dto: UpdatePostDto, ctx: AuditContext): Promise<ServiceResult> {
     const post = await this.postRepo.findById(id);
     if(post.id === 0){
-        return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+      return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
   
     const requesterId = ctx.userId;
@@ -88,15 +139,12 @@ export class PostService implements IPostService {
         membership.status === CommunityMemberStatus.ACTIVE;
 
     if (!isAuthor && !isModerator) {
-      return ServiceResultFactory.fail(
-        PostMessages.onlyAuthorOrModeratorCanUpdate,
-        HttpStatus.forbidden
-      );
+      return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanUpdate, HttpStatus.forbidden);
     }
 
     const updated = await this.postRepo.update(id,dto);
     if (!updated) {
-        return ServiceResultFactory.fail(PostMessages.updateFailed, HttpStatus.internalServerError);
+      return ServiceResultFactory.fail(PostMessages.updateFailed, HttpStatus.internalServerError);
     }
 
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.POST_UPDATED, AuditDetails.POST_UPDATED, ctx.ipAddress));
@@ -108,7 +156,7 @@ export class PostService implements IPostService {
   async delete(id: number, ctx: AuditContext): Promise<ServiceResult> {
     const post = await this.postRepo.findById(id);
     if(post.id === 0){
-        return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+      return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
 
     const requesterId = ctx.userId;
@@ -121,15 +169,12 @@ export class PostService implements IPostService {
         membership.status === CommunityMemberStatus.ACTIVE;
 
     if (!isAuthor && !isModerator) {
-      return ServiceResultFactory.fail(
-        PostMessages.onlyAuthorOrModeratorCanDelete,
-        HttpStatus.forbidden
-      );
+      return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanDelete, HttpStatus.forbidden);
     }
 
     const deleted = await this.postRepo.delete(id);
     if (!deleted) {
-        return ServiceResultFactory.fail(PostMessages.deleteFailed, HttpStatus.internalServerError);
+      return ServiceResultFactory.fail(PostMessages.deleteFailed, HttpStatus.internalServerError);
     }
 
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.POST_DELETED, AuditDetails.POST_DELETED, ctx.ipAddress));
@@ -162,38 +207,8 @@ export class PostService implements IPostService {
     }
 
     const result = await this.postRepo.findByCommunity(dto);
-    const postIds = result.posts.map((p) => p.id);
-
-    const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds(postIds);
-
-    const uniqueTagIds = Array.from(
-      new Set(Object.values(tagIdsByPostId).flat())
-    );
-
-    const tags = await this.tagRepo.findByIds(uniqueTagIds);
-
-    const tagsById = tags.reduce<Record<number, PostTagDto>>((acc, tag) => {
-      return {
-        ...acc,
-        [tag.id]: new PostTagDto(tag.id, tag.name),
-      };
-    }, {});
-
-    const likeCounts = await this.postLikeRepo.countByPostIds(postIds);
-    const commentCounts = await this.postCommentRepo.countByPostIds(postIds);
-
-    const items = result.posts.map((post) => {
-      const postTags = (tagIdsByPostId[post.id] ?? [])
-        .map((tagId) => tagsById[tagId])
-        .filter((tag): tag is PostTagDto => tag !== undefined);
-
-      return PostMapper.toWithDetailsDto(
-        post,
-        postTags,
-        likeCounts[post.id] ?? 0,
-        commentCounts[post.id] ?? 0
-      );
-    });
+   
+    const items = await this.buildPostsWithDetails(result.posts);
 
     const data = new PaginatedListDto(
       items,
@@ -205,42 +220,14 @@ export class PostService implements IPostService {
     return ServiceResultFactory.ok(PostMessages.postsFetched, data, HttpStatus.ok);
   }
 
-
-
   async getFeed(userId: number, page: number, limit: number): Promise<ServiceResult<PaginatedListDto<PostWithDetailsDto>>> {
     const activeCommunityIds = await this.communityMemberRepo.findActiveCommunityIdsByUserId(userId);
     const followingUserIds = await this.userFollowRepo.findFollowingIdsByUserId(userId);
     const publicCommunityIds = await this.communityRepo.findIdsByType(CommunityType.PUBLIC);
 
-    const result = await this.postRepo.findFeed(page,limit,activeCommunityIds,followingUserIds,publicCommunityIds);
+    const result = await this.postRepo.findFeed(page, limit, activeCommunityIds, followingUserIds, publicCommunityIds);
 
-    const postIds = result.posts.map((p) => p.id);
-    
-    const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds(postIds);
-    const uniqueTagIds = Array.from(new Set(Object.values(tagIdsByPostId).flat()));
-    const tags = await this.tagRepo.findByIds(uniqueTagIds);
-    const tagsById = tags.reduce<Record<number, PostTagDto>>((acc, tag) => {
-      return {
-        ...acc,
-        [tag.id]: new PostTagDto(tag.id, tag.name),
-      };
-    }, {});
-
-    const likeCounts = await this.postLikeRepo.countByPostIds(postIds);
-    const commentCounts = await this.postCommentRepo.countByPostIds(postIds);
-
-    const items = result.posts.map((post) => {
-      const postTags = (tagIdsByPostId[post.id] ?? [])
-        .map((tagId) => tagsById[tagId])
-        .filter((tag): tag is PostTagDto => tag !== undefined);
-
-      return PostMapper.toWithDetailsDto(
-        post,
-        postTags,
-        likeCounts[post.id] ?? 0,
-        commentCounts[post.id] ?? 0
-      );
-    });
+    const items = await this.buildPostsWithDetails(result.posts);
 
     const data = new PaginatedListDto(
       items,
@@ -292,16 +279,6 @@ export class PostService implements IPostService {
       }
     }
 
-    const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds([post.id]);
-    const tagIds = tagIdsByPostId[post.id] ?? [];
-
-    const tags = await this.tagRepo.findByIds(tagIds);
-
-    const postTags = tags.map((tag) => new PostTagDto(tag.id, tag.name));
-
-    const likeCounts = await this.postLikeRepo.countByPostIds([post.id]);
-    const commentCounts = await this.postCommentRepo.countByPostIds([post.id]);
-
     const commentsResult = await this.commentService.getByPost(
       new GetCommentsByPostDto(
         post.id,
@@ -312,22 +289,18 @@ export class PostService implements IPostService {
       viewerId,
       viewerRole
     );
-
+    
     if (!commentsResult.success) {
-      return ServiceResultFactory.fail<PostDetailsDto>(PostMessages.fetchDetailsFailed, HttpStatus.internalServerError);
+      return ServiceResultFactory.fail<PostDetailsDto>(
+        commentsResult.message ?? PostMessages.fetchDetailsFailed,
+        commentsResult.status ?? HttpStatus.internalServerError
+      );
     }
-
     const comments = commentsResult.data?.items ?? [];
 
-    const data = PostMapper.toDetailsDto(
-      post,
-      postTags,
-      likeCounts[post.id] ?? 0,
-      commentCounts[post.id] ?? 0,
-      comments
-    );
+    const data = await this.buildPostDetails(post, comments);
 
-    return ServiceResultFactory.ok(PostMessages.detailsFetched,data,HttpStatus.ok);
+    return ServiceResultFactory.ok(PostMessages.detailsFetched, data,HttpStatus.ok);
   }
 
 }

@@ -66,7 +66,7 @@ export class CommunityRepository implements ICommunityRepository {
       );
       return rows.length > 0 ? CommunityMapper.toModel(rows[0]): new Community();
     } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.findByName, err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByNameFailed, err);
       return new Community();
     } finally { res.conn.release(); }
   }
@@ -94,16 +94,16 @@ export class CommunityRepository implements ICommunityRepository {
 
   async findAll(page: number, limit: number, type?: CommunityType): Promise<{communities:Community[];total:number}> {
     const res = await this.db.getReadConnection();
-    if (!res) return {communities:[],total: 0};
+    if (!res) return {communities:[], total: 0};
 
     const offset = safeInt((page - 1) * limit);
     const lim = safeInt(limit);
-    const where = type ? `WHERE type = ?` : "";
+    const whereClause = type ? `WHERE type = ?` : "";
     try {
        const [rows] = await res.conn.execute<RowDataPacket[]>(
         `SELECT *
        FROM communities
-       ${where}
+       ${whereClause}
        ORDER BY created_at DESC
        LIMIT ${lim} OFFSET ${offset}`,
         type ? [type] : [],
@@ -112,7 +112,7 @@ export class CommunityRepository implements ICommunityRepository {
        const [cnt] = await res.conn.execute<RowDataPacket[]>(
         `SELECT COUNT(*) as total
        FROM communities
-       ${where}`,
+       ${whereClause}`,
         type ? [type] : [],
       );
 

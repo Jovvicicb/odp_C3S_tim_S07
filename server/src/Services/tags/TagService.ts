@@ -24,12 +24,12 @@ export class TagService implements ITagService {
   async create(dto: CreateTagDto, ctx: AuditContext): Promise<ServiceResult<TagDto>> {
     const existing = await this.tagRepo.findByName(dto.name);
     if(existing.id !== 0){
-        return ServiceResultFactory.fail<TagDto>(TagMessages.nameTaken, HttpStatus.conflict);
+      return ServiceResultFactory.fail<TagDto>(TagMessages.nameTaken, HttpStatus.conflict);
     }
 
     const created = await this.tagRepo.create(dto);
     if (created.id === 0) {
-    return ServiceResultFactory.fail<TagDto>(TagMessages.createFailed, HttpStatus.internalServerError);
+      return ServiceResultFactory.fail<TagDto>(TagMessages.createFailed, HttpStatus.internalServerError);
     }
 
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.TAG_CREATED, AuditDetails.TAG_CREATED, ctx.ipAddress));
@@ -40,12 +40,12 @@ export class TagService implements ITagService {
   async delete(id: number, ctx: AuditContext): Promise<ServiceResult> {
     const existing = await this.tagRepo.findById(id);
     if(existing.id === 0){
-        return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
+      return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
     }
 
     const deleted = await this.tagRepo.delete(id);
     if (!deleted) {
-        return ServiceResultFactory.fail(TagMessages.deleteFailed, HttpStatus.internalServerError);
+      return ServiceResultFactory.fail(TagMessages.deleteFailed, HttpStatus.internalServerError);
     }
 
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.TAG_DELETED, AuditDetails.TAG_DELETED, ctx.ipAddress));
@@ -54,7 +54,7 @@ export class TagService implements ITagService {
   }
 
   async getAll(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<TagDto>>> {
-    const result  = await this.tagRepo.findAll(page, limit);
+    const result = await this.tagRepo.findAll(page, limit);
 
     const data = new PaginatedListDto(
         result.tags.map((t) => TagMapper.toDto(t)),

@@ -6,23 +6,23 @@ export class AuditMapper {
 
   public static toModel(row: RowDataPacket): Audit {
     return new Audit(
-      row.id,
-      row.user_id,
-      row.action,
-      row.details,
-      row.ip_address,
+      Number(row.id),
+      Number(row.user_id),
+      String(row.action),
+      String(row.details),
+      String(row.ip_address),
       new Date(row.created_at)
     );
   }
     
-  public static toDto(user: Audit): AuditDto {
+  public static toDto(audit: Audit): AuditDto {
     return new AuditDto(
-      user.id,
-      user.userId,
-      user.action,
-      user.details,
-      user.ipAddress,
-      user.createdAt
+      audit.id,
+      audit.userId,
+      audit.action,
+      audit.details,
+      audit.ipAddress,
+      audit.createdAt
     );
   }
 }

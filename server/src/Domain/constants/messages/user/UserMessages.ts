@@ -29,10 +29,12 @@ export const UserMessages = {
   cannotFollowYourself: "You cannot follow yourself",
   alreadyFollowing: "You are already following this user",
   followFailed: "Failed to follow user",
-  followedSuccessfully: "User followed successfully",
+  followed: "User followed successfully",
 
   cannotUnfollowYourself: "You cannot unfollow yourself",
   notFollowing: "You are not following this user",
   unfollowFailed: "Failed to unfollow user",
-  unfollowedSuccessfully: "User unfollowed successfully",
+  unfollowed: "User unfollowed successfully",
+
+  cannotChangeOwnRole: "You cannot change your own role",
 } as const;

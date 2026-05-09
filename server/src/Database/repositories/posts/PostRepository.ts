@@ -12,32 +12,32 @@ import { PostSortType } from "../../../Domain/enums/posts/PostSortType";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
-export class PostRepository implements IPostRepository {
-  public constructor(
-    private readonly db: DbManager,
-    private readonly logger: ILoggerService,
-  ) {}
+  export class PostRepository implements IPostRepository {
+    public constructor(
+      private readonly db: DbManager,
+      private readonly logger: ILoggerService,
+    ) {}
 
 
-  
-async findById(id: number): Promise<Post> {
-    const res = await this.db.getReadConnection();
-    if (!res) return new Post();
+    
+  async findById(id: number): Promise<Post> {
+      const res = await this.db.getReadConnection();
+      if (!res) return new Post();
 
-    try {
-        const [rows] = await res.conn.execute<RowDataPacket[]>(
-            `SELECT * FROM posts WHERE id = ? LIMIT 1`,
-            [id]
-        );
+      try {
+          const [rows] = await res.conn.execute<RowDataPacket[]>(
+              `SELECT * FROM posts WHERE id = ? LIMIT 1`,
+              [id]
+          );
 
-        return rows.length > 0 ? PostMapper.toModel(rows[0]) : new Post();
-    } catch (err) {
-        this.logger.error("PostRepository", PostLogMessages.findByIdFailed, err);
-        return new Post();
-    } finally {
-        res.conn.release();
-    }
-}
+          return rows.length > 0 ? PostMapper.toModel(rows[0]) : new Post();
+      } catch (err) {
+          this.logger.error("PostRepository", PostLogMessages.findByIdFailed, err);
+          return new Post();
+      } finally {
+          res.conn.release();
+      }
+  }
 
   async create(dto: CreatePostDto): Promise<Post> {
     const res = await this.db.getWriteConnection();
@@ -113,7 +113,7 @@ async findById(id: number): Promise<Post> {
 
       return {
         posts: rows.map((r) => PostMapper.toModel(r)),
-        total: cnt[0]?.total ?? 0,
+        total: Number(cnt[0]?.total ?? 0),
       };
     } catch (err) {
       this.logger.error("PostRepository", PostLogMessages.findByCommunityFailed, err);
@@ -193,46 +193,46 @@ async findById(id: number): Promise<Post> {
 
 
   async update(postId: number, dto: UpdatePostDto): Promise<boolean> {
-  const res = await this.db.getWriteConnection();
-  if (!res) return false;
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
 
-  try {
-    const fieldMap: Record<string, string> = {
-      title: "title",
-      content: "content",
-      mediaUrl: "media_url",
-    };
+    try {
+      const fieldMap: Record<string, string> = {
+        title: "title",
+        content: "content",
+        mediaUrl: "media_url",
+      };
 
-    const entries = Object.entries(dto)
-      .filter(([, v]) => v !== undefined)
-      .map(([key, value]) => [fieldMap[key], value] as const)
-      .filter(([column]) => !!column);
+      const entries = Object.entries(dto)
+        .filter(([, v]) => v !== undefined)
+        .map(([key, value]) => [fieldMap[key], value] as const)
+        .filter(([column]) => column !== undefined);
 
-    if (entries.length === 0) return false;
+      if (entries.length === 0) return false;
 
-    const setClause = entries.map(([column]) => `${column} = ?`).join(", ");
-    const values = entries.map(([, value]) => value);
+      const setClause = entries.map(([column]) => `${column} = ?`).join(", ");
+      const values = entries.map(([, value]) => value);
 
-    const [result] = await res.conn.execute<ResultSetHeader>(
-      `UPDATE posts SET ${setClause} WHERE id = ?`,
-      [...values, postId]
-    );
+      const [result] = await res.conn.execute<ResultSetHeader>(
+        `UPDATE posts SET ${setClause} WHERE id = ?`,
+        [...values, postId]
+      );
 
-    return result.affectedRows > 0;
-  } catch (err) {
-    this.logger.error("PostRepository", PostLogMessages.updateFailed, err);
-    return false;
-  } finally {
-    res.conn.release();
+      return result.affectedRows > 0;
+    } catch (err) {
+      this.logger.error("PostRepository", PostLogMessages.updateFailed, err);
+      return false;
+    } finally {
+      res.conn.release();
+    }
   }
-}
 
 
   async delete(id: number): Promise<boolean> {
     const res = await this.db.getWriteConnection();
     if (!res) return false;
     try {
-    const [result] = await res.conn.execute<ResultSetHeader>(
+      const [result] = await res.conn.execute<ResultSetHeader>(
         `DELETE FROM posts WHERE id = ?`,
         [id]
     );
@@ -242,9 +242,6 @@ async findById(id: number): Promise<Post> {
       this.logger.error("PostRepository", PostLogMessages.deleteFailed, err);
       return false;
     } finally { res.conn.release(); }   
-}
-
-
-
+  }
 
 }

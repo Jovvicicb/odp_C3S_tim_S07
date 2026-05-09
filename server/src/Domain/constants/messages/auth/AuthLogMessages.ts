@@ -1,6 +1,5 @@
 export const AuthLogMessages = {
-  loginFailed:    "login failed",
-  registerFailed: "register failed",
-  logoutFailed:    "logout failed",
-
+  loginFailed:    "Login failed",
+  registerFailed: "Register failed",
+  logoutFailed:    "Logout failed",
 } as const;

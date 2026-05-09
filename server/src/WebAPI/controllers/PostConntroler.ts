@@ -6,7 +6,6 @@ import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { upload } from "../../Middlewares/multer/multer";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { CreatePostInput } from "../types/posts/CreatePostInput";
 import { IpHelper } from "../../Shared/helpers/IpHelper";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
@@ -47,7 +46,6 @@ export class PostController {
         this.router.post("/posts/:id/tags",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.addTag.bind(this));
         this.router.delete("/posts/:id/tags/:tagId", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeTag.bind(this));
     }
-
 
 
   private async getByCommunity(req: Request, res: Response): Promise<void> {
@@ -103,15 +101,7 @@ export class PostController {
 
 
   private async getFeed(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const pageParam = parseStringValue(req.query.page);
     const limitParam = parseStringValue(req.query.limit);
@@ -142,14 +132,7 @@ export class PostController {
 
 
   private async create(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const { validation, dto } = validateCreatePost(
       {
@@ -178,6 +161,18 @@ export class PostController {
   }
 
   private async getById(req: Request, res: Response): Promise<void> {
+    const idParam = parseStringValue(req.params.id);
+    const id = parseId(idParam);
+
+    const idValidation = validateId(id);
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message,
+      });
+      return;
+    }
+
     const commentsPageParam = parseStringValue(req.query.commentsPage);
     const commentsLimitParam = parseStringValue(req.query.commentsLimit);
     const commentsSortParam = parseStringValue(req.query.commentsSort);
@@ -194,19 +189,6 @@ export class PostController {
     }
 
     const commentsSort = validateCommentSort(commentsSortParam);
-
-    const idParam = parseStringValue(req.params.id);
-    const id = parseId(idParam);
-
-    const idValidation = validateId(id);
-
-    if (!idValidation.valid) {
-      res.status(HttpStatus.badRequest).json({
-        success: false,
-        message: idValidation.message,
-      });
-      return;
-    }
 
     const viewer = OptionalAuthHelper.getUser(req);
 
@@ -225,14 +207,7 @@ export class PostController {
 
 
   private async delete(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -261,14 +236,7 @@ export class PostController {
 
 
   private async update(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -304,14 +272,7 @@ export class PostController {
 
 
   private async like(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const postIdParam = parseStringValue(req.params.id);
     const postId = parseId(postIdParam);
@@ -341,14 +302,7 @@ export class PostController {
 
   
   private async unlike(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: UserMessages.unauthorized,
-      });
-      return;
-    }
+    const userId = req.user!.id;
 
     const postIdParam = parseStringValue(req.params.id);
     const postId = parseId(postIdParam);
@@ -377,11 +331,7 @@ export class PostController {
 
 
   private async addTag(req: Request, res: Response): Promise<void> {
-    const userId  = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({success: false, message: UserMessages.unauthorized});
-      return;
-    }
+    const userId = req.user!.id;
   
     const postIdParam = parseStringValue(req.params.id);
     const postId = parseId(postIdParam);
@@ -417,11 +367,7 @@ export class PostController {
 
 
   private async removeTag(req: Request, res: Response): Promise<void> {
-    const requesterId  = req.user?.id;
-    if (!requesterId) {
-      res.status(HttpStatus.unauthorized).json({success: false, message: UserMessages.unauthorized});
-      return;
-    }
+    const requesterId = req.user!.id;
   
     const postIdParam = parseStringValue(req.params.id);
     const postId = parseId(postIdParam);
@@ -454,12 +400,6 @@ export class PostController {
       });
     }
   }
-
-
-
-
-  
-  
 
   public getRouter(): Router { return this.router; }
 }

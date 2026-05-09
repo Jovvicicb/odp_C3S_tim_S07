@@ -27,6 +27,6 @@ export class HealthService implements IHealthService {
     const data = HealthMapper.toDbNodeHealthDto(newMaster);
 
     return ServiceResultFactory.ok(HealthMessages.failoverSuccess, data, HttpStatus.ok);
-    }
+  }
 
 }

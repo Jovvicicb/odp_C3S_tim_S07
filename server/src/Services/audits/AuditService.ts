@@ -11,14 +11,15 @@ import { AuditMessages } from "../../Domain/constants/messages/audits/AuditMessa
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 
 export class AuditService implements IAuditService {
-  public constructor(private readonly auditRepo: IAuditRepository) {}
+    public constructor(private readonly auditRepo: IAuditRepository
+  ) {}
 
   async getAll(dto : GetAuditsDto): Promise<ServiceResult<PaginatedListDto<AuditDto>>> {
-    const items = await this.auditRepo.findAll(dto);
+    const result  = await this.auditRepo.findAll(dto);
     
     const data = new PaginatedListDto(
-      items.audits.map((c) => AuditMapper.toDto(c)),
-      items.total, 
+      result.audits.map((audit) => AuditMapper.toDto(audit)),
+      result.total, 
       dto.page, 
       dto.limit
     );
@@ -28,6 +29,7 @@ export class AuditService implements IAuditService {
   async create(dto: CreateAuditDto): Promise<AuditDto | null> {
     const created = await this.auditRepo.create(dto);
     if (created.id === 0) return null;
+    
     return AuditMapper.toDto(created);
   }
 

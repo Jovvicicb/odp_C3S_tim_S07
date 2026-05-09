@@ -5,8 +5,8 @@ import { TagDto } from "../../../Domain/DTOs/tags/TagDto";
 export class TagMapper {
   public static toModel(row: RowDataPacket): Tag {
     return new Tag(
-      row.id,
-      row.name,
+      Number(row.id),
+      String(row.name),
       new Date(row.created_at)
     );
   }

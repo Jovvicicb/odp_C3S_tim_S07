@@ -5,7 +5,7 @@ import { CommunityMember } from "../../models/CommunityMember";
 export interface ICommunityMemberRepository {
     findCommunityIdsByUserId(page: number, limit: number, userId: number): Promise<{communityIds: number[]; total: number}>;
     findActiveCommunityIdsByUserId(userId: number): Promise<number[]>;
-    findUserIdsByCommunityId(page: number, limit: number, communityId: number): Promise<{ usersIds: number[]; total: number}>;
+    findUserIdsByCommunityId(page: number, limit: number, communityId: number): Promise<{ userIds: number[]; total: number}>;
     create(userId: number, communityId: number, role: CommunityMemberRole, status: CommunityMemberStatus): Promise<boolean>;
     updateRole(userId: number, communityId: number, role: CommunityMemberRole): Promise<boolean>;
     updateStatus(userId: number, communityId: number, status: CommunityMemberStatus): Promise<boolean>;

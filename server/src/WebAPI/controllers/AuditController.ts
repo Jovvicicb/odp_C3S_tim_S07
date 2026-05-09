@@ -16,11 +16,12 @@ import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 export class AuditController {
   private readonly router = Router();
 
-  public constructor(private readonly auditService: IAuditService,
-     private readonly logger: ILoggerService
+  public constructor(
+    private readonly auditService: IAuditService,
+    private readonly logger: ILoggerService
   ) {
     this.router.get("/audits/logs", authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
-  }
+    }
 
   private async getAll(req: Request, res: Response): Promise<void> {
     const pageParam   = parseStringValue(req.query.page);
@@ -35,7 +36,6 @@ export class AuditController {
     }
 
     const dto = new GetAuditsDto(page,limit);
-    
     try{
       const result = await this.auditService.getAll(dto);
       ResponseHelper.send(res, result);

@@ -27,7 +27,7 @@ export class CommentLikeService implements ICommentLikeService {
   async like(userId: number, commentId: number): Promise<ServiceResult> {
     const comment = await this.commentRepo.findById(commentId);
     if (comment.id === 0) {
-    return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
+        return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
     }
 
     if (comment.isDeleted) {
@@ -85,6 +85,6 @@ export class CommentLikeService implements ICommentLikeService {
     }
 
     return ServiceResultFactory.ok(CommentMessages.unliked, undefined, HttpStatus.ok);
-    }
+  }
     
 }

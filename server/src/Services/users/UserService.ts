@@ -18,8 +18,8 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { UserRole } from "../../Domain/enums/UserRole";
 
 export class UserService implements IUserService {
-  private readonly saltRounds = parseInt(process.env.SALT_ROUNDS ?? "10", 10);
-  public constructor(private readonly userRepo: IUserRepository,
+    private readonly saltRounds = parseInt(process.env.SALT_ROUNDS ?? "10", 10);
+    public constructor(private readonly userRepo: IUserRepository,
     private readonly auditHelperService: IAuditHelperService,
   ) {}
 
@@ -38,17 +38,15 @@ export class UserService implements IUserService {
 
   async getById(id: number): Promise<ServiceResult<UserDto>> {
     const user = await this.userRepo.findById(id);
-
     if (user.id === 0){
-      return ServiceResultFactory.fail(UserMessages.notFound, HttpStatus.notFound
-    );
+      return ServiceResultFactory.fail(UserMessages.notFound, HttpStatus.notFound);
     }
+    
     return ServiceResultFactory.ok(UserMessages.fetchOneSuccess,UserMapper.toDto(user),HttpStatus.ok);
   }
 
   async getByUsername(username: string): Promise<ServiceResult<UserDto>> {
     const user = await this.userRepo.findByUsername(username);
-
     if (user.id === 0) {
       return ServiceResultFactory.fail(UserMessages.notFound, HttpStatus.notFound);
     }
@@ -57,93 +55,72 @@ export class UserService implements IUserService {
   }
 
   async update(dto: UpdateMeDto,ctx:AuditContext): Promise<ServiceResult> {
-      const userId = ctx.userId;
-       if (!userId) {
-          return ServiceResultFactory.fail(UserMessages.unauthorized, HttpStatus.unauthorized);
-       }
+    const userId = ctx.userId;
 
-      if (dto.username !== undefined) {
-        const byUsername = await this.userRepo.findByUsername(dto.username);
-        if (byUsername.id !== 0 && byUsername.id !== userId) {
-           return ServiceResultFactory.fail(UserMessages.usernameTaken, HttpStatus.conflict);
-        }
+    if (dto.username !== undefined) {
+      const byUsername = await this.userRepo.findByUsername(dto.username);
+      if (byUsername.id !== 0 && byUsername.id !== userId) {
+        return ServiceResultFactory.fail(UserMessages.usernameTaken, HttpStatus.conflict);
       }
+    }
 
-      if (dto.email !== undefined) {
-        const byEmail = await this.userRepo.findByEmail(dto.email);
-        if (byEmail.id !== 0 && byEmail.id !== userId) {
-            return ServiceResultFactory.fail(UserMessages.emailTaken, HttpStatus.conflict);
-        }
+    if (dto.email !== undefined) {
+      const byEmail = await this.userRepo.findByEmail(dto.email);
+      if (byEmail.id !== 0 && byEmail.id !== userId) {
+        return ServiceResultFactory.fail(UserMessages.emailTaken, HttpStatus.conflict);
       }
+    }
 
-      const updateDto = new UpdateMeDto(
-        dto.username,
-        dto.email,
-        dto.password,
-        dto.fullname,
-        dto.bio,
-        dto.profilePicture
-      );
+    const updateDto = new UpdateMeDto(
+      dto.username,
+      dto.email,
+      dto.password,
+      dto.fullname,
+      dto.bio,
+      dto.profilePicture
+    );
 
-      if (dto.password !== undefined) {
-        const hash = await bcrypt.hash(dto.password, this.saltRounds).catch(() => "");
-        if (!hash) {
-           return ServiceResultFactory.fail(UserMessages.updateFailed, HttpStatus.internalServerError);
-        }
-        updateDto.password = hash;
+    if (dto.password !== undefined) {
+      const hash = await bcrypt.hash(dto.password, this.saltRounds).catch(() => "");
+      if (!hash) {
+        return ServiceResultFactory.fail(UserMessages.updateFailed, HttpStatus.internalServerError);
       }
+      updateDto.password = hash;
+    }
 
-      const isUpdated = await this.userRepo.update(userId, updateDto);
-      if (!isUpdated) {
-         return ServiceResultFactory.fail(UserMessages.updateFailed, HttpStatus.internalServerError);
-      }
+    const isUpdated = await this.userRepo.update(userId, updateDto);
+    if (!isUpdated) {
+      return ServiceResultFactory.fail(UserMessages.updateFailed, HttpStatus.internalServerError);
+    }
 
-      await this.auditHelperService.safeCreate(
-        new CreateAuditDto(
-          userId,
-          AuditActions.USER_UPDATED,
-          AuditDetails.USER_UPDATED,
-          ctx.ipAddress
-        )
-      );
+    await this.auditHelperService.safeCreate(
+      new CreateAuditDto(userId, AuditActions.USER_UPDATED, AuditDetails.USER_UPDATED, ctx.ipAddress)
+    );
 
-      return ServiceResultFactory.ok(UserMessages.updated, undefined, HttpStatus.ok);
+    return ServiceResultFactory.ok(UserMessages.updated, undefined, HttpStatus.ok);
   }
 
   async updateRole(id: number, role: UserRole,ctx:AuditContext): Promise<ServiceResult> {
-  const exists = await this.userRepo.exists(id);
+    const exists = await this.userRepo.exists(id);
+    if (!exists) {
+      return ServiceResultFactory.fail(UserMessages.notFound,HttpStatus.notFound);
+    }
 
-  if (!exists) {
-    return ServiceResultFactory.fail(
-      UserMessages.notFound,
-      HttpStatus.notFound
+    if (ctx.userId === id) {
+      return ServiceResultFactory.fail(UserMessages.cannotChangeOwnRole, HttpStatus.forbidden);
+    }
+
+    const isUpdated = await this.userRepo.updateRole(id, role);
+    if (!isUpdated) {
+      return ServiceResultFactory.fail(UserMessages.roleUpdateFailed, HttpStatus.internalServerError);
+    }
+
+    await this.auditHelperService.safeCreate(
+      new CreateAuditDto(ctx.userId, AuditActions.USER_ROLE_CHANGED, AuditDetails.USER_ROLE_CHANGED, ctx.ipAddress)
     );
+
+    return ServiceResultFactory.ok(UserMessages.roleUpdated, undefined, HttpStatus.ok);
   }
-
-  const isUpdated = await this.userRepo.updateRole(id, role);
-
-  if (!isUpdated) {
-    return ServiceResultFactory.fail(
-      UserMessages.roleUpdateFailed,
-      HttpStatus.internalServerError
-    );
-  }
-
-  await this.auditHelperService.safeCreate(
-        new CreateAuditDto(
-          ctx.userId,
-          AuditActions.USER_ROLE_CHANGED,
-          AuditDetails.USER_ROLE_CHANGED,
-          ctx.ipAddress
-        )
-      );
-
-  return ServiceResultFactory.ok(
-    UserMessages.roleUpdated,
-    undefined,
-    HttpStatus.ok
-  );
-}
 
   async exists(id: number): Promise<boolean> {
     return this.userRepo.exists(id);

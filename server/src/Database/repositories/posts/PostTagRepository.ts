@@ -5,7 +5,6 @@ import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { PostLogMessages } from "../../../Domain/constants/messages/posts/PostLogMessages";
 import { PostTag } from "../../../Domain/models/PostTag";
 
-const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
 export class PostTagRepository implements IPostTagRepository {
     public constructor(
@@ -28,13 +27,10 @@ export class PostTagRepository implements IPostTagRepository {
             );
 
             return rows.reduce<Record<number, number[]>>((acc, row) => {
-            const postId = Number(row.post_id);
-            const tagId = Number(row.tag_id);
-
-            return {
-                ...acc,
-                [postId]: [...(acc[postId] ?? []), tagId],
-            };
+                const postId = Number(row.post_id);
+                const tagId = Number(row.tag_id);
+                acc[postId] = [...(acc[postId] ?? []), tagId];
+                return acc;
             }, {});
         } catch (err) {
             this.logger.error("PostTagRepository", PostLogMessages.findPostTagsFailed, err);
@@ -66,28 +62,28 @@ export class PostTagRepository implements IPostTagRepository {
     }
 
     async delete(postId: number, tagId: number): Promise<boolean> {
-    const res = await this.db.getWriteConnection();
-    if (!res) return false;
+        const res = await this.db.getWriteConnection();
+        if (!res) return false;
 
-    try {
-        const [result] = await res.conn.execute<ResultSetHeader>(
-        `DELETE FROM post_tags
-        WHERE post_id = ? AND tag_id = ?`,
-        [postId, tagId]
-        );
+        try {
+            const [result] = await res.conn.execute<ResultSetHeader>(
+            `DELETE FROM post_tags
+            WHERE post_id = ? AND tag_id = ?`,
+            [postId, tagId]
+            );
 
-        return result.affectedRows > 0;
-    } catch (err) {
-        this.logger.error("PostTagRepository", PostLogMessages.removeTagFailed, err);
-        return false;
-    } finally {
-        res.conn.release();
-    }
+            return result.affectedRows > 0;
+        } catch (err) {
+            this.logger.error("PostTagRepository", PostLogMessages.removeTagFailed, err);
+            return false;
+        } finally {
+            res.conn.release();
+        }
     }
 
     
     async exists(postId: number, tagId: number): Promise<boolean> {
-        const res = await this.db.getWriteConnection();
+        const res = await this.db.getReadConnection();
         if(!res) return false;
 
         try {

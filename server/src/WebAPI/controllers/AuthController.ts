@@ -111,15 +111,7 @@ export class AuthController {
   }
   
   private async logout(req: Request, res: Response): Promise<void> {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(HttpStatus.unauthorized).json({
-        success: false,
-        message: AuthMessages.unauthorized,
-      });
-      return;
-    }
-    const ctx = IpHelper.buildAuditContext(req,userId);
+    const ctx = IpHelper.buildAuditContext(req,req.user!.id);
     try{
       const result =  await this.authService.logout(ctx);
       ResponseHelper.send(res, result);

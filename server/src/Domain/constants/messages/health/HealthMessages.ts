@@ -3,9 +3,10 @@ export const HealthMessages = {
   serverHealthFailed: "Failed to check server health",
 
   dbHealthFetched: "Database health status fetched successfully",
-  dbHealthFetchFailed: "Failed to fetch database health status",  
+  dbHealthFetchFailed: "Failed to fetch database health status",
 
-  failoverSuccess: "Failover completed successfully",
-  failoverFailed: "Failed to perform failover",
-  noHealthySlave: "No healthy slave available for failover",
+  failoverSuccess: "Database failover completed successfully",
+  failoverFailed: "Failed to perform database failover",
+
+  noHealthySlave: "No healthy slave node available for failover",
 } as const;

@@ -16,27 +16,27 @@ export class TagRepository implements ITagRepository {
   ) {}
 
   async findByIds(ids: number[]): Promise<Tag[]> {
-  const res = await this.db.getReadConnection();
-  if (!res || ids.length === 0) return [];
+    const res = await this.db.getReadConnection();
+    if (!res || ids.length === 0) return [];
 
-  const placeholders = ids.map(() => "?").join(",");
+    const placeholders = ids.map(() => "?").join(",");
 
-  try {
-    const [rows] = await res.conn.execute<RowDataPacket[]>(
-      `SELECT *
-       FROM tags
-       WHERE id IN (${placeholders})`,
-      ids
-    );
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM tags
+        WHERE id IN (${placeholders})`,
+        ids
+      );
 
-    return rows.map((r) => TagMapper.toModel(r));
-  } catch (err) {
-    this.logger.error("TagRepository", TagLogMessages.findByIdsFailed, err);
-    return [];
-  } finally {
-    res.conn.release();
+      return rows.map((r) => TagMapper.toModel(r));
+    } catch (err) {
+      this.logger.error("TagRepository", TagLogMessages.findByIdsFailed, err);
+      return [];
+    } finally {
+      res.conn.release();
+    }
   }
-}
 
   async create(dto: CreateTagDto): Promise<Tag> {
     const res = await this.db.getWriteConnection();
@@ -44,7 +44,7 @@ export class TagRepository implements ITagRepository {
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
        `INSERT INTO tags (name) VALUES (?)`,
-        [dto.name ]
+        [dto.name]
       );
       if (result.insertId === 0) return new Tag();
       return new Tag(
@@ -101,7 +101,7 @@ export class TagRepository implements ITagRepository {
 
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT * FROM tags WHERE name = ?`,
+        `SELECT * FROM tags WHERE name = ? LIMIT 1`,
          [name]
       );
       return rows.length > 0 ? TagMapper.toModel(rows[0]) : new Tag();
@@ -130,7 +130,7 @@ export class TagRepository implements ITagRepository {
 
     return {
             tags: rows.map((r) => TagMapper.toModel(r)),
-            total: cnt[0]?.total ?? 0};
+            total: Number(cnt[0]?.total ?? 0)};
     } catch (err) {
       this.logger.error("TagRepository", TagLogMessages.findAllFailed, err);
       return {tags : [] ,total:0};

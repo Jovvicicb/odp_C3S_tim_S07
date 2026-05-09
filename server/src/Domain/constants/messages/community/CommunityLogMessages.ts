@@ -12,18 +12,17 @@ export const CommunityLogMessages = {
   // repository
   findAllFailed: "findAll failed",
   findByIdFailed: "findById failed",
-  findByName: "findByName failed",
+  findByNameFailed: "findByName failed",
   findByUserIdFailed: "findByUserId failed",
-  findByUserIdAndCommunityid: "Find community member failed",
+  findByUserIdAndCommunityId: "Find community member failed",
   findByIdsFailed: "Find communities by ids failed",
   findMyCommunitiesFailed: "Find my communities failed",
+  findActiveCommunityIdsFailed: "find active community ids failed",
   findMembersFailed: "Find community members failed",
   exists: "exists failed",
   updateMemberRoleFailed: "Update community member role failed",
   updateMemberStatusFailed: "Update community member status failed",
 
-
-  
   // shared
   createFailed: "create failed",
   updateFailed: "update failed",

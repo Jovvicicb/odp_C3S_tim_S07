@@ -26,41 +26,46 @@ export class PostTagService implements IPostTagService {
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
+  private async canManagePostTags(postAuthorId: number, communityId: number, requesterId: number): Promise<boolean> {
+    const isAuthor = postAuthorId === requesterId;
+
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(
+      requesterId,
+      communityId
+    );
+
+    const isModerator =
+      membership.id !== 0 &&
+      membership.role === CommunityMemberRole.MODERATOR &&
+      membership.status === CommunityMemberStatus.ACTIVE;
+
+    return isAuthor || isModerator;
+  }
+
   async addTag(postId: number, tagId: number, ctx: AuditContext): Promise<ServiceResult> {
     const post = await this.postRepo.findById(postId);
     if(post.id === 0){
-        return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+      return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
 
     const tag = await this.tagRepo.findById(tagId);
     if(tag.id === 0){
-        return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
+      return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
     }
   
-    const requesterId = ctx.userId;
-    const isAuthor = post.authorId === requesterId;
-
-    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
-    const isModerator =
-        membership.id !== 0 &&
-        membership.role === CommunityMemberRole.MODERATOR &&
-        membership.status === CommunityMemberStatus.ACTIVE;
-
-    if (!isAuthor && !isModerator) {
-      return ServiceResultFactory.fail(
-        PostMessages.onlyAuthorOrModeratorCanAddTag,
-        HttpStatus.forbidden
-      );
+    const canManage = await this.canManagePostTags(post.authorId, post.communityId, ctx.userId);
+    if (!canManage) {
+      return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanAddTag, HttpStatus.forbidden);
     }
 
-    const alreadyExists = await this.postTagRepo.exists(postId,tagId)
+    const alreadyExists = await this.postTagRepo.exists(postId, tagId);
     if(alreadyExists){
       return ServiceResultFactory.fail(PostMessages.tagAlreadyAdded, HttpStatus.conflict);
     }
 
-    const created = await this.postTagRepo.create(postId,tagId);
+    const created = await this.postTagRepo.create(postId, tagId);
     if (created.id === 0) {
-        return ServiceResultFactory.fail(PostMessages.addTagFailed, HttpStatus.internalServerError);
+      return ServiceResultFactory.fail(PostMessages.addTagFailed, HttpStatus.internalServerError);
     }
 
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.POST_TAG_ADDED, AuditDetails.POST_TAG_ADDED, ctx.ipAddress));
@@ -69,41 +74,30 @@ export class PostTagService implements IPostTagService {
   }
 
 
-   async removeTag(postId: number, tagId: number, ctx: AuditContext): Promise<ServiceResult> {
+  async removeTag(postId: number, tagId: number, ctx: AuditContext): Promise<ServiceResult> {
     const post = await this.postRepo.findById(postId);
     if(post.id === 0){
-        return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+      return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
 
     const tag = await this.tagRepo.findById(tagId);
     if(tag.id === 0){
-        return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
+      return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
     }
   
-    const requesterId = ctx.userId;
-    const isAuthor = post.authorId === requesterId;
-
-    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
-    const isModerator =
-        membership.id !== 0 &&
-        membership.role === CommunityMemberRole.MODERATOR &&
-        membership.status === CommunityMemberStatus.ACTIVE;
-
-    if (!isAuthor && !isModerator) {
-      return ServiceResultFactory.fail(
-        PostMessages.onlyAuthorOrModeratorCanRemoveTag,
-        HttpStatus.forbidden
-      );
+    const canManage = await this.canManagePostTags(post.authorId, post.communityId, ctx.userId);
+    if (!canManage) {
+      return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanRemoveTag, HttpStatus.forbidden);
     }
 
-    const exists = await this.postTagRepo.exists(postId,tagId)
+    const exists = await this.postTagRepo.exists(postId, tagId);
     if(!exists){
       return ServiceResultFactory.fail(PostMessages.tagNotAdded, HttpStatus.notFound);
     }
 
-    const deleted = await this.postTagRepo.delete(postId,tagId);
+    const deleted = await this.postTagRepo.delete(postId, tagId);
     if (!deleted) {
-        return ServiceResultFactory.fail(PostMessages.removeTagFailed, HttpStatus.internalServerError);
+      return ServiceResultFactory.fail(PostMessages.removeTagFailed, HttpStatus.internalServerError);
     }
 
     await this.auditHelperService.safeCreate(new CreateAuditDto(ctx.userId, AuditActions.POST_TAG_REMOVED, AuditDetails.POST_TAG_REMOVED, ctx.ipAddress));

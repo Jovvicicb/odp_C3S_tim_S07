@@ -66,16 +66,16 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
 
     return rows.map((r) => Number(r.community_id));
   } catch (err) {
-    this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMyCommunitiesFailed, err);
+    this.logger.error("CommunityMemberRepository", CommunityLogMessages.findActiveCommunityIdsFailed, err);
     return [];
   } finally {
     res.conn.release();
   }
 }
 
- async findUserIdsByCommunityId(page: number, limit: number, communityId: number): Promise<{ usersIds: number[]; total: number}> {
+ async findUserIdsByCommunityId(page: number, limit: number, communityId: number): Promise<{ userIds: number[]; total: number}> {
     const res = await this.db.getReadConnection();
-    if (!res) return { usersIds: [], total: 0 };
+    if (!res) return { userIds: [], total: 0 };
 
     const offset = safeInt((page - 1) * limit);
     const lim = safeInt(limit);
@@ -98,12 +98,12 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
         );
 
         return {
-          usersIds: rows.map((r) => Number(r.user_id)),
+          userIds: rows.map((r) => Number(r.user_id)),
           total: cnt[0]?.total ?? 0,
         };
     } catch (err) {
         this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMembersFailed, err);
-        return { usersIds: [], total: 0 };
+        return { userIds: [], total: 0 };
     } finally {
         res.conn.release();
     }   
@@ -205,7 +205,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
         ? CommunityMemberMapper.toModel(rows[0])
         : new CommunityMember();
     } catch (err) {
-      this.logger.error("CommunityMemberRepository", CommunityLogMessages.findByUserIdAndCommunityid, err);
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.findByUserIdAndCommunityId, err);
       return new CommunityMember();
     } finally {
       res.conn.release();
@@ -217,13 +217,14 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
     if (!res) return false;
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT COUNT(*) as cnt
+       `SELECT 1
         FROM community_members
-        WHERE user_id = ? AND community_id = ?`,
+        WHERE user_id = ? AND community_id = ?
+        LIMIT 1`,
         [userId, communityId]
        );
 
-      return (rows[0]?.cnt ?? 0) > 0;
+      return rows.length > 0;
     } catch (err) {
       this.logger.error("CommunityMemberRepository", CommunityLogMessages.exists, err);
       return false;

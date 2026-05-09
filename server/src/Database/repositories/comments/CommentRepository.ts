@@ -5,7 +5,7 @@ import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { CreateCommentDto } from "../../../Domain/DTOs/comments/CreateCommentDto";
 import { Comment } from "../../../Domain/models/Comment";
 import { CommentLogMessages } from "../../../Domain/constants/messages/comments/CommentLogMessages";
-import { CommentMapper } from "../../../Shared/mappers/comments/CommentMpper";
+import { CommentMapper } from "../../../Shared/mappers/comments/CommentMapper";
 import { UpdateCommentDto } from "../../../Domain/DTOs/comments/UpdateCommentDto";
 import { GetCommentsByPostDto } from "../../../Domain/DTOs/comments/GetCommentsByPostDto";
 import { CommentSortType } from "../../../Domain/enums/comments/CommentSortType";

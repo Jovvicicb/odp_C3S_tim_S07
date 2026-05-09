@@ -1,4 +1,4 @@
-import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 import { DbManager } from "../../connection/DbConnectionPool";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { PostLogMessages } from "../../../Domain/constants/messages/posts/PostLogMessages";
@@ -28,13 +28,11 @@ export class PostCommentRepository implements IPostCommentRepository {
             );
 
             return rows.reduce<Record<number, number>>((acc, row) => {
-            return {
-                ...acc,
-                [Number(row.post_id)]: Number(row.total),
-            };
+                acc[Number(row.post_id)] = Number(row.total);
+                return acc;
             }, {});
         } catch (err) {
-            this.logger.error("CommentRepository", PostLogMessages.countCommentsFailed, err);
+            this.logger.error("PostCommentRepository", PostLogMessages.countCommentsFailed, err);
             return {};
         } finally {
             res.conn.release();

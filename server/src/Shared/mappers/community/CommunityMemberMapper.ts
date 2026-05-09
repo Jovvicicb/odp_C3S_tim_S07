@@ -6,12 +6,12 @@ import { CommunityMemberStatus } from "../../../Domain/enums/communities/Communi
 export class CommunityMemberMapper {
   public static toModel(row: RowDataPacket): CommunityMember {
     return new CommunityMember(
-      row.id,
-      row.user_id,
-      row.community_id,
+      Number(row.id),
+      Number(row.user_id),
+      Number(row.community_id),
       row.role as CommunityMemberRole,
       row.status as CommunityMemberStatus,
-      row.joined_at
+      new Date(row.joined_at)
     );
   }
 }

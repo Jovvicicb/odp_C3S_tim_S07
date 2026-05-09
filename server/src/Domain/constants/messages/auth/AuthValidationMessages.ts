@@ -5,6 +5,6 @@ export const AuthValidationMessages = {
   emailInvalid: "Email format is invalid",
   passwordRequired: "Password is required",
   passwordInvalid: "Password must be at least 8 characters long and contain at least one uppercase letter and one number",
-  fullnameInvalid: "FullName must be at most 300 characters long",
+  fullnameInvalid: "Full name must be at most 300 characters long",
   bioTooLong: "Bio must be at most 300 characters long",
 } as const;

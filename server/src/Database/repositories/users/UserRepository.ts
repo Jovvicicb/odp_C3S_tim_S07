@@ -39,7 +39,7 @@ export class UserRepository implements IUserRepository {
     const res = await this.db.getReadConnection();
     if (!res) return new User();
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE id = ?`, [id]);
+      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE id = ? LIMIT 1`, [id]);
       return rows.length > 0 ? UserMapper.toModel(rows[0]) : new User();
     } catch (err) {
       this.logger.error("UserRepository", UserLogMessages.findByIdFailed, err);
@@ -70,7 +70,7 @@ async findByUsername(username: string): Promise<User> {
     const res = await this.db.getReadConnection();
     if (!res) return new User();
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE username = ?`, [username]);
+      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE username = ? LIMIT 1`, [username]);
       return rows.length > 0 ? UserMapper.toModel(rows[0]) : new User();
     } catch (err) {
       this.logger.error("UserRepository", UserLogMessages.findByUsernameFailed, err);
@@ -82,7 +82,7 @@ async findByUsername(username: string): Promise<User> {
     const res = await this.db.getReadConnection();
     if (!res) return new User();
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE email = ?`, [email]);
+      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE email = ? LIMIT 1`, [email]);
       return rows.length > 0 ? UserMapper.toModel(rows[0]) : new User();
     } catch (err) {
       this.logger.error("UserRepository", UserLogMessages.findByEmailFailed, err);
@@ -161,9 +161,9 @@ async findByUsername(username: string): Promise<User> {
     if (!res) return false;
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT COUNT(*) as cnt FROM users WHERE id = ?`, [id]
+        `SELECT 1 FROM users WHERE id = ? LIMIT 1`, [id]
       );
-      return (rows[0]?.cnt ?? 0) > 0;
+      return rows.length > 0;
     } catch (err) {
       this.logger.error("UserRepository", UserLogMessages.existsFailed, err);
       return false;
