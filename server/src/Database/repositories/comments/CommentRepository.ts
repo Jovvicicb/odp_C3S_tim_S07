@@ -189,5 +189,26 @@ export class CommentRepository implements ICommentRepository {
       res.conn.release();
     }
   }
+
+  async updateFlagStatus(id: number, isFlagged: number): Promise<boolean> {
+    const res = await this.db.getWriteConnection();
+    if (!res) { return false; }
+
+    try {
+      const [result] = await res.conn.execute<ResultSetHeader>(
+       `UPDATE comments
+        SET is_flagged = ?
+        WHERE id = ?`,
+        [isFlagged, id]
+      );
+
+      return result.affectedRows > 0;
+    } catch (err) {
+      this.logger.error("CommentRepository", CommentLogMessages.updateFlagStatusFailed, err);
+      return false;
+    } finally {
+      res.conn.release();
+    }
+  }
   
 }

@@ -33,6 +33,8 @@ export const AuditDetails = {
   COMMENT_CREATED: "Comment created",
   COMMENT_DELETED: "Comment deleted",
   COMMENT_UPDATED: "Comment updated",
+  COMMENT_FLAGGED: "Comment flagged",
+  COMMENT_UNFLAGGED: "Comment unflagged",
 
 } as const;
 

@@ -10,4 +10,5 @@ export interface ICommentRepository {
   findById(id: number): Promise<Comment>;
   findRootByPost(dto: GetCommentsByPostDto): Promise<{ comments: Comment[]; total: number }>;
   findRepliesByParentIds(parentIds: number[]): Promise<Comment[]>;
+  updateFlagStatus(id: number, isFlagged: number): Promise<boolean>;
 }

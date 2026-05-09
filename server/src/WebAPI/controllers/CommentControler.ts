@@ -38,7 +38,8 @@ export class CommentController {
     this.router.delete("/comments/:id",              authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.delete.bind(this));
     this.router.post("/comments/:id/like",           authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.like.bind(this));
     this.router.delete("/comments/:id/like",         authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.unlike.bind(this));
-
+    this.router.patch("/comments/:id/flag",          authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.flag.bind(this));
+    this.router.patch("/comments/:id/unflag",        authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.unflag.bind(this));
   }
 
   private async getByPost(req: Request, res: Response): Promise<void> {
@@ -256,6 +257,66 @@ export class CommentController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommentMessages.unlikeFailed,
+      });
+    }
+  }
+
+  private async flag(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.id;
+
+    const idParam = parseStringValue(req.params.id);
+    const id = parseId(idParam);
+
+    const idValidation = validateId(id);
+
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message,
+      });
+      return;
+    }
+
+    const ctx = IpHelper.buildAuditContext(req, userId);
+    try {
+      const result = await this.commentService.flag(id, ctx);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommentLogMessages.flagFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommentMessages.flagFailed,
+      });
+    }
+  }
+
+  private async unflag(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.id;
+
+    const idParam = parseStringValue(req.params.id);
+    const id = parseId(idParam);
+
+    const idValidation = validateId(id);
+
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message,
+      });
+      return;
+    }
+
+    const ctx = IpHelper.buildAuditContext(req, userId);
+    try {
+      const result = await this.commentService.unflag(id, ctx);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, CommentLogMessages.unflagFailed, err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommentMessages.unflagFailed,
       });
     }
   }

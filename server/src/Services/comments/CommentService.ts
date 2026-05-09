@@ -37,6 +37,15 @@ export class CommentService implements ICommentService {
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
+  private async isActiveModerator(userId: number, communityId: number): Promise<boolean> {
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(userId, communityId);
+    return (
+      membership.id !== 0 &&
+      membership.role === CommunityMemberRole.MODERATOR &&
+      membership.status === CommunityMemberStatus.ACTIVE
+    );
+  }
+
   async create(dto: CreateCommentDto, ctx: AuditContext): Promise<ServiceResult<CommentDto>> {
     const post = await this.postRepo.findById(dto.postId);
     if (post.id === 0) {
@@ -240,5 +249,70 @@ export class CommentService implements ICommentService {
     );
 
     return ServiceResultFactory.ok(CommentMessages.fetched, data,HttpStatus.ok);
+  }
+
+
+  async flag(id: number, ctx: AuditContext): Promise<ServiceResult> {
+    const comment = await this.commentRepo.findById(id);
+    if (comment.id === 0) {
+      return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
+    }
+
+    const post = await this.postRepo.findById(comment.postId);
+    if (post.id === 0) {
+      return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+    }
+
+    const isModerator = await this.isActiveModerator(ctx.userId, post.communityId);
+    if (!isModerator) {
+      return ServiceResultFactory.fail(CommentMessages.onlyModeratorCanFlag, HttpStatus.forbidden);
+    }
+
+    if (comment.isFlagged) {
+      return ServiceResultFactory.fail(CommentMessages.alreadyFlagged,HttpStatus.conflict);
+    }
+
+    const updated = await this.commentRepo.updateFlagStatus(id, 1);
+    if (!updated) {
+      return ServiceResultFactory.fail(CommentMessages.flagFailed, HttpStatus.internalServerError);
+    }
+
+    await this.auditHelperService.safeCreate(
+      new CreateAuditDto(ctx.userId, AuditActions.COMMENT_FLAGGED, AuditDetails.COMMENT_FLAGGED, ctx.ipAddress)
+    );
+
+    return ServiceResultFactory.ok(CommentMessages.flagged, undefined,HttpStatus.ok);
+  }
+
+  async unflag(id: number, ctx: AuditContext): Promise<ServiceResult> {
+    const comment = await this.commentRepo.findById(id);
+    if (comment.id === 0) {
+      return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
+    }
+
+    const post = await this.postRepo.findById(comment.postId);
+    if (post.id === 0) {
+      return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+    }
+
+    const isModerator = await this.isActiveModerator(ctx.userId, post.communityId);
+    if (!isModerator) {
+      return ServiceResultFactory.fail( CommentMessages.onlyModeratorCanUnflag, HttpStatus.forbidden);
+    }
+
+    if (!comment.isFlagged) {
+      return ServiceResultFactory.fail( CommentMessages.notFlagged, HttpStatus.conflict);
+    }
+
+    const updated = await this.commentRepo.updateFlagStatus(id, 0);
+    if (!updated) {
+      return ServiceResultFactory.fail(CommentMessages.unflagFailed, HttpStatus.internalServerError);
+    }
+
+    await this.auditHelperService.safeCreate(
+      new CreateAuditDto(ctx.userId, AuditActions.COMMENT_UNFLAGGED, AuditDetails.COMMENT_UNFLAGGED, ctx.ipAddress)
+    );
+
+    return ServiceResultFactory.ok(CommentMessages.unflagged, undefined, HttpStatus.ok);
   }
 }

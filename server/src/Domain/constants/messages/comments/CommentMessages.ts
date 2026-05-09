@@ -34,4 +34,13 @@ export const CommentMessages = {
   fetchByPostFailed: "Failed to fetch comments",
   commentsAccessForbidden: "You are not allowed to view comments for this post",
 
+  flagged: "Comment flagged successfully",
+  unflagged: "Comment unflagged successfully",
+  flagFailed: "Failed to flag comment",
+  unflagFailed: "Failed to unflag comment",
+  onlyModeratorCanFlag: "Only community moderators can flag comments",
+  onlyModeratorCanUnflag: "Only community moderators can unflag comments",
+  alreadyFlagged: "Comment is already flagged",
+  notFlagged: "Comment is not flagged",
+
 } as const;

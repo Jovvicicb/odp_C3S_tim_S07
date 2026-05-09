@@ -15,4 +15,8 @@ export const CommentLogMessages = {
   createLikeFailed: "Create comment like failed",
   deleteLikeFailed: "Delete comment like failed",
   existsLikeFailed: "Exists comment like failed",
+
+  flagFailed: "Flag comment failed",
+  unflagFailed: "Unflag comment failed",
+  updateFlagStatusFailed: "Update comment flag status failed",
   } as const;
