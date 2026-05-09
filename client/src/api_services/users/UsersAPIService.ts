@@ -1,7 +1,9 @@
 import axios from "axios";
-import type { IUsersAPIService, ApiResponse } from "./IUsersAPIService";
+import type { IUsersAPIService } from "./IUsersAPIService";
 import type { UserDto } from "../../models/user/UserTypes";
 import { readItem } from "../../helpers/local_storage";
+import type { PaginatedListDto } from "../../types/community/CommunityTypes";
+import type { ApiResponse } from "../../types/common/ApiResponse";
 
 const BASE = import.meta.env.VITE_API_URL + "users";
 
@@ -16,10 +18,16 @@ const err = <T>(e: unknown, fallback: string): ApiResponse<T> => ({
 });
 
 export const usersApi: IUsersAPIService = {
-  async getAll() {
-    return axios.get<ApiResponse<UserDto[]>>(BASE, { headers: authHeader() })
-      .then(r => r.data).catch(e => err(e, "Failed to load users"));
+  async getAll(page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<UserDto>>>(`${BASE}/all`, {
+        headers: authHeader(),
+        params: { page, limit },
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, "Failed to load users"));
   },
+
   async getById(id) {
     return axios.get<ApiResponse<UserDto>>(`${BASE}/${id}`, { headers: authHeader() })
       .then(r => r.data).catch(e => err(e, "Failed to load user"));

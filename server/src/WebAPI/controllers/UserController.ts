@@ -33,13 +33,13 @@ export class UserController {
     private readonly logger: ILoggerService
   ) {
     this.router.get("/users/search",           authenticate, authorize(UserRole.USER,UserRole.ADMIN),                         this.search.bind(this));
+    this.router.get("/users/all",              authenticate, authorize(UserRole.ADMIN),                                       this.getAll.bind(this));
     this.router.get("/users/:id",                                                                                             this.getById.bind(this));
     this.router.put("/users/me",               authenticate, authorize(UserRole.USER,UserRole.ADMIN), upload.single("image"), this.updateMe.bind(this));
     this.router.get("/users/:id/followers",                                                                                   this.getFollowers.bind(this));
     this.router.get("/users/:id/following",                                                                                   this.getFollowing.bind(this));
     this.router.post("/users/:id/follow",      authenticate, authorize(UserRole.USER,UserRole.ADMIN),                         this.follow.bind(this));
     this.router.delete("/users/:id/follow",    authenticate, authorize(UserRole.USER,UserRole.ADMIN),                         this.unfollow.bind(this));
-    this.router.get("/users/all",              authenticate, authorize(UserRole.ADMIN),                                       this.getAll.bind(this));
     this.router.put("/users/:id/role",         authenticate, authorize(UserRole.ADMIN),                                       this.updateRole.bind(this));
   }
 
