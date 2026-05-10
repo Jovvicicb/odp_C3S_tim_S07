@@ -1,11 +1,13 @@
+import type { CommunityType } from "../../types/community/CommunityType";
+
 export type CommunityDto = {
   id: number;
   name: string;
-  description: string;
-  rules: string;
-  communityType: string;
+  description: string | null;
+  rules: string | null;
+  type: CommunityType;
   ownerId: number;
-  avatar: string;
-  createdAt: Date;
-  updatedAt: Date;
+  avatar: string | null;
+  createdAt: string;
+  updatedAt: string;
 };

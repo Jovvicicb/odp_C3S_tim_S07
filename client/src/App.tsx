@@ -10,7 +10,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
 import CreateCommunity from "./pages/user/CreateCommunity";
 import CommunityDetailsPage from "./pages/user/CommunityDetailsPage";
-import CommunitiesPage from "./pages/user/CommunitiesPage";
+import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 
 export default function App() {
   return (
@@ -45,14 +45,6 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/communities"
-        element={
-          <ProtectedRoute requiredRole="user">
-            <CommunitiesPage />
-          </ProtectedRoute>
-        }
-      />
 
       {/* Admin routes */}
       <Route
@@ -68,6 +60,15 @@ export default function App() {
         element={
           <ProtectedRoute requiredRole="admin">
             <UsersPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/communities"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminCommunitiesPage />
           </ProtectedRoute>
         }
       />

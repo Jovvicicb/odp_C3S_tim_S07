@@ -1,5 +1,7 @@
 export const CommunityMessages = {
   createSuccess: "Community created successfully",
   createFailed: "Failed to create community",
-  unexpectedError: "Something went wrong",
+
+  fetchAllSuccess: "Communities loaded successfully",
+  fetchAllFailed: "Failed to load communities",
 } as const;

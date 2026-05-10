@@ -4,6 +4,8 @@ import type { ApiResponse } from "../../types/common/ApiResponse";
 import { readItem } from "../../helpers/local_storage";
 import type { CreateCommunityResponseDto } from "../../models/community/CreateCommunityResponseDto ";
 import { CommunityMessages } from "../../constants/messages/community/CommunityMessages";
+import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
+import type { CommunityDto } from "../../models/community/CommunityDto";
 
 const BASE = import.meta.env.VITE_API_URL + "communities";
 
@@ -29,5 +31,15 @@ export const communityApi: ICommunityAPIService = {
       })
       .then((r) => r.data)
       .catch((e) => err(e, CommunityMessages.createFailed));
+  },
+
+   async getAll(page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<CommunityDto>>>(`${BASE}/all`, {
+        headers: authHeader(),
+        params: { page, limit },
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.fetchAllFailed));
   },
 };

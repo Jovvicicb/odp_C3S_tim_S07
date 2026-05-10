@@ -5,12 +5,12 @@ import { useAuth } from "../../hooks/auth/useAuthHook";
 // TODO: Update nav items to match your routes and roles
 const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: "⬡" },
-  { to: "/communities", label: "Communities", icon: "⬡" },
   // add more user routes here
 ];
 const adminNav = [
   { to: "/admin", label: "Dashboard", icon: "⬡" },
   { to: "/admin/users", label: "Users", icon: "◎" },
+  { to: "/admin/communities", label: "Communities", icon: "⬡" },
   // add more admin routes here
 ];
 
