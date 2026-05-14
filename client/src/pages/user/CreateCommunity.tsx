@@ -4,15 +4,16 @@ import { PageHeader } from "../../components/ui/UI";
 
 export default function CreateCommunity() {
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
-        eyebrow="Create Community"
-        title={`Create Communiti`}
-        action={
-          <ActionButton type="back" label="Back" to="/dashboard" size="md" />
-        }
+        eyebrow="Communities"
+        title="Create community"
+        action={<ActionButton variant="back" label="Back" />}
       />
-      <CommunityForm />
+
+      <div className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-6 shadow-xl shadow-sky-950/10">
+        <CommunityForm />
+      </div>
     </div>
   );
 }

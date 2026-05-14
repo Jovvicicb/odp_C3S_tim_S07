@@ -13,20 +13,20 @@ export default function AdminCommunitiesPage() {
     useAdminCommunities(1, 10);
 
   return (
-    <div>
-      <PageHeader eyebrow="Admin" title="Communities" />
+    <div className="space-y-6">
+      <PageHeader eyebrow="Admin panel" title="Communities" />
 
       {error && <ErrorBox message={error} />}
 
       {loading ? (
-        <div className="py-20 flex justify-center">
+        <div className="flex justify-center py-20">
           <Spinner size={24} />
         </div>
       ) : communities.length === 0 && !error ? (
         <Empty message="No communities found" />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="flex flex-col gap-5">
             {communities.map((community) => (
               <CommunityCard key={community.id} community={community} />
             ))}

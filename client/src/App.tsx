@@ -11,6 +11,7 @@ import UsersPage from "./pages/admin/UsersPage";
 import CreateCommunity from "./pages/user/CreateCommunity";
 import CommunityDetailsPage from "./pages/user/CommunityDetailsPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
+import LandingPage from "./pages/public/LandingPage";
 
 export default function App() {
   return (
@@ -73,7 +74,7 @@ export default function App() {
         }
       />
 
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/404" element={<NotFoundPage />} />
       <Route path="*" element={<Navigate to="/404" replace />} />
     </Routes>
