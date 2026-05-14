@@ -2,8 +2,12 @@ import { type ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { RoleBadge } from "../ui/UI";
+import { useToast } from "../../hooks/toast/useToast";
 
-const userNav = [{ to: "/dashboard", label: "Dashboard", icon: "◈" }];
+const userNav = [
+  { to: "/dashboard", label: "Dashboard", icon: "◈" },
+  { to: "/profile", label: "My profile", icon: "◉" },
+];
 
 const adminNav = [
   { to: "/admin", label: "Dashboard", icon: "◈" },
@@ -14,6 +18,7 @@ const adminNav = [
 export function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const nav = user?.role === "admin" ? adminNav : userNav;
   const initial = user?.username?.[0]?.toUpperCase() ?? "P";
@@ -79,6 +84,10 @@ export function Layout({ children }: { children: ReactNode }) {
             <button
               onClick={() => {
                 logout();
+                showToast({
+                  type: "info",
+                  message: "You have been signed out",
+                });
                 navigate("/login");
               }}
               className="w-full rounded-xl border border-white/8 bg-white/4 px-3 py-2 text-left text-xs font-medium text-white/40 transition-all hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-200"

@@ -12,6 +12,7 @@ import CreateCommunity from "./pages/user/CreateCommunity";
 import CommunityDetailsPage from "./pages/user/CommunityDetailsPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
+import ProfileSettingsPage from "./pages/user/ProfileSettingsPage";
 
 export default function App() {
   return (
@@ -43,6 +44,15 @@ export default function App() {
         element={
           <ProtectedRoute requiredRole="user">
             <CommunityDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ProfileSettingsPage />
           </ProtectedRoute>
         }
       />

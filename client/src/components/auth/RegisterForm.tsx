@@ -68,6 +68,7 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
       setLoading(false);
     }
   };
+
   return (
     <div className="w-full max-w-lg">
       <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0b0f17]/90 shadow-2xl shadow-sky-950/30">

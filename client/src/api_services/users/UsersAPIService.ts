@@ -28,4 +28,24 @@ export const usersApi: IUsersAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, UserMessages.fetchAllFailed));
   },
+  
+   async getById(id) {
+    return axios
+      .get<ApiResponse<UserDto>>(`${BASE}/${id}`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, UserMessages.fetchOneFailed));
+  },
+
+  async updateMe(formData) {
+    return axios
+      .put<ApiResponse<void>>(`${BASE}/me`, formData, {
+        headers: {
+          ...authHeader(),
+        },
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, UserMessages.updateFailed));
+  },
 };

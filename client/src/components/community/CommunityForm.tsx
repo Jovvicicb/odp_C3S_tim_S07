@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { ErrorBox, SuccessBox } from "../ui/UI";
+import { ErrorBox } from "../ui/UI";
 import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import { useCreateCommunity } from "../../hooks/community/useCreateCommunity";
 import { validateCreateCommunity } from "../../validators/community/validateCreateCommunity";
 import type { CommunityType } from "../../types/community/CommunityType";
+import { useToast } from "../../hooks/toast/useToast";
+import { CommunityMessages } from "../../constants/messages/community/CommunityMessages";
+import { useNavigate } from "react-router-dom";
+import { CommonMessages } from "../../constants/messages/common/CommonMessages";
 
 export default function CommunityForm() {
   const [name, setName] = useState("");
@@ -13,19 +17,10 @@ export default function CommunityForm() {
   const [avatar, setAvatar] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [fileKey, setFileKey] = useState(0);
+  const { showToast } = useToast();
+  const navigate = useNavigate();
 
-  const { createCommunity, loading, error, success, setError } =
-    useCreateCommunity();
-
-  const resetForm = () => {
-    setName("");
-    setDescription("");
-    setRules("");
-    setType("public");
-    setAvatar(null);
-    setPreview("");
-    setFileKey((prev) => prev + 1);
-  };
+  const { createCommunity, loading, error, setError } = useCreateCommunity();
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,21 +38,30 @@ export default function CommunityForm() {
       return;
     }
 
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    formData.append("name", StringNormalizer.normalizeSpaces(name));
-    formData.append("description", StringNormalizer.trim(description));
-    formData.append("rules", StringNormalizer.trim(rules));
-    formData.append("type", type);
+      formData.append("name", StringNormalizer.normalizeSpaces(name));
+      formData.append("description", StringNormalizer.trim(description));
+      formData.append("rules", StringNormalizer.trim(rules));
+      formData.append("type", type);
 
-    if (avatar) {
-      formData.append("image", avatar);
-    }
+      if (avatar) {
+        formData.append("image", avatar);
+      }
 
-    const created = await createCommunity(formData);
+      const createdCommunity = await createCommunity(formData);
 
-    if (created) {
-      resetForm();
+      if (!createdCommunity) return;
+
+      showToast({
+        type: "success",
+        message: CommunityMessages.createSuccess,
+      });
+
+      navigate(`/communities/${createdCommunity.id}`);
+    } catch {
+      setError(CommonMessages.unexpectedError);
     }
   };
 
@@ -76,7 +80,6 @@ export default function CommunityForm() {
         className="mx-auto flex w-full max-w-2xl flex-col gap-6"
       >
         {error && <ErrorBox message={error} />}
-        {success && <SuccessBox message={success} />}
 
         <div>
           <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35">
