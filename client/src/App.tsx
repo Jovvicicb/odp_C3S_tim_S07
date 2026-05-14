@@ -5,14 +5,14 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import NotFoundPage from "./pages/not_found/NotFoundPage";
 
-import UserDashboard from "./pages/user/UserDashboard";
+import FeedPage from "./pages/app/FeedPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
-import CreateCommunity from "./pages/user/CreateCommunity";
-import CommunityDetailsPage from "./pages/user/CommunityDetailsPage";
+import CreateCommunity from "./pages/app/CreateCommunity";
+import CommunityDetailsPage from "./pages/app/CommunityDetailsPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
-import ProfileSettingsPage from "./pages/user/ProfileSettingsPage";
+import ProfileSettingsPage from "./pages/app/ProfileSettingsPage";
 
 export default function App() {
   return (
@@ -22,10 +22,10 @@ export default function App() {
 
       {/* User routes */}
       <Route
-        path="/dashboard"
+        path="/feed"
         element={
-          <ProtectedRoute requiredRole="user">
-            <UserDashboard />
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <FeedPage />
           </ProtectedRoute>
         }
       />
@@ -33,7 +33,7 @@ export default function App() {
       <Route
         path="/communities/create"
         element={
-          <ProtectedRoute requiredRole="user">
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
             <CreateCommunity />
           </ProtectedRoute>
         }
@@ -42,7 +42,7 @@ export default function App() {
       <Route
         path="/communities/:id"
         element={
-          <ProtectedRoute requiredRole="user">
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
             <CommunityDetailsPage />
           </ProtectedRoute>
         }
@@ -51,7 +51,7 @@ export default function App() {
       <Route
         path="/profile"
         element={
-          <ProtectedRoute requiredRole="user">
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
             <ProfileSettingsPage />
           </ProtectedRoute>
         }
@@ -61,7 +61,7 @@ export default function App() {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute requiredRole="admin">
+          <ProtectedRoute allowedRoles={["admin"]}>
             <AdminDashboard />
           </ProtectedRoute>
         }
@@ -69,7 +69,7 @@ export default function App() {
       <Route
         path="/admin/users"
         element={
-          <ProtectedRoute requiredRole="admin">
+          <ProtectedRoute allowedRoles={["admin"]}>
             <UsersPage />
           </ProtectedRoute>
         }
@@ -78,7 +78,7 @@ export default function App() {
       <Route
         path="/admin/communities"
         element={
-          <ProtectedRoute requiredRole="admin">
+          <ProtectedRoute allowedRoles={["admin"]}>
             <AdminCommunitiesPage />
           </ProtectedRoute>
         }

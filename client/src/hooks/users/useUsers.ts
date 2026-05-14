@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { usersApi } from "../../api_services/users/UsersAPIService";
 import type { UserDto } from "../../models/user/UserDto";
+import { UserMessages } from "../../constants/messages/user/UserMessages";
 
 export function useUsers(initialPage = 1, initialLimit = 10) {
   const [users, setUsers] = useState<UserDto[]>([]);
@@ -21,7 +22,7 @@ export function useUsers(initialPage = 1, initialLimit = 10) {
       if (!res.success || !res.data) {
         setUsers([]);
         setTotal(0);
-        setError(res.message ?? "Failed to load users");
+        setError(res.message ?? UserMessages.fetchAllFailed);
         return;
       }
 
@@ -30,7 +31,7 @@ export function useUsers(initialPage = 1, initialLimit = 10) {
     } catch {
       setUsers([]);
       setTotal(0);
-      setError("Failed to load users");
+      setError(UserMessages.fetchAllFailed);
     } finally {
       setLoading(false);
     }
@@ -42,15 +43,16 @@ export function useUsers(initialPage = 1, initialLimit = 10) {
     });
     }, [page, limit, fetchUsers]);
 
-  return {
-    users,
-    loading,
-    error,
-    page,
-    limit,
-    total,
-    setPage,
-    setLimit,
-    reload: () => fetchUsers(page, limit),
-  };
+ return {
+  users,
+  setUsers,
+  loading,
+  error,
+  page,
+  limit,
+  total,
+  setPage,
+  setLimit,
+  reload: () => fetchUsers(page, limit),
+};
 }

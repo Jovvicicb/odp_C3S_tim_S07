@@ -28,7 +28,7 @@ export const usersApi: IUsersAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, UserMessages.fetchAllFailed));
   },
-  
+
    async getById(id) {
     return axios
       .get<ApiResponse<UserDto>>(`${BASE}/${id}`, {
@@ -48,4 +48,15 @@ export const usersApi: IUsersAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, UserMessages.updateFailed));
   },
+
+  async updateRole(id, role) {
+  return axios
+    .put<ApiResponse<void>>(
+      `${BASE}/${id}/role`,
+      { role },
+      { headers: authHeader() },
+    )
+    .then((r) => r.data)
+    .catch((e) => err(e, UserMessages.roleUpdateFailed));
+},
 };

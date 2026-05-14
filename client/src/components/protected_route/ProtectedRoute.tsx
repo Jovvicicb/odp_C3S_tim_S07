@@ -4,26 +4,31 @@ import { useAuth } from "../../hooks/auth/useAuthHook";
 import { Layout } from "../layout/Layout";
 import { Spinner } from "../ui/UI";
 
-export const ProtectedRoute: React.FC<{
+type Props = {
   children: React.ReactNode;
-  requiredRole: string;
-}> = ({ children, requiredRole }) => {
+  allowedRoles: string[];
+};
+
+export const ProtectedRoute: React.FC<Props> = ({ children, allowedRoles }) => {
   const { isAuthenticated, user, isLoading, logout } = useAuth();
   const location = useLocation();
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#07111f]">
         <div className="absolute top-[-10%] left-[-10%] h-105 w-105 rounded-full bg-sky-500/10 blur-3xl" />
         <div className="absolute bottom-[-10%] right-[-10%] h-105 w-105 rounded-full bg-indigo-500/10 blur-3xl" />
+
         <Spinner size={24} />
       </div>
     );
+  }
 
-  if (!isAuthenticated)
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
-  if (user?.role !== requiredRole)
+  if (!user || !allowedRoles.includes(user.role)) {
     return (
       <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#07111f] px-6">
         <div className="absolute top-[-10%] left-[-10%] h-105 w-105 rounded-full bg-sky-500/10 blur-3xl" />
@@ -47,6 +52,7 @@ export const ProtectedRoute: React.FC<{
         </div>
       </div>
     );
+  }
 
   return <Layout>{children}</Layout>;
 };

@@ -2,7 +2,7 @@ import { ActionButton } from "../../components/ui/ActionButton";
 import { PageHeader, StatCard } from "../../components/ui/UI";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 
-export default function UserDashboard() {
+export default function FeedPage() {
   const { user } = useAuth();
 
   return (

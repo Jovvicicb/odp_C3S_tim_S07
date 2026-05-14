@@ -5,14 +5,16 @@ import { RoleBadge } from "../ui/UI";
 import { useToast } from "../../hooks/toast/useToast";
 
 const userNav = [
-  { to: "/dashboard", label: "Dashboard", icon: "◈" },
+  { to: "/feed", label: "My feed", icon: "◈" },
   { to: "/profile", label: "My profile", icon: "◉" },
 ];
 
 const adminNav = [
   { to: "/admin", label: "Dashboard", icon: "◈" },
+  { to: "/feed", label: "My feed", icon: "⬡" },
   { to: "/admin/users", label: "Users", icon: "◎" },
   { to: "/admin/communities", label: "Communities", icon: "⬡" },
+  { to: "/profile", label: "My profile", icon: "◉" },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
