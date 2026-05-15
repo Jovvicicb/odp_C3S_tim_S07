@@ -13,10 +13,10 @@ import { PostSortType } from "../../../Domain/enums/posts/PostSortType";
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
   export class PostRepository implements IPostRepository {
-    public constructor(
-      private readonly db: DbManager,
-      private readonly logger: ILoggerService,
-    ) {}
+  public constructor(
+    private readonly db: DbManager,
+    private readonly logger: ILoggerService,
+  ) {}
 
 
     
@@ -126,9 +126,6 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
 
   async findFeed(page: number, limit: number, activeCommunityIds: number[], followingUserIds: number[], publicCommunityIds: number[]): Promise<{ posts: Post[]; total: number }> {
-    const res = await this.db.getReadConnection();
-    if (!res) return { posts: [], total: 0 };
-
     const offset = safeInt((page - 1) * limit);
     const lim = safeInt(limit);
 
@@ -159,6 +156,9 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
     if (whereParts.length === 0) {
       return { posts: [], total: 0 };
     }
+
+    const res = await this.db.getReadConnection();
+    if (!res) return { posts: [], total: 0 };
 
     const whereClause = `WHERE ${whereParts.join(" OR ")}`;
 
@@ -193,23 +193,23 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
 
   async update(postId: number, dto: UpdatePostDto): Promise<boolean> {
+    const fieldMap: Record<string, string> = {
+      title: "title",
+      content: "content",
+      mediaUrl: "media_url",
+    };
+
+    const entries = Object.entries(dto)
+      .filter(([, v]) => v !== undefined)
+      .map(([key, value]) => [fieldMap[key], value] as const)
+      .filter(([column]) => column !== undefined);
+
+    if (entries.length === 0) return false;
+    
     const res = await this.db.getWriteConnection();
     if (!res) return false;
 
     try {
-      const fieldMap: Record<string, string> = {
-        title: "title",
-        content: "content",
-        mediaUrl: "media_url",
-      };
-
-      const entries = Object.entries(dto)
-        .filter(([, v]) => v !== undefined)
-        .map(([key, value]) => [fieldMap[key], value] as const)
-        .filter(([column]) => column !== undefined);
-
-      if (entries.length === 0) return false;
-
       const setClause = entries.map(([column]) => `${column} = ?`).join(", ");
       const values = entries.map(([, value]) => value);
 

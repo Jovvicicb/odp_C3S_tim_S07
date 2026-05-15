@@ -99,7 +99,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
 
         return {
           userIds: rows.map((r) => Number(r.user_id)),
-          total: cnt[0]?.total ?? 0,
+          total: Number(cnt[0]?.total ?? 0),
         };
     } catch (err) {
         this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMembersFailed, err);
@@ -188,7 +188,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
     }
   }
 
-   async findByUserIdAndCommunityId(userId: number, communityId: number): Promise<CommunityMember> {
+  async findByUserIdAndCommunityId(userId: number, communityId: number): Promise<CommunityMember> {
     const res = await this.db.getReadConnection();
     if (!res) return new CommunityMember();
 

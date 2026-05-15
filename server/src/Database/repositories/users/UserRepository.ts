@@ -48,8 +48,10 @@ export class UserRepository implements IUserRepository {
   }
 
   async findByIds(ids: number[]): Promise<User[]> {
+    if (ids.length === 0) return [];
+
     const res = await this.db.getReadConnection();
-    if (!res || ids.length === 0) return [];
+    if (!res) return [];
 
     try {
       const placeholders = ids.map(() => "?").join(",");
@@ -66,7 +68,8 @@ export class UserRepository implements IUserRepository {
       res.conn.release();
     }
   }
-async findByUsername(username: string): Promise<User> {
+
+  async findByUsername(username: string): Promise<User> {
     const res = await this.db.getReadConnection();
     if (!res) return new User();
     try {
@@ -111,7 +114,7 @@ async findByUsername(username: string): Promise<User> {
 
       return {
               users: rows.map((r) => UserMapper.toModel(r)),
-              total: cnt[0]?.total ?? 0};
+              total: Number(cnt[0]?.total ?? 0)};
     } catch (err) {
       this.logger.error("UserRepository", UserLogMessages.findAllFailed, err);
       return {users : [] ,total:0};
@@ -119,18 +122,14 @@ async findByUsername(username: string): Promise<User> {
   }
 
   async update(userId: number, dto: UpdateMeDto): Promise<boolean> {
-  const res = await this.db.getWriteConnection();
-  if (!res) return false;
-
-  try {
     const fieldMap: Record<string, string> = {
-      username: "username",
-      email: "email",
-      password: "password_hash",
-      fullname: "fullname",
-      bio: "bio",
-      profilePicture: "profile_picture",
-    };
+        username: "username",
+        email: "email",
+        password: "password_hash",
+        fullname: "fullname",
+        bio: "bio",
+        profilePicture: "profile_picture",
+      };
 
     const entries = Object.entries(dto)
       .filter(([, v]) => v !== undefined)
@@ -138,23 +137,27 @@ async findByUsername(username: string): Promise<User> {
       .filter(([column]) => !!column);
 
     if (entries.length === 0) return false;
+    
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
 
-    const setClause = entries.map(([column]) => `${column} = ?`).join(", ");
-    const values = entries.map(([, value]) => value);
+    try {
+      const setClause = entries.map(([column]) => `${column} = ?`).join(", ");
+      const values = entries.map(([, value]) => value);
 
-    const [result] = await res.conn.execute<ResultSetHeader>(
-      `UPDATE users SET ${setClause} WHERE id = ?`,
-      [...values, userId]
-    );
+      const [result] = await res.conn.execute<ResultSetHeader>(
+        `UPDATE users SET ${setClause} WHERE id = ?`,
+        [...values, userId]
+      );
 
-    return result.affectedRows > 0;
-  } catch (err) {
-    this.logger.error("UserRepository", UserLogMessages.updateFailed, err);
-    return false;
-  } finally {
-    res.conn.release();
+      return result.affectedRows > 0;
+    } catch (err) {
+      this.logger.error("UserRepository", UserLogMessages.updateFailed, err);
+      return false;
+    } finally {
+      res.conn.release();
+    }
   }
-}
 
   async exists(id: number): Promise<boolean> {
     const res = await this.db.getReadConnection();
@@ -171,21 +174,21 @@ async findByUsername(username: string): Promise<User> {
   }
 
   async updateRole(id: number, role: UserRole): Promise<boolean> {
-  const res = await this.db.getWriteConnection();
-  if (!res) return false;
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
 
-  try {
-    const [result] = await res.conn.execute<ResultSetHeader>(
-      `UPDATE users SET role = ? WHERE id = ?`,
-      [role, id]
-    );
+    try {
+      const [result] = await res.conn.execute<ResultSetHeader>(
+        `UPDATE users SET role = ? WHERE id = ?`,
+        [role, id]
+      );
 
-    return result.affectedRows > 0;
-  } catch (err) {
-    this.logger.error("UserRepository", UserLogMessages.updateRoleFailed, err);
-    return false;
-  } finally {
-    res.conn.release();
+      return result.affectedRows > 0;
+    } catch (err) {
+      this.logger.error("UserRepository", UserLogMessages.updateRoleFailed, err);
+      return false;
+    } finally {
+      res.conn.release();
+    }
   }
-}
 }

@@ -138,14 +138,9 @@ export class CommentService implements ICommentService {
       return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
 
-    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(ctx.userId, post.communityId);
-
     const isAuthor = comment.userId === ctx.userId;
-    const isModerator =
-      membership.id !== 0 &&
-      membership.role === CommunityMemberRole.MODERATOR &&
-      membership.status === CommunityMemberStatus.ACTIVE;
-
+    const isModerator = await this.isActiveModerator(ctx.userId, post.communityId);
+    
     if (!isAuthor && !isModerator) {
       return ServiceResultFactory.fail(
         CommentMessages.onlyAuthorOrModeratorCanDelete,
@@ -206,6 +201,11 @@ export class CommentService implements ICommentService {
     }
 
     const rootResult = await this.commentRepo.findRootByPost(dto);
+    if (rootResult.comments.length === 0) {
+      const data = new PaginatedListDto([], rootResult.total, dto.page, dto.limit);
+      return ServiceResultFactory.ok(CommentMessages.fetched, data,HttpStatus.ok);
+    }
+
     const rootIds = rootResult.comments.map((c) => c.id);
 
     const replies = await this.commentRepo.findRepliesByParentIds(rootIds);
@@ -224,13 +224,13 @@ export class CommentService implements ICommentService {
         []
       );
 
-      return {
-        ...acc,
-        [reply.parentId as number]: [
-          ...(acc[reply.parentId as number] ?? []),
-          replyDto,
-        ],
-      };
+      const parentId = reply.parentId as number;
+      if (!acc[parentId]) {
+        acc[parentId] = [];
+      }
+      acc[parentId].push(replyDto);
+
+      return acc;
     }, {});
 
     const items = rootResult.comments.map((root) => {

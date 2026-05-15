@@ -7,6 +7,7 @@ import { useToast } from "../../hooks/toast/useToast";
 const userNav = [
   { to: "/feed", label: "My feed", icon: "◈" },
   { to: "/profile", label: "My profile", icon: "◉" },
+  { to: "/communities/mine", label: "My communities", icon: "◈" },
 ];
 
 const adminNav = [
@@ -14,6 +15,7 @@ const adminNav = [
   { to: "/feed", label: "My feed", icon: "⬡" },
   { to: "/admin/users", label: "Users", icon: "◎" },
   { to: "/admin/communities", label: "Communities", icon: "⬡" },
+  { to: "/communities/mine", label: "My communities", icon: "◈" },
   { to: "/profile", label: "My profile", icon: "◉" },
 ];
 

@@ -24,9 +24,9 @@ export class HealthService implements IHealthService {
         return ServiceResultFactory.fail( HealthMessages.noHealthySlave, HttpStatus.internalServerError);
     }
 
-    const data = HealthMapper.toDbNodeHealthDto(newMaster);
+    const newMasterDto  = HealthMapper.toDbNodeHealthDto(newMaster);
 
-    return ServiceResultFactory.ok(HealthMessages.failoverSuccess, data, HttpStatus.ok);
+    return ServiceResultFactory.ok(HealthMessages.failoverSuccess, newMasterDto , HttpStatus.ok);
   }
 
 }

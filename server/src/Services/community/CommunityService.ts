@@ -24,6 +24,7 @@ import { CommunityDetailsDto } from "../../Domain/DTOs/community/CommunityDetail
 import { UserMapper } from "../../Shared/mappers/users/UserMapper";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { UserDto } from "../../Domain/DTOs/users/UserDto";
+import { CommunityMember } from "../../Domain/models/CommunityMember";
 
 export class CommunityService implements ICommunityService {
   public constructor(
@@ -32,6 +33,14 @@ export class CommunityService implements ICommunityService {
      private readonly userRepo: IUserRepository,
      private readonly auditHelperService: IAuditHelperService
   ) {}
+
+  private isActiveModerator(membership: CommunityMember): boolean {
+    return (
+      membership.id !== 0 &&
+      membership.role === CommunityMemberRole.MODERATOR &&
+      membership.status === CommunityMemberStatus.ACTIVE
+    );
+  }
 
   async getPublic(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
     const result = await this.communityRepo.findAll(page, limit,CommunityType.PUBLIC);
@@ -72,6 +81,7 @@ export class CommunityService implements ICommunityService {
 
     const communityMemberCreated = await this.communityMemberRepo.create(dto.ownerId, community.id, CommunityMemberRole.MODERATOR, CommunityMemberStatus.ACTIVE);
     if (!communityMemberCreated) {
+      await this.communityRepo.delete(community.id);
       return ServiceResultFactory.fail<CreateCommunityResponseDto>(CommunityMessages.createFailed, HttpStatus.internalServerError);
     }
     
@@ -82,7 +92,7 @@ export class CommunityService implements ICommunityService {
     return ServiceResultFactory.ok(CommunityMessages.created, createdDto, HttpStatus.created);
   }
 
-   async getById(page: number, limit: number, communityId: number, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<CommunityDetailsDto>> {
+  async getById(page: number, limit: number, communityId: number, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<CommunityDetailsDto>> {
     const community = await this.communityRepo.findById(communityId);
     if (community.id === 0) {
       return ServiceResultFactory.fail<CommunityDetailsDto>(CommunityMessages.notFound, HttpStatus.notFound);
@@ -106,14 +116,22 @@ export class CommunityService implements ICommunityService {
 
 
     const membersResult  = await this.communityMemberRepo.findUserIdsByCommunityId(page,limit,communityId);
+    if (membersResult.userIds.length === 0) {
+      const members = new PaginatedListDto([], membersResult.total, page, limit);
+
+      const data = new CommunityDetailsDto(
+        CommunityMapper.toDto(community),
+        members
+      );
+
+      return ServiceResultFactory.ok(CommunityMessages.fetchOneSuccess, data, HttpStatus.ok);
+    }
 
     const users  = await this.userRepo.findByIds(membersResult.userIds);
 
     const usersById = users.reduce<Record<number, UserDto>>((acc, user) => {
-      return {
-        ...acc,
-        [user.id]: UserMapper.toDto(user),
-      };
+      acc[user.id] = UserMapper.toDto(user);
+      return acc;
     }, {});
 
     const membersDto = membersResult.userIds
@@ -144,11 +162,7 @@ export class CommunityService implements ICommunityService {
     }
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(ctx.userId, id);
-    if (
-      membership.id === 0 ||
-      membership.role !== CommunityMemberRole.MODERATOR ||
-      membership.status !== CommunityMemberStatus.ACTIVE
-    ) {
+    if (!this.isActiveModerator(membership)) {
       return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanUpdate, HttpStatus.forbidden);
     }
 
@@ -175,11 +189,7 @@ export class CommunityService implements ICommunityService {
     }
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(ctx.userId, id);
-    if (
-      membership.id === 0 ||
-      membership.role !== CommunityMemberRole.MODERATOR ||
-      membership.status !== CommunityMemberStatus.ACTIVE
-    ) {
+    if (!this.isActiveModerator(membership)) {
       return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanDelete, HttpStatus.forbidden);
     }
 

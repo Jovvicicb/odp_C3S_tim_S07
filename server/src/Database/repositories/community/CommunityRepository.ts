@@ -34,8 +34,10 @@ export class CommunityRepository implements ICommunityRepository {
   }
 
   async findByIds(ids: number[]): Promise<Community[]> {
+    if (ids.length === 0) return [];
+    
     const res = await this.db.getReadConnection();
-    if (!res || ids.length === 0) return [];
+    if (!res) return [];
 
     try {
       const placeholders = ids.map(() => "?").join(",");
@@ -61,7 +63,7 @@ export class CommunityRepository implements ICommunityRepository {
 
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT * FROM communities WHERE name = ?`,
+        `SELECT * FROM communities WHERE name = ? LIMIT 1`,
          [name]
       );
       return rows.length > 0 ? CommunityMapper.toModel(rows[0]): new Community();
@@ -99,6 +101,7 @@ export class CommunityRepository implements ICommunityRepository {
     const offset = safeInt((page - 1) * limit);
     const lim = safeInt(limit);
     const whereClause = type ? `WHERE type = ?` : "";
+    const params = type ? [type] : [];
     try {
        const [rows] = await res.conn.execute<RowDataPacket[]>(
         `SELECT *
@@ -106,19 +109,19 @@ export class CommunityRepository implements ICommunityRepository {
        ${whereClause}
        ORDER BY created_at DESC
        LIMIT ${lim} OFFSET ${offset}`,
-        type ? [type] : [],
+       params,
       );
 
        const [cnt] = await res.conn.execute<RowDataPacket[]>(
         `SELECT COUNT(*) as total
        FROM communities
        ${whereClause}`,
-        type ? [type] : [],
+        params,
       );
 
       return {
         communities: rows.map((r) => CommunityMapper.toModel(r)),
-        total: cnt[0]?.total ?? 0};
+        total: Number(cnt[0]?.total ?? 0)};
     } catch (err) {
       this.logger.error("CommunityRepository", CommunityLogMessages.findAllFailed, err);
       return {communities : [] ,total:0};
@@ -158,16 +161,20 @@ export class CommunityRepository implements ICommunityRepository {
   }
 
   async update(id: number, dto: UpdateCommunityDto): Promise<boolean> {
+    const entries = Object.entries(dto).filter(([, v]) => v !== undefined);
+    if (entries.length === 0) return false;
+
     const res = await this.db.getWriteConnection();
     if (!res) return false;
+
     try {
-      const entries = Object.entries(dto).filter(([, v]) => v !== undefined);
-      if (entries.length === 0) return false;
       const setClause = entries.map(([k]) => `${k} = ?`).join(", ");
       const values = entries.map(([, v]) => v);
+
       const [result] = await res.conn.execute<ResultSetHeader>(
         `UPDATE communities SET ${setClause} WHERE id = ?`, [...values, id]
       );
+      
       return result.affectedRows > 0;
     } catch (err) {
       this.logger.error("CommunityRepository", CommunityLogMessages.updateFailed, err);

@@ -50,6 +50,7 @@ export const CommunityMessages = {
   joinRequestDenied: "Join request denied successfully",
   updateMemberStatusFailed: "Failed to update community member status",
   joinRequestRemovalFailed: "Failed to remove join request",
+  cannotChangeOwnMemberStatus: "You cannot change your own membership status.",
 
   onlyModeratorCanRemoveMember: "Only community moderators can remove members",
   memberRemoved: "Member removed successfully",

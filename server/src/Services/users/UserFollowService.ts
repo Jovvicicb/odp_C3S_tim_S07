@@ -71,12 +71,14 @@ export class UserFollowService implements IUserFollowService{
         }
 
         const result = await this.userFollowRepo.getFollowers(dto);
+        if (result.followerIds.length === 0) {
+            const data = new PaginatedListDto([], result.total, dto.page, dto.limit);
+            return ServiceResultFactory.ok(UserMessages.followersFetchedSuccess, data, HttpStatus.ok);
+        }
         const foundUsers = await this.userRepo.findByIds(result.followerIds);
         const usersById = foundUsers.reduce<Record<number, UserDto>>((acc, user) => {
-            return {
-            ...acc,
-            [user.id]: UserMapper.toDto(user),
-            };
+            acc[user.id] = UserMapper.toDto(user);
+            return acc;
         }, {});
 
          const usersDto = result.followerIds
@@ -100,12 +102,14 @@ export class UserFollowService implements IUserFollowService{
         }
 
         const result = await this.userFollowRepo.getFollowing(dto);
+        if (result.followingIds.length === 0) {
+            const data = new PaginatedListDto([], result.total, dto.page, dto.limit);
+            return ServiceResultFactory.ok(UserMessages.followingFetchedSuccess, data, HttpStatus.ok);
+        }
         const foundUsers = await this.userRepo.findByIds(result.followingIds);
         const usersById = foundUsers.reduce<Record<number, UserDto>>((acc, user) => {
-            return {
-            ...acc,
-            [user.id]: UserMapper.toDto(user),
-            };
+            acc[user.id] = UserMapper.toDto(user);
+            return acc;
         }, {});
 
         const usersDto = result.followingIds

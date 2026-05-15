@@ -4,4 +4,5 @@ export const CommunityMessages = {
 
   fetchAllSuccess: "Communities loaded successfully",
   fetchAllFailed: "Failed to load communities",
+  fetchMineFailed: "Failed to fetch my communities",
 } as const;

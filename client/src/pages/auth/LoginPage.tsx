@@ -10,7 +10,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
-    navigate(user.role === "admin" ? "/admin" : "/dashboard");
+    navigate(user.role === "admin" ? "/admin" : "/feed");
   }, [isAuthenticated, user, navigate]);
 
   return (

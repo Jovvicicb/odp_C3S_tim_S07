@@ -167,8 +167,10 @@ export class CommentRepository implements ICommentRepository {
 
 
   async findRepliesByParentIds(parentIds: number[]): Promise<Comment[]> {
+    if (parentIds.length === 0) return [];
+
     const res = await this.db.getReadConnection();
-    if (!res || parentIds.length === 0) return [];
+    if (!res) return [];
 
     const placeholders = parentIds.map(() => "?").join(",");
 

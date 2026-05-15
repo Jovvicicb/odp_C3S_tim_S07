@@ -13,8 +13,10 @@ export class PostTagRepository implements IPostTagRepository {
     ){}
 
     async findTagIdsByPostIds(postIds: number[]): Promise<Record<number, number[]>> {
+        if (postIds.length === 0) return {};
+
         const res = await this.db.getReadConnection();
-        if (!res || postIds.length === 0) return {};
+        if (!res) return {};
 
         const placeholders = postIds.map(() => "?").join(",");
 
@@ -29,7 +31,10 @@ export class PostTagRepository implements IPostTagRepository {
             return rows.reduce<Record<number, number[]>>((acc, row) => {
                 const postId = Number(row.post_id);
                 const tagId = Number(row.tag_id);
-                acc[postId] = [...(acc[postId] ?? []), tagId];
+                if (!acc[postId]) {
+                    acc[postId] = [];
+                }
+                acc[postId].push(tagId);
                 return acc;
             }, {});
         } catch (err) {

@@ -12,8 +12,10 @@ export class PostLikeRepository implements IPostLikeRepository {
     ){}
 
     async countByPostIds(postIds: number[]): Promise<Record<number, number>> {
+        if (postIds.length === 0) return {};
+
         const res = await this.db.getReadConnection();
-        if (!res || postIds.length === 0) return {};
+        if (!res) return {};
 
         const placeholders = postIds.map(() => "?").join(",");
 

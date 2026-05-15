@@ -16,8 +16,10 @@ export class TagRepository implements ITagRepository {
   ) {}
 
   async findByIds(ids: number[]): Promise<Tag[]> {
+    if (ids.length === 0) return [];
+
     const res = await this.db.getReadConnection();
-    if (!res || ids.length === 0) return [];
+    if (!res) return [];
 
     const placeholders = ids.map(() => "?").join(",");
 

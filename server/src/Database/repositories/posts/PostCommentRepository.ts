@@ -13,9 +13,11 @@ export class PostCommentRepository implements IPostCommentRepository {
 
 
     async countByPostIds(postIds: number[]): Promise<Record<number, number>> {
-        const res = await this.db.getReadConnection();
-        if (!res || postIds.length === 0) return {};
+        if (postIds.length === 0) return {};
 
+        const res = await this.db.getReadConnection();
+        if (!res) return {};
+        
         const placeholders = postIds.map(() => "?").join(",");
 
         try {

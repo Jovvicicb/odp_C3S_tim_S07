@@ -19,6 +19,7 @@ import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMem
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { UserRole } from "../../Domain/enums/UserRole";
+import { CommunityMember } from "../../Domain/models/CommunityMember";
 import { Post } from "../../Domain/models/Post";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
 import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
@@ -51,18 +52,28 @@ export class PostService implements IPostService {
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
+  private isActiveModerator(membership: CommunityMember): boolean {
+  return (
+    membership.id !== 0 &&
+    membership.role === CommunityMemberRole.MODERATOR &&
+    membership.status === CommunityMemberStatus.ACTIVE
+  );
+}
+
   private async buildPostsWithDetails(posts: Post[]): Promise<PostWithDetailsDto[]> {
+    if (posts.length === 0) return [];
+
     const postIds = posts.map((post) => post.id);
 
     const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds(postIds);
     const uniqueTagIds = Array.from(new Set(Object.values(tagIdsByPostId).flat()));
-    const tags = await this.tagRepo.findByIds(uniqueTagIds);
+    const tags = uniqueTagIds.length > 0
+      ? await this.tagRepo.findByIds(uniqueTagIds)
+      : [];
 
     const tagsById = tags.reduce<Record<number, PostTagDto>>((acc, tag) => {
-      return {
-        ...acc,
-        [tag.id]: new PostTagDto(tag.id, tag.name),
-      };
+        acc[tag.id] = new PostTagDto(tag.id, tag.name);
+        return acc;
     }, {});
 
     const likeCounts = await this.postLikeRepo.countByPostIds(postIds);
@@ -86,7 +97,10 @@ export class PostService implements IPostService {
     const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds([post.id]);
     const tagIds = tagIdsByPostId[post.id] ?? [];
 
-    const tags = await this.tagRepo.findByIds(tagIds);
+    const tags = tagIds.length > 0
+      ? await this.tagRepo.findByIds(tagIds)
+      : [];
+      
     const postTags = tags.map((tag) => new PostTagDto(tag.id, tag.name));
 
     const likeCounts = await this.postLikeRepo.countByPostIds([post.id]);
@@ -133,10 +147,7 @@ export class PostService implements IPostService {
     const isAuthor = post.authorId === requesterId;
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
-    const isModerator =
-        membership.id !== 0 &&
-        membership.role === CommunityMemberRole.MODERATOR &&
-        membership.status === CommunityMemberStatus.ACTIVE;
+    const isModerator = this.isActiveModerator(membership);
 
     if (!isAuthor && !isModerator) {
       return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanUpdate, HttpStatus.forbidden);
@@ -163,10 +174,7 @@ export class PostService implements IPostService {
     const isAuthor = post.authorId === requesterId;
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
-    const isModerator =
-        membership.id !== 0 &&
-        membership.role === CommunityMemberRole.MODERATOR &&
-        membership.status === CommunityMemberStatus.ACTIVE;
+    const isModerator = this.isActiveModerator(membership);
 
     if (!isAuthor && !isModerator) {
       return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanDelete, HttpStatus.forbidden);
@@ -207,7 +215,11 @@ export class PostService implements IPostService {
     }
 
     const result = await this.postRepo.findByCommunity(dto);
-   
+    if (result.posts.length === 0) {
+      const data = new PaginatedListDto([], result.total, dto.page, dto.limit);
+      return ServiceResultFactory.ok(PostMessages.postsFetched, data, HttpStatus.ok);
+    }
+
     const items = await this.buildPostsWithDetails(result.posts);
 
     const data = new PaginatedListDto(
@@ -226,6 +238,10 @@ export class PostService implements IPostService {
     const publicCommunityIds = await this.communityRepo.findIdsByType(CommunityType.PUBLIC);
 
     const result = await this.postRepo.findFeed(page, limit, activeCommunityIds, followingUserIds, publicCommunityIds);
+    if (result.posts.length === 0) {
+      const data = new PaginatedListDto([], result.total, page, limit);
+      return ServiceResultFactory.ok(PostMessages.feedFetched, data, HttpStatus.ok);
+    }
 
     const items = await this.buildPostsWithDetails(result.posts);
 

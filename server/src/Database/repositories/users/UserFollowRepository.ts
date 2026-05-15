@@ -81,7 +81,7 @@ export class UserFollowRepository implements IUserFollowRepository {
 
             return {
             followerIds: rows.map((r) => Number(r.follower_id)),
-            total: cnt[0]?.total ?? 0,
+            total: Number(cnt[0]?.total ?? 0),
             };
         } catch (err) {
             this.logger.error("UserFollowRepository", UserLogMessages.getFollowersFailed, err);
@@ -116,7 +116,7 @@ export class UserFollowRepository implements IUserFollowRepository {
 
             return {
             followingIds: rows.map((r) => Number(r.following_id)),
-            total: cnt[0]?.total ?? 0,
+            total: Number(cnt[0]?.total ?? 0),
             };
         } catch (err) {
             this.logger.error("UserFollowRepository", UserLogMessages.getFollowingFailed, err);

@@ -17,6 +17,7 @@ import { AuditContext } from '../../Domain/types/audits/AuditContext';
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
 import { CommunityMapper } from '../../Shared/mappers/community/CommunityMapper';
+import { CommunityMember } from '../../Domain/models/CommunityMember';
 
 export class CommunityMemberService implements ICommunityMemberService {
   public constructor(
@@ -25,7 +26,15 @@ export class CommunityMemberService implements ICommunityMemberService {
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
-  
+
+  private isActiveModerator(membership: CommunityMember): boolean {
+    return (
+        membership.id !== 0 &&
+        membership.role === CommunityMemberRole.MODERATOR &&
+        membership.status === CommunityMemberStatus.ACTIVE
+    );
+  }
+    
 
   async join(communityId: number, userId: number): Promise<ServiceResult> {
     const community = await this.communityRepo.findById(communityId);
@@ -100,13 +109,21 @@ export class CommunityMemberService implements ICommunityMemberService {
   async getMine(page: number, limit: number, userId: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
     const result = await this.communityMemberRepo.findCommunityIdsByUserId(page,limit,userId);
 
+    if (result.communityIds.length === 0) {
+        const data = new PaginatedListDto([], result.total, page, limit);
+
+        return ServiceResultFactory.ok(
+        CommunityMessages.fetchMineSuccess,
+        data,
+        HttpStatus.ok
+        );
+    }
+
     const communities =await this.communityRepo.findByIds(result.communityIds);
 
     const communitiesById = communities.reduce<Record<number, CommunityDto>>((acc, community) => {
-    return {
-        ...acc,
-        [community.id]: CommunityMapper.toDto(community),
-    };
+        acc[community.id] = CommunityMapper.toDto(community);
+        return acc;
     }, {});
 
     const communitiesDto = result.communityIds
@@ -131,11 +148,7 @@ export class CommunityMemberService implements ICommunityMemberService {
 
     const requesterId = ctx.userId;
     const requesterMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, communityId);
-    if (
-        requesterMembership.id === 0 ||
-        requesterMembership.role !== CommunityMemberRole.MODERATOR ||
-        requesterMembership.status !== CommunityMemberStatus.ACTIVE
-    ) {
+   if (!this.isActiveModerator(requesterMembership)) {
         return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanChangeMemberRole, HttpStatus.forbidden);
     }
 
@@ -175,12 +188,11 @@ export class CommunityMemberService implements ICommunityMemberService {
     } 
 
     const requesterId = ctx.userId;
+    if(requesterId === targetUserId){
+        return ServiceResultFactory.fail(CommunityMessages.cannotChangeOwnMemberStatus, HttpStatus.badRequest);
+    }
     const requesterMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, communityId);
-    if (
-        requesterMembership.id === 0 ||
-        requesterMembership.role !== CommunityMemberRole.MODERATOR ||
-        requesterMembership.status !== CommunityMemberStatus.ACTIVE
-    ) {
+    if (!this.isActiveModerator(requesterMembership)) {
         return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanChangeMemberStatus, HttpStatus.forbidden);
     }
 
@@ -226,11 +238,7 @@ export class CommunityMemberService implements ICommunityMemberService {
 
     const requesterId = ctx.userId;
     const requesterMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, communityId);
-    if (
-        requesterMembership.id === 0 ||
-        requesterMembership.role !== CommunityMemberRole.MODERATOR ||
-        requesterMembership.status !== CommunityMemberStatus.ACTIVE
-    ) {
+    if (!this.isActiveModerator(requesterMembership)) {
         return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanRemoveMember, HttpStatus.forbidden);
     }
 

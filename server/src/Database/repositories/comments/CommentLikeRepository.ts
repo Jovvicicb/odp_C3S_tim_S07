@@ -82,9 +82,11 @@ export class CommentLikeRepository implements ICommentLikeRepository {
 
 
   async countByCommentIds(commentIds: number[]): Promise<Record<number, number>> {
-    const res = await this.db.getReadConnection();
-    if (!res || commentIds.length === 0) return {};
+    if (commentIds.length === 0) return {};
 
+    const res = await this.db.getReadConnection();
+    if (!res) return {};
+    
     const placeholders = commentIds.map(() => "?").join(",");
 
     try {

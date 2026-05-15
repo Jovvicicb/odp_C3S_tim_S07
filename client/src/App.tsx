@@ -13,6 +13,7 @@ import CommunityDetailsPage from "./pages/app/CommunityDetailsPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
 import ProfileSettingsPage from "./pages/app/ProfileSettingsPage";
+import MyCommunitiesPage from "./pages/app/MyCommunitiesPage";
 
 export default function App() {
   return (
@@ -53,6 +54,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
             <ProfileSettingsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/communities/mine"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <MyCommunitiesPage />
           </ProtectedRoute>
         }
       />
