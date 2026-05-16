@@ -52,4 +52,28 @@ export const communityApi: ICommunityAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, CommunityMessages.fetchAllFailed));
   },
+
+  async getPublic(page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<CommunityDto>>>(BASE, {
+        headers: authHeader(),
+        params: { page, limit },
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.fetchAllFailed));
+  },
+  
+  async join(id) {
+  return axios
+    .post<ApiResponse<void>>(`${BASE}/${id}/join`, {}, { headers: authHeader() })
+    .then((r) => r.data)
+    .catch((e) => err(e, CommunityMessages.joinFailed));
+},
+
+async leave(id) {
+  return axios
+    .delete<ApiResponse<void>>(`${BASE}/${id}/leave`, { headers: authHeader() })
+    .then((r) => r.data)
+    .catch((e) => err(e, CommunityMessages.leaveFailed));
+},
 };

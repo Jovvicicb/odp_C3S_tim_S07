@@ -232,6 +232,34 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
       res.conn.release(); 
     }
   }
-  
+
+  async findStatusesByUserIdAndCommunityIds(userId: number, communityIds: number[]): Promise<Record<number, CommunityMemberStatus>> {
+  if (communityIds.length === 0) return {};
+
+  const res = await this.db.getReadConnection();
+  if (!res) return {};
+
+  const placeholders = communityIds.map(() => "?").join(",");
+
+  try {
+    const [rows] = await res.conn.execute<RowDataPacket[]>(
+      `SELECT community_id, status
+       FROM community_members
+       WHERE user_id = ? AND community_id IN (${placeholders})`,
+      [userId, ...communityIds]
+    );
+
+    return rows.reduce<Record<number, CommunityMemberStatus>>((acc, row) => {
+      acc[Number(row.community_id)] = row.status as CommunityMemberStatus;
+      return acc;
+    }, {});
+  } catch (err) {
+    this.logger.error("CommunityMemberRepository", CommunityLogMessages.findStatusesFailed, err);
+    return {};
+  } finally {
+    res.conn.release();
+  }
+}
+    
 
 }

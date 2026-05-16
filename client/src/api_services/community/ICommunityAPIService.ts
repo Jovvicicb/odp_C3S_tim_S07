@@ -7,4 +7,7 @@ export interface ICommunityAPIService {
   create(formData: FormData): Promise<ApiResponse<CreateCommunityResponseDto>>;
   getAll(page: number, limit: number): Promise<ApiResponse<PaginatedListDto<CommunityDto>>>;
   getMine(page: number, limit: number): Promise<ApiResponse<PaginatedListDto<CommunityDto>>>;
+  getPublic(page: number, limit: number): Promise<ApiResponse<PaginatedListDto<CommunityDto>>>;
+  join(id: number): Promise<ApiResponse<void>>;
+  leave(id: number): Promise<ApiResponse<void>>;
 }

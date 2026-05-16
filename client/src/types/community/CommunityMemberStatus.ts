@@ -1,0 +1,1 @@
+export type CommunityMemberStatus = "active" | "pending" | "banned";

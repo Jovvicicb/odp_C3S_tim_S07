@@ -22,6 +22,7 @@ export const CommunityLogMessages = {
   exists: "exists failed",
   updateMemberRoleFailed: "Update community member role failed",
   updateMemberStatusFailed: "Update community member status failed",
+  findStatusesFailed: "Failed to find community membership statuses",
 
   // shared
   createFailed: "create failed",

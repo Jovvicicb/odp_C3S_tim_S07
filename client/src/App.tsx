@@ -14,6 +14,7 @@ import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
 import ProfileSettingsPage from "./pages/app/ProfileSettingsPage";
 import MyCommunitiesPage from "./pages/app/MyCommunitiesPage";
+import CommunitiesPage from "./pages/app/CommunityPage";
 
 export default function App() {
   return (
@@ -27,6 +28,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
             <FeedPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/communities"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <CommunitiesPage />
           </ProtectedRoute>
         }
       />

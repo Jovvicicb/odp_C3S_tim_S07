@@ -1,3 +1,4 @@
+import type { CommunityMemberStatus } from "../../types/community/CommunityMemberStatus";
 import type { CommunityType } from "../../types/community/CommunityType";
 
 export type CommunityDto = {
@@ -10,4 +11,5 @@ export type CommunityDto = {
   avatar: string | null;
   createdAt: string;
   updatedAt: string;
+  membershipStatus: CommunityMemberStatus | null;
 };

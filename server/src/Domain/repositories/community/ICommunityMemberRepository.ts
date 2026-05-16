@@ -12,4 +12,5 @@ export interface ICommunityMemberRepository {
     delete(userId: number, communityId: number): Promise<boolean>;
     findByUserIdAndCommunityId(userId: number, communityId: number): Promise<CommunityMember>;
     exists(userId: number, communityId: number): Promise<boolean>;
+    findStatusesByUserIdAndCommunityIds(userId: number, communityIds: number[]): Promise<Record<number, CommunityMemberStatus>>;
 }

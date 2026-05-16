@@ -42,11 +42,17 @@ export class CommunityService implements ICommunityService {
     );
   }
 
-  async getPublic(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
+  async getPublic(page: number, limit: number, viewerId?: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
     const result = await this.communityRepo.findAll(page, limit,CommunityType.PUBLIC);
 
+    const communityIds = result.communities.map((c) => c.id);
+
+    const statusesByCommunityId = viewerId
+    ? await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(viewerId, communityIds)
+    : {};
+
     const data = new PaginatedListDto(
-      result.communities.map((c) => CommunityMapper.toDto(c)),
+      result.communities.map((c) => CommunityMapper.toDto(c, statusesByCommunityId[c.id] ?? null)),
       result.total, 
       page, 
       limit
@@ -55,12 +61,18 @@ export class CommunityService implements ICommunityService {
     return ServiceResultFactory.ok(CommunityMessages.fetchPublicSuccess,data,HttpStatus.ok);
   }
 
-  async getAll(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
+  async getAll(page: number, limit: number, viewerId?: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
     const result = await this.communityRepo.findAll(page, limit);
 
+    const communityIds = result.communities.map((c) => c.id);
+
+    const statusesByCommunityId = viewerId
+      ? await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(viewerId, communityIds)
+      : {};
+
     const data = new PaginatedListDto(
-      result.communities.map((c) => CommunityMapper.toDto(c)),
-      result.total, 
+      result.communities.map((c) => CommunityMapper.toDto(c, statusesByCommunityId[c.id] ?? null)),
+      result.total,
       page, 
       limit
     );

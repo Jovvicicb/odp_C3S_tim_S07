@@ -1,3 +1,5 @@
+import { ActionButton } from "../../components/ui/ActionButton";
+import { CommunityCard } from "../../components/community/CommunityCard";
 import {
   Empty,
   ErrorBox,
@@ -5,13 +7,11 @@ import {
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
-import { CommunityCard } from "../../components/community/CommunityCard";
-import { useMyCommunities } from "../../hooks/community/useMyCommunities";
-import { ActionButton } from "../../components/ui/ActionButton";
+import { usePublicCommunities } from "../../hooks/community/usePublicCommunities";
 import { useCommunityMembership } from "../../hooks/community/useCommunityMembership";
 import { useToast } from "../../hooks/toast/useToast";
 
-export default function MyCommunitiesPage() {
+export default function CommunitiesPage() {
   const {
     communities,
     setCommunities,
@@ -20,17 +20,42 @@ export default function MyCommunitiesPage() {
     page,
     limit,
     total,
-    setTotal,
     setPage,
-  } = useMyCommunities(1, 10);
+  } = usePublicCommunities(1, 10);
 
   const { showToast } = useToast();
 
   const {
+    joinCommunity,
     leaveCommunity,
     loadingCommunityId,
     error: membershipError,
   } = useCommunityMembership();
+
+  const handleJoin = async (communityId: number) => {
+    const message = await joinCommunity(communityId);
+
+    if (!message) {
+      return;
+    }
+
+    setCommunities((current) =>
+      current.map((community) =>
+        community.id === communityId
+          ? {
+              ...community,
+              membershipStatus:
+                community.type === "public" ? "active" : "pending",
+            }
+          : community,
+      ),
+    );
+
+    showToast({
+      type: "success",
+      message,
+    });
+  };
 
   const handleLeave = async (communityId: number) => {
     const message = await leaveCommunity(communityId);
@@ -40,31 +65,33 @@ export default function MyCommunitiesPage() {
     }
 
     setCommunities((current) =>
-      current.filter((community) => community.id !== communityId),
+      current.map((community) =>
+        community.id === communityId
+          ? {
+              ...community,
+              membershipStatus: null,
+            }
+          : community,
+      ),
     );
-
-    setTotal((current) => Math.max(0, current - 1));
 
     showToast({
       type: "success",
       message,
     });
-
-    if (communities.length === 1 && page > 1) {
-      setPage(page - 1);
-    }
   };
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Communities"
-        title="My communities"
+        title="Public communities"
         action={
           <ActionButton
             variant="create"
             label="Create community"
             to="/communities/create"
+            size="md"
           />
         }
       />
@@ -77,20 +104,18 @@ export default function MyCommunitiesPage() {
         <div className="flex justify-center py-20">
           <Spinner size={24} />
         </div>
-      ) : communities.length === 0 ? (
-        <Empty message="You haven't joined any communities yet." />
+      ) : communities.length === 0 && !error ? (
+        <Empty message="No public communities found." />
       ) : (
         <>
           <div className="flex flex-col gap-5">
             {communities.map((community) => (
               <CommunityCard
                 key={community.id}
-                community={{
-                  ...community,
-                  membershipStatus: "active",
-                }}
-                showMembershipAction
+                community={community}
+                showMembershipAction={true}
                 actionLoading={loadingCommunityId === community.id}
+                onJoin={handleJoin}
                 onLeave={handleLeave}
               />
             ))}

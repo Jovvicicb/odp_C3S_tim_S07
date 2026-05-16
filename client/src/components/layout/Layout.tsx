@@ -6,17 +6,20 @@ import { useToast } from "../../hooks/toast/useToast";
 
 const userNav = [
   { to: "/feed", label: "My feed", icon: "◈" },
-  { to: "/profile", label: "My profile", icon: "◉" },
+  { to: "/communities", label: "Communities", icon: "◉" },
   { to: "/communities/mine", label: "My communities", icon: "◈" },
+  { to: "/profile", label: "My profile", icon: "◉" },
 ];
 
 const adminNav = [
-  { to: "/admin", label: "Dashboard", icon: "◈" },
-  { to: "/feed", label: "My feed", icon: "⬡" },
-  { to: "/admin/users", label: "Users", icon: "◎" },
-  { to: "/admin/communities", label: "Communities", icon: "⬡" },
+  { to: "/feed", label: "My feed", icon: "◈" },
+  { to: "/communities", label: "Communities", icon: "◉" },
   { to: "/communities/mine", label: "My communities", icon: "◈" },
   { to: "/profile", label: "My profile", icon: "◉" },
+
+  { to: "/admin", label: "Dashboard", icon: "◈" },
+  { to: "/admin/users", label: "Users", icon: "◎" },
+  { to: "/admin/communities", label: "Communities", icon: "⬡" },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {

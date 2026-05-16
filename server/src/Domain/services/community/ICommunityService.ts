@@ -9,8 +9,8 @@ import { CommunityDetailsDto } from "../../DTOs/community/CommunityDetailsDto";
 import { UserRole } from "../../enums/UserRole";
 
 export interface ICommunityService {
-  getPublic(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
-  getAll(page: number, limit: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
+  getPublic(page: number, limit: number, viewerId?: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
+  getAll(page: number, limit: number, viewerId?: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
   getById(page: number, limit: number, communityId: number, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<CommunityDetailsDto>>;
   create(dto: CreateCommunityDto, ctx:AuditContext): Promise<ServiceResult<CreateCommunityResponseDto>>;
   update(id: number, dto: UpdateCommunityDto, ctx:AuditContext): Promise<ServiceResult>;

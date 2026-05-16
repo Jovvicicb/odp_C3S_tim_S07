@@ -1,3 +1,4 @@
+import { CommunityMemberStatus } from "../../enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../enums/communities/CommunityType";
 
 export class CommunityDto {
@@ -10,6 +11,7 @@ export class CommunityDto {
     public ownerId: number,
     public avatar: string | null,
     public createdAt: Date,
-    public updatedAt: Date
+    public updatedAt: Date,
+    public membershipStatus: CommunityMemberStatus | null = null
   ) {}
 }

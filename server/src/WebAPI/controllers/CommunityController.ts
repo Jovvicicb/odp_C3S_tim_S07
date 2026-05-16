@@ -13,7 +13,6 @@ import { validatePagination } from "../validators/common/ValidatePagination";
 import { validateUpdateCommunity } from "../validators/community/ValidateUpdateCommunity";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { CreateCommunityInput } from "../types/community/CreateCommunityInput";
 import { UpdateCommunityInput } from "../types/community/UpdateCommunityInput";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
@@ -58,8 +57,9 @@ export class CommunityController {
       return;
     } 
 
+    const viewer = OptionalAuthHelper.getUser(req);
     try{
-      const result = await this.communityService.getPublic(page, limit);
+      const result = await this.communityService.getPublic(page, limit, viewer?.id);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.getPublicFailed, err);
@@ -113,8 +113,9 @@ export class CommunityController {
       return;
     } 
 
+    const viewer = OptionalAuthHelper.getUser(req);
     try{
-      const result = await this.communityService.getAll(page, limit);
+      const result = await this.communityService.getAll(page, limit, viewer?.id);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.getAllFailed, err);

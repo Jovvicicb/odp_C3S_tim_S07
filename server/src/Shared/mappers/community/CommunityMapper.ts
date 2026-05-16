@@ -3,6 +3,7 @@ import { CommunityDto } from "../../../Domain/DTOs/community/CommunityDto";
 import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
 import { Community } from "../../../Domain/models/Community";
 import { CreateCommunityResponseDto } from "../../../Domain/DTOs/community/CreateCommunityResponseDto";
+import { CommunityMemberStatus } from "../../../Domain/enums/communities/CommunityMemberStatus";
 
 export class CommunityMapper {
   public static toModel(row: RowDataPacket): Community {
@@ -18,7 +19,10 @@ export class CommunityMapper {
       new Date(row.updated_at)
     );
   }
-  public static toDto(community: Community): CommunityDto {
+  public static toDto(
+    community: Community,
+    membershipStatus: CommunityMemberStatus | null = null
+  ): CommunityDto {
     return new CommunityDto(
       community.id,
       community.name,
@@ -28,7 +32,8 @@ export class CommunityMapper {
       community.ownerId,
       community.avatar,
       community.createdAt,
-      community.updatedAt
+      community.updatedAt,
+      membershipStatus
     );
   }
 
