@@ -1,4 +1,5 @@
-import { UserRole } from "../../enums/UserRole";
+import { UserFollowStatus } from "../../enums/users/UserFollowStatus";
+import { UserRole } from "../../enums/users/UserRole";
 
 export class UserDto {
   constructor(
@@ -11,6 +12,7 @@ export class UserDto {
     public image: string | null,
     public isActive: number,
     public createdAt: Date,
-    public updatedAt: Date 
+    public updatedAt: Date,
+    public followStatus: UserFollowStatus | null = null
   ) {}
 }

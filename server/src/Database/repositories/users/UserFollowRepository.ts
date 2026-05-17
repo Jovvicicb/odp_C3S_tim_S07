@@ -168,4 +168,36 @@ export class UserFollowRepository implements IUserFollowRepository {
         }
     }
 
+  async findFollowingIdsFromList(followerId: number, targetUserIds: number[]): Promise<number[]> {
+    if (targetUserIds.length === 0) {
+        return [];
+    }
+
+    const res = await this.db.getReadConnection();
+    if (!res) {return [];}
+
+    const placeholders = targetUserIds.map(() => "?").join(",");
+    try {
+        const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT following_id
+        FROM user_follows
+        WHERE follower_id = ?
+        AND following_id IN (${placeholders})`,
+        [followerId, ...targetUserIds]
+        );
+
+        return rows.map((row) => Number(row.following_id));
+    } catch (err) {
+        this.logger.error(
+        "UserFollowRepository",
+        UserLogMessages.findFollowingIdsFromListFailed,
+        err
+        );
+
+        return [];
+    } finally {
+        res.conn.release();
+    }
+    }
+
 }

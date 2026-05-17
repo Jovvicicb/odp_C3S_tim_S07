@@ -1,6 +1,6 @@
 import { Request } from "express";
 import jwt from "jsonwebtoken";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 
 export type OptionalAuthUser = {id: number; username: string; role: UserRole;};
 

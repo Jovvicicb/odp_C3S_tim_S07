@@ -9,4 +9,5 @@ export interface IUserFollowRepository {
     getFollowing(dto: GetFollowingDto):Promise<{followingIds: number[]; total: number}>;
     findFollowingIdsByUserId(userId: number): Promise<number[]>;
     exists(followerId: number,followingId: number):Promise<boolean>;
+    findFollowingIdsFromList(followerId: number, targetUserIds: number[]): Promise<number[]>;
 }

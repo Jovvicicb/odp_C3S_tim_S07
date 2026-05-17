@@ -13,6 +13,7 @@ export const UserLogMessages = {
   findByIdsFailed: "Find users by ids failed",
   findByUsernameFailed: "Find user by username failed",
   findByEmailFailed: "Find user by email failed",
+  findFollowingIdsFromListFailed: "Find following ids from list failed",
 
   createFollowUserFailed: "Create follow failed",
   deleteFollowUserFailed: "Delete follow failed",

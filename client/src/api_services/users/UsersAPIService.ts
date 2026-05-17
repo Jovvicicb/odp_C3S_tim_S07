@@ -50,13 +50,33 @@ export const usersApi: IUsersAPIService = {
   },
 
   async updateRole(id, role) {
-  return axios
-    .put<ApiResponse<void>>(
-      `${BASE}/${id}/role`,
-      { role },
-      { headers: authHeader() },
-    )
-    .then((r) => r.data)
-    .catch((e) => err(e, UserMessages.roleUpdateFailed));
-},
+    return axios
+      .put<ApiResponse<void>>(
+        `${BASE}/${id}/role`,
+        { role },
+        { headers: authHeader() },
+      )
+      .then((r) => r.data)
+      .catch((e) => err(e, UserMessages.roleUpdateFailed));
+  },
+
+  async follow(id) {
+    return axios
+      .post<ApiResponse<void>>(
+        `${BASE}/${id}/follow`,
+        {},
+        { headers: authHeader() },
+      )
+      .then((r) => r.data)
+      .catch((e) => err(e, UserMessages.followFailed));
+  },
+
+  async unfollow(id) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${id}/follow`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, UserMessages.unfollowFailed));
+  },
 };

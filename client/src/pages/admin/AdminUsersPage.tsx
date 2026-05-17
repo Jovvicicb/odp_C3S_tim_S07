@@ -12,7 +12,7 @@ import { useToast } from "../../hooks/toast/useToast";
 import { UserMessages } from "../../constants/messages/user/UserMessages";
 import type { UserRole } from "../../types/user/UserRole";
 
-export default function UsersPage() {
+export default function AdminUsersPage() {
   const {
     users,
     setUsers,
@@ -79,7 +79,8 @@ export default function UsersPage() {
               <UserCard
                 key={user.id}
                 user={user}
-                loading={loadingUserId === user.id}
+                showRoleControl
+                roleLoading={loadingUserId === user.id}
                 onRoleChange={handleRoleChange}
               />
             ))}

@@ -7,7 +7,7 @@ import NotFoundPage from "./pages/not_found/NotFoundPage";
 
 import FeedPage from "./pages/dashboard/FeedPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import UsersPage from "./pages/admin/UsersPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import CreateCommunity from "./pages/community/CreateCommunityPage";
 import CommunityDetailsPage from "./pages/community/CommunityDetailsPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
@@ -37,6 +37,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
             <CommunitiesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/communities/:id"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <CommunityDetailsPage />
           </ProtectedRoute>
         }
       />
@@ -90,7 +99,7 @@ export default function App() {
         path="/admin/users"
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
-            <UsersPage />
+            <AdminUsersPage />
           </ProtectedRoute>
         }
       />

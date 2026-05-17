@@ -1,20 +1,54 @@
 import { useNavigate } from "react-router-dom";
+import { ImageHelper } from "../../helpers/images/ImageHelper";
 import type { UserDto } from "../../models/user/UserDto";
 import type { UserRole } from "../../types/user/UserRole";
-import { ImageHelper } from "../../helpers/images/ImageHelper";
+import type { UserFollowStatus } from "../../types/user/UserFollowStatus";
 import { RoleBadge } from "../ui/UI";
 
 type Props = {
   user: UserDto;
-  loading?: boolean;
-  onRoleChange: (userId: number, role: UserRole) => void;
+  showRoleControl?: boolean;
+  roleLoading?: boolean;
+  onRoleChange?: (userId: number, role: UserRole) => void;
+  showFollowAction?: boolean;
+  followLoading?: boolean;
+  onFollow?: (userId: number) => void;
+  onUnfollow?: (userId: number) => void;
 };
 
-export function UserCard({ user, loading = false, onRoleChange }: Props) {
+export function UserCard({
+  user,
+  showRoleControl = false,
+  roleLoading = false,
+  onRoleChange,
+  showFollowAction = false,
+  followLoading = false,
+  onFollow,
+  onUnfollow,
+}: Props) {
   const navigate = useNavigate();
 
   const imageUrl = ImageHelper.getImageUrl(user.image);
   const initial = user.username[0]?.toUpperCase() ?? "U";
+
+  const followStatus = user.followStatus as UserFollowStatus | null;
+
+  const followLabel = followLoading
+    ? "Loading..."
+    : followStatus === "self"
+      ? "You"
+      : followStatus === "following"
+        ? "Unfollow"
+        : "Follow";
+
+  const followDisabled = followLoading || followStatus === "self";
+
+  const followClass =
+    followStatus === "following"
+      ? "border-red-400/20 bg-red-500/10 text-red-200 hover:bg-red-500/15"
+      : followStatus === "self"
+        ? "border-white/10 bg-white/4 text-white/35"
+        : "border-sky-300/20 bg-sky-400/10 text-sky-100 hover:bg-sky-400/15";
 
   return (
     <article
@@ -56,19 +90,43 @@ export function UserCard({ user, loading = false, onRoleChange }: Props) {
           onClick={(e) => e.stopPropagation()}
           className="flex shrink-0 items-center gap-3"
         >
-          <select
-            value={user.role}
-            disabled={loading}
-            onChange={(e) => onRoleChange(user.id, e.target.value as UserRole)}
-            className="rounded-2xl border border-white/10 bg-[#07111f] px-3 py-2 text-xs font-semibold text-white/80 outline-none transition-all hover:border-sky-300/30 focus:border-sky-300/40 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="user" className="bg-[#07111f] text-white">
-              user
-            </option>
-            <option value="admin" className="bg-[#07111f] text-white">
-              admin
-            </option>
-          </select>
+          {showRoleControl && (
+            <select
+              value={user.role}
+              disabled={roleLoading}
+              onChange={(e) =>
+                onRoleChange?.(user.id, e.target.value as UserRole)
+              }
+              className="rounded-2xl border border-white/10 bg-[#07111f] px-3 py-2 text-xs font-semibold text-white/80 outline-none transition-all hover:border-sky-300/30 focus:border-sky-300/40 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="user" className="bg-[#07111f] text-white">
+                user
+              </option>
+              <option value="admin" className="bg-[#07111f] text-white">
+                admin
+              </option>
+            </select>
+          )}
+
+          {showFollowAction && (
+            <button
+              type="button"
+              disabled={followDisabled}
+              onClick={() => {
+                if (followStatus === "following") {
+                  onUnfollow?.(user.id);
+                  return;
+                }
+
+                if (followStatus === "not_following") {
+                  onFollow?.(user.id);
+                }
+              }}
+              className={`rounded-2xl border px-4 py-2 text-xs font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${followClass}`}
+            >
+              {followLabel}
+            </button>
+          )}
 
           <span className="text-white/25 transition-colors group-hover:text-sky-200">
             →

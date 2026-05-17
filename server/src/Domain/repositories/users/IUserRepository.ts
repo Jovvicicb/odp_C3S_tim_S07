@@ -1,6 +1,6 @@
 import { GetUsersDto } from "../../DTOs/users/GetUsersDto";
 import { UpdateMeDto } from "../../DTOs/users/UpdateMeDto";
-import { UserRole } from "../../enums/UserRole";
+import { UserRole } from "../../enums/users/UserRole";
 import { User } from "../../models/User";
 
 export interface IUserRepository {

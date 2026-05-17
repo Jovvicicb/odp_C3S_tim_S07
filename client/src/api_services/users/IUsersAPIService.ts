@@ -8,4 +8,6 @@ export interface IUsersAPIService {
   getById(id: number): Promise<ApiResponse<UserDto>>;
   updateMe(formData: FormData): Promise<ApiResponse<void>>;
   updateRole(id: number, role: UserRole): Promise<ApiResponse<void>>;
+  follow(id: number): Promise<ApiResponse<void>>;
+  unfollow(id: number): Promise<ApiResponse<void>>;
 }

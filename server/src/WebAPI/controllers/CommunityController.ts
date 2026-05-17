@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import { ICommunityService } from "../../Domain/services/community/ICommunityService";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { upload } from "../../Middlewares/multer/multer";
 import { validateCreateCommunity } from "../validators/community/ValidateCreateCommunity";
 import { parseId } from "../parser/common/ParseId";

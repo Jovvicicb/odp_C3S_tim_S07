@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "../../Domain/types/JwtPayload";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 
 declare global {
   namespace Express {

@@ -1,0 +1,1 @@
+export type UserFollowStatus = "following" | "not_following" | "self" | null;

@@ -6,6 +6,7 @@ import type { CreateCommunityResponseDto } from "../../models/community/CreateCo
 import { CommunityMessages } from "../../constants/messages/community/CommunityMessages";
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import type { CommunityDto } from "../../models/community/CommunityDto";
+import type { CommunityDetailsDto } from "../../models/community/CommunityDetailsDto";
 
 const BASE = import.meta.env.VITE_API_URL + "communities";
 
@@ -77,6 +78,19 @@ export const communityApi: ICommunityAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, CommunityMessages.fetchAllFailed));
   },
+
+  async getById(id, membersPage = 1, membersLimit = 10) {
+  return axios
+    .get<ApiResponse<CommunityDetailsDto>>(`${BASE}/${id}`, {
+      headers: authHeader(),
+      params: {
+        membersPage,
+        membersLimit,
+      },
+    })
+    .then((r) => r.data)
+    .catch((e) => err(e, CommunityMessages.fetchOneFailed));
+},
   
   async join(id) {
   return axios

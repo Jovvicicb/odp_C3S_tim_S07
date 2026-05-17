@@ -3,7 +3,7 @@ import { ITagService } from "../../Domain/services/tags/ITagService";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { TagLogMessages } from "../../Domain/constants/messages/tags/TagLogMessages";

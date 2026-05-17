@@ -3,7 +3,7 @@ import { IPostService } from "../../Domain/services/posts/IPostService";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { upload } from "../../Middlewares/multer/multer";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreatePostInput } from "../types/posts/CreatePostInput";

@@ -1,4 +1,4 @@
-import { UserRole } from "../../../Domain/enums/UserRole";
+import { UserRole } from "../../../Domain/enums/users/UserRole";
 import { UserValidationMessages } from "../../../Domain/constants/messages/user/UserValidationMessages";
 import { ValidateUpdateRoleResult } from "../../../Domain/types/users/ValidateUpdateRoleResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";

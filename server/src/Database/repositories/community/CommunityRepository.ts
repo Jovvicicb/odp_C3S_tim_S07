@@ -25,7 +25,7 @@ export class CommunityRepository implements ICommunityRepository {
 
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT * FROM communities WHERE id = ?`,
+        `SELECT * FROM communities WHERE id = ? LIMIT 1`,
          [id]
       );
       return rows.length > 0 ? CommunityMapper.toModel(rows[0]): new Community();

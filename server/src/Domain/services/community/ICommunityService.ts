@@ -6,7 +6,7 @@ import { AuditContext } from "../../types/audits/AuditContext";
 import { ServiceResult } from "../../types/service/ServiceResult";
 import { CreateCommunityResponseDto } from "../../DTOs/community/CreateCommunityResponseDto";
 import { CommunityDetailsDto } from "../../DTOs/community/CommunityDetailsDto";
-import { UserRole } from "../../enums/UserRole";
+import { UserRole } from "../../enums/users/UserRole";
 import { DiscoverCommunitiesDto } from "../../DTOs/community/DiscoverCommunitiesDto";
 
 export interface ICommunityService {

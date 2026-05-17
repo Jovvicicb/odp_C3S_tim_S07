@@ -6,7 +6,7 @@ import { PostDto } from "../../DTOs/Posts/PostDto";
 import { PostWithDetailsDto } from "../../DTOs/Posts/PostWithDetailsDto";
 import { UpdatePostDto } from "../../DTOs/Posts/UpdatePostDto";
 import { CommentSortType } from "../../enums/comments/CommentSortType";
-import { UserRole } from "../../enums/UserRole";
+import { UserRole } from "../../enums/users/UserRole";
 import { AuditContext } from "../../types/audits/AuditContext";
 import { ServiceResult } from "../../types/service/ServiceResult";
 

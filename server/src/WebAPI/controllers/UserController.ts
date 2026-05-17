@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import { IUserService } from "../../Domain/services/users/IUserService";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { parseStringValue } from "../parser/common/ParseStringValue";
 import { parseId } from "../parser/common/ParseId";

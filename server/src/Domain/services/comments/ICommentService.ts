@@ -4,7 +4,7 @@ import { ServiceResult } from "../../types/service/ServiceResult";
 import { AuditContext } from "../../types/audits/AuditContext";
 import { UpdateCommentDto } from "../../DTOs/comments/UpdateCommentDto";
 import { GetCommentsByPostDto } from "../../DTOs/comments/GetCommentsByPostDto";
-import { UserRole } from "../../enums/UserRole";
+import { UserRole } from "../../enums/users/UserRole";
 import { PaginatedListDto } from "../../DTOs/common/PaginatedListDto";
 import { CommentTreeDto } from "../../DTOs/comments/CommentTreeDto";
 

@@ -7,7 +7,7 @@ import { UserMapper } from "../../../Shared/mappers/users/UserMapper";
 import { GetUsersDto } from "../../../Domain/DTOs/users/GetUsersDto";
 import { UserLogMessages } from "../../../Domain/constants/messages/user/UserLogMessages";
 import { UpdateMeDto } from "../../../Domain/DTOs/users/UpdateMeDto";
-import { UserRole } from "../../../Domain/enums/UserRole";
+import { UserRole } from "../../../Domain/enums/users/UserRole";
 
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));

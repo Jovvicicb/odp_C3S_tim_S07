@@ -3,7 +3,7 @@ import { ICommentService } from "../../Domain/services/comments/ICommentService"
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { validateCreateComment } from "../validators/comments/ValidateCreateComment";
 import { CreateCommentInput } from "../types/comments/CreateCommentInput";

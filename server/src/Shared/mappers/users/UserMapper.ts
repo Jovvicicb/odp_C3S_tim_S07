@@ -1,7 +1,8 @@
 import { User } from "../../../Domain/models/User";
 import { UserDto } from "../../../Domain/DTOs/users/UserDto";
 import { RowDataPacket } from "mysql2";
-import { UserRole } from "../../../Domain/enums/UserRole";
+import { UserRole } from "../../../Domain/enums/users/UserRole";
+import { UserFollowStatus } from "../../../Domain/enums/users/UserFollowStatus";
 
 export class UserMapper {
 
@@ -21,7 +22,7 @@ export class UserMapper {
     );
   }
     
-  public static toDto(user: User): UserDto {
+  public static toDto(user: User,  followStatus: UserFollowStatus | null = null): UserDto {
     return new UserDto(
       user.id,
       user.username,
@@ -32,7 +33,8 @@ export class UserMapper {
       user.image,
       user.isActive,
       user.createdAt,
-      user.updatedAt
+      user.updatedAt,
+      followStatus
     );
   }
 }

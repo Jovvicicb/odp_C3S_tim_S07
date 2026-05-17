@@ -5,6 +5,7 @@ import { CommunityDto } from "./CommunityDto";
 export class CommunityDetailsDto {
   constructor(
     public community: CommunityDto,
-    public members: PaginatedListDto<UserDto>
+    public members: PaginatedListDto<UserDto> | null,
+    public canViewContent: boolean
   ) {}
 }

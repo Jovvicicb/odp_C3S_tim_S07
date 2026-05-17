@@ -1,4 +1,4 @@
-import { UserRole } from "../enums/UserRole";
+import { UserRole } from "../enums/users/UserRole";
 
 export class User {
   constructor(

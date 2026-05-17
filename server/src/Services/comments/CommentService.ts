@@ -14,7 +14,7 @@ import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { ICommentLikeRepository } from "../../Domain/repositories/comments/ICommentLikeRepository";
 import { ICommentRepository } from "../../Domain/repositories/comments/ICommentRepository";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";

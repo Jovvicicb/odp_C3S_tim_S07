@@ -1,7 +1,7 @@
 import { AuthValidationMessages } from '../../../Domain/constants/messages/auth/AuthValidationMessages';
 import { FileValidationMessages } from '../../../Domain/constants/messages/common/FileValidationMessages';
 import { AuthRegisterDto } from '../../../Domain/DTOs/auth/AuthRegisterDto';
-import { UserRole } from '../../../Domain/enums/UserRole';
+import { UserRole } from '../../../Domain/enums/users/UserRole';
 import { ValidateRegisterResult } from '../../../Domain/types/auth/ValidateRegisterResult';
 import { StringNormalizer } from '../../../Shared/normalization/StringNormalizer';
 import { RegisterInput } from '../../types/auth/RegisterInput';

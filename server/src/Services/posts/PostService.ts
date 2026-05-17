@@ -18,7 +18,7 @@ import { CommentSortType } from "../../Domain/enums/comments/CommentSortType";
 import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { CommunityMember } from "../../Domain/models/CommunityMember";
 import { Post } from "../../Domain/models/Post";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";

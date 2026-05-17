@@ -12,7 +12,7 @@ import { AuthLogMessages } from "../../Domain/constants/messages/auth/AuthLogMes
 import { IpHelper } from "../../Shared/helpers/IpHelper";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 
 export class AuthController {

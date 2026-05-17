@@ -6,7 +6,7 @@ import { HealthLogMessages } from "../../Domain/constants/messages/health/Health
 import { IHealthService } from "../../Domain/services/health/IHealthService";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 
 export class HealthController {

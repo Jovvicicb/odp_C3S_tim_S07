@@ -1,3 +1,4 @@
+import type { UserFollowStatus } from "../../types/user/UserFollowStatus";
 import type { UserRole } from "../../types/user/UserRole";
 
 export type UserDto = {
@@ -11,4 +12,5 @@ export type UserDto = {
   isActive: number;
   createdAt: string;
   updatedAt: string;
+  followStatus: UserFollowStatus | null;
 };

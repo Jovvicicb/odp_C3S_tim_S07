@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { parseStringValue } from "../parser/common/ParseStringValue";
 import { parsePagination } from "../parser/common/ParsePagination";
