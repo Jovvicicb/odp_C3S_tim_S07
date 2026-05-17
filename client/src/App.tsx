@@ -5,16 +5,16 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import NotFoundPage from "./pages/not_found/NotFoundPage";
 
-import FeedPage from "./pages/app/FeedPage";
+import FeedPage from "./pages/dashboard/FeedPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
-import CreateCommunity from "./pages/app/CreateCommunity";
-import CommunityDetailsPage from "./pages/app/CommunityDetailsPage";
+import CreateCommunity from "./pages/community/CreateCommunityPage";
+import CommunityDetailsPage from "./pages/community/CommunityDetailsPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
-import ProfileSettingsPage from "./pages/app/ProfileSettingsPage";
-import MyCommunitiesPage from "./pages/app/MyCommunitiesPage";
-import CommunitiesPage from "./pages/app/CommunityPage";
+import ProfileSettingsPage from "./pages/users/ProfileSettingsPage";
+import MyCommunitiesPage from "./pages/community/MyCommunitiesPage";
+import CommunitiesPage from "./pages/community/CommunityPage";
 
 export default function App() {
   return (

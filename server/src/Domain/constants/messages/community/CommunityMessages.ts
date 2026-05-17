@@ -59,5 +59,8 @@ export const CommunityMessages = {
   cannotRemoveYourself: "You cannot remove yourself from the community",
     
   invalidType:   "Invalid community type",
-  nameTaken: "Community name is already taken"
+  nameTaken: "Community name is already taken",
+
+  discoverSuccess: "Communities discovered successfully",
+  discoverFailed: "Failed to discover communities",
 } as const;

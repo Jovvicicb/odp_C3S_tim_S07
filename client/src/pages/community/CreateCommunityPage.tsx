@@ -2,7 +2,7 @@ import CommunityForm from "../../components/community/CommunityForm";
 import { ActionButton } from "../../components/ui/ActionButton";
 import { PageHeader } from "../../components/ui/UI";
 
-export default function CreateCommunity() {
+export default function CreateCommunityPage() {
   return (
     <div className="space-y-6">
       <PageHeader

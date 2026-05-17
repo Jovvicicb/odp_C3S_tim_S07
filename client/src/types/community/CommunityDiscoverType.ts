@@ -1,0 +1,1 @@
+export type CommunityDiscoverType = "all" | "public" | "private";

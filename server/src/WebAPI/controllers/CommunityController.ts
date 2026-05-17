@@ -23,6 +23,8 @@ import { ICommunityMemberService } from "../../Domain/services/community/ICommun
 import { validateUpdateCommunityMemberRole } from "../validators/community/ValidateUpdateCommunityMemberRole";
 import { validateUpdateCommunityMemberStatus } from "../validators/community/ValidateUpdateCommunityMemberStatus";
 import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
+import { DiscoverCommunitiesDto } from "../../Domain/DTOs/community/DiscoverCommunitiesDto";
+import { validateCommunityDiscoverType } from "../validators/community/ValidateCommunityDiscoverType";
 
 export class CommunityController {
   private readonly router = Router();
@@ -32,6 +34,7 @@ export class CommunityController {
     private readonly communityMemberService: ICommunityMemberService,
     private readonly logger: ILoggerService) {
     this.router.get("/communities",                                                                                                              this.getPublic.bind(this));
+    this.router.get("/communities/discover",                     authenticate, authorize(UserRole.USER, UserRole.ADMIN),                         this.discover.bind(this));
     this.router.get("/communities/mine",                         authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getMine.bind(this));
     this.router.get("/communities/all",                          authenticate, authorize(UserRole.ADMIN),                                        this.getAll.bind(this));
     this.router.post("/communities",                             authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
@@ -69,6 +72,53 @@ export class CommunityController {
         message: CommunityMessages.fetchPublicFailed
       });
 
+    }
+  }
+
+  private async discover(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.id;
+
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+    const typeParam = parseStringValue(req.query.type);
+    const searchParam = parseStringValue(req.query.search);
+
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const paginationValidation = validatePagination(page, limit);
+
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    const type = validateCommunityDiscoverType(typeParam);
+    const search = searchParam ? searchParam : null;
+
+    const dto = new DiscoverCommunitiesDto(
+      page,
+      limit,
+      type,
+      search
+    );
+
+    try {
+      const result = await this.communityService.discover(dto, userId);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(
+        this.constructor.name,
+        CommunityLogMessages.discoverFailed,
+        err
+      );
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.discoverFailed,
+      });
     }
   }
 

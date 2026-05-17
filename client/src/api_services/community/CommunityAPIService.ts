@@ -33,7 +33,22 @@ export const communityApi: ICommunityAPIService = {
       .catch((e) => err(e, CommunityMessages.createFailed));
   },
 
-   async getAll(page = 1, limit = 10) {
+  async discover(page = 1, limit = 10, type = "all", search = "") {
+    return axios
+      .get<ApiResponse<PaginatedListDto<CommunityDto>>>(`${BASE}/discover`, {
+        headers: authHeader(),
+        params: {
+          page,
+          limit,
+          type,
+          search,
+        },
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.discoverFetchFailed));
+  },
+
+  async getAll(page = 1, limit = 10) {
     return axios
       .get<ApiResponse<PaginatedListDto<CommunityDto>>>(`${BASE}/all`, {
         headers: authHeader(),

@@ -9,4 +9,6 @@ export const CommunityValidationMessages = {
   invalidMemberRole: "Invalid community member role",
   statusActionRequired: "Status action (accept / deny) is required",
   invalidStatusAction: "Invalid status action",
+  invalidDiscoverType: "Invalid discover type",
+  searchTooLong: "Search query is too long",
 } as const;

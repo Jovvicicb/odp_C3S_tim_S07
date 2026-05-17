@@ -8,6 +8,8 @@ import { CommunityMapper } from "../../../Shared/mappers/community/CommunityMapp
 import { UpdateCommunityDto } from "../../../Domain/DTOs/community/UpdateCommunityDto";
 import { CommunityLogMessages } from "../../../Domain/constants/messages/community/CommunityLogMessages";
 import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
+import { DiscoverCommunitiesDto } from "../../../Domain/DTOs/community/DiscoverCommunitiesDto";
+import { CommunityDiscoverType } from "../../../Domain/enums/communities/CommunityDiscoverType";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -89,6 +91,64 @@ export class CommunityRepository implements ICommunityRepository {
     } catch (err) {
       this.logger.error("CommunityRepository", CommunityLogMessages.findByIdsFailed, err);
       return [];
+    } finally {
+      res.conn.release();
+    }
+  }
+
+  async discover(page: number, limit: number, type: CommunityType | null, search: string | null): Promise<{ communities: Community[]; total: number }> {
+    const res = await this.db.getReadConnection();
+    if (!res) {
+      return { communities: [], total: 0 };
+    }
+
+    const offset = safeInt((page - 1) * limit);
+    const lim = safeInt(limit);
+
+    const whereParts: string[] = [];
+    const params: Array<string | number> = [];
+
+    if (type !== null) {
+      whereParts.push("type = ?");
+      params.push(type);
+    }
+
+    if (search !== null && search.trim() !== "") {
+      whereParts.push("name LIKE ?");
+      params.push(`%${search.trim()}%`);
+    }
+
+    const whereClause = whereParts.length > 0 ? `WHERE ${whereParts.join(" AND ")}` : "";
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM communities
+        ${whereClause}
+        ORDER BY created_at DESC
+        LIMIT ${lim} OFFSET ${offset}`,
+        params
+      );
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total
+        FROM communities
+        ${whereClause}`,
+        params
+      );
+
+      return {
+        communities: rows.map((r) => CommunityMapper.toModel(r)),
+        total: Number(cnt[0]?.total ?? 0),
+      };
+    } catch (err) {
+      this.logger.error(
+        "CommunityRepository",
+        CommunityLogMessages.discoverFailed,
+        err
+      );
+
+      return { communities: [], total: 0 };
     } finally {
       res.conn.release();
     }

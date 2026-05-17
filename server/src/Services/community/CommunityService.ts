@@ -25,6 +25,7 @@ import { UserMapper } from "../../Shared/mappers/users/UserMapper";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { UserDto } from "../../Domain/DTOs/users/UserDto";
 import { CommunityMember } from "../../Domain/models/CommunityMember";
+import { DiscoverCommunitiesDto } from "../../Domain/DTOs/community/DiscoverCommunitiesDto";
 
 export class CommunityService implements ICommunityService {
   public constructor(
@@ -59,6 +60,26 @@ export class CommunityService implements ICommunityService {
     );
 
     return ServiceResultFactory.ok(CommunityMessages.fetchPublicSuccess,data,HttpStatus.ok);
+  }
+
+  async discover(dto: DiscoverCommunitiesDto, viewerId: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
+    const result = await this.communityRepo.discover(dto.page, dto.limit, dto.type, dto.search);
+
+    const communityIds = result.communities.map((c) => c.id);
+
+    const statusesByCommunityId =
+      communityIds.length > 0
+        ? await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(viewerId, communityIds)
+        : {};
+
+    const data = new PaginatedListDto(
+      result.communities.map((c) => CommunityMapper.toDto(c, statusesByCommunityId[c.id] ?? null)),
+      result.total,
+      dto.page,
+      dto.limit
+    );
+
+    return ServiceResultFactory.ok(CommunityMessages.discoverSuccess, data, HttpStatus.ok);
   }
 
   async getAll(page: number, limit: number, viewerId?: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>> {
