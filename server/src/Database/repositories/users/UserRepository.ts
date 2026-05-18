@@ -80,7 +80,51 @@ export class UserRepository implements IUserRepository {
       return new User();
     } finally { res.conn.release(); }
   }
-  
+
+  async searchByUsername(username: string,page: number,limit: number): Promise<{ users: User[]; total: number }> {
+    if (!username.trim()) {
+      return { users: [], total: 0 };
+    }
+
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return { users: [], total: 0 };
+    }
+
+    const offset = safeInt((page - 1) * limit);
+    const lim = safeInt(limit);
+    const searchValue = `%${username.trim()}%`;
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM users
+        WHERE username LIKE ?
+        ORDER BY username ASC
+        LIMIT ${lim} OFFSET ${offset}`,
+        [searchValue]
+      );
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total
+        FROM users
+        WHERE username LIKE ?`,
+        [searchValue]
+      );
+
+      return {
+        users: rows.map((row) => UserMapper.toModel(row)),
+        total: Number(cnt[0]?.total ?? 0),
+      };
+    } catch (err) {
+      this.logger.error("UserRepository", UserLogMessages.searchByUsernameFailed, err);
+      return { users: [], total: 0 };
+    } finally {
+      res.conn.release();
+    }
+  }
+    
   async findByEmail(email: string): Promise<User> {
     const res = await this.db.getReadConnection();
     if (!res) return new User();

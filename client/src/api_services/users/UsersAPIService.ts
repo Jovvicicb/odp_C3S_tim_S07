@@ -79,4 +79,47 @@ export const usersApi: IUsersAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, UserMessages.unfollowFailed));
   },
+
+  async getFollowers(id, page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<UserDto>>>(`${BASE}/${id}/followers`, {
+        headers: authHeader(),
+        params: { page, limit },
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, UserMessages.followersFetchFailed));
+  },
+
+  async getFollowing(id, page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<UserDto>>>(`${BASE}/${id}/following`, {
+        headers: authHeader(),
+        params: { page, limit },
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, UserMessages.followingFetchFailed));
+  },
+
+  async removeFollower(id) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${id}/follower`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, UserMessages.removeFollowerFailed));
+  },
+
+  async search(username, page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<UserDto>>>(`${BASE}/search`, {
+        headers: authHeader(),
+        params: {
+          username,
+          page,
+          limit,
+        },
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, UserMessages.searchFailed));
+  },
 };

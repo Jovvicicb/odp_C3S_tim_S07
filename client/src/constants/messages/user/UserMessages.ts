@@ -9,4 +9,10 @@ export const UserMessages = {
   unfollowed: "User unfollowed successfully",
   followFailed: "Failed to follow user",
   unfollowFailed: "Failed to unfollow user",
+  followersFetchFailed: "Failed to load followers",
+  followingFetchFailed: "Failed to load following users",
+  followerRemovedSuccessfully: "Follower removed successfully",
+  removeFollowerFailed: "Failed to remove follower",
+  searchSuccess: "Users loaded successfully",
+  searchFailed: "Failed to search users",
 } as const;

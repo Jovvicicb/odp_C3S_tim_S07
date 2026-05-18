@@ -37,4 +37,12 @@ export const UserMessages = {
   unfollowed: "User unfollowed successfully",
 
   cannotChangeOwnRole: "You cannot change your own role",
+
+  notYourFollower: "This user is not your follower",
+  removeFollowerFailed: "Failed to remove follower",
+  followerRemovedSuccessfully: "Follower removed successfully",
+  cannotRemoveYourselfFromFollowers: "You cannot remove yourself from followers",
+
+  searchSuccess: "Users found successfully",
+  searchFailed: "Failed to search users",
 } as const;

@@ -10,4 +10,8 @@ export interface IUsersAPIService {
   updateRole(id: number, role: UserRole): Promise<ApiResponse<void>>;
   follow(id: number): Promise<ApiResponse<void>>;
   unfollow(id: number): Promise<ApiResponse<void>>;
+  getFollowers(id: number, page: number, limit: number): Promise<ApiResponse<PaginatedListDto<UserDto>>>;
+  getFollowing(id: number, page: number, limit: number): Promise<ApiResponse<PaginatedListDto<UserDto>>>;
+  removeFollower(id: number): Promise<ApiResponse<void>>;
+  search(username: string, page: number, limit: number): Promise<ApiResponse<PaginatedListDto<UserDto>>>;
 }

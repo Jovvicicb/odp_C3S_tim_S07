@@ -15,6 +15,9 @@ import LandingPage from "./pages/public/LandingPage";
 import ProfileSettingsPage from "./pages/users/ProfileSettingsPage";
 import MyCommunitiesPage from "./pages/community/MyCommunitiesPage";
 import CommunitiesPage from "./pages/community/CommunityPage";
+import FollowersPage from "./pages/users/FollowersPage";
+import FollowingPage from "./pages/users/FollowingPage";
+import SearchUsersPage from "./pages/users/SearchUsersPage";
 
 export default function App() {
   return (
@@ -82,6 +85,32 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
             <MyCommunitiesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users/:id/followers"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <FollowersPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users/:id/following"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <FollowingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/users/search"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <SearchUsersPage />
           </ProtectedRoute>
         }
       />

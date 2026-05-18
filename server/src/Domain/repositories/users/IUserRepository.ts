@@ -7,6 +7,7 @@ export interface IUserRepository {
   findById(id: number): Promise<User>;
   findByIds(ids: number[]): Promise<User[]>;
   findByUsername(username: string): Promise<User>;
+  searchByUsername(username: string,page: number,limit: number): Promise<{ users: User[]; total: number }>;
   findByEmail(email: string): Promise<User>;
   findAll(dto:GetUsersDto):Promise<{users:User[];total:number}>;
   create(user: User): Promise<User>;

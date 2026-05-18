@@ -16,10 +16,13 @@ import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFa
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { UserRole } from "../../Domain/enums/users/UserRole";
+import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
+import { UserFollowStatus } from "../../Domain/enums/users/UserFollowStatus";
 
 export class UserService implements IUserService {
     private readonly saltRounds = parseInt(process.env.SALT_ROUNDS ?? "10", 10);
     public constructor(private readonly userRepo: IUserRepository,
+    private readonly userFollowRepo: IUserFollowRepository,
     private readonly auditHelperService: IAuditHelperService,
   ) {}
 
@@ -43,6 +46,46 @@ export class UserService implements IUserService {
     }
     
     return ServiceResultFactory.ok(UserMessages.fetchOneSuccess,UserMapper.toDto(user),HttpStatus.ok);
+  }
+
+  async search(username: string, page: number, limit: number, viewerId: number): Promise<ServiceResult<PaginatedListDto<UserDto>>> {
+    const result = await this.userRepo.searchByUsername(username, page, limit);
+
+    if (result.users.length === 0) {
+    const data = new PaginatedListDto<UserDto>([], result.total, page, limit);
+
+      return ServiceResultFactory.ok(UserMessages.searchSuccess, data, HttpStatus.ok);
+    }
+
+    const userIds = result.users.map((user) => user.id);
+
+    const followingIds = await this.userFollowRepo.findFollowingIdsFromList(
+      viewerId,
+      userIds,
+    );
+
+    const followingSet = new Set(followingIds);
+
+    const data = new PaginatedListDto(
+      result.users.map((user) => {
+        const dto = UserMapper.toDto(user);
+
+        dto.followStatus =
+          dto.id === viewerId
+            ? UserFollowStatus.SELF
+            : followingSet.has(dto.id)
+              ? UserFollowStatus.FOLLOWING
+              : UserFollowStatus.NOT_FOLLOWING;
+
+        return dto;
+      }),
+      result.total,
+      page,
+      limit,
+    );
+
+
+    return ServiceResultFactory.ok(UserMessages.searchSuccess, data, HttpStatus.ok);
   }
 
   async getByUsername(username: string): Promise<ServiceResult<UserDto>> {

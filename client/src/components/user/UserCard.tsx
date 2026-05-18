@@ -14,6 +14,9 @@ type Props = {
   followLoading?: boolean;
   onFollow?: (userId: number) => void;
   onUnfollow?: (userId: number) => void;
+  showRemoveFollowerAction?: boolean;
+  removeFollowerLoading?: boolean;
+  onRemoveFollower?: (userId: number) => void;
 };
 
 export function UserCard({
@@ -25,6 +28,9 @@ export function UserCard({
   followLoading = false,
   onFollow,
   onUnfollow,
+  showRemoveFollowerAction = false,
+  removeFollowerLoading = false,
+  onRemoveFollower,
 }: Props) {
   const navigate = useNavigate();
 
@@ -125,6 +131,17 @@ export function UserCard({
               className={`rounded-2xl border px-4 py-2 text-xs font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${followClass}`}
             >
               {followLabel}
+            </button>
+          )}
+
+          {showRemoveFollowerAction && (
+            <button
+              type="button"
+              disabled={removeFollowerLoading}
+              onClick={() => onRemoveFollower?.(user.id)}
+              className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-200 transition-all hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {removeFollowerLoading ? "Removing..." : "Remove"}
             </button>
           )}
 

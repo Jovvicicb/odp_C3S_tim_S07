@@ -23,6 +23,8 @@ import { validateUpdateUserRole } from "../validators/users/ValidateUpdateUserRo
 import { IUserFollowService } from "../../Domain/services/users/IUserFollowService";
 import { GetFollowersDto } from "../../Domain/DTOs/users/GetFollowersDto";
 import { GetFollowingDto } from "../../Domain/DTOs/users/GetFollowingDto";
+import { UserValidationMessages } from "../../Domain/constants/messages/user/UserValidationMessages";
+import { StringNormalizer } from "../../Shared/normalization/StringNormalizer";
 
 export class UserController {
   private readonly router = Router();
@@ -40,6 +42,7 @@ export class UserController {
     this.router.get("/users/:id/following",                                                                                   this.getFollowing.bind(this));
     this.router.post("/users/:id/follow",      authenticate, authorize(UserRole.USER,UserRole.ADMIN),                         this.follow.bind(this));
     this.router.delete("/users/:id/follow",    authenticate, authorize(UserRole.USER,UserRole.ADMIN),                         this.unfollow.bind(this));
+    this.router.delete("/users/:id/follower",  authenticate, authorize(UserRole.USER, UserRole.ADMIN),                        this.removeFollower.bind(this));
     this.router.put("/users/:id/role",         authenticate, authorize(UserRole.ADMIN),                                       this.updateRole.bind(this));
   }
 
@@ -97,20 +100,35 @@ export class UserController {
 
 
   private async search(req: Request, res: Response): Promise<void> {
-    const username = parseStringValue(req.query.username);
+    const viewerId = req.user!.id;
 
-    const { validation, normalizedUsername } = validateUsername(username);
+    const usernameParam = parseStringValue(req.query.username);
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
 
-    if (!validation.valid || !normalizedUsername) {
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const paginationValidation = validatePagination(page, limit);
+    if (!paginationValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
-        message: validation.message,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    const username = StringNormalizer.trim(usernameParam);
+
+    if (!username) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: UserValidationMessages.usernameRequired,
       });
       return;
     }
     
     try{
-      const result = await this.userService.getByUsername(normalizedUsername);
+      const result = await this.userService.search(username ,page , limit, viewerId);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, UserLogMessages.getByUsernameFailed, err);
@@ -244,6 +262,35 @@ export class UserController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: UserMessages.unfollowFailed
+      });
+    }
+  }
+
+  private async removeFollower(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.id;
+
+    const idParam = parseStringValue(req.params.id);
+    const followerId = parseId(idParam);
+
+    const idValidation = validateId(followerId);
+    if (!idValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: idValidation.message,
+      });
+      return;
+    }
+
+    try {
+      const result = await this.userFollowService.removeFollower(followerId, userId);
+
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, UserLogMessages.removeFollowerFailed,err);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: UserMessages.removeFollowerFailed,
       });
     }
   }

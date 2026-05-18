@@ -64,6 +64,29 @@ export class UserFollowService implements IUserFollowService{
         return ServiceResultFactory.ok(UserMessages.unfollowed, undefined, HttpStatus.ok);
     }
 
+    async removeFollower(followerId: number, userId: number): Promise<ServiceResult> {
+        if (followerId === userId) {
+            return ServiceResultFactory.fail(UserMessages.cannotRemoveYourselfFromFollowers, HttpStatus.badRequest);
+        }
+
+        const followerExists = await this.userRepo.exists(followerId);
+        if (!followerExists) {
+            return ServiceResultFactory.fail(UserMessages.notFound, HttpStatus.notFound);
+        }
+
+        const exists = await this.userFollowRepo.exists(followerId, userId);
+        if (!exists) {
+            return ServiceResultFactory.fail(UserMessages.notYourFollower, HttpStatus.notFound);
+        }
+
+        const deleted = await this.userFollowRepo.delete(followerId, userId);
+        if (!deleted) {
+            return ServiceResultFactory.fail(UserMessages.removeFollowerFailed, HttpStatus.internalServerError);
+        }
+
+        return ServiceResultFactory.ok(UserMessages.followerRemovedSuccessfully, undefined, HttpStatus.ok);
+    }
+
     async getFollowers(dto: GetFollowersDto): Promise<ServiceResult<PaginatedListDto<UserDto>>> {
         const userExists = await this.userRepo.exists(dto.userId)
         if(!userExists){
