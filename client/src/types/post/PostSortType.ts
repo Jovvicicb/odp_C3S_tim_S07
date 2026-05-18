@@ -1,0 +1,1 @@
+export type PostSortType = "newest" | "popular" | "mostCommented";

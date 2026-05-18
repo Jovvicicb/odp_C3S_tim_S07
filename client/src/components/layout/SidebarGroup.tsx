@@ -45,7 +45,7 @@ export function SidebarGroup({
         className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
           hasActiveItem
             ? "bg-sky-400/10 text-sky-100 shadow-[0_0_24px_rgba(56,189,248,0.08)] ring-1 ring-sky-300/15"
-            : "text-white/55 hover:bg-white/[0.04] hover:text-white"
+            : "text-white/55 hover:bg-white/4 hover:text-white"
         }`}
       >
         <span>{title}</span>
@@ -76,13 +76,13 @@ export function SidebarGroup({
 
                   return `relative block rounded-xl px-4 py-2.5 text-sm transition-all duration-200 ${
                     active
-                      ? "bg-white/[0.06] text-sky-100"
-                      : "text-white/40 hover:bg-white/[0.04] hover:text-white/80"
+                      ? "bg-white/6 text-sky-100"
+                      : "text-white/40 hover:bg-white/4 hover:text-white/80"
                   }`;
                 }}
               >
                 {isItemActive(item.to) && (
-                  <span className="absolute -left-[13px] top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-full bg-sky-300 shadow-[0_0_12px_rgba(125,211,252,0.8)]" />
+                  <span className="absolute -left-3.25 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-sky-300 shadow-[0_0_12px_rgba(125,211,252,0.8)]" />
                 )}
 
                 <span>{item.label}</span>

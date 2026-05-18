@@ -18,6 +18,7 @@ import CommunitiesPage from "./pages/community/CommunityPage";
 import FollowersPage from "./pages/users/FollowersPage";
 import FollowingPage from "./pages/users/FollowingPage";
 import SearchUsersPage from "./pages/users/SearchUsersPage";
+import CreatePostPage from "./pages/post/CreatePostPage";
 
 export default function App() {
   return (
@@ -111,6 +112,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
             <SearchUsersPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/communities/:communityId/posts/create"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <CreatePostPage />
           </ProtectedRoute>
         }
       />
