@@ -13,8 +13,7 @@ import { CommunityPostsSection } from "../../components/community/details/Commun
 import { useCommunityDetails } from "../../hooks/community/useCommunityDetails";
 import { useCommunityPosts } from "../../hooks/posts/useCommunityPosts";
 import { useCommunityDetailsActions } from "../../hooks/community/details/useCommunityDetailsActions";
-
-type CommunityDetailsTab = "posts" | "members";
+import type { CommunityDetailsTab } from "../../types/community/CommunityDetailsTab";
 
 export default function CommunityDetailsPage() {
   const { id } = useParams();

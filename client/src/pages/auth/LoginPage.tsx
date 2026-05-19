@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LoginForm } from "../../components/auth/LoginForm";
+
+import { LoginForm } from "../../components/auth/login/LoginForm";
 import { authApi } from "../../api_services/auth/AuthAPIService";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 

@@ -1,4 +1,4 @@
-type CommunityDetailsTab = "posts" | "members";
+import type { CommunityDetailsTab } from "../../../types/community/CommunityDetailsTab";
 
 type Props = {
   activeTab: CommunityDetailsTab;

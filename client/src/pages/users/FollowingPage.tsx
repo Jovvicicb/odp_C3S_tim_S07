@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+
 import {
   Empty,
   ErrorBox,
@@ -6,18 +7,19 @@ import {
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
-import { UserCard } from "../../components/user/UserCard";
+
+import { FollowingList } from "../../components/user/follow/FollowingList";
+
 import { useAuth } from "../../hooks/auth/useAuthHook";
-import { useToast } from "../../hooks/toast/useToast";
-import { useUserFollow } from "../../hooks/users/useUserFollow";
 import { useUserFollowList } from "../../hooks/users/useUserFollowList";
+import { useFollowingActions } from "../../hooks/users/follow/useFollowingActions";
 
 export default function FollowingPage() {
   const { id } = useParams();
+
   const viewedUserId = Number(id);
 
   const { user } = useAuth();
-  const { showToast } = useToast();
 
   const {
     users,
@@ -36,35 +38,17 @@ export default function FollowingPage() {
     10,
   );
 
-  const {
-    unfollow,
-    loadingUserId: followLoadingUserId,
-    error: followError,
-  } = useUserFollow();
-
   const isMyFollowingPage = user?.id === viewedUserId;
 
-  const handleUnfollow = async (followingId: number) => {
-    const message = await unfollow(followingId);
-    if (!message) return;
-
-    if (isMyFollowingPage) {
-      setUsers((current) => current.filter((u) => u.id !== followingId));
-      setTotal((current) => Math.max(0, current - 1));
-
-      if (users.length === 1 && page > 1) {
-        setPage(page - 1);
-      }
-    } else {
-      setUsers((current) =>
-        current.map((u) =>
-          u.id === followingId ? { ...u, followStatus: "not_following" } : u,
-        ),
-      );
-    }
-
-    showToast({ type: "success", message });
-  };
+  const { handleUnfollow, followLoadingUserId, followError } =
+    useFollowingActions({
+      users,
+      page,
+      isMyFollowingPage,
+      setUsers,
+      setTotal,
+      setPage,
+    });
 
   return (
     <div className="space-y-6">
@@ -80,20 +64,11 @@ export default function FollowingPage() {
         <Empty message="No following users found." />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            {users.map((following) => (
-              <UserCard
-                key={following.id}
-                user={{
-                  ...following,
-                  followStatus: "following",
-                }}
-                showFollowAction
-                followLoading={followLoadingUserId === following.id}
-                onUnfollow={handleUnfollow}
-              />
-            ))}
-          </div>
+          <FollowingList
+            followingUsers={users}
+            followLoadingUserId={followLoadingUserId}
+            onUnfollow={handleUnfollow}
+          />
 
           <Pagination
             page={page}

@@ -5,11 +5,12 @@ import {
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
-import { CommunityCard } from "../../components/community/CommunityCard";
-import { useMyCommunities } from "../../hooks/community/useMyCommunities";
 import { ActionButton } from "../../components/ui/ActionButton";
-import { useCommunityMembership } from "../../hooks/community/useCommunityMembership";
-import { useToast } from "../../hooks/toast/useToast";
+
+import { MyCommunitiesList } from "../../components/community/my/MyCommunitiesList";
+
+import { useMyCommunities } from "../../hooks/community/useMyCommunities";
+import { useMyCommunitiesActions } from "../../hooks/community/my/useMyCommunitiesActions";
 
 export default function MyCommunitiesPage() {
   const {
@@ -24,36 +25,14 @@ export default function MyCommunitiesPage() {
     setPage,
   } = useMyCommunities(1, 10);
 
-  const { showToast } = useToast();
-
-  const {
-    leaveCommunity,
-    loadingCommunityId,
-    error: membershipError,
-  } = useCommunityMembership();
-
-  const handleLeave = async (communityId: number) => {
-    const message = await leaveCommunity(communityId);
-
-    if (!message) {
-      return;
-    }
-
-    setCommunities((current) =>
-      current.filter((community) => community.id !== communityId),
-    );
-
-    setTotal((current) => Math.max(0, current - 1));
-
-    showToast({
-      type: "success",
-      message,
+  const { handleLeave, loadingCommunityId, membershipError } =
+    useMyCommunitiesActions({
+      communities,
+      page,
+      setPage,
+      setTotal,
+      setCommunities,
     });
-
-    if (communities.length === 1 && page > 1) {
-      setPage(page - 1);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -77,24 +56,15 @@ export default function MyCommunitiesPage() {
         <div className="flex justify-center py-20">
           <Spinner size={24} />
         </div>
-      ) : communities.length === 0 ? (
+      ) : communities.length === 0 && !error ? (
         <Empty message="You haven't joined any communities yet." />
       ) : (
         <>
-          <div className="flex flex-col gap-5">
-            {communities.map((community) => (
-              <CommunityCard
-                key={community.id}
-                community={{
-                  ...community,
-                  membershipStatus: "active",
-                }}
-                showMembershipAction
-                actionLoading={loadingCommunityId === community.id}
-                onLeave={handleLeave}
-              />
-            ))}
-          </div>
+          <MyCommunitiesList
+            communities={communities}
+            loadingCommunityId={loadingCommunityId}
+            onLeave={handleLeave}
+          />
 
           <Pagination
             page={page}

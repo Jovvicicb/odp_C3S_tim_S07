@@ -1,0 +1,1 @@
+export type CommunityDetailsTab = "posts" | "members";

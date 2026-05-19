@@ -1,0 +1,142 @@
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { ErrorBox } from "../../ui/UI";
+import { StringNormalizer } from "../../../helpers/normalization/StringNormalizer";
+import { useCreatePost } from "../../../hooks/posts/useCreatePost";
+import { validateCreatePost } from "../../../validators/post/validateCreatePost";
+import { useToast } from "../../../hooks/toast/useToast";
+import { PostMessages } from "../../../constants/messages/post/PostMessages";
+import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
+
+import { PostFormIntro } from "./PostFormIntro";
+import { PostImageInput } from "./PostImageInput";
+import { usePostImageInput } from "../../../hooks/posts/form/usePostImageInput";
+import { SubmitButton } from "../../ui/SubmitButton";
+
+export default function CreatePostForm() {
+  const { communityId } = useParams();
+  const parsedCommunityId = Number(communityId);
+
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+
+  const { createPost, loading, error, setError } = useCreatePost();
+
+  const { imageFile, preview, fileKey, handleImageChange } =
+    usePostImageInput(setError);
+
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const validation = validateCreatePost({
+      title,
+      content,
+      communityId: Number.isNaN(parsedCommunityId) ? null : parsedCommunityId,
+      imageFile,
+    });
+
+    if (!validation.valid) {
+      setError(validation.message);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+
+      formData.append("title", StringNormalizer.normalizeSpaces(title));
+      formData.append("content", StringNormalizer.trim(content));
+      formData.append("communityId", String(parsedCommunityId));
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      const createdPost = await createPost(formData);
+
+      if (!createdPost) return;
+
+      showToast({
+        type: "success",
+        message: PostMessages.createSuccess,
+      });
+
+      navigate(`/communities/${createdPost.communityId}`);
+    } catch {
+      setError(CommonMessages.unexpectedError);
+    }
+  };
+
+  return (
+    <section>
+      <PostFormIntro />
+
+      <form
+        noValidate
+        onSubmit={submit}
+        className="mx-auto flex w-full max-w-2xl flex-col gap-6"
+      >
+        {error && <ErrorBox message={error} />}
+
+        <div>
+          <label
+            htmlFor="post-title"
+            className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35"
+          >
+            Post title
+          </label>
+
+          <input
+            id="post-title"
+            name="title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            minLength={5}
+            maxLength={200}
+            required
+            placeholder="Enter post title..."
+            className="w-full rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:border-sky-300/40 focus:bg-white/6 focus:shadow-lg focus:shadow-sky-500/5"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="post-content"
+            className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35"
+          >
+            Content
+          </label>
+
+          <textarea
+            id="post-content"
+            name="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={8}
+            minLength={10}
+            maxLength={10000}
+            required
+            placeholder="Write your post content..."
+            className="w-full resize-none rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm leading-6 text-white placeholder-white/20 outline-none transition-all focus:border-sky-300/40 focus:bg-white/6 focus:shadow-lg focus:shadow-sky-500/5"
+          />
+        </div>
+
+        <PostImageInput
+          fileKey={fileKey}
+          preview={preview}
+          onChange={handleImageChange}
+        />
+
+        <SubmitButton
+          label="Create post"
+          loadingLabel="Creating post..."
+          loading={loading}
+        />
+      </form>
+    </section>
+  );
+}

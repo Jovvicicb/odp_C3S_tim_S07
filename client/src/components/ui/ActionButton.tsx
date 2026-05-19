@@ -16,7 +16,7 @@ const variantStyles: Record<Variant, string> = {
   back: "border border-white/10 bg-white/4 text-white/65 hover:bg-white/8 hover:border-white/20 hover:text-white",
 };
 
-const icons: Record<Variant, string> = {
+const defaultIcons: Record<Variant, string> = {
   create: "+",
   back: "←",
 };
@@ -28,6 +28,8 @@ type Props = {
   onClick?: () => void;
   className?: string;
   size?: Size;
+  disabled?: boolean;
+  icon?: string;
 };
 
 export function ActionButton({
@@ -37,10 +39,14 @@ export function ActionButton({
   onClick,
   className = "",
   size = "md",
+  disabled = false,
+  icon,
 }: Props) {
   const navigate = useNavigate();
 
   const handleClick = () => {
+    if (disabled) return;
+
     if (onClick) {
       onClick();
       return;
@@ -60,18 +66,23 @@ export function ActionButton({
     <button
       type="button"
       onClick={handleClick}
+      disabled={disabled}
+      aria-label={label ?? variant}
       className={`
         inline-flex items-center justify-center rounded-2xl
         font-semibold tracking-tight transition-all duration-200
         hover:-translate-y-0.5 active:scale-[0.98]
+        disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0
         ${sizeStyles[size]}
         ${variantStyles[variant]}
         ${className}
       `}
     >
-      <span className="text-lg leading-none">{icons[variant]}</span>
+      <span className="text-lg leading-none">
+        {icon ?? defaultIcons[variant]}
+      </span>
 
-      <span>{label}</span>
+      {label && <span>{label}</span>}
     </button>
   );
 }

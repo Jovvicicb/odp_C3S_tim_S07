@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+
 import {
   Empty,
   ErrorBox,
@@ -6,18 +7,19 @@ import {
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
-import { UserCard } from "../../components/user/UserCard";
+
+import { FollowersList } from "../../components/user/follow/FollowersList";
+
 import { useAuth } from "../../hooks/auth/useAuthHook";
-import { useToast } from "../../hooks/toast/useToast";
 import { useUserFollowList } from "../../hooks/users/useUserFollowList";
-import { useRemoveFollower } from "../../hooks/users/useRemoveFollower";
+import { useFollowersActions } from "../../hooks/users/follow/useFollowersActions";
 
 export default function FollowersPage() {
   const { id } = useParams();
+
   const viewedUserId = Number(id);
 
   const { user } = useAuth();
-  const { showToast } = useToast();
 
   const {
     users,
@@ -36,28 +38,16 @@ export default function FollowersPage() {
     10,
   );
 
-  const {
-    removeFollower,
-    loadingUserId: removeLoadingUserId,
-    error: removeError,
-  } = useRemoveFollower();
+  const { handleRemoveFollower, removeLoadingUserId, removeError } =
+    useFollowersActions({
+      users,
+      page,
+      setUsers,
+      setTotal,
+      setPage,
+    });
 
   const isMyFollowersPage = user?.id === viewedUserId;
-
-  const handleRemoveFollower = async (followerId: number) => {
-    const message = await removeFollower(followerId);
-
-    if (!message) return;
-
-    setUsers((current) => current.filter((u) => u.id !== followerId));
-    setTotal((current) => Math.max(0, current - 1));
-
-    showToast({ type: "success", message });
-
-    if (users.length === 1 && page > 1) {
-      setPage(page - 1);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -73,17 +63,12 @@ export default function FollowersPage() {
         <Empty message="No followers found." />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            {users.map((follower) => (
-              <UserCard
-                key={follower.id}
-                user={follower}
-                showRemoveFollowerAction={isMyFollowersPage}
-                removeFollowerLoading={removeLoadingUserId === follower.id}
-                onRemoveFollower={handleRemoveFollower}
-              />
-            ))}
-          </div>
+          <FollowersList
+            followers={users}
+            canRemoveFollowers={isMyFollowersPage}
+            removeLoadingUserId={removeLoadingUserId}
+            onRemoveFollower={handleRemoveFollower}
+          />
 
           <Pagination
             page={page}

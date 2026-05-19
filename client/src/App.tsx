@@ -14,7 +14,7 @@ import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
 import ProfileSettingsPage from "./pages/users/ProfileSettingsPage";
 import MyCommunitiesPage from "./pages/community/MyCommunitiesPage";
-import CommunitiesPage from "./pages/community/CommunityPage";
+import DiscoverCommunitiesPage from "./pages/community/DiscoverCommunitiesPage";
 import FollowersPage from "./pages/users/FollowersPage";
 import FollowingPage from "./pages/users/FollowingPage";
 import SearchUsersPage from "./pages/users/SearchUsersPage";
@@ -40,7 +40,7 @@ export default function App() {
         path="/communities"
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <CommunitiesPage />
+            <DiscoverCommunitiesPage />
           </ProtectedRoute>
         }
       />
