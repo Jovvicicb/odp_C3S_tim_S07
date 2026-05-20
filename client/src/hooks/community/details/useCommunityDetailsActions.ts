@@ -101,11 +101,17 @@ export function useCommunityDetailsActions({ setDetails, reload }: Props) {
             members: current.members
               ? {
                   ...current.members,
-                  items: current.members.items.map((member) =>
-                    member.id === userId
-                      ? { ...member, followStatus: "following" }
-                      : member,
-                  ),
+                 items: current.members.items.map((member) =>
+                  member.user.id === userId
+                    ? {
+                        ...member,
+                        user: {
+                          ...member.user,
+                          followStatus: "following",
+                        },
+                      }
+                    : member,
+                ),
                 }
               : current.members,
           }
@@ -131,10 +137,16 @@ export function useCommunityDetailsActions({ setDetails, reload }: Props) {
               ? {
                   ...current.members,
                   items: current.members.items.map((member) =>
-                    member.id === userId
-                      ? { ...member, followStatus: "not_following" }
-                      : member,
-                  ),
+                  member.user.id === userId
+                    ? {
+                        ...member,
+                        user: {
+                          ...member.user,
+                          followStatus: "not_following",
+                        },
+                      }
+                    : member,
+                ),
                 }
               : current.members,
           }

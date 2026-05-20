@@ -1,6 +1,7 @@
 import type { CommunityDto } from "../../models/community/CommunityDto";
 import { ImageHelper } from "../../helpers/images/ImageHelper";
 import { useNavigate } from "react-router-dom";
+import { CommunityMembershipButton } from "./CommunityMembershipButton";
 
 type Props = {
   community: CommunityDto;
@@ -20,31 +21,6 @@ export function CommunityCard({
   const createdAt = new Date(community.createdAt).toLocaleDateString();
   const navigate = useNavigate();
   const imageUrl = ImageHelper.getImageUrl(community.avatar);
-
-  const isActiveMember = community.membershipStatus === "active";
-  const isPending = community.membershipStatus === "pending";
-  const isBanned = community.membershipStatus === "banned";
-  const canJoin = community.membershipStatus === null;
-
-  const buttonLabel = actionLoading
-    ? "Loading..."
-    : isBanned
-      ? "Banned"
-      : isPending
-        ? "Pending"
-        : isActiveMember
-          ? "Leave"
-          : "Join";
-
-  const buttonDisabled = actionLoading || isPending || isBanned;
-
-  const buttonStyle = isActiveMember
-    ? "border-red-400/20 bg-red-500/10 text-red-200 hover:bg-red-500/15"
-    : isPending
-      ? "border-amber-400/20 bg-amber-500/10 text-amber-200"
-      : isBanned
-        ? "border-zinc-400/20 bg-zinc-500/10 text-zinc-300"
-        : "border-sky-300/20 bg-sky-400/10 text-sky-100 hover:bg-sky-400/15";
 
   return (
     <article
@@ -91,28 +67,14 @@ export function CommunityCard({
                 {community.type}
               </span>
 
-              {showMembershipAction &&
-                (canJoin || isActiveMember || isPending || isBanned) && (
-                  <button
-                    type="button"
-                    disabled={buttonDisabled}
-                    onClick={(e) => {
-                      e.stopPropagation();
-
-                      if (canJoin) {
-                        onJoin?.(community.id);
-                        return;
-                      }
-
-                      if (isActiveMember) {
-                        onLeave?.(community.id);
-                      }
-                    }}
-                    className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${buttonStyle}`}
-                  >
-                    {buttonLabel}
-                  </button>
-                )}
+              {showMembershipAction && (
+                <CommunityMembershipButton
+                  community={community}
+                  loading={actionLoading}
+                  onJoin={onJoin}
+                  onLeave={onLeave}
+                />
+              )}
             </div>
           </div>
 

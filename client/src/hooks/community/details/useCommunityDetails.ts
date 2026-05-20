@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { communityApi } from "../../api_services/community/CommunityAPIService";
-import { CommunityMessages } from "../../constants/messages/community/CommunityMessages";
-import type { CommunityDetailsDto } from "../../models/community/CommunityDetailsDto";
+import { communityApi } from "../../../api_services/community/CommunityAPIService";
+import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
+import type { CommunityDetailsDto } from "../../../models/community/CommunityDetailsDto";
 
 export function useCommunityDetails(
   communityId: number | null,

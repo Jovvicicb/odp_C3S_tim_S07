@@ -15,5 +15,8 @@ export const CommunityMessages = {
   joined: "Joined community successfully",
   left: "Left community successfully",
 
-  
+  joinRequestsFetchFailed: "Failed to fetch join requests",
+  updateMemberRoleFailed: "Failed to update member role",
+  updateMemberStatusFailed: "Failed to update member status",
+  removeMemberFailed: "Failed to remove member",
 } as const;

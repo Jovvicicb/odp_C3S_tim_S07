@@ -63,4 +63,8 @@ export const CommunityMessages = {
 
   discoverSuccess: "Communities discovered successfully",
   discoverFailed: "Failed to discover communities",
+
+  joinRequestsFetched: "Join requests fetched successfully",
+  joinRequestsFetchFailed: "Failed to fetch join requests",
+  onlyModeratorCanViewJoinRequests: "Only community moderators can view join requests",
 } as const;

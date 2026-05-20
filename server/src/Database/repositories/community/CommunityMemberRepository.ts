@@ -73,41 +73,49 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
   }
 }
 
- async findUserIdsByCommunityId(page: number, limit: number, communityId: number): Promise<{ userIds: number[]; total: number}> {
-    const res = await this.db.getReadConnection();
-    if (!res) return { userIds: [], total: 0 };
+ async findActiveMembersByCommunityId(page: number, limit: number, communityId: number): Promise<{ members: CommunityMember[]; total: number }> {
+  const res = await this.db.getReadConnection();
 
-    const offset = safeInt((page - 1) * limit);
-    const lim = safeInt(limit);
+  if (!res) {
+    return { members: [], total: 0 };
+  }
 
-    try {
-        const [rows] = await res.conn.execute<RowDataPacket[]>(
-         `SELECT user_id
-          FROM community_members
-          WHERE community_id = ? AND status = ?
-          ORDER BY joined_at DESC
-          LIMIT ${lim} OFFSET ${offset}`,
-          [communityId, CommunityMemberStatus.ACTIVE]
-        );
+  const offset = safeInt((page - 1) * limit);
+  const lim = safeInt(limit);
 
-        const [cnt] = await res.conn.execute<RowDataPacket[]>(
-          `SELECT COUNT(*) as total
-          FROM community_members
-          WHERE community_id = ? AND status = ?`,
-          [communityId, CommunityMemberStatus.ACTIVE]
-        );
+  try {
+    const [rows] = await res.conn.execute<RowDataPacket[]>(
+      `SELECT *
+       FROM community_members
+       WHERE community_id = ? AND status = ?
+       ORDER BY joined_at DESC
+       LIMIT ${lim} OFFSET ${offset}`,
+      [communityId, CommunityMemberStatus.ACTIVE]
+    );
 
-        return {
-          userIds: rows.map((r) => Number(r.user_id)),
-          total: Number(cnt[0]?.total ?? 0),
-        };
-    } catch (err) {
-        this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMembersFailed, err);
-        return { userIds: [], total: 0 };
-    } finally {
-        res.conn.release();
-    }   
- }
+    const [cnt] = await res.conn.execute<RowDataPacket[]>(
+      `SELECT COUNT(*) as total
+       FROM community_members
+       WHERE community_id = ? AND status = ?`,
+      [communityId, CommunityMemberStatus.ACTIVE]
+    );
+
+    return {
+      members: rows.map((row) => CommunityMemberMapper.toModel(row)),
+      total: Number(cnt[0]?.total ?? 0),
+    };
+  } catch (err) {
+    this.logger.error(
+      "CommunityMemberRepository",
+      CommunityLogMessages.findMembersFailed,
+      err
+    );
+
+    return { members: [], total: 0 };
+  } finally {
+    res.conn.release();
+  }
+}
 
   
   async create(userId: number, communityId: number, role: CommunityMemberRole, status: CommunityMemberStatus): Promise<boolean> {
@@ -234,32 +242,76 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
   }
 
   async findStatusesByUserIdAndCommunityIds(userId: number, communityIds: number[]): Promise<Record<number, CommunityMemberStatus>> {
-  if (communityIds.length === 0) return {};
+    if (communityIds.length === 0) return {};
 
-  const res = await this.db.getReadConnection();
-  if (!res) return {};
+    const res = await this.db.getReadConnection();
+    if (!res) return {};
 
-  const placeholders = communityIds.map(() => "?").join(",");
+    const placeholders = communityIds.map(() => "?").join(",");
 
-  try {
-    const [rows] = await res.conn.execute<RowDataPacket[]>(
-      `SELECT community_id, status
-       FROM community_members
-       WHERE user_id = ? AND community_id IN (${placeholders})`,
-      [userId, ...communityIds]
-    );
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT community_id, status
+        FROM community_members
+        WHERE user_id = ? AND community_id IN (${placeholders})`,
+        [userId, ...communityIds]
+      );
 
-    return rows.reduce<Record<number, CommunityMemberStatus>>((acc, row) => {
-      acc[Number(row.community_id)] = row.status as CommunityMemberStatus;
-      return acc;
-    }, {});
-  } catch (err) {
-    this.logger.error("CommunityMemberRepository", CommunityLogMessages.findStatusesFailed, err);
-    return {};
-  } finally {
-    res.conn.release();
+      return rows.reduce<Record<number, CommunityMemberStatus>>((acc, row) => {
+        acc[Number(row.community_id)] = row.status as CommunityMemberStatus;
+        return acc;
+      }, {});
+    } catch (err) {
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.findStatusesFailed, err);
+      return {};
+    } finally {
+      res.conn.release();
+    }
   }
-}
+
+  async findPendingMembersByCommunityId(page: number, limit: number, communityId: number): Promise<{ members: CommunityMember[]; total: number }> {
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return { members: [], total: 0 };
+    }
+
+    const offset = safeInt((page - 1) * limit);
+    const lim = safeInt(limit);
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM community_members
+        WHERE community_id = ? AND status = ?
+        ORDER BY joined_at DESC
+        LIMIT ${lim} OFFSET ${offset}`,
+        [communityId, CommunityMemberStatus.PENDING]
+      );
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total
+        FROM community_members
+        WHERE community_id = ? AND status = ?`,
+        [communityId, CommunityMemberStatus.PENDING]
+      );
+
+      return {
+        members: rows.map((row) => CommunityMemberMapper.toModel(row)),
+        total: Number(cnt[0]?.total ?? 0),
+      };
+    } catch (err) {
+      this.logger.error(
+        "CommunityMemberRepository",
+        CommunityLogMessages.findPendingMembersFailed,
+        err
+      );
+
+      return { members: [], total: 0 };
+    } finally {
+      res.conn.release();
+    }
+  }
     
 
 }

@@ -1,1 +1,1 @@
-export type CommunityDetailsTab = "posts" | "members";
+export type CommunityDetailsTab = "posts" | "members" | "requests";

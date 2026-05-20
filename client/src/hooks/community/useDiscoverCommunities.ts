@@ -15,13 +15,27 @@ export function useDiscoverCommunities(initialPage = 1, initialLimit = 10) {
 
   const [type, setType] = useState<CommunityDiscoverType>("all");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 350);
+
+    return () => clearTimeout(timeout);
+  }, [search]);
 
   const fetchCommunities = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
-      const res = await communityApi.discover(page, limit, type, search);
+      const res = await communityApi.discover(
+        page,
+        limit,
+        type,
+        debouncedSearch,
+      );
 
       if (!res.success || !res.data) {
         setCommunities([]);
@@ -39,7 +53,7 @@ export function useDiscoverCommunities(initialPage = 1, initialLimit = 10) {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, type, search]);
+  }, [page, limit, type, debouncedSearch]);
 
   useEffect(() => {
     queueMicrotask(() => {

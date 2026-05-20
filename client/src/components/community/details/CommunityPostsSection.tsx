@@ -7,9 +7,11 @@ import { PostCard } from "../../post/PostCard";
 import type { CommunityDto } from "../../../models/community/CommunityDto";
 import type { PostWithDetailsDto } from "../../../models/post/PostWithDetailsDto";
 import type { PostSortType } from "../../../types/post/PostSortType";
+import type { CommunityViewerPermissionsDto } from "../../../models/community/CommunityViewerPermissionsDto";
 
 type Props = {
   community: CommunityDto;
+  permissions: CommunityViewerPermissionsDto;
   posts: PostWithDetailsDto[];
   postsLoading: boolean;
   postsError: string;
@@ -23,6 +25,7 @@ type Props = {
 
 export function CommunityPostsSection({
   community,
+  permissions,
   posts,
   postsLoading,
   postsError,
@@ -35,7 +38,7 @@ export function CommunityPostsSection({
 }: Props) {
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
 
-  const canCreatePost = community.membershipStatus === "active";
+  const canCreatePost = permissions.canCreatePost;
 
   const postTags = Array.from(
     new Map(

@@ -25,6 +25,7 @@ import { validateUpdateCommunityMemberStatus } from "../validators/community/Val
 import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 import { DiscoverCommunitiesDto } from "../../Domain/DTOs/community/DiscoverCommunitiesDto";
 import { validateCommunityDiscoverType } from "../validators/community/ValidateCommunityDiscoverType";
+import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 
 export class CommunityController {
   private readonly router = Router();
@@ -46,6 +47,8 @@ export class CommunityController {
     this.router.patch("/communities/:id/members/:userId/role",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.updateMemberRole.bind(this));
     this.router.patch("/communities/:id/members/:userId/status", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.updateMemberStatus.bind(this));
     this.router.delete("/communities/:id/members/:userId",       authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeMember.bind(this));
+    this.router.get("/communities/:communityId/join-requests",   authenticate, authorize(UserRole.USER, UserRole.ADMIN),                         this.getJoinRequests.bind(this)
+);
   }
 
   private async getPublic(req: Request, res: Response): Promise<void> {
@@ -490,6 +493,61 @@ export class CommunityController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommunityMessages.removeMemberFailed,
+      });
+    }
+  }
+
+  private async getJoinRequests(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
+
+    const communityIdParam = parseStringValue(req.params.communityId);
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+
+    const communityId = parseId(communityIdParam);
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const communityIdValidation = validateId(communityId);
+
+    if (!communityIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: communityIdValidation.message,
+      });
+      return;
+    }
+
+    const paginationValidation = validatePagination(page, limit);
+
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    try {
+      const result = await this.communityMemberService.getJoinRequests(
+        communityId,
+        page,
+        limit,
+        userId,
+        userRole
+      );
+
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(
+        this.constructor.name,
+        CommunityLogMessages.getJoinRequestsFailed,
+        err
+      );
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommunityMessages.joinRequestsFetchFailed,
       });
     }
   }

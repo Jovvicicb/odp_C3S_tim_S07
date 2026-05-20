@@ -7,6 +7,7 @@ import { CommunityMessages } from "../../constants/messages/community/CommunityM
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import type { CommunityDto } from "../../models/community/CommunityDto";
 import type { CommunityDetailsDto } from "../../models/community/CommunityDetailsDto";
+import type { CommunityMemberDetailsDto } from "../../models/community/CommunityMemberDetailsDto";
 
 const BASE = import.meta.env.VITE_API_URL + "communities";
 
@@ -80,29 +81,73 @@ export const communityApi: ICommunityAPIService = {
   },
 
   async getById(id, membersPage = 1, membersLimit = 10) {
-  return axios
-    .get<ApiResponse<CommunityDetailsDto>>(`${BASE}/${id}`, {
-      headers: authHeader(),
-      params: {
-        membersPage,
-        membersLimit,
-      },
-    })
-    .then((r) => r.data)
-    .catch((e) => err(e, CommunityMessages.fetchOneFailed));
-},
-  
+    return axios
+      .get<ApiResponse<CommunityDetailsDto>>(`${BASE}/${id}`, {
+        headers: authHeader(),
+        params: {
+          page: membersPage,
+          limit: membersLimit,
+        },
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.fetchOneFailed));
+  },
+    
   async join(id) {
-  return axios
-    .post<ApiResponse<void>>(`${BASE}/${id}/join`, {}, { headers: authHeader() })
-    .then((r) => r.data)
-    .catch((e) => err(e, CommunityMessages.joinFailed));
-},
+    return axios
+      .post<ApiResponse<void>>(`${BASE}/${id}/join`, {}, { headers: authHeader() })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.joinFailed));
+  },
 
-async leave(id) {
-  return axios
-    .delete<ApiResponse<void>>(`${BASE}/${id}/leave`, { headers: authHeader() })
-    .then((r) => r.data)
-    .catch((e) => err(e, CommunityMessages.leaveFailed));
-},
+  async leave(id) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${id}/leave`, { headers: authHeader() })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.leaveFailed));
+  },
+
+  async getJoinRequests(communityId, page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<CommunityMemberDetailsDto>>>(
+        `${BASE}/${communityId}/join-requests`,
+        {
+          headers: authHeader(),
+          params: { page, limit },
+        },
+      )
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.joinRequestsFetchFailed));
+  },
+
+  async updateMemberRole(communityId, userId, role) {
+    return axios
+      .patch<ApiResponse<void>>(
+        `${BASE}/${communityId}/members/${userId}/role`,
+        { role },
+        { headers: authHeader() },
+      )
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.updateMemberRoleFailed));
+  },
+
+  async updateMemberStatus(communityId, userId, action) {
+    return axios
+      .patch<ApiResponse<void>>(
+        `${BASE}/${communityId}/members/${userId}/status`,
+        { action },
+        { headers: authHeader() },
+      )
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.updateMemberStatusFailed));
+  },
+
+  async removeMember(communityId, userId) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${communityId}/members/${userId}`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommunityMessages.removeMemberFailed));
+  },
 };

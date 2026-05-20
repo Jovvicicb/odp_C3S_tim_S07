@@ -18,11 +18,20 @@ import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
 import { CommunityMapper } from '../../Shared/mappers/community/CommunityMapper';
 import { CommunityMember } from '../../Domain/models/CommunityMember';
+import { UserRole } from '../../Domain/enums/users/UserRole';
+import { CommunityMemberDetailsDto } from '../../Domain/DTOs/community/CommunityMemberDetailsDto';
+import { IUserRepository } from '../../Domain/repositories/users/IUserRepository';
+import { IUserFollowRepository } from '../../Domain/repositories/users/IUserFollowRepository';
+import { User } from '../../Domain/models/User';
+import { UserFollowStatus } from '../../Domain/enums/users/UserFollowStatus';
+import { UserMapper } from '../../Shared/mappers/users/UserMapper';
 
 export class CommunityMemberService implements ICommunityMemberService {
   public constructor(
     private readonly communityMemberRepo: ICommunityMemberRepository,
     private readonly communityRepo: ICommunityRepository,
+    private readonly userRepo: IUserRepository,
+    private readonly userFollowRepo: IUserFollowRepository,
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
@@ -266,6 +275,85 @@ export class CommunityMemberService implements ICommunityMemberService {
     );
     
     return ServiceResultFactory.ok(CommunityMessages.memberRemoved, undefined, HttpStatus.ok);
+  }
+
+  
+  async getJoinRequests(communityId: number, page: number, limit: number, viewerId: number, viewerRole: UserRole): Promise<ServiceResult<PaginatedListDto<CommunityMemberDetailsDto>>> {
+    const community = await this.communityRepo.findById(communityId);
+    if (community.id === 0) {
+      return ServiceResultFactory.fail<PaginatedListDto<CommunityMemberDetailsDto>>(CommunityMessages.notFound, HttpStatus.notFound);
+    }
+
+    const isAdmin = viewerRole === UserRole.ADMIN;
+
+    const requesterMembership =
+      await this.communityMemberRepo.findByUserIdAndCommunityId(
+        viewerId,
+        communityId
+      );
+
+    if (!isAdmin && !this.isActiveModerator(requesterMembership)) {
+      return ServiceResultFactory.fail<PaginatedListDto<CommunityMemberDetailsDto>>(
+        CommunityMessages.onlyModeratorCanViewJoinRequests,
+        HttpStatus.forbidden
+      );
+    }
+
+    const result = await this.communityMemberRepo.findPendingMembersByCommunityId(page, limit, communityId);
+
+    if (result.members.length === 0) {
+      const data = new PaginatedListDto<CommunityMemberDetailsDto>(
+        [],
+        result.total,
+        page,
+        limit
+      );
+
+      return ServiceResultFactory.ok(CommunityMessages.joinRequestsFetched, data, HttpStatus.ok);
+    }
+
+    const userIds = result.members.map((member) => member.userId);
+
+    const users = await this.userRepo.findByIds(userIds);
+
+    const followedUserIds = await this.userFollowRepo.findFollowingIdsFromList(viewerId, userIds);
+
+    const followedUserIdsSet = new Set(followedUserIds);
+
+    const usersById = users.reduce<Record<number, User>>((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+
+    const items = result.members
+      .map((member) => {
+        const user = usersById[member.userId];
+
+        if (!user) {
+          return undefined;
+        }
+
+        const followStatus =
+          user.id === viewerId
+            ? UserFollowStatus.SELF
+            : followedUserIdsSet.has(user.id)
+              ? UserFollowStatus.FOLLOWING
+              : UserFollowStatus.NOT_FOLLOWING;
+
+        return new CommunityMemberDetailsDto(
+          UserMapper.toDto(user, followStatus),
+          member.role,
+          member.status,
+          community.ownerId === user.id
+        );
+      })
+      .filter(
+        (item): item is CommunityMemberDetailsDto => item !== undefined
+      );
+
+    const data = new PaginatedListDto(items, result.total, page, limit);
+
+    return ServiceResultFactory.ok(CommunityMessages.joinRequestsFetched, data, HttpStatus.ok);
   }
 
 }
