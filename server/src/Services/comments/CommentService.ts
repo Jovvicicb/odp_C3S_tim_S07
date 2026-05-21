@@ -26,6 +26,24 @@ import { AuditContext } from "../../Domain/types/audits/AuditContext";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
 import { CommentMapper } from "../../Shared/mappers/comments/CommentMapper";
+import { Comment } from "../../Domain/models/Comment";
+import { CommentViewerPermissionsDto } from "../../Domain/DTOs/comments/CommentViewerPermissionsDto";
+import { Community } from "../../Domain/models/Community";
+import { CommunityMember } from "../../Domain/models/CommunityMember";
+import { Post } from "../../Domain/models/Post";
+
+type CommentAccessCheckResult =
+  | {
+      allowed: true;
+      post: Post;
+      community: Community;
+      membership: CommunityMember;
+    }
+  | {
+      allowed: false;
+      message: string;
+      status: number;
+    };
 
 export class CommentService implements ICommentService {
   public constructor(
@@ -46,28 +64,149 @@ export class CommentService implements ICommentService {
     );
   }
 
-  async create(dto: CreateCommentDto, ctx: AuditContext): Promise<ServiceResult<CommentDto>> {
-    const post = await this.postRepo.findById(dto.postId);
+
+  private isActiveModeratorMembership(membership?: {id: number; role: CommunityMemberRole; status: CommunityMemberStatus;}): boolean {
+    return (
+      !!membership &&
+      membership.id !== 0 &&
+      membership.role === CommunityMemberRole.MODERATOR &&
+      membership.status === CommunityMemberStatus.ACTIVE
+    );
+  }
+
+  private buildCommentPermissions(
+    comment: Comment,
+    viewerId: number | undefined,
+    canViewContent: boolean,
+    canModerateComments: boolean
+  ): CommentViewerPermissionsDto {
+    const isAuthor = viewerId !== undefined && comment.userId === viewerId;
+    const isDeleted = comment.isDeleted;
+
+    const canInteract = !!viewerId && canViewContent;
+
+    return new CommentViewerPermissionsDto(
+      canInteract && isAuthor && !isDeleted,
+      canInteract && !isDeleted && (isAuthor || canModerateComments),
+      canInteract && !isDeleted,
+      canInteract && !isDeleted && comment.parentId === null,
+      canInteract && !isDeleted && canModerateComments
+    );
+  }
+
+  private async checkCommentAccess(userId: number, postId: number): Promise<CommentAccessCheckResult> {
+    const post = await this.postRepo.findById(postId);
     if (post.id === 0) {
-      return ServiceResultFactory.fail<CommentDto>(PostMessages.notFound, HttpStatus.notFound);
+      return { allowed: false, message: PostMessages.notFound, status: HttpStatus.notFound,};
     }
 
     const community = await this.communityRepo.findById(post.communityId);
     if (community.id === 0) {
-      return ServiceResultFactory.fail<CommentDto>(CommunityMessages.notFound, HttpStatus.notFound);
+      return {allowed: false, message: CommunityMessages.notFound, status: HttpStatus.notFound,};
     }
 
-    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(dto.userId, post.communityId);
-    if ( membership.id !== 0 &&
-       ( membership.status === CommunityMemberStatus.BANNED || membership.status === CommunityMemberStatus.PENDING )
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(userId, post.communityId);
+    if (
+      membership.id !== 0 &&
+      (
+        membership.status === CommunityMemberStatus.BANNED ||
+        membership.status === CommunityMemberStatus.PENDING
+      )
     ) {
-      return ServiceResultFactory.fail<CommentDto>(CommentMessages.notAllowed, HttpStatus.forbidden);
+      return {allowed: false, message: CommentMessages.notAllowed, status: HttpStatus.forbidden,};
     }
 
-    if (community.type === CommunityType.PRIVATE) {
-      if (membership.id === 0 || membership.status !== CommunityMemberStatus.ACTIVE) {
-        return ServiceResultFactory.fail<CommentDto>(CommentMessages.notAllowed, HttpStatus.forbidden);
-      }
+    if (
+      community.type === CommunityType.PRIVATE &&
+      (
+        membership.id === 0 ||
+        membership.status !== CommunityMemberStatus.ACTIVE
+      )
+    ) {
+      return {allowed: false, message: CommentMessages.notAllowed, status: HttpStatus.forbidden,};
+    }
+
+    return {allowed: true, post, community, membership,};
+  }
+
+  private async canDeleteComment(comment: Comment, postId: number, requesterId: number, requesterRole?: UserRole): Promise<boolean> {
+    const isAdmin = requesterRole === UserRole.ADMIN;
+    if (isAdmin) {
+      return true;
+    }
+
+    const post = await this.postRepo.findById(postId);
+    if (post.id === 0) {
+      return false;
+    }
+
+    const community = await this.communityRepo.findById(post.communityId);
+    if (community.id === 0) {
+      return false;
+    }
+
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
+    if (
+      membership.id !== 0 &&
+      (
+        membership.status === CommunityMemberStatus.BANNED ||
+        membership.status === CommunityMemberStatus.PENDING
+      )
+    ) {
+      return false;
+    }
+
+    const isAuthor = comment.userId === requesterId;
+    const isModerator = this.isActiveModeratorMembership(membership);
+
+    if (isModerator) {
+      return true;
+    }
+
+    if (!isAuthor) {
+      return false;
+    }
+
+    if (
+      community.type === CommunityType.PRIVATE &&
+      (
+        membership.id === 0 ||
+        membership.status !== CommunityMemberStatus.ACTIVE
+      )
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private async canModerateComment(postId: number, requesterId: number, requesterRole?: UserRole): Promise<boolean> {
+    const isAdmin = requesterRole === UserRole.ADMIN;
+    if (isAdmin) {
+      return true;
+    }
+
+    const post = await this.postRepo.findById(postId);
+    if (post.id === 0) {
+      return false;
+    }
+
+    const community = await this.communityRepo.findById(post.communityId);
+    if (community.id === 0) {
+      return false;
+    }
+
+    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
+
+    return this.isActiveModeratorMembership(membership);
+  }
+
+      
+
+  async create(dto: CreateCommentDto, ctx: AuditContext): Promise<ServiceResult<CommentDto>> {
+    const access = await this.checkCommentAccess(dto.userId, dto.postId);
+    if (!access.allowed) {
+      return ServiceResultFactory.fail<CommentDto>(access.message, access.status);
     }
 
     if (dto.parentId !== null) {
@@ -80,6 +219,10 @@ export class CommentService implements ICommentService {
       if (parentComment.postId !== dto.postId) {
         return ServiceResultFactory.fail<CommentDto>(CommentMessages.parentPostMismatch, HttpStatus.badRequest);
       }
+
+       if (parentComment.isDeleted) {
+        return ServiceResultFactory.fail<CommentDto>(CommentMessages.cannotReplyToDeleted, HttpStatus.conflict);
+    }
 
       if (parentComment.parentId !== null) {
         return ServiceResultFactory.fail<CommentDto>(CommentMessages.maxDepthReached, HttpStatus.badRequest);
@@ -110,6 +253,11 @@ export class CommentService implements ICommentService {
       return ServiceResultFactory.fail(CommentMessages.cannotUpdateDeleted, HttpStatus.conflict);
     }
 
+    const access = await this.checkCommentAccess(ctx.userId, comment.postId);
+    if (!access.allowed) {
+      return ServiceResultFactory.fail(access.message,  access.status);
+    }
+
     const updated = await this.commentRepo.update(id, dto);
     if (!updated) {
       return ServiceResultFactory.fail(CommentMessages.updateFailed, HttpStatus.internalServerError);
@@ -123,7 +271,7 @@ export class CommentService implements ICommentService {
       CommentMessages.updated, undefined, HttpStatus.ok);
   }
 
-  async delete(id: number, ctx: AuditContext): Promise<ServiceResult> {
+  async delete(id: number, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult> {
     const comment = await this.commentRepo.findById(id);
     if (comment.id === 0) {
       return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
@@ -138,18 +286,12 @@ export class CommentService implements ICommentService {
       return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
 
-    const isAuthor = comment.userId === ctx.userId;
-    const isModerator = await this.isActiveModerator(ctx.userId, post.communityId);
-    
-    if (!isAuthor && !isModerator) {
-      return ServiceResultFactory.fail(
-        CommentMessages.onlyAuthorOrModeratorCanDelete,
-        HttpStatus.forbidden
-      );
+    const canDelete = await this.canDeleteComment(comment, comment.postId, ctx.userId, requesterRole);
+    if (!canDelete) {
+      return ServiceResultFactory.fail(CommentMessages.onlyAuthorOrModeratorCanDelete, HttpStatus.forbidden);
     }
 
     const deleted = await this.commentRepo.softDelete(id);
-
     if (!deleted) {
       return ServiceResultFactory.fail(CommentMessages.deleteFailed, HttpStatus.internalServerError);
     }
@@ -163,7 +305,7 @@ export class CommentService implements ICommentService {
   async getByPost(dto: GetCommentsByPostDto, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<PaginatedListDto<CommentTreeDto>>> {
     const post = await this.postRepo.findById(dto.postId);
     if (post.id === 0) {
-      return ServiceResultFactory.fail<PaginatedListDto<CommentTreeDto>>(PostMessages.notFound, HttpStatus.notFound);
+      return ServiceResultFactory.fail<PaginatedListDto<CommentTreeDto>>( PostMessages.notFound, HttpStatus.notFound);
     }
 
     const community = await this.communityRepo.findById(post.communityId);
@@ -200,62 +342,99 @@ export class CommentService implements ICommentService {
       }
     }
 
+    const canViewContent =
+      community.type === CommunityType.PUBLIC ||
+      isAdmin ||
+      membership?.status === CommunityMemberStatus.ACTIVE;
+
+    const canModerateComments = isAdmin || this.isActiveModeratorMembership(membership);
+
     const rootResult = await this.commentRepo.findRootByPost(dto);
+
     if (rootResult.comments.length === 0) {
-      const data = new PaginatedListDto([], rootResult.total, dto.page, dto.limit);
-      return ServiceResultFactory.ok(CommentMessages.fetched, data,HttpStatus.ok);
+      const data = new PaginatedListDto<CommentTreeDto>(
+        [],
+        rootResult.total,
+        dto.page,
+        dto.limit
+      );
+
+      return ServiceResultFactory.ok(CommentMessages.fetched, data, HttpStatus.ok);
     }
 
-    const rootIds = rootResult.comments.map((c) => c.id);
+    const rootIds = rootResult.comments.map((comment) => comment.id);
 
     const replies = await this.commentRepo.findRepliesByParentIds(rootIds);
 
     const allCommentIds = [
       ...rootIds,
-      ...replies.map((r) => r.id),
+      ...replies.map((reply) => reply.id),
     ];
 
     const likeCounts = await this.commentLikeRepo.countByCommentIds(allCommentIds);
 
-    const repliesByParentId = replies.reduce<Record<number, CommentTreeDto[]>>((acc, reply) => {
-      const replyDto = CommentMapper.toTreeDto(
-        reply,
-        likeCounts[reply.id] ?? 0,
-        []
-      );
+    const likedCommentIds = viewerId
+      ? await this.commentLikeRepo.findLikedCommentIdsByUserId(viewerId, allCommentIds)
+      : [];
 
-      const parentId = reply.parentId as number;
-      if (!acc[parentId]) {
-        acc[parentId] = [];
-      }
-      acc[parentId].push(replyDto);
+    const likedCommentIdsSet = new Set(likedCommentIds);
 
-      return acc;
-    }, {});
+    const repliesByParentId = replies.reduce<Record<number, CommentTreeDto[]>>(
+      (acc, reply) => {
+        const replyDto = CommentMapper.toTreeDto(
+          reply,
+          likeCounts[reply.id] ?? 0,
+          likedCommentIdsSet.has(reply.id),
+          this.buildCommentPermissions(
+            reply,
+            viewerId,
+            canViewContent,
+            canModerateComments
+          ),
+          []
+        );
+
+        const parentId = reply.parentId as number;
+
+        if (!acc[parentId]) {
+          acc[parentId] = [];
+        }
+
+        acc[parentId].push(replyDto);
+
+        return acc;
+      },
+      {}
+    );
 
     const items = rootResult.comments.map((root) => {
       return CommentMapper.toTreeDto(
         root,
         likeCounts[root.id] ?? 0,
+        likedCommentIdsSet.has(root.id),
+        this.buildCommentPermissions(
+          root,
+          viewerId,
+          canViewContent,
+          canModerateComments
+        ),
         repliesByParentId[root.id] ?? []
       );
     });
 
-    const data = new PaginatedListDto(
-      items,
-      rootResult.total,
-      dto.page,
-      dto.limit
-    );
+    const data = new PaginatedListDto(items, rootResult.total, dto.page, dto.limit);
 
-    return ServiceResultFactory.ok(CommentMessages.fetched, data,HttpStatus.ok);
+    return ServiceResultFactory.ok(CommentMessages.fetched, data, HttpStatus.ok);
   }
 
-
-  async flag(id: number, ctx: AuditContext): Promise<ServiceResult> {
+  async flag(id: number, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult> {
     const comment = await this.commentRepo.findById(id);
     if (comment.id === 0) {
       return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
+    }
+
+    if (comment.isDeleted) {
+      return ServiceResultFactory.fail(CommentMessages.cannotFlagDeleted, HttpStatus.conflict);
     }
 
     const post = await this.postRepo.findById(comment.postId);
@@ -263,8 +442,8 @@ export class CommentService implements ICommentService {
       return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
 
-    const isModerator = await this.isActiveModerator(ctx.userId, post.communityId);
-    if (!isModerator) {
+    const canModerate = await this.canModerateComment(comment.postId, ctx.userId, requesterRole);
+    if (!canModerate) {
       return ServiceResultFactory.fail(CommentMessages.onlyModeratorCanFlag, HttpStatus.forbidden);
     }
 
@@ -284,10 +463,14 @@ export class CommentService implements ICommentService {
     return ServiceResultFactory.ok(CommentMessages.flagged, undefined,HttpStatus.ok);
   }
 
-  async unflag(id: number, ctx: AuditContext): Promise<ServiceResult> {
+  async unflag(id: number, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult> {
     const comment = await this.commentRepo.findById(id);
     if (comment.id === 0) {
       return ServiceResultFactory.fail(CommentMessages.notFound, HttpStatus.notFound);
+    }
+
+    if (comment.isDeleted) {
+      return ServiceResultFactory.fail(CommentMessages.cannotUnflagDeleted, HttpStatus.conflict);
     }
 
     const post = await this.postRepo.findById(comment.postId);
@@ -295,9 +478,9 @@ export class CommentService implements ICommentService {
       return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
 
-    const isModerator = await this.isActiveModerator(ctx.userId, post.communityId);
-    if (!isModerator) {
-      return ServiceResultFactory.fail( CommentMessages.onlyModeratorCanUnflag, HttpStatus.forbidden);
+    const canModerate = await this.canModerateComment(comment.postId, ctx.userId, requesterRole);
+    if (!canModerate) {
+      return ServiceResultFactory.fail(CommentMessages.onlyModeratorCanUnflag, HttpStatus.forbidden);
     }
 
     if (!comment.isFlagged) {

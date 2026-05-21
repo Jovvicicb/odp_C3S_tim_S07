@@ -208,6 +208,7 @@ export class PostController {
 
   private async delete(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
+    const userRole = req.user!.role;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -220,7 +221,7 @@ export class PostController {
 
     const ctx = IpHelper.buildAuditContext(req,userId);
     try{
-      const result = await this.postService.delete(id,ctx);
+      const result = await this.postService.delete(id, ctx, userRole);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, PostLogMessages.deleteFailed, err);
@@ -237,6 +238,7 @@ export class PostController {
 
   private async update(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
+    const userRole = req.user!.role;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -257,7 +259,7 @@ export class PostController {
 
     const ctx = IpHelper.buildAuditContext(req,userId);
     try{
-      const result = await this.postService.update(id, dto, ctx);
+      const result = await this.postService.update(id, dto, ctx, userRole);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name,PostLogMessages.updateFailed, err);
@@ -287,7 +289,7 @@ export class PostController {
     }
     
     try {
-      const result = await this.postLikeService.like(userId,postId);
+      const result = await this.postLikeService.like(userId, postId);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, PostLogMessages.likeFailed, err);
@@ -317,7 +319,7 @@ export class PostController {
     }
     
     try {
-      const result = await this.postLikeService.unlike(userId,postId);
+      const result = await this.postLikeService.unlike(userId, postId);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, PostLogMessages.unlikeFailed, err);
@@ -332,6 +334,7 @@ export class PostController {
 
   private async addTag(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
+    const userRole = req.user!.role;
   
     const postIdParam = parseStringValue(req.params.id);
     const postId = parseId(postIdParam);
@@ -353,7 +356,7 @@ export class PostController {
   
     const ctx = IpHelper.buildAuditContext(req, userId);
     try {
-      const result = await this.postTagService.addTag(postId, tagId, ctx);
+      const result = await this.postTagService.addTag(postId, tagId, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, PostLogMessages.addTagFailed, err);
@@ -368,6 +371,7 @@ export class PostController {
 
   private async removeTag(req: Request, res: Response): Promise<void> {
     const requesterId = req.user!.id;
+    const userRole = req.user!.role;
   
     const postIdParam = parseStringValue(req.params.id);
     const postId = parseId(postIdParam);
@@ -389,7 +393,7 @@ export class PostController {
   
     const ctx = IpHelper.buildAuditContext(req, requesterId);
     try {
-      const result = await this.postTagService.removeTag(postId, tagId, ctx);
+      const result = await this.postTagService.removeTag(postId, tagId, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, PostLogMessages.removeTagFailed, err);

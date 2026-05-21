@@ -109,5 +109,42 @@ export class CommentLikeRepository implements ICommentLikeRepository {
       res.conn.release();
     }
   }
+
+
+  async findLikedCommentIdsByUserId(userId: number, commentIds: number[]): Promise<number[]> {
+    if (commentIds.length === 0) {
+      return [];
+    }
+
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return [];
+    }
+
+    const placeholders = commentIds.map(() => "?").join(",");
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT comment_id
+        FROM comment_likes
+        WHERE user_id = ?
+        AND comment_id IN (${placeholders})`,
+        [userId, ...commentIds]
+      );
+
+      return rows.map((row) => Number(row.comment_id));
+    } catch (err) {
+      this.logger.error(
+        "CommentLikeRepository",
+        CommentLogMessages.findLikedCommentsFailed,
+        err
+      );
+
+      return [];
+    } finally {
+      res.conn.release();
+    }
+  }
   
 }

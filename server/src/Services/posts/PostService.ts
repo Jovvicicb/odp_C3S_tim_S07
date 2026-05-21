@@ -11,6 +11,7 @@ import { CreatePostDto } from "../../Domain/DTOs/Posts/CreatePostDto";
 import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommunityDto";
 import { PostDetailsDto } from "../../Domain/DTOs/Posts/PostDetailsDto";
 import { PostDto } from "../../Domain/DTOs/Posts/PostDto";
+import { PostViewerPermissionsDto } from "../../Domain/DTOs/Posts/PostViewerPermissionsDto";
 import { PostWithDetailsDto } from "../../Domain/DTOs/Posts/PostWithDetailsDto";
 import { UpdatePostDto } from "../../Domain/DTOs/Posts/UpdatePostDto";
 import { PostTagDto } from "../../Domain/DTOs/tags/PostTagDto";
@@ -19,8 +20,10 @@ import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMem
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { UserRole } from "../../Domain/enums/users/UserRole";
+import { Community } from "../../Domain/models/Community";
 import { CommunityMember } from "../../Domain/models/CommunityMember";
 import { Post } from "../../Domain/models/Post";
+import { User } from "../../Domain/models/User";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
 import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
 import { IPostCommentRepository } from "../../Domain/repositories/posts/IPostCommentRepository";
@@ -29,13 +32,16 @@ import { IPostRepository } from "../../Domain/repositories/posts/IPostRepository
 import { IPostTagRepository } from "../../Domain/repositories/posts/IPostTagRepository";
 import { ITagRepository } from "../../Domain/repositories/tags/ITagRepository";
 import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
+import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
 import { ICommentService } from "../../Domain/services/comments/ICommentService";
 import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
 import { IPostService } from "../../Domain/services/posts/IPostService";
 import { AuditContext } from "../../Domain/types/audits/AuditContext";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
+import { CommunityMapper } from "../../Shared/mappers/community/CommunityMapper";
 import { PostMapper } from "../../Shared/mappers/posts/PostMapper";
+import { UserMapper } from "../../Shared/mappers/users/UserMapper";
 
 
 export class PostService implements IPostService {
@@ -48,17 +54,56 @@ export class PostService implements IPostService {
     private readonly tagRepo: ITagRepository,
     private readonly postCommentRepo: IPostCommentRepository,
     private readonly userFollowRepo: IUserFollowRepository,
+    private readonly userRepo: IUserRepository,
     private readonly commentService: ICommentService,
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
-  private isActiveModerator(membership: CommunityMember): boolean {
-  return (
-    membership.id !== 0 &&
-    membership.role === CommunityMemberRole.MODERATOR &&
-    membership.status === CommunityMemberStatus.ACTIVE
-  );
-}
+  private isActiveModerator(membership?: CommunityMember): boolean {
+    return (
+      !!membership &&
+      membership.id !== 0 &&
+      membership.role === CommunityMemberRole.MODERATOR &&
+      membership.status === CommunityMemberStatus.ACTIVE
+    );
+  }
+
+  private canManagePost(post: Post, requesterId: number, requesterRole: UserRole | undefined, membership?: CommunityMember): boolean {
+    const isAuthor = post.authorId === requesterId;
+    const isAdmin = requesterRole === UserRole.ADMIN;
+    const isModerator = this.isActiveModerator(membership);
+
+    if (isAdmin) {
+      return true;
+    }
+
+    if (
+      membership &&
+      membership.id !== 0 &&
+      (
+        membership.status === CommunityMemberStatus.BANNED ||
+        membership.status === CommunityMemberStatus.PENDING
+      )
+    ) {
+      return false;
+    }
+
+    return isAuthor || isModerator;
+  }
+
+  private buildPostPermissions(post: Post, viewerId: number | undefined, canViewContent: boolean, isModerator: boolean): PostViewerPermissionsDto {
+    const isAuthor = viewerId !== undefined && post.authorId === viewerId;
+    const canInteract = !!viewerId && canViewContent;
+
+    return new PostViewerPermissionsDto(
+      canInteract && (isAuthor || isModerator),
+      canInteract && (isAuthor || isModerator),
+      canInteract && (isAuthor || isModerator),
+      canInteract,
+      canInteract,
+      canInteract && isModerator
+    );
+  }
 
   private async buildPostsWithDetails(posts: Post[]): Promise<PostWithDetailsDto[]> {
     if (posts.length === 0) return [];
@@ -93,24 +138,31 @@ export class PostService implements IPostService {
     });
   }
 
-  private async buildPostDetails(post: Post, comments: CommentTreeDto[]): Promise<PostDetailsDto> {
+  private async buildPostDetails(post: Post, community: Community, author: User, comments: PaginatedListDto<CommentTreeDto>, likedByCurrentUser: boolean, permissions: PostViewerPermissionsDto, membershipStatus: CommunityMemberStatus | null): Promise<PostDetailsDto> {
     const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds([post.id]);
     const tagIds = tagIdsByPostId[post.id] ?? [];
 
     const tags = tagIds.length > 0
       ? await this.tagRepo.findByIds(tagIds)
       : [];
-      
+
     const postTags = tags.map((tag) => new PostTagDto(tag.id, tag.name));
 
     const likeCounts = await this.postLikeRepo.countByPostIds([post.id]);
     const commentCounts = await this.postCommentRepo.countByPostIds([post.id]);
 
+    const authorDto = author.id !== 0 ? UserMapper.toDto(author) : null;
+    const communityDto = CommunityMapper.toDto(community, membershipStatus);
+
     return PostMapper.toDetailsDto(
       post,
+      authorDto,
+      communityDto,
       postTags,
       likeCounts[post.id] ?? 0,
       commentCounts[post.id] ?? 0,
+      likedByCurrentUser,
+      permissions,
       comments
     );
   }
@@ -137,19 +189,18 @@ export class PostService implements IPostService {
     return ServiceResultFactory.ok(PostMessages.created, postDto, HttpStatus.created);
   }
 
-  async update(id: number, dto: UpdatePostDto, ctx: AuditContext): Promise<ServiceResult> {
+  async update(id: number, dto: UpdatePostDto, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult> {
     const post = await this.postRepo.findById(id);
     if(post.id === 0){
       return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
   
     const requesterId = ctx.userId;
-    const isAuthor = post.authorId === requesterId;
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
-    const isModerator = this.isActiveModerator(membership);
 
-    if (!isAuthor && !isModerator) {
+    const canManage = this.canManagePost(post, requesterId, requesterRole, membership);
+    if (!canManage) {
       return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanUpdate, HttpStatus.forbidden);
     }
 
@@ -164,22 +215,22 @@ export class PostService implements IPostService {
   }
 
 
-  async delete(id: number, ctx: AuditContext): Promise<ServiceResult> {
+  async delete(id: number, ctx: AuditContext,  requesterRole?: UserRole): Promise<ServiceResult> {
     const post = await this.postRepo.findById(id);
     if(post.id === 0){
       return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
     }
 
     const requesterId = ctx.userId;
-    const isAuthor = post.authorId === requesterId;
-
+  
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, post.communityId);
-    const isModerator = this.isActiveModerator(membership);
+   
+    const canManage = this.canManagePost(post,  requesterId,  requesterRole, membership);
 
-    if (!isAuthor && !isModerator) {
+    if (!canManage) {
       return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanDelete, HttpStatus.forbidden);
     }
-
+    
     const deleted = await this.postRepo.delete(id);
     if (!deleted) {
       return ServiceResultFactory.fail(PostMessages.deleteFailed, HttpStatus.internalServerError);
@@ -272,6 +323,11 @@ export class PostService implements IPostService {
       ? await this.communityMemberRepo.findByUserIdAndCommunityId(viewerId, post.communityId)
       : undefined;
 
+    const membershipStatus =
+      membership && membership.id !== 0
+        ? membership.status
+        : null;
+
     if (
       !isAdmin &&
       membership &&
@@ -291,9 +347,19 @@ export class PostService implements IPostService {
         membership.id === 0 ||
         membership.status !== CommunityMemberStatus.ACTIVE
       ) {
-        return ServiceResultFactory.fail<PostDetailsDto>(PostMessages.postAccessForbidden, HttpStatus.forbidden);
+        return ServiceResultFactory.fail<PostDetailsDto>(
+          PostMessages.postAccessForbidden,
+          HttpStatus.forbidden
+        );
       }
     }
+
+    const canViewContent =
+      community.type === CommunityType.PUBLIC ||
+      isAdmin ||
+      membershipStatus === CommunityMemberStatus.ACTIVE;
+
+    const isModerator = isAdmin || this.isActiveModerator(membership);
 
     const commentsResult = await this.commentService.getByPost(
       new GetCommentsByPostDto(
@@ -305,18 +371,38 @@ export class PostService implements IPostService {
       viewerId,
       viewerRole
     );
-    
-    if (!commentsResult.success) {
+
+    if (!commentsResult.success || !commentsResult.data) {
       return ServiceResultFactory.fail<PostDetailsDto>(
         commentsResult.message ?? PostMessages.fetchDetailsFailed,
         commentsResult.status ?? HttpStatus.internalServerError
       );
     }
-    const comments = commentsResult.data?.items ?? [];
 
-    const data = await this.buildPostDetails(post, comments);
+    const likedByCurrentUser = viewerId
+      ? await this.postLikeRepo.exists(viewerId, post.id)
+      : false;
 
-    return ServiceResultFactory.ok(PostMessages.detailsFetched, data,HttpStatus.ok);
+    const permissions = this.buildPostPermissions(
+      post,
+      viewerId,
+      canViewContent,
+      isModerator
+    );
+
+    const author = await this.userRepo.findById(post.authorId);
+
+    const data = await this.buildPostDetails(
+      post,
+      community,
+      author,
+      commentsResult.data,
+      likedByCurrentUser,
+      permissions,
+      membershipStatus
+    );
+
+    return ServiceResultFactory.ok(PostMessages.detailsFetched, data, HttpStatus.ok);
   }
 
 }

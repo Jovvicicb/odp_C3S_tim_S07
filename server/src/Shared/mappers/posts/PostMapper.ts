@@ -5,6 +5,10 @@ import { PostTagDto } from "../../../Domain/DTOs/tags/PostTagDto";
 import { PostWithDetailsDto } from "../../../Domain/DTOs/Posts/PostWithDetailsDto";
 import { CommentTreeDto } from "../../../Domain/DTOs/comments/CommentTreeDto";
 import { PostDetailsDto } from "../../../Domain/DTOs/Posts/PostDetailsDto";
+import { UserDto } from "../../../Domain/DTOs/users/UserDto";
+import { CommunityDto } from "../../../Domain/DTOs/community/CommunityDto";
+import { PostViewerPermissionsDto } from "../../../Domain/DTOs/Posts/PostViewerPermissionsDto";
+import { PaginatedListDto } from "../../../Domain/DTOs/common/PaginatedListDto";
 
 export class PostMapper {
   public static toModel(row: RowDataPacket): Post {
@@ -49,21 +53,32 @@ export class PostMapper {
     );
   }
 
-  public static toDetailsDto(post: Post, tags: PostTagDto[], likeCount: number, commentCount: number, comments: CommentTreeDto[]): PostDetailsDto {
-    return new PostDetailsDto(
-      post.id,
-      post.title,
-      post.content,
-      post.mediaUrl,
-      post.authorId,
-      post.communityId,
-      post.createdAt,
-      post.updatedAt,
-      tags,
-      likeCount,
-      commentCount,
-      comments
-    );
-  }
-
+public static toDetailsDto(
+  post: Post,
+  author: UserDto | null,
+  community: CommunityDto,
+  tags: PostTagDto[],
+  likeCount: number,
+  commentCount: number,
+  likedByCurrentUser: boolean,
+  permissions: PostViewerPermissionsDto,
+  comments: PaginatedListDto<CommentTreeDto>
+): PostDetailsDto {
+  return new PostDetailsDto(
+    post.id,
+    post.title,
+    post.content,
+    post.mediaUrl,
+    author,
+    community,
+    post.createdAt,
+    post.updatedAt,
+    tags,
+    likeCount,
+    commentCount,
+    likedByCurrentUser,
+    permissions,
+    comments
+  );
+}
 }

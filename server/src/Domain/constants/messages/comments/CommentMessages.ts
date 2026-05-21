@@ -29,6 +29,7 @@ export const CommentMessages = {
   unliked: "Comment unliked successfully",
   unlikeFailed: "Failed to unlike comment",
   notLiked: "Comment is not liked",
+  cannotUnlikeComment: "Cannot unlike this comment",
 
   fetched: "Comments fetched successfully",
   fetchByPostFailed: "Failed to fetch comments",
@@ -42,5 +43,9 @@ export const CommentMessages = {
   onlyModeratorCanUnflag: "Only community moderators can unflag comments",
   alreadyFlagged: "Comment is already flagged",
   notFlagged: "Comment is not flagged",
+  cannotReplyToDeleted: "Cannot reply to a deleted comment",
+  cannotFlagDeleted: "Cannot flag a deleted comment",
+  cannotUnflagDeleted: "Cannot unflag a deleted comment",
+  accessAllowed: "Comment access allowed",
 
 } as const;

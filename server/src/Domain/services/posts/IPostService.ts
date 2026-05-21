@@ -15,6 +15,6 @@ export interface IPostService {
     getByCommunity(dto: GetPostsByCommunityDto, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<PaginatedListDto<PostWithDetailsDto>>>;
     getById(id: number, commentsPage: number, commentsLimit: number, commentsSort: CommentSortType, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<PostDetailsDto>>;
     create(dto: CreatePostDto, ctx:AuditContext): Promise<ServiceResult<PostDto>>;
-    update(id: number, dto: UpdatePostDto, ctx: AuditContext): Promise<ServiceResult>;
-    delete(id: number, ctx: AuditContext): Promise<ServiceResult>;
+    update(id: number, dto: UpdatePostDto, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult>;
+    delete(id: number, ctx: AuditContext,  requesterRole?: UserRole): Promise<ServiceResult>;
 }

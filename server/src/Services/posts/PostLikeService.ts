@@ -19,57 +19,86 @@ export class PostLikeService implements IPostLikeService {
     private readonly communityMemberRepo: ICommunityMemberRepository,
   ) {}
 
-  async like(userId: number, postId: number): Promise<ServiceResult> {
-    const post = await this.postRepo.findById(postId);
-    if(post.id === 0){
-        return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+
+    private async canInteractWithPost(userId: number, postId: number,  forbiddenMessage: string): Promise<ServiceResult<{ canInteract: boolean }>> {
+        const post = await this.postRepo.findById(postId);
+        if (post.id === 0) {
+            return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+        }
+
+        const community = await this.communityRepo.findById(post.communityId);
+        if (community.id === 0) {
+            return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
+        }
+
+        const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(userId, post.communityId);
+        if (
+            membership.id !== 0 &&
+            (
+            membership.status === CommunityMemberStatus.BANNED ||
+            membership.status === CommunityMemberStatus.PENDING
+            )
+        ) {
+            return ServiceResultFactory.fail(forbiddenMessage, HttpStatus.forbidden);
+        }
+
+        if (
+            community.type === CommunityType.PRIVATE &&
+            (
+            membership.id === 0 ||
+            membership.status !== CommunityMemberStatus.ACTIVE
+            )
+        ) {
+            return ServiceResultFactory.fail(forbiddenMessage, HttpStatus.forbidden);
+        }
+
+        return ServiceResultFactory.ok(PostMessages.postAccessAllowed, { canInteract: true }, HttpStatus.ok);
     }
 
-    const community = await this.communityRepo.findById(post.communityId);
-    if(community.id === 0){
-        return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
-    }
-  
-    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(userId, post.communityId);
-    if( membership.status === CommunityMemberStatus.BANNED || membership.status === CommunityMemberStatus.PENDING) {
-        return ServiceResultFactory.fail(PostMessages.cannotLikePost, HttpStatus.forbidden);
-    }
+    async like(userId: number, postId: number): Promise<ServiceResult> {
+        const accessResult = await this.canInteractWithPost(userId, postId, PostMessages.cannotLikePost);
+        if (!accessResult.success) {
+            return ServiceResultFactory.fail(
+                accessResult.message ?? PostMessages.cannotLikePost,
+                accessResult.status ?? HttpStatus.forbidden
+            );
+        }
 
-    if(community.type === CommunityType.PRIVATE && ( membership.id === 0 || membership.status !== CommunityMemberStatus.ACTIVE )){
-        return ServiceResultFactory.fail(PostMessages.cannotLikePost, HttpStatus.forbidden);
-    }
+        const alreadyLiked = await this.postLikeRepo.exists(userId,postId);
+        if(alreadyLiked){
+            return ServiceResultFactory.fail(PostMessages.alreadyLiked, HttpStatus.conflict);
+        }
 
-    const alreadyLiked = await this.postLikeRepo.exists(userId,postId);
-    if(alreadyLiked){
-      return ServiceResultFactory.fail(PostMessages.alreadyLiked, HttpStatus.conflict);
-    }
+        const created = await this.postLikeRepo.create(userId,postId);
+        if(created.id === 0) {
+            return ServiceResultFactory.fail(PostMessages.likeFailed, HttpStatus.internalServerError);
+        }
 
-    const created = await this.postLikeRepo.create(userId,postId);
-    if(created.id === 0) {
-        return ServiceResultFactory.fail(PostMessages.likeFailed, HttpStatus.internalServerError);
+        return ServiceResultFactory.ok(PostMessages.liked, undefined, HttpStatus.ok);
     }
 
-    return ServiceResultFactory.ok(PostMessages.liked, undefined, HttpStatus.ok);
-  }
 
+    async unlike(userId: number, postId: number): Promise<ServiceResult> {
+        const accessResult = await this.canInteractWithPost(userId, postId, PostMessages.cannotUnlikePost);
 
-  async unlike(userId: number, postId: number): Promise<ServiceResult> {
-    const post = await this.postRepo.findById(postId);
-    if(post.id === 0){
-        return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
+        if (!accessResult.success) {
+            return ServiceResultFactory.fail(
+            accessResult.message ?? PostMessages.cannotUnlikePost,
+            accessResult.status ?? HttpStatus.forbidden
+            );
+        }
+
+        const exists = await this.postLikeRepo.exists(userId, postId);
+        if (!exists) {
+            return ServiceResultFactory.fail(PostMessages.notLiked, HttpStatus.notFound);
+        }
+
+        const deleted = await this.postLikeRepo.delete(userId, postId);
+        if (!deleted) {
+            return ServiceResultFactory.fail(PostMessages.unlikeFailed,HttpStatus.internalServerError);
+        }
+
+        return ServiceResultFactory.ok(PostMessages.unliked, undefined, HttpStatus.ok);
     }
-
-    const exists = await this.postLikeRepo.exists(userId,postId);
-    if(!exists){
-        return ServiceResultFactory.fail(PostMessages.notLiked, HttpStatus.notFound);
-    }
-
-    const deleted = await this.postLikeRepo.delete(userId,postId);
-    if(!deleted) {
-        return ServiceResultFactory.fail(PostMessages.unlikeFailed, HttpStatus.internalServerError);
-    }
-
-    return ServiceResultFactory.ok(PostMessages.unliked, undefined, HttpStatus.ok);
-  }
 
 }

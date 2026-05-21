@@ -5,4 +5,5 @@ export interface ICommentLikeRepository {
   delete(userId: number, commentId: number): Promise<boolean>;
   exists(userId: number, commentId: number): Promise<boolean>;
   countByCommentIds(commentIds: number[]): Promise<Record<number, number>>;
+  findLikedCommentIdsByUserId(userId: number, commentIds: number[]): Promise<number[]>;
 }

@@ -2,6 +2,7 @@ import { RowDataPacket } from "mysql2";
 import { CommentDto } from "../../../Domain/DTOs/comments/CommentDto";
 import { Comment } from "../../../Domain/models/Comment";
 import { CommentTreeDto } from "../../../Domain/DTOs/comments/CommentTreeDto";
+import { CommentViewerPermissionsDto } from "../../../Domain/DTOs/comments/CommentViewerPermissionsDto";
 
 export class CommentMapper {
   public static toModel(row: RowDataPacket): Comment {
@@ -30,7 +31,7 @@ export class CommentMapper {
     );
   }
 
-  public static toTreeDto(comment: Comment, likeCount: number, replies: CommentTreeDto[] = []): CommentTreeDto {
+  public static toTreeDto(comment: Comment, likeCount: number, likedByCurrentUser: boolean, permissions: CommentViewerPermissionsDto, replies: CommentTreeDto[] = []): CommentTreeDto {
     return new CommentTreeDto(
       comment.id,
       comment.isDeleted ? "[komentar obrisan]" : comment.content,
@@ -40,6 +41,8 @@ export class CommentMapper {
       comment.isDeleted,
       comment.isFlagged,
       likeCount,
+      likedByCurrentUser,
+      permissions,
       comment.createdAt,
       replies
     );

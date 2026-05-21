@@ -175,6 +175,7 @@ export class CommentController {
 
   private async delete(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
+    const userRole = req.user!.role;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -191,7 +192,7 @@ export class CommentController {
 
     const ctx = IpHelper.buildAuditContext(req, userId);
     try {
-      const result = await this.commentService.delete(id, ctx);
+      const result = await this.commentService.delete(id, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, CommentLogMessages.deleteFailed, err);
@@ -263,6 +264,7 @@ export class CommentController {
 
   private async flag(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
+    const userRole = req.user!.role;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -279,7 +281,7 @@ export class CommentController {
 
     const ctx = IpHelper.buildAuditContext(req, userId);
     try {
-      const result = await this.commentService.flag(id, ctx);
+      const result = await this.commentService.flag(id, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, CommentLogMessages.flagFailed, err);
@@ -293,6 +295,7 @@ export class CommentController {
 
   private async unflag(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
+    const userRole = req.user!.role;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -309,7 +312,7 @@ export class CommentController {
 
     const ctx = IpHelper.buildAuditContext(req, userId);
     try {
-      const result = await this.commentService.unflag(id, ctx);
+      const result = await this.commentService.unflag(id, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, CommentLogMessages.unflagFailed, err);

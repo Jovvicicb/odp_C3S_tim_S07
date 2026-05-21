@@ -11,8 +11,8 @@ import { CommentTreeDto } from "../../DTOs/comments/CommentTreeDto";
 export interface ICommentService {
   create(dto: CreateCommentDto, ctx: AuditContext): Promise<ServiceResult<CommentDto>>;
   update(id: number, dto: UpdateCommentDto, ctx: AuditContext): Promise<ServiceResult>;
-  delete(id: number, ctx: AuditContext): Promise<ServiceResult>;
+  delete(id: number, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult>;
   getByPost(dto: GetCommentsByPostDto, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<PaginatedListDto<CommentTreeDto>>>;
-  flag(id: number, ctx: AuditContext): Promise<ServiceResult>;
-  unflag(id: number, ctx: AuditContext): Promise<ServiceResult>;
+  flag(id: number, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult>;
+  unflag(id: number, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult>;
 }

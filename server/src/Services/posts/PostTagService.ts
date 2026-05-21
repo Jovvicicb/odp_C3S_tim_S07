@@ -6,6 +6,7 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
 import { IPostRepository } from "../../Domain/repositories/posts/IPostRepository";
 import { IPostTagRepository } from "../../Domain/repositories/posts/IPostTagRepository";
@@ -17,22 +18,37 @@ import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
 
 
-export class PostTagService implements IPostTagService {
-  public constructor(
-    private readonly postRepo: IPostRepository,
-    private readonly communityMemberRepo: ICommunityMemberRepository,
-    private readonly tagRepo: ITagRepository,
-    private readonly postTagRepo: IPostTagRepository,
-    private readonly auditHelperService: IAuditHelperService
-  ) {}
+  export class PostTagService implements IPostTagService {
+    public constructor(
+      private readonly postRepo: IPostRepository,
+      private readonly communityMemberRepo: ICommunityMemberRepository,
+      private readonly tagRepo: ITagRepository,
+      private readonly postTagRepo: IPostTagRepository,
+      private readonly auditHelperService: IAuditHelperService
+    ) {}
 
-  private async canManagePostTags(postAuthorId: number, communityId: number, requesterId: number): Promise<boolean> {
+    private async canManagePostTags(postAuthorId: number, communityId: number, requesterId: number, requesterRole?: UserRole): Promise<boolean> {
     const isAuthor = postAuthorId === requesterId;
+    const isAdmin = requesterRole === UserRole.ADMIN;
+
+    if (isAdmin) {
+      return true;
+    }
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(
       requesterId,
       communityId
     );
+
+    if (
+      membership.id !== 0 &&
+      (
+        membership.status === CommunityMemberStatus.BANNED ||
+        membership.status === CommunityMemberStatus.PENDING
+      )
+    ) {
+      return false;
+    }
 
     const isModerator =
       membership.id !== 0 &&
@@ -42,7 +58,7 @@ export class PostTagService implements IPostTagService {
     return isAuthor || isModerator;
   }
 
-  async addTag(postId: number, tagId: number, ctx: AuditContext): Promise<ServiceResult> {
+  async addTag(postId: number, tagId: number, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult> {
     const post = await this.postRepo.findById(postId);
     if(post.id === 0){
       return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
@@ -53,7 +69,7 @@ export class PostTagService implements IPostTagService {
       return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
     }
   
-    const canManage = await this.canManagePostTags(post.authorId, post.communityId, ctx.userId);
+    const canManage = await this.canManagePostTags(post.authorId, post.communityId, ctx.userId, requesterRole);
     if (!canManage) {
       return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanAddTag, HttpStatus.forbidden);
     }
@@ -74,7 +90,7 @@ export class PostTagService implements IPostTagService {
   }
 
 
-  async removeTag(postId: number, tagId: number, ctx: AuditContext): Promise<ServiceResult> {
+  async removeTag(postId: number, tagId: number, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult> {
     const post = await this.postRepo.findById(postId);
     if(post.id === 0){
       return ServiceResultFactory.fail(PostMessages.notFound, HttpStatus.notFound);
@@ -85,7 +101,7 @@ export class PostTagService implements IPostTagService {
       return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
     }
   
-    const canManage = await this.canManagePostTags(post.authorId, post.communityId, ctx.userId);
+    const canManage = await this.canManagePostTags(post.authorId, post.communityId, ctx.userId, requesterRole);
     if (!canManage) {
       return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanRemoveTag, HttpStatus.forbidden);
     }
