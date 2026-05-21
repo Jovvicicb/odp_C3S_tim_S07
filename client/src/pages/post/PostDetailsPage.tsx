@@ -8,6 +8,7 @@ import { PostCommentsSection } from "../../components/post/details/PostCommentsS
 
 import { usePostDetails } from "../../hooks/posts/details/usePostDetails";
 import { usePostDetailsActions } from "../../hooks/posts/details/usePostDetailsActions";
+import { useCommentActions } from "../../hooks/comments/useCommentActions";
 
 export default function PostDetailsPage() {
   const { id } = useParams();
@@ -26,6 +27,7 @@ export default function PostDetailsPage() {
     commentsSort,
     setCommentsPage,
     setCommentsSort,
+    reload,
   } = usePostDetails(parsedPostId, 1, 10, "newest");
 
   const {
@@ -38,6 +40,11 @@ export default function PostDetailsPage() {
   } = usePostDetailsActions({
     setPostDetails,
   });
+
+  const { handleCreateComment, loadingCommentCreate, commentActionError } =
+    useCommentActions({
+      reloadPostDetails: reload,
+    });
 
   const handleEditPost = (postId: number) => {
     navigate(`/posts/${postId}/edit`);
@@ -63,8 +70,8 @@ export default function PostDetailsPage() {
         action={<ActionButton variant="back" label="Back" />}
       />
 
-      {(error || postActionError) && (
-        <ErrorBox message={error || postActionError} />
+      {(error || postActionError || commentActionError) && (
+        <ErrorBox message={error || postActionError || commentActionError} />
       )}
 
       <PostDetailsCard
@@ -78,13 +85,17 @@ export default function PostDetailsPage() {
       />
 
       <PostCommentsSection
+        postId={postDetails.id}
         comments={postDetails.comments}
         totalCommentCount={postDetails.commentCount}
         commentsPage={commentsPage}
         commentsLimit={commentsLimit}
         commentsSort={commentsSort}
+        canComment={postDetails.permissions.canComment}
+        loadingCommentCreate={loadingCommentCreate}
         onPageChange={setCommentsPage}
         onSortChange={setCommentsSort}
+        onCreateComment={handleCreateComment}
       />
     </div>
   );

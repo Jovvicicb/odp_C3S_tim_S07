@@ -3,25 +3,34 @@ import type { PaginatedListDto } from "../../../models/common/PaginatedListDto";
 import type { CommentTreeDto } from "../../../models/comment/CommentTreeDto";
 import type { CommentSortType } from "../../../types/comment/CommentSortType";
 import { CommentPreviewCard } from "./CommentPreviewCard";
+import { CommentForm } from "../../comment/CommentForm";
 
 type Props = {
+  postId: number;
   comments: PaginatedListDto<CommentTreeDto>;
   totalCommentCount: number;
   commentsPage: number;
   commentsLimit: number;
   commentsSort: CommentSortType;
+  canComment: boolean;
+  loadingCommentCreate: boolean;
   onPageChange: (page: number) => void;
   onSortChange: (sort: CommentSortType) => void;
+  onCreateComment: (postId: number, content: string) => Promise<boolean>;
 };
 
 export function PostCommentsSection({
+  postId,
   comments,
   totalCommentCount,
   commentsPage,
   commentsLimit,
   commentsSort,
+  canComment,
+  loadingCommentCreate,
   onPageChange,
   onSortChange,
+  onCreateComment,
 }: Props) {
   return (
     <section className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-6 shadow-xl shadow-sky-950/10">
@@ -53,6 +62,15 @@ export function PostCommentsSection({
           </option>
         </select>
       </div>
+
+      {canComment && (
+        <div className="mt-6">
+          <CommentForm
+            loading={loadingCommentCreate}
+            onSubmit={(content) => onCreateComment(postId, content)}
+          />
+        </div>
+      )}
 
       {comments.items.length === 0 ? (
         <div className="mt-6">

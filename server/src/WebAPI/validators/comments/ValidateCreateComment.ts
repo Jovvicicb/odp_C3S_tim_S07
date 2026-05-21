@@ -22,13 +22,13 @@ export const validateCreateComment = (input: CreateCommentInput): ValidateCreate
     };
   }
 
-  if (!input.postId) {
+ if (input.postId === undefined || input.postId === null || input.postId === "") {
     return {
       validation: { valid: false, message: CommentValidationMessages.invalidPostId }
     };
   }
 
-  const postId = parseId(input.postId);
+  const postId = parseId(String(input.postId));
   const postValidation = validateId(postId);
 
   if (!postValidation.valid) {
@@ -39,7 +39,7 @@ export const validateCreateComment = (input: CreateCommentInput): ValidateCreate
 
   const parsedParentId =
     input.parentId !== undefined && input.parentId !== null && input.parentId !== ""
-      ? parseId(input.parentId)
+      ? parseId(String(input.parentId))
       : null;
 
   if (parsedParentId !== null) {
