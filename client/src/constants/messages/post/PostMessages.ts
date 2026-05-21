@@ -6,4 +6,5 @@ createSuccess: "Post created successfully",
   fetchDetailsFailed: "Failed to fetch post details",
   likeFailed: "Failed to like post",
   unlikeFailed: "Failed to unlike post",
+  deleteFailed: "Failed to delete post",
 } as const;

@@ -5,15 +5,20 @@ import { PostStatsActions } from "./PostStatsActions";
 type Props = {
   post: PostDetailsDto;
   loadingPostLike: boolean;
+  loadingPostDelete: boolean;
   onLikePost: (postId: number) => void;
   onUnlikePost: (postId: number) => void;
+  onEditPost: (postId: number) => void;
+  onDeletePost: (postId: number) => void;
 };
-
 export function PostDetailsCard({
   post,
   loadingPostLike,
+  loadingPostDelete,
   onLikePost,
   onUnlikePost,
+  onEditPost,
+  onDeletePost,
 }: Props) {
   const imageUrl = ImageHelper.getImageUrl(post.mediaUrl);
   const createdAt = new Date(post.createdAt).toLocaleDateString();
@@ -61,10 +66,15 @@ export function PostDetailsCard({
             likeCount={post.likeCount}
             commentCount={post.commentCount}
             canLikePost={post.permissions.canLikePost}
+            canEditPost={post.permissions.canEditPost}
+            canDeletePost={post.permissions.canDeletePost}
             likedByCurrentUser={post.likedByCurrentUser}
             loadingPostLike={loadingPostLike}
+            loadingPostDelete={loadingPostDelete}
             onLike={() => onLikePost(post.id)}
             onUnlike={() => onUnlikePost(post.id)}
+            onEdit={() => onEditPost(post.id)}
+            onDelete={() => onDeletePost(post.id)}
           />
         </div>
 

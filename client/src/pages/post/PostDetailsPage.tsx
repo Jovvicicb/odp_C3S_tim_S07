@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
 import { ActionButton } from "../../components/ui/ActionButton";
@@ -11,6 +11,7 @@ import { usePostDetailsActions } from "../../hooks/posts/details/usePostDetailsA
 
 export default function PostDetailsPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const postId = Number(id);
   const parsedPostId = Number.isNaN(postId) ? null : postId;
@@ -27,10 +28,20 @@ export default function PostDetailsPage() {
     setCommentsSort,
   } = usePostDetails(parsedPostId, 1, 10, "newest");
 
-  const { handleLikePost, handleUnlikePost, loadingPostLike, postActionError } =
-    usePostDetailsActions({
-      setPostDetails,
-    });
+  const {
+    handleLikePost,
+    handleUnlikePost,
+    handleDeletePost,
+    loadingPostLike,
+    loadingPostDelete,
+    postActionError,
+  } = usePostDetailsActions({
+    setPostDetails,
+  });
+
+  const handleEditPost = (postId: number) => {
+    navigate(`/posts/${postId}/edit`);
+  };
 
   if (loading) {
     return (
@@ -59,8 +70,11 @@ export default function PostDetailsPage() {
       <PostDetailsCard
         post={postDetails}
         loadingPostLike={loadingPostLike}
+        loadingPostDelete={loadingPostDelete}
         onLikePost={handleLikePost}
         onUnlikePost={handleUnlikePost}
+        onEditPost={handleEditPost}
+        onDeletePost={handleDeletePost}
       />
 
       <PostCommentsSection

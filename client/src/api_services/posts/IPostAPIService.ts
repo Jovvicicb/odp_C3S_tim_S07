@@ -12,4 +12,5 @@ export interface IPostAPIService {
     getById(id: number, commentsPage: number, commentsLimit: number, commentsSort: CommentSortType,): Promise<ApiResponse<PostDetailsDto>>;
     like(id: number): Promise<ApiResponse<void>>;
     unlike(id: number): Promise<ApiResponse<void>>;
+    delete(id: number): Promise<ApiResponse<void>>;
 }

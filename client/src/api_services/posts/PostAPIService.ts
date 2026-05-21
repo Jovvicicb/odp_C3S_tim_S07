@@ -83,5 +83,14 @@ export const postApi: IPostAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, PostMessages.unlikeFailed));
   },
+
+  async delete(id: number) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${id}`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, PostMessages.deleteFailed));
+  },
     
 };

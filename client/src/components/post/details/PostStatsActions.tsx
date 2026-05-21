@@ -2,20 +2,30 @@ type Props = {
   likeCount: number;
   commentCount: number;
   canLikePost: boolean;
+  canEditPost: boolean;
+  canDeletePost: boolean;
   likedByCurrentUser: boolean;
   loadingPostLike: boolean;
+  loadingPostDelete: boolean;
   onLike: () => void;
   onUnlike: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 };
 
 export function PostStatsActions({
   likeCount,
   commentCount,
   canLikePost,
+  canEditPost,
+  canDeletePost,
   likedByCurrentUser,
   loadingPostLike,
+  loadingPostDelete,
   onLike,
   onUnlike,
+  onEdit,
+  onDelete,
 }: Props) {
   return (
     <div className="flex shrink-0 flex-wrap gap-2">
@@ -42,6 +52,27 @@ export function PostStatsActions({
             : likedByCurrentUser
               ? "Unlike"
               : "Like"}
+        </button>
+      )}
+
+      {canEditPost && (
+        <button
+          type="button"
+          onClick={onEdit}
+          className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-200 transition-all hover:bg-amber-500/15"
+        >
+          Edit
+        </button>
+      )}
+
+      {canDeletePost && (
+        <button
+          type="button"
+          disabled={loadingPostDelete}
+          onClick={onDelete}
+          className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-200 transition-all hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loadingPostDelete ? "Deleting..." : "Delete"}
         </button>
       )}
 
