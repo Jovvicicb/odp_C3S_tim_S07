@@ -55,16 +55,6 @@ export class CommentService implements ICommentService {
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
-  private async isActiveModerator(userId: number, communityId: number): Promise<boolean> {
-    const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(userId, communityId);
-    return (
-      membership.id !== 0 &&
-      membership.role === CommunityMemberRole.MODERATOR &&
-      membership.status === CommunityMemberStatus.ACTIVE
-    );
-  }
-
-
   private isActiveModeratorMembership(membership?: {id: number; role: CommunityMemberRole; status: CommunityMemberStatus;}): boolean {
     return (
       !!membership &&

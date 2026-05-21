@@ -6,6 +6,8 @@ import { readItem } from "../../helpers/local_storage";
 import type { PostWithDetailsDto } from "../../models/post/PostWithDetailsDto";
 import { PostMessages } from "../../constants/messages/post/PostMessages";
 import type { PostDto } from "../../models/post/PostDto";
+import type { PostDetailsDto } from "../../models/post/PostDetailsDto";
+import type { CommentSortType } from "../../types/comment/CommentSortType";
 
 const BASE = import.meta.env.VITE_API_URL + "posts";
 
@@ -51,4 +53,19 @@ export const postApi: IPostAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, PostMessages.fetchByCommunityFailed));
   },
+
+   async getById(id: number, commentsPage = 1, commentsLimit = 10, commentsSort: CommentSortType = "newest",) {
+      return axios
+        .get<ApiResponse<PostDetailsDto>>(`${BASE}/${id}`, {
+          headers: authHeader(),
+          params: {
+            commentsPage,
+            commentsLimit,
+            commentsSort,
+          },
+        })
+        .then((r) => r.data)
+        .catch((e) => err(e, PostMessages.fetchDetailsFailed));
+    },
+  
 };

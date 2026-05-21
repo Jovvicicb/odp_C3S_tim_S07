@@ -3,4 +3,5 @@ createSuccess: "Post created successfully",
   createFailed: "Failed to create post",
   fetchByCommunityFailed: "Failed to load community posts",
   postsFetched: "Posts loaded successfully",
+  fetchDetailsFailed: "Failed to fetch post details",
 } as const;
