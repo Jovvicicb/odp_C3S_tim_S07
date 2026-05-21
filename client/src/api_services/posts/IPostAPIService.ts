@@ -10,5 +10,6 @@ export interface IPostAPIService {
     create(formData: FormData): Promise<ApiResponse<PostDto>>;
     getByCommunity(communityId: number, page: number, limit: number, sort: PostSortType,): Promise<ApiResponse<PaginatedListDto<PostWithDetailsDto>>>;
     getById(id: number, commentsPage: number, commentsLimit: number, commentsSort: CommentSortType,): Promise<ApiResponse<PostDetailsDto>>;
-
+    like(id: number): Promise<ApiResponse<void>>;
+    unlike(id: number): Promise<ApiResponse<void>>;
 }

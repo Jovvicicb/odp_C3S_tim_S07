@@ -66,6 +66,22 @@ export const postApi: IPostAPIService = {
         })
         .then((r) => r.data)
         .catch((e) => err(e, PostMessages.fetchDetailsFailed));
-    },
-  
+  },
+
+  async like(id: number) {
+    return axios
+      .post<ApiResponse<void>>(`${BASE}/${id}/like`, {}, { headers: authHeader() })
+      .then((r) => r.data)
+      .catch((e) => err(e, PostMessages.likeFailed));
+  },
+
+  async unlike(id: number) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${id}/like`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, PostMessages.unlikeFailed));
+  },
+    
 };
