@@ -41,10 +41,17 @@ export default function PostDetailsPage() {
     setPostDetails,
   });
 
-  const { handleCreateComment, loadingCommentCreate, commentActionError } =
-    useCommentActions({
-      reloadPostDetails: reload,
-    });
+  const {
+    handleCreateComment,
+    handleLikeComment,
+    handleUnlikeComment,
+    loadingCommentCreate,
+    loadingCommentLikeId,
+    commentActionError,
+  } = useCommentActions({
+    reloadPostDetails: reload,
+    setPostDetails,
+  });
 
   const handleEditPost = (postId: number) => {
     navigate(`/posts/${postId}/edit`);
@@ -83,7 +90,6 @@ export default function PostDetailsPage() {
         onEditPost={handleEditPost}
         onDeletePost={handleDeletePost}
       />
-
       <PostCommentsSection
         postId={postDetails.id}
         comments={postDetails.comments}
@@ -93,9 +99,12 @@ export default function PostDetailsPage() {
         commentsSort={commentsSort}
         canComment={postDetails.permissions.canComment}
         loadingCommentCreate={loadingCommentCreate}
+        loadingCommentLikeId={loadingCommentLikeId}
         onPageChange={setCommentsPage}
         onSortChange={setCommentsSort}
         onCreateComment={handleCreateComment}
+        onLikeComment={handleLikeComment}
+        onUnlikeComment={handleUnlikeComment}
       />
     </div>
   );

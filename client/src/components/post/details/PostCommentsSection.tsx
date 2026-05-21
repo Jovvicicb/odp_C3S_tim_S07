@@ -14,11 +14,13 @@ type Props = {
   commentsSort: CommentSortType;
   canComment: boolean;
   loadingCommentCreate: boolean;
+  loadingCommentLikeId: number | null;
   onPageChange: (page: number) => void;
   onSortChange: (sort: CommentSortType) => void;
   onCreateComment: (postId: number, content: string) => Promise<boolean>;
+  onLikeComment: (commentId: number) => void;
+  onUnlikeComment: (commentId: number) => void;
 };
-
 export function PostCommentsSection({
   postId,
   comments,
@@ -28,9 +30,12 @@ export function PostCommentsSection({
   commentsSort,
   canComment,
   loadingCommentCreate,
+  loadingCommentLikeId,
   onPageChange,
   onSortChange,
   onCreateComment,
+  onLikeComment,
+  onUnlikeComment,
 }: Props) {
   return (
     <section className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-6 shadow-xl shadow-sky-950/10">
@@ -80,7 +85,13 @@ export function PostCommentsSection({
         <>
           <div className="mt-6 space-y-4">
             {comments.items.map((comment) => (
-              <CommentPreviewCard key={comment.id} comment={comment} />
+              <CommentPreviewCard
+                key={comment.id}
+                comment={comment}
+                loadingCommentLikeId={loadingCommentLikeId}
+                onLikeComment={onLikeComment}
+                onUnlikeComment={onUnlikeComment}
+              />
             ))}
           </div>
 

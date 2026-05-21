@@ -36,4 +36,20 @@ export const commentApi: ICommentAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, CommentMessages.createFailed));
   },
+
+  async like(id: number) {
+    return axios
+      .post<ApiResponse<void>>(`${BASE}/${id}/like`, {}, { headers: authHeader() })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommentMessages.likeFailed));
+  },
+
+  async unlike(id: number) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${id}/like`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommentMessages.unlikeFailed));
+  },
 };
