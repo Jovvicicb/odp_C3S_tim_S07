@@ -38,7 +38,7 @@ export class PostTagRepository implements IPostTagRepository {
                 return acc;
             }, {});
         } catch (err) {
-            this.logger.error("PostTagRepository", PostLogMessages.findPostTagsFailed, err);
+            this.logger.error("PostTagRepository", PostLogMessages.findPostTagsFailed, err instanceof Error ? err : null);
             return {};
         } finally {
             res.conn.release();
@@ -59,7 +59,7 @@ export class PostTagRepository implements IPostTagRepository {
 
             return new PostTag(result.insertId, postId, tagId);  
         } catch (err) {
-            this.logger.error("PostTagRepository", PostLogMessages.addTagFailed, err);
+            this.logger.error("PostTagRepository", PostLogMessages.addTagFailed, err instanceof Error ? err : null);
             return new PostTag();
         } finally {
             res.conn.release();
@@ -79,7 +79,7 @@ export class PostTagRepository implements IPostTagRepository {
 
             return result.affectedRows > 0;
         } catch (err) {
-            this.logger.error("PostTagRepository", PostLogMessages.removeTagFailed, err);
+            this.logger.error("PostTagRepository", PostLogMessages.removeTagFailed, err instanceof Error ? err : null);
             return false;
         } finally {
             res.conn.release();
@@ -102,7 +102,7 @@ export class PostTagRepository implements IPostTagRepository {
 
         return rows.length > 0;
         } catch (err) {
-            this.logger.error("PostTagRepository", PostLogMessages.findPostTagFailed, err);
+            this.logger.error("PostTagRepository", PostLogMessages.findPostTagFailed, err instanceof Error ? err : null);
             return false;
         } finally {
             res.conn.release();

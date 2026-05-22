@@ -48,7 +48,7 @@ export class TagController {
       const result = await this.tagService.getAll(page, limit);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, TagLogMessages.findAllFailed, err);
+      this.logger.error(this.constructor.name, TagLogMessages.findAllFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -77,7 +77,7 @@ export class TagController {
       const result = await this.tagService.create(dto, ctx);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, TagLogMessages.createFailed, err);
+      this.logger.error(this.constructor.name, TagLogMessages.createFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -104,7 +104,7 @@ export class TagController {
       const result = await this.tagService.delete(id,ctx);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, TagLogMessages.deleteFailed, err);
+      this.logger.error(this.constructor.name, TagLogMessages.deleteFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,

@@ -8,6 +8,10 @@ import { PostMessages } from "../../constants/messages/post/PostMessages";
 import type { PostDto } from "../../models/posts/PostDto";
 import type { PostDetailsDto } from "../../models/posts/PostDetailsDto";
 import type { CommentSortType } from "../../types/comments/CommentSortType";
+import {
+  getApiErrorMessage,
+  type ApiClientError,
+} from "../../helpers/api/ApiErrorHelper";
 
 const BASE = import.meta.env.VITE_API_URL + "posts";
 
@@ -17,11 +21,9 @@ const authHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-const err = <T>(e: unknown, fallback: string): ApiResponse<T> => ({
+const err = <T>(e: ApiClientError, fallback: string): ApiResponse<T> => ({
   success: false,
-  message: axios.isAxiosError(e)
-    ? (e.response?.data as { message?: string })?.message ?? fallback
-    : fallback,
+  message: getApiErrorMessage(e, fallback),
 });
 
 export const postApi: IPostAPIService = {
@@ -34,7 +36,7 @@ export const postApi: IPostAPIService = {
         },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, PostMessages.createFailed));
+      .catch((e: ApiClientError) => err(e, PostMessages.createFailed));
   },
 
   async getByCommunity(communityId, page = 1, limit = 10, sort = "newest") {
@@ -51,46 +53,58 @@ export const postApi: IPostAPIService = {
         },
       )
       .then((r) => r.data)
-      .catch((e) => err(e, PostMessages.fetchByCommunityFailed));
+      .catch((e: ApiClientError) =>
+        err(e, PostMessages.fetchByCommunityFailed),
+      );
   },
 
-   async getById(id: number, commentsPage = 1, commentsLimit = 10, commentsSort: CommentSortType = "newest",) {
-      return axios
-        .get<ApiResponse<PostDetailsDto>>(`${BASE}/${id}`, {
-          headers: authHeader(),
-          params: {
-            commentsPage,
-            commentsLimit,
-            commentsSort,
-          },
-        })
-        .then((r) => r.data)
-        .catch((e) => err(e, PostMessages.fetchDetailsFailed));
-  },
-
-  async like(id: number) {
+  async getById(
+    id,
+    commentsPage = 1,
+    commentsLimit = 10,
+    commentsSort: CommentSortType = "newest",
+  ) {
     return axios
-      .post<ApiResponse<void>>(`${BASE}/${id}/like`, {}, { headers: authHeader() })
+      .get<ApiResponse<PostDetailsDto>>(`${BASE}/${id}`, {
+        headers: authHeader(),
+        params: {
+          commentsPage,
+          commentsLimit,
+          commentsSort,
+        },
+      })
       .then((r) => r.data)
-      .catch((e) => err(e, PostMessages.likeFailed));
+      .catch((e: ApiClientError) => err(e, PostMessages.fetchDetailsFailed));
   },
 
-  async unlike(id: number) {
+  async like(id) {
+    return axios
+      .post<ApiResponse<void>>(
+        `${BASE}/${id}/like`,
+        {},
+        {
+          headers: authHeader(),
+        },
+      )
+      .then((r) => r.data)
+      .catch((e: ApiClientError) => err(e, PostMessages.likeFailed));
+  },
+
+  async unlike(id) {
     return axios
       .delete<ApiResponse<void>>(`${BASE}/${id}/like`, {
         headers: authHeader(),
       })
       .then((r) => r.data)
-      .catch((e) => err(e, PostMessages.unlikeFailed));
+      .catch((e: ApiClientError) => err(e, PostMessages.unlikeFailed));
   },
 
-  async delete(id: number) {
+  async delete(id) {
     return axios
       .delete<ApiResponse<void>>(`${BASE}/${id}`, {
         headers: authHeader(),
       })
       .then((r) => r.data)
-      .catch((e) => err(e, PostMessages.deleteFailed));
+      .catch((e: ApiClientError) => err(e, PostMessages.deleteFailed));
   },
-    
 };

@@ -44,7 +44,7 @@ export class CommentRepository implements ICommentRepository {
         dto.parentId
       );
     } catch (err) {
-      this.logger.error("CommentRepository", CommentLogMessages.createFailed, err);
+      this.logger.error("CommentRepository", CommentLogMessages.createFailed, err instanceof Error ? err : null);
       return new Comment();
     } finally {
       res.conn.release();
@@ -65,7 +65,7 @@ export class CommentRepository implements ICommentRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommentRepository", CommentLogMessages.updateFailed, err);
+      this.logger.error("CommentRepository", CommentLogMessages.updateFailed, err instanceof Error ? err : null);
       return false;
     } finally {
       res.conn.release();
@@ -88,7 +88,7 @@ export class CommentRepository implements ICommentRepository {
 
       return rows.length > 0 ? CommentMapper.toModel(rows[0]) : new Comment();
     } catch (err) {
-      this.logger.error("CommentRepository", CommentLogMessages.findByIdFailed, err);
+      this.logger.error("CommentRepository", CommentLogMessages.findByIdFailed, err instanceof Error ? err : null);
       return new Comment();
     } finally {
       res.conn.release();
@@ -109,7 +109,7 @@ export class CommentRepository implements ICommentRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommentRepository", CommentLogMessages.softDeleteFailed, err);
+      this.logger.error("CommentRepository", CommentLogMessages.softDeleteFailed, err instanceof Error ? err : null);
       return false;
     } finally {
       res.conn.release();
@@ -158,7 +158,7 @@ export class CommentRepository implements ICommentRepository {
         total: Number(cnt[0]?.total ?? 0),
       };
     } catch (err) {
-      this.logger.error("CommentRepository", CommentLogMessages.findRootByPostFailed, err);
+      this.logger.error("CommentRepository", CommentLogMessages.findRootByPostFailed, err instanceof Error ? err : null);
       return { comments: [], total: 0 };
     } finally {
       res.conn.release();
@@ -185,7 +185,7 @@ export class CommentRepository implements ICommentRepository {
 
       return rows.map((r) => CommentMapper.toModel(r));
     } catch (err) {
-      this.logger.error("CommentRepository", CommentLogMessages.findRepliesFailed, err);
+      this.logger.error("CommentRepository", CommentLogMessages.findRepliesFailed, err instanceof Error ? err : null);
       return [];
     } finally {
       res.conn.release();
@@ -206,7 +206,7 @@ export class CommentRepository implements ICommentRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommentRepository", CommentLogMessages.updateFlagStatusFailed, err);
+      this.logger.error("CommentRepository", CommentLogMessages.updateFlagStatusFailed, err instanceof Error ? err : null);
       return false;
     } finally {
       res.conn.release();

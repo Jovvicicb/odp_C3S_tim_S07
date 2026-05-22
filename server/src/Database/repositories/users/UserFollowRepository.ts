@@ -30,7 +30,7 @@ export class UserFollowRepository implements IUserFollowRepository {
 
             return new UserFollow(result.insertId, followerId, followingId);
         } catch (err) {
-             this.logger.error("UserFollowRepository", UserLogMessages.createFollowUserFailed, err);
+             this.logger.error("UserFollowRepository", UserLogMessages.createFollowUserFailed, err instanceof Error ? err : null);
             return new UserFollow();
         } finally {
             res.conn.release();
@@ -49,7 +49,7 @@ export class UserFollowRepository implements IUserFollowRepository {
 
             return result.affectedRows > 0;
         } catch (err) {
-            this.logger.error("UserFollowRepository", UserLogMessages.deleteFollowUserFailed, err);
+            this.logger.error("UserFollowRepository", UserLogMessages.deleteFollowUserFailed, err instanceof Error ? err : null);
             return false;
         } finally {
             res.conn.release();
@@ -84,7 +84,7 @@ export class UserFollowRepository implements IUserFollowRepository {
             total: Number(cnt[0]?.total ?? 0),
             };
         } catch (err) {
-            this.logger.error("UserFollowRepository", UserLogMessages.getFollowersFailed, err);
+            this.logger.error("UserFollowRepository", UserLogMessages.getFollowersFailed, err instanceof Error ? err : null);
             return { followerIds: [], total: 0 };
         } finally {
             res.conn.release();
@@ -119,7 +119,7 @@ export class UserFollowRepository implements IUserFollowRepository {
             total: Number(cnt[0]?.total ?? 0),
             };
         } catch (err) {
-            this.logger.error("UserFollowRepository", UserLogMessages.getFollowingFailed, err);
+            this.logger.error("UserFollowRepository", UserLogMessages.getFollowingFailed, err instanceof Error ? err : null);
             return { followingIds: [], total: 0 };
         } finally {
             res.conn.release();
@@ -140,7 +140,7 @@ export class UserFollowRepository implements IUserFollowRepository {
 
             return rows.map((r) => Number(r.following_id));
         } catch (err) {
-            this.logger.error("UserFollowRepository", UserLogMessages.getFollowingFailed, err);
+            this.logger.error("UserFollowRepository", UserLogMessages.getFollowingFailed, err instanceof Error ? err : null);
             return [];
         } finally {
             res.conn.release();
@@ -161,7 +161,7 @@ export class UserFollowRepository implements IUserFollowRepository {
 
         return rows.length > 0;
         } catch (err) {
-        this.logger.error("UserFollowRepository", UserLogMessages.existsFollowUserFailed, err);
+        this.logger.error("UserFollowRepository", UserLogMessages.existsFollowUserFailed, err instanceof Error ? err : null);
         return false;
         } finally {
         res.conn.release();
@@ -191,7 +191,7 @@ export class UserFollowRepository implements IUserFollowRepository {
         this.logger.error(
         "UserFollowRepository",
         UserLogMessages.findFollowingIdsFromListFailed,
-        err
+        err instanceof Error ? err : null
         );
 
         return [];

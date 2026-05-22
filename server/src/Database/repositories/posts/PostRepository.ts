@@ -32,7 +32,7 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
           return rows.length > 0 ? PostMapper.toModel(rows[0]) : new Post();
       } catch (err) {
-          this.logger.error("PostRepository", PostLogMessages.findByIdFailed, err);
+          this.logger.error("PostRepository", PostLogMessages.findByIdFailed, err instanceof Error ? err : null);
           return new Post();
       } finally {
           res.conn.release();
@@ -64,7 +64,7 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
             dto.communityId
             );
     } catch (err) {
-      this.logger.error("PostRepository", PostLogMessages.createFailed, err);
+      this.logger.error("PostRepository", PostLogMessages.createFailed, err instanceof Error ? err : null);
       return new Post();
     } finally { res.conn.release(); }
   }
@@ -116,7 +116,7 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
         total: Number(cnt[0]?.total ?? 0),
       };
     } catch (err) {
-      this.logger.error("PostRepository", PostLogMessages.findByCommunityFailed, err);
+      this.logger.error("PostRepository", PostLogMessages.findByCommunityFailed, err instanceof Error ? err : null);
       return { posts: [], total: 0 };
     } finally {
       res.conn.release();
@@ -184,7 +184,7 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
         total: Number(cnt[0]?.total ?? 0),
       };
     } catch (err) {
-      this.logger.error("PostRepository", PostLogMessages.findFeedFailed, err);
+      this.logger.error("PostRepository", PostLogMessages.findFeedFailed, err instanceof Error ? err : null);
       return { posts: [], total: 0 };
     } finally {
       res.conn.release();
@@ -220,7 +220,7 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("PostRepository", PostLogMessages.updateFailed, err);
+      this.logger.error("PostRepository", PostLogMessages.updateFailed, err instanceof Error ? err : null);
       return false;
     } finally {
       res.conn.release();
@@ -239,7 +239,7 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
     return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("PostRepository", PostLogMessages.deleteFailed, err);
+      this.logger.error("PostRepository", PostLogMessages.deleteFailed, err instanceof Error ? err : null);
       return false;
     } finally { res.conn.release(); }   
   }

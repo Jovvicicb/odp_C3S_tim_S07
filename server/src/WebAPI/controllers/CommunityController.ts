@@ -68,7 +68,7 @@ export class CommunityController {
       const result = await this.communityService.getPublic(page, limit, viewer?.id);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, CommunityLogMessages.getPublicFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.getPublicFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -115,7 +115,7 @@ export class CommunityController {
       this.logger.error(
         this.constructor.name,
         CommunityLogMessages.discoverFailed,
-        err
+        err instanceof Error ? err : null
       );
 
       res.status(HttpStatus.internalServerError).json({
@@ -144,7 +144,7 @@ export class CommunityController {
       const result = await this.communityMemberService.getMine(page, limit, userId);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, CommunityLogMessages.getMyCommunitiesFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.getMyCommunitiesFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -171,7 +171,7 @@ export class CommunityController {
       const result = await this.communityService.getAll(page, limit, viewer?.id);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, CommunityLogMessages.getAllFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.getAllFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -212,7 +212,7 @@ export class CommunityController {
       const result = await this.communityService.getById(page, limit, id, viewer?.id, viewer?.role);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommunityLogMessages.getByIdFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.getByIdFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -243,7 +243,7 @@ export class CommunityController {
       const result = await this.communityService.create(dto,ctx);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, CommunityLogMessages.createFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.createFailed, err instanceof Error ? err : null);
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommunityMessages.createFailed
@@ -277,7 +277,7 @@ export class CommunityController {
       const result = await this.communityService.update(id, dto, ctx);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name,CommunityLogMessages.updateFailed, err);
+      this.logger.error(this.constructor.name,CommunityLogMessages.updateFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -303,7 +303,7 @@ export class CommunityController {
       const result = await this.communityService.delete(id,ctx);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, CommunityLogMessages.deleteFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.deleteFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -333,7 +333,7 @@ export class CommunityController {
       const result = await this.communityMemberService.join(communityId, userId);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommunityLogMessages.joinFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.joinFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -361,7 +361,7 @@ export class CommunityController {
       const result = await this.communityMemberService.leave(communityId, userId);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommunityLogMessages.leaveFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.leaveFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -407,7 +407,7 @@ export class CommunityController {
       const result = await this.communityMemberService.updateMemberRole(communityId, targetUserId, normalizedRole, ctx);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommunityLogMessages.updateMemberRoleFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.updateMemberRoleFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -452,7 +452,7 @@ export class CommunityController {
       const result = await this.communityMemberService.updateMemberStatus(communityId, targetUserId, normalizedAction, ctx);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommunityLogMessages.updateMemberStatusFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.updateMemberStatusFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -488,7 +488,7 @@ export class CommunityController {
       const result = await this.communityMemberService.removeMember(communityId, targetUserId, ctx);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommunityLogMessages.removeMemberFailed, err);
+      this.logger.error(this.constructor.name, CommunityLogMessages.removeMemberFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -542,7 +542,7 @@ export class CommunityController {
       this.logger.error(
         this.constructor.name,
         CommunityLogMessages.getJoinRequestsFailed,
-        err
+        err instanceof Error ? err : null
       );
 
       res.status(HttpStatus.internalServerError).json({

@@ -45,7 +45,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
         total: cnt[0]?.total ?? 0,
         };
     } catch (err) {
-        this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMyCommunitiesFailed, err);
+        this.logger.error("CommunityMemberRepository", CommunityLogMessages.findMyCommunitiesFailed, err instanceof Error ? err : null);
         return { communityIds: [], total: 0 };
     } finally {
         res.conn.release();
@@ -66,7 +66,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
 
     return rows.map((r) => Number(r.community_id));
   } catch (err) {
-    this.logger.error("CommunityMemberRepository", CommunityLogMessages.findActiveCommunityIdsFailed, err);
+    this.logger.error("CommunityMemberRepository", CommunityLogMessages.findActiveCommunityIdsFailed, err instanceof Error ? err : null);
     return [];
   } finally {
     res.conn.release();
@@ -108,7 +108,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
     this.logger.error(
       "CommunityMemberRepository",
       CommunityLogMessages.findMembersFailed,
-      err
+      err instanceof Error ? err : null
     );
 
     return { members: [], total: 0 };
@@ -130,7 +130,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommunityMemberRepository", CommunityLogMessages.createFailed, err);
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.createFailed, err instanceof Error ? err : null);
       return false;
     } finally { 
       res.conn.release(); 
@@ -150,7 +150,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommunityMemberRepository", CommunityLogMessages.updateMemberRoleFailed, err);
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.updateMemberRoleFailed, err instanceof Error ? err : null);
       return false;
     } finally { 
       res.conn.release(); 
@@ -170,7 +170,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommunityMemberRepository", CommunityLogMessages.updateMemberStatusFailed, err);
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.updateMemberStatusFailed, err instanceof Error ? err : null);
       return false;
     } finally { 
       res.conn.release(); 
@@ -189,7 +189,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommunityMemberRepository", CommunityLogMessages.deleteFailed, err);
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.deleteFailed, err instanceof Error ? err : null);
       return false;
     } finally { 
       res.conn.release(); 
@@ -213,7 +213,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
         ? CommunityMemberMapper.toModel(rows[0])
         : new CommunityMember();
     } catch (err) {
-      this.logger.error("CommunityMemberRepository", CommunityLogMessages.findByUserIdAndCommunityId, err);
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.findByUserIdAndCommunityId, err instanceof Error ? err : null);
       return new CommunityMember();
     } finally {
       res.conn.release();
@@ -234,7 +234,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
 
       return rows.length > 0;
     } catch (err) {
-      this.logger.error("CommunityMemberRepository", CommunityLogMessages.exists, err);
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.exists, err instanceof Error ? err : null);
       return false;
     } finally { 
       res.conn.release(); 
@@ -262,7 +262,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
         return acc;
       }, {});
     } catch (err) {
-      this.logger.error("CommunityMemberRepository", CommunityLogMessages.findStatusesFailed, err);
+      this.logger.error("CommunityMemberRepository", CommunityLogMessages.findStatusesFailed, err instanceof Error ? err : null);
       return {};
     } finally {
       res.conn.release();
@@ -304,7 +304,7 @@ export class CommunityMemberRepository implements ICommunityMemberRepository {
       this.logger.error(
         "CommunityMemberRepository",
         CommunityLogMessages.findPendingMembersFailed,
-        err
+        err instanceof Error ? err : null
       );
 
       return { members: [], total: 0 };

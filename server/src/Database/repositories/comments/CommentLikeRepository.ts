@@ -31,7 +31,7 @@ export class CommentLikeRepository implements ICommentLikeRepository {
         commentId
       );
     } catch (err) {
-      this.logger.error("CommentLikeRepository", CommentLogMessages.createLikeFailed, err);
+      this.logger.error("CommentLikeRepository", CommentLogMessages.createLikeFailed, err instanceof Error ? err : null);
       return new CommentLike();
     } finally {
       res.conn.release();
@@ -51,7 +51,7 @@ export class CommentLikeRepository implements ICommentLikeRepository {
 
         return result.affectedRows > 0;
     } catch (err) {
-        this.logger.error("CommentLikeRepository", CommentLogMessages.deleteLikeFailed, err);
+        this.logger.error("CommentLikeRepository", CommentLogMessages.deleteLikeFailed, err instanceof Error ? err : null);
         return false;
     } finally {
         res.conn.release();
@@ -73,7 +73,7 @@ export class CommentLikeRepository implements ICommentLikeRepository {
 
       return rows.length > 0;
     } catch (err) {
-      this.logger.error("CommentLikeRepository", CommentLogMessages.existsLikeFailed, err);
+      this.logger.error("CommentLikeRepository", CommentLogMessages.existsLikeFailed, err instanceof Error ? err : null);
       return false;
     } finally {
       res.conn.release();
@@ -103,7 +103,7 @@ export class CommentLikeRepository implements ICommentLikeRepository {
         return acc;
       }, {});
     } catch (err) {
-      this.logger.error("CommentLikeRepository", CommentLogMessages.countLikesFailed, err);
+      this.logger.error("CommentLikeRepository", CommentLogMessages.countLikesFailed, err instanceof Error ? err : null);
       return {};
     } finally {
       res.conn.release();
@@ -138,7 +138,7 @@ export class CommentLikeRepository implements ICommentLikeRepository {
       this.logger.error(
         "CommentLikeRepository",
         CommentLogMessages.findLikedCommentsFailed,
-        err
+        err instanceof Error ? err : null
       );
 
       return [];

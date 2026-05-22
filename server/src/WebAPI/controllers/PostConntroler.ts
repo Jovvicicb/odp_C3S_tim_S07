@@ -90,7 +90,7 @@ export class PostController {
       const result = await this.postService.getByCommunity(dto, viewer?.id, viewer?.role);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, PostLogMessages.findByCommunityFailed, err);
+      this.logger.error(this.constructor.name, PostLogMessages.findByCommunityFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -120,8 +120,8 @@ export class PostController {
     try {
       const result = await this.postService.getFeed(userId, page, limit);
       ResponseHelper.send(res, result);
-    } catch (err) {
-      this.logger.error(this.constructor.name, PostLogMessages.getFeedFailed, err);
+    } catch (err) {err
+      this.logger.error(this.constructor.name, PostLogMessages.getFeedFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -152,7 +152,7 @@ export class PostController {
       const result = await this.postService.create(dto,ctx);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, PostLogMessages.createFailed, err);
+      this.logger.error(this.constructor.name, PostLogMessages.createFailed, err instanceof Error ? err : null);
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: PostMessages.createFailed
@@ -196,7 +196,7 @@ export class PostController {
       const result = await this.postService.getById(id, commentsPage, commentsLimit, commentsSort, viewer?.id, viewer?.role);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, PostLogMessages.findDetailsFailed, err);
+      this.logger.error(this.constructor.name, PostLogMessages.findDetailsFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -224,7 +224,7 @@ export class PostController {
       const result = await this.postService.delete(id, ctx, userRole);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, PostLogMessages.deleteFailed, err);
+      this.logger.error(this.constructor.name, PostLogMessages.deleteFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -262,7 +262,7 @@ export class PostController {
       const result = await this.postService.update(id, dto, ctx, userRole);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name,PostLogMessages.updateFailed, err);
+      this.logger.error(this.constructor.name,PostLogMessages.updateFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -292,7 +292,7 @@ export class PostController {
       const result = await this.postLikeService.like(userId, postId);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, PostLogMessages.likeFailed, err);
+      this.logger.error(this.constructor.name, PostLogMessages.likeFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -322,7 +322,7 @@ export class PostController {
       const result = await this.postLikeService.unlike(userId, postId);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, PostLogMessages.unlikeFailed, err);
+      this.logger.error(this.constructor.name, PostLogMessages.unlikeFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -359,7 +359,7 @@ export class PostController {
       const result = await this.postTagService.addTag(postId, tagId, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, PostLogMessages.addTagFailed, err);
+      this.logger.error(this.constructor.name, PostLogMessages.addTagFailed, err instanceof Error ? err : null);
   
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -396,7 +396,7 @@ export class PostController {
       const result = await this.postTagService.removeTag(postId, tagId, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, PostLogMessages.removeTagFailed, err);
+      this.logger.error(this.constructor.name, PostLogMessages.removeTagFailed, err instanceof Error ? err : null);
   
       res.status(HttpStatus.internalServerError).json({
         success: false,

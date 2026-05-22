@@ -33,7 +33,7 @@ export class TagRepository implements ITagRepository {
 
       return rows.map((r) => TagMapper.toModel(r));
     } catch (err) {
-      this.logger.error("TagRepository", TagLogMessages.findByIdsFailed, err);
+      this.logger.error("TagRepository", TagLogMessages.findByIdsFailed, err instanceof Error ? err : null);
       return [];
     } finally {
       res.conn.release();
@@ -54,7 +54,7 @@ export class TagRepository implements ITagRepository {
         dto.name
       );
     } catch (err) {
-      this.logger.error("TagRepository", TagLogMessages.createFailed, err);
+      this.logger.error("TagRepository", TagLogMessages.createFailed, err instanceof Error ? err : null);
       return new Tag();
     } finally { res.conn.release(); }
   }
@@ -70,7 +70,7 @@ export class TagRepository implements ITagRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("TagRepository", TagLogMessages.deleteFailed, err);
+      this.logger.error("TagRepository", TagLogMessages.deleteFailed, err instanceof Error ? err : null);
       return false;
     } finally { res.conn.release(); }   
   }
@@ -89,7 +89,7 @@ export class TagRepository implements ITagRepository {
 
       return rows.length > 0 ? TagMapper.toModel(rows[0]) : new Tag();
     } catch (err) {
-      this.logger.error("TagRepository", TagLogMessages.findByIdFailed, err);
+      this.logger.error("TagRepository", TagLogMessages.findByIdFailed, err instanceof Error ? err : null);
       return new Tag();
     } finally {
       res.conn.release();
@@ -108,7 +108,7 @@ export class TagRepository implements ITagRepository {
       );
       return rows.length > 0 ? TagMapper.toModel(rows[0]) : new Tag();
     } catch (err) {
-      this.logger.error("TagRepository", TagLogMessages.findByNameFailed, err);
+      this.logger.error("TagRepository", TagLogMessages.findByNameFailed, err instanceof Error ? err : null);
       return new Tag();
     } finally { res.conn.release(); }
   }
@@ -134,7 +134,7 @@ export class TagRepository implements ITagRepository {
             tags: rows.map((r) => TagMapper.toModel(r)),
             total: Number(cnt[0]?.total ?? 0)};
     } catch (err) {
-      this.logger.error("TagRepository", TagLogMessages.findAllFailed, err);
+      this.logger.error("TagRepository", TagLogMessages.findAllFailed, err instanceof Error ? err : null);
       return {tags : [] ,total:0};
     } finally { res.conn.release(); }
   }

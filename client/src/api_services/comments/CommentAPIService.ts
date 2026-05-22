@@ -3,6 +3,10 @@ import type { ICommentAPIService } from "./ICommentAPIService";
 import type { ApiResponse } from "../../types/common/ApiResponse";
 import { readItem } from "../../helpers/local_storage";
 import { CommentMessages } from "../../constants/messages/comment/CommentMessages";
+import {
+  getApiErrorMessage,
+  type ApiClientError,
+} from "../../helpers/api/ApiErrorHelper";
 
 const BASE = import.meta.env.VITE_API_URL + "comments";
 
@@ -12,11 +16,9 @@ const authHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-const err = <T>(e: unknown, fallback: string): ApiResponse<T> => ({
+const err = <T>(e: ApiClientError, fallback: string): ApiResponse<T> => ({
   success: false,
-  message: axios.isAxiosError(e)
-    ? (e.response?.data as { message?: string })?.message ?? fallback
-    : fallback,
+  message: getApiErrorMessage(e, fallback),
 });
 
 export const commentApi: ICommentAPIService = {
@@ -34,10 +36,10 @@ export const commentApi: ICommentAPIService = {
         },
       )
       .then((r) => r.data)
-      .catch((e) => err(e, CommentMessages.createFailed));
+      .catch((e: ApiClientError) => err(e, CommentMessages.createFailed));
   },
 
-  async update(id: number, content: string) {
+  async update(id, content) {
     return axios
       .put<ApiResponse<void>>(
         `${BASE}/${id}`,
@@ -49,47 +51,63 @@ export const commentApi: ICommentAPIService = {
         },
       )
       .then((r) => r.data)
-      .catch((e) => err(e, CommentMessages.updateFailed));
+      .catch((e: ApiClientError) => err(e, CommentMessages.updateFailed));
   },
-    
 
-  async like(id: number) {
+  async like(id) {
     return axios
-      .post<ApiResponse<void>>(`${BASE}/${id}/like`, {}, { headers: authHeader() })
+      .post<ApiResponse<void>>(
+        `${BASE}/${id}/like`,
+        {},
+        {
+          headers: authHeader(),
+        },
+      )
       .then((r) => r.data)
-      .catch((e) => err(e, CommentMessages.likeFailed));
+      .catch((e: ApiClientError) => err(e, CommentMessages.likeFailed));
   },
 
-  async unlike(id: number) {
+  async unlike(id) {
     return axios
       .delete<ApiResponse<void>>(`${BASE}/${id}/like`, {
         headers: authHeader(),
       })
       .then((r) => r.data)
-      .catch((e) => err(e, CommentMessages.unlikeFailed));
+      .catch((e: ApiClientError) => err(e, CommentMessages.unlikeFailed));
   },
 
-
-  async delete(id: number) {
+  async delete(id) {
     return axios
       .delete<ApiResponse<void>>(`${BASE}/${id}`, {
         headers: authHeader(),
       })
       .then((r) => r.data)
-      .catch((e) => err(e, CommentMessages.deleteFailed));
+      .catch((e: ApiClientError) => err(e, CommentMessages.deleteFailed));
   },
 
-  async flag(id: number) {
+  async flag(id) {
     return axios
-      .patch<ApiResponse<void>>(`${BASE}/${id}/flag`, {}, { headers: authHeader() })
+      .patch<ApiResponse<void>>(
+        `${BASE}/${id}/flag`,
+        {},
+        {
+          headers: authHeader(),
+        },
+      )
       .then((r) => r.data)
-      .catch((e) => err(e, CommentMessages.flagFailed));
+      .catch((e: ApiClientError) => err(e, CommentMessages.flagFailed));
   },
 
-  async unflag(id: number) {
+  async unflag(id) {
     return axios
-      .patch<ApiResponse<void>>(`${BASE}/${id}/unflag`, {}, { headers: authHeader() })
+      .patch<ApiResponse<void>>(
+        `${BASE}/${id}/unflag`,
+        {},
+        {
+          headers: authHeader(),
+        },
+      )
       .then((r) => r.data)
-      .catch((e) => err(e, CommentMessages.unflagFailed));
+      .catch((e: ApiClientError) => err(e, CommentMessages.unflagFailed));
   },
 };

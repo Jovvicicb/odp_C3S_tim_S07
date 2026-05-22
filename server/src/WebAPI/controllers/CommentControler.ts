@@ -91,7 +91,7 @@ export class CommentController {
 
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommentLogMessages.fetchByPostFailed, err);
+      this.logger.error(this.constructor.name, CommentLogMessages.fetchByPostFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -122,7 +122,7 @@ export class CommentController {
       const result = await this.commentService.create(dto, ctx);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommentLogMessages.createFailed, err);
+      this.logger.error(this.constructor.name, CommentLogMessages.createFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -164,7 +164,7 @@ export class CommentController {
       const result = await this.commentService.update(id, dto, ctx);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommentLogMessages.updateFailed, err);
+      this.logger.error(this.constructor.name, CommentLogMessages.updateFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -195,8 +195,7 @@ export class CommentController {
       const result = await this.commentService.delete(id, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommentLogMessages.deleteFailed, err);
-
+      this.logger.error(this.constructor.name, CommentLogMessages.deleteFailed, err instanceof Error ? err : null);
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommentMessages.deleteFailed,
@@ -224,7 +223,7 @@ export class CommentController {
       const result = await this.commentLikeService.like(userId, commentId);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommentLogMessages.likeFailed, err);
+      this.logger.error(this.constructor.name, CommentLogMessages.likeFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -253,7 +252,7 @@ export class CommentController {
       const result = await this.commentLikeService.unlike(userId, commentId);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommentLogMessages.unlikeFailed, err);
+      this.logger.error(this.constructor.name, CommentLogMessages.unlikeFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -284,7 +283,7 @@ export class CommentController {
       const result = await this.commentService.flag(id, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommentLogMessages.flagFailed, err);
+      this.logger.error(this.constructor.name, CommentLogMessages.flagFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -315,7 +314,7 @@ export class CommentController {
       const result = await this.commentService.unflag(id, ctx, userRole);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, CommentLogMessages.unflagFailed, err);
+      this.logger.error(this.constructor.name, CommentLogMessages.unflagFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,

@@ -38,7 +38,7 @@ export class AuditRepository implements IAuditRepository {
         dto.ipAddress
       );
     } catch (err) {
-      this.logger.error("AuditRepository", AuditLogMessages.createFailed, err);
+      this.logger.error("AuditRepository", AuditLogMessages.createFailed, err instanceof Error ? err : null);
       return new Audit();
     } finally { res.conn.release(); }
   }
@@ -65,7 +65,7 @@ export class AuditRepository implements IAuditRepository {
               audits: rows.map((r) => AuditMapper.toModel(r)),
               total: Number(cnt[0]?.total ?? 0)};
     } catch (err) {
-      this.logger.error("AuditRepository", AuditLogMessages.findAllFailed, err);
+      this.logger.error("AuditRepository", AuditLogMessages.findAllFailed, err instanceof Error ? err : null);
       return {audits : [] ,total:0};
     } finally { res.conn.release(); }
   }

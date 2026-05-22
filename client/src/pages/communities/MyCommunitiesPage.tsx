@@ -57,7 +57,7 @@ export default function MyCommunitiesPage() {
           <Spinner size={24} />
         </div>
       ) : communities.length === 0 && !error ? (
-        <Empty message="You haven't joined any communities yet." />
+        <Empty message="You have not joined communities yet." />
       ) : (
         <>
           <MyCommunitiesList

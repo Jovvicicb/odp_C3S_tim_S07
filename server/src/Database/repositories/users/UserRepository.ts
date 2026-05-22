@@ -30,7 +30,7 @@ export class UserRepository implements IUserRepository {
       if (result.insertId === 0) return new User();
       return new User(result.insertId, user.username, user.email, user.role, user.passwordHash,user.fullname,user.bio,user.image);
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.createFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.createFailed, err instanceof Error ? err : null);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -42,7 +42,7 @@ export class UserRepository implements IUserRepository {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE id = ? LIMIT 1`, [id]);
       return rows.length > 0 ? UserMapper.toModel(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.findByIdFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.findByIdFailed, err instanceof Error ? err : null);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -62,7 +62,7 @@ export class UserRepository implements IUserRepository {
 
       return rows.map((r) => UserMapper.toModel(r));
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.findByIdsFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.findByIdsFailed, err instanceof Error ? err : null);
       return [];
     } finally {
       res.conn.release();
@@ -76,7 +76,7 @@ export class UserRepository implements IUserRepository {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE username = ? LIMIT 1`, [username]);
       return rows.length > 0 ? UserMapper.toModel(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.findByUsernameFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.findByUsernameFailed, err instanceof Error ? err : null);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -118,7 +118,7 @@ export class UserRepository implements IUserRepository {
         total: Number(cnt[0]?.total ?? 0),
       };
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.searchByUsernameFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.searchByUsernameFailed, err instanceof Error ? err : null);
       return { users: [], total: 0 };
     } finally {
       res.conn.release();
@@ -132,7 +132,7 @@ export class UserRepository implements IUserRepository {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE email = ? LIMIT 1`, [email]);
       return rows.length > 0 ? UserMapper.toModel(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.findByEmailFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.findByEmailFailed, err instanceof Error ? err : null);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -160,7 +160,7 @@ export class UserRepository implements IUserRepository {
               users: rows.map((r) => UserMapper.toModel(r)),
               total: Number(cnt[0]?.total ?? 0)};
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.findAllFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.findAllFailed, err instanceof Error ? err : null);
       return {users : [] ,total:0};
     } finally { res.conn.release(); }
   }
@@ -196,7 +196,7 @@ export class UserRepository implements IUserRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.updateFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.updateFailed, err instanceof Error ? err : null);
       return false;
     } finally {
       res.conn.release();
@@ -212,7 +212,7 @@ export class UserRepository implements IUserRepository {
       );
       return rows.length > 0;
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.existsFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.existsFailed, err instanceof Error ? err : null);
       return false;
     } finally { res.conn.release(); }
   }
@@ -229,7 +229,7 @@ export class UserRepository implements IUserRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("UserRepository", UserLogMessages.updateRoleFailed, err);
+      this.logger.error("UserRepository", UserLogMessages.updateRoleFailed, err instanceof Error ? err : null);
       return false;
     } finally {
       res.conn.release();

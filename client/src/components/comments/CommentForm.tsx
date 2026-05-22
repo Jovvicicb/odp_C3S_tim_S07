@@ -51,7 +51,7 @@ export function CommentForm({
 
   return (
     <div
-      className={`rounded-3xl border border-white/8 bg-white/[0.03] shadow-inner shadow-black/10 ${
+      className={`rounded-3xl border border-white/8 bg-white/3 shadow-inner shadow-black/10 ${
         compact ? "p-4" : "p-5"
       }`}
     >

@@ -63,7 +63,7 @@ export class UserController {
       const result = await this.userService.getAll(dto);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, UserLogMessages.getAllFailed, err);
+      this.logger.error(this.constructor.name, UserLogMessages.getAllFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -89,7 +89,7 @@ export class UserController {
       const result = await this.userService.getById(id);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, UserLogMessages.getByIdFailed, err);
+      this.logger.error(this.constructor.name, UserLogMessages.getByIdFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -131,7 +131,7 @@ export class UserController {
       const result = await this.userService.search(username ,page , limit, viewerId);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, UserLogMessages.getByUsernameFailed, err);
+      this.logger.error(this.constructor.name, UserLogMessages.getByUsernameFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -162,7 +162,7 @@ export class UserController {
       const result = await this.userService.update(dto, ctx);
       ResponseHelper.send(res,result);
     } catch (err) {
-      this.logger.error(this.constructor.name, UserLogMessages.updateFailed, err);
+      this.logger.error(this.constructor.name, UserLogMessages.updateFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -201,7 +201,7 @@ export class UserController {
       const result = await this.userService.updateRole(id, normalizedRole, ctx);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, UserLogMessages.updateRoleFailed, err);
+      this.logger.error(this.constructor.name, UserLogMessages.updateRoleFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -229,7 +229,7 @@ export class UserController {
       const result = await this.userFollowService.follow(targetUserId,userId);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, UserLogMessages.followFailed, err);
+      this.logger.error(this.constructor.name, UserLogMessages.followFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -257,7 +257,7 @@ export class UserController {
       const result = await this.userFollowService.unfollow(targetUserId,userId);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, UserLogMessages.unfollowFailed, err);
+      this.logger.error(this.constructor.name, UserLogMessages.unfollowFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -286,7 +286,7 @@ export class UserController {
 
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, UserLogMessages.removeFollowerFailed,err);
+      this.logger.error(this.constructor.name, UserLogMessages.removeFollowerFailed,err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -318,7 +318,7 @@ export class UserController {
         const result = await this.userFollowService.getFollowers(dto);
         ResponseHelper.send(res, result);
       }catch(err){
-        this.logger.error(this.constructor.name, UserLogMessages.getFollowersFailed, err);
+        this.logger.error(this.constructor.name, UserLogMessages.getFollowersFailed, err instanceof Error ? err : null);
 
         res.status(HttpStatus.internalServerError).json({
           success: false,
@@ -350,7 +350,7 @@ export class UserController {
         const result = await this.userFollowService.getFollowing(dto);
         ResponseHelper.send(res, result);
       }catch(err){
-        this.logger.error(this.constructor.name, UserLogMessages.getFollowingFailed, err);
+        this.logger.error(this.constructor.name, UserLogMessages.getFollowingFailed, err instanceof Error ? err : null);
 
         res.status(HttpStatus.internalServerError).json({
           success: false,

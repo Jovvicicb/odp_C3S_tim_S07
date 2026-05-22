@@ -102,7 +102,7 @@ export class DbManager {
     } catch (err) {
       this.currentMaster.node.status = NodeStatus.OFFLINE;
       this.currentMaster.node.failedWrites++;
-      this.logger.error("DB", "Failed to connect to master", err);
+      this.logger.error("DB", "Failed to connect to master", err instanceof Error ? err : null);
       return null;
     }
   }
@@ -137,7 +137,7 @@ export class DbManager {
       return { conn, nodeName: this.currentMaster.name };
     } catch (err) {
       this.currentMaster.node.status = NodeStatus.OFFLINE;
-      this.logger.error("DB", "Failed to connect to master for fallback read", err);
+      this.logger.error("DB", "Failed to connect to master for fallback read", err instanceof Error ? err : null);
       return null;
     }
   }

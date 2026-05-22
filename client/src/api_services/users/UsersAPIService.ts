@@ -5,6 +5,10 @@ import { readItem } from "../../helpers/local_storage";
 import type { ApiResponse } from "../../types/common/ApiResponse";
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import { UserMessages } from "../../constants/messages/user/UserMessages";
+import {
+  getApiErrorMessage,
+  type ApiClientError,
+} from "../../helpers/api/ApiErrorHelper";
 
 const BASE = import.meta.env.VITE_API_URL + "users";
 
@@ -13,9 +17,9 @@ const authHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-const err = <T>(e: unknown, fallback: string): ApiResponse<T> => ({
+const err = <T>(e: ApiClientError, fallback: string): ApiResponse<T> => ({
   success: false,
-  message: axios.isAxiosError(e) ? (e.response?.data as { message?: string })?.message ?? fallback : fallback,
+  message: getApiErrorMessage(e, fallback),
 });
 
 export const usersApi: IUsersAPIService = {
@@ -23,19 +27,22 @@ export const usersApi: IUsersAPIService = {
     return axios
       .get<ApiResponse<PaginatedListDto<UserDto>>>(`${BASE}/all`, {
         headers: authHeader(),
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+        },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.fetchAllFailed));
+      .catch((e: ApiClientError) => err(e, UserMessages.fetchAllFailed));
   },
 
-   async getById(id) {
+  async getById(id) {
     return axios
       .get<ApiResponse<UserDto>>(`${BASE}/${id}`, {
         headers: authHeader(),
       })
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.fetchOneFailed));
+      .catch((e: ApiClientError) => err(e, UserMessages.fetchOneFailed));
   },
 
   async updateMe(formData) {
@@ -46,18 +53,22 @@ export const usersApi: IUsersAPIService = {
         },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.updateFailed));
+      .catch((e: ApiClientError) => err(e, UserMessages.updateFailed));
   },
 
   async updateRole(id, role) {
     return axios
       .put<ApiResponse<void>>(
         `${BASE}/${id}/role`,
-        { role },
-        { headers: authHeader() },
+        {
+          role,
+        },
+        {
+          headers: authHeader(),
+        },
       )
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.roleUpdateFailed));
+      .catch((e: ApiClientError) => err(e, UserMessages.roleUpdateFailed));
   },
 
   async follow(id) {
@@ -65,10 +76,12 @@ export const usersApi: IUsersAPIService = {
       .post<ApiResponse<void>>(
         `${BASE}/${id}/follow`,
         {},
-        { headers: authHeader() },
+        {
+          headers: authHeader(),
+        },
       )
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.followFailed));
+      .catch((e: ApiClientError) => err(e, UserMessages.followFailed));
   },
 
   async unfollow(id) {
@@ -77,27 +90,37 @@ export const usersApi: IUsersAPIService = {
         headers: authHeader(),
       })
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.unfollowFailed));
+      .catch((e: ApiClientError) => err(e, UserMessages.unfollowFailed));
   },
 
   async getFollowers(id, page = 1, limit = 10) {
     return axios
       .get<ApiResponse<PaginatedListDto<UserDto>>>(`${BASE}/${id}/followers`, {
         headers: authHeader(),
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+        },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.followersFetchFailed));
+      .catch((e: ApiClientError) =>
+        err(e, UserMessages.followersFetchFailed),
+      );
   },
 
   async getFollowing(id, page = 1, limit = 10) {
     return axios
       .get<ApiResponse<PaginatedListDto<UserDto>>>(`${BASE}/${id}/following`, {
         headers: authHeader(),
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+        },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.followingFetchFailed));
+      .catch((e: ApiClientError) =>
+        err(e, UserMessages.followingFetchFailed),
+      );
   },
 
   async removeFollower(id) {
@@ -106,7 +129,9 @@ export const usersApi: IUsersAPIService = {
         headers: authHeader(),
       })
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.removeFollowerFailed));
+      .catch((e: ApiClientError) =>
+        err(e, UserMessages.removeFollowerFailed),
+      );
   },
 
   async search(username, page = 1, limit = 10) {
@@ -120,6 +145,6 @@ export const usersApi: IUsersAPIService = {
         },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, UserMessages.searchFailed));
+      .catch((e: ApiClientError) => err(e, UserMessages.searchFailed));
   },
 };

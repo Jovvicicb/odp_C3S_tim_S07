@@ -33,7 +33,7 @@ export class HealthController {
         },
       });
     } catch (err) {
-      this.logger.error(this.constructor.name, HealthLogMessages.getHealthFailed, err);
+      this.logger.error(this.constructor.name, HealthLogMessages.getHealthFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -47,7 +47,7 @@ export class HealthController {
         const result = await this.healthService.getDbHealth();
         ResponseHelper.send(res, result);
     } catch (err) {
-        this.logger.error(this.constructor.name, HealthLogMessages.getDbHealthFailed, err);
+        this.logger.error(this.constructor.name, HealthLogMessages.getDbHealthFailed, err instanceof Error ? err : null);
 
         res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -61,7 +61,7 @@ export class HealthController {
       const result = await this.healthService.triggerFailover();
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, HealthLogMessages.failoverFailed, err);
+      this.logger.error(this.constructor.name, HealthLogMessages.failoverFailed, err instanceof Error ? err : null);
       
       res.status(HttpStatus.internalServerError).json({
         success: false,

@@ -30,7 +30,7 @@ export class CommunityRepository implements ICommunityRepository {
       );
       return rows.length > 0 ? CommunityMapper.toModel(rows[0]): new Community();
     } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.findByIdFailed, err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByIdFailed, err instanceof Error ? err : null);
       return new Community();
     } finally { res.conn.release(); }
   }
@@ -53,7 +53,7 @@ export class CommunityRepository implements ICommunityRepository {
 
       return rows.map((r) => CommunityMapper.toModel(r));
     } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.findByIdsFailed, err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByIdsFailed, err instanceof Error ? err : null);
       return [];
     } finally { res.conn.release(); }
   }
@@ -70,7 +70,7 @@ export class CommunityRepository implements ICommunityRepository {
       );
       return rows.length > 0 ? CommunityMapper.toModel(rows[0]): new Community();
     } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.findByNameFailed, err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByNameFailed, err instanceof Error ? err : null);
       return new Community();
     } finally { res.conn.release(); }
   }
@@ -89,7 +89,7 @@ export class CommunityRepository implements ICommunityRepository {
 
       return rows.map((r) => Number(r.id));
     } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.findByIdsFailed, err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.findByIdsFailed, err instanceof Error ? err : null);
       return [];
     } finally {
       res.conn.release();
@@ -145,7 +145,7 @@ export class CommunityRepository implements ICommunityRepository {
       this.logger.error(
         "CommunityRepository",
         CommunityLogMessages.discoverFailed,
-        err
+        err instanceof Error ? err : null
       );
 
       return { communities: [], total: 0 };
@@ -183,7 +183,7 @@ export class CommunityRepository implements ICommunityRepository {
         communities: rows.map((r) => CommunityMapper.toModel(r)),
         total: Number(cnt[0]?.total ?? 0)};
     } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.findAllFailed, err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.findAllFailed, err instanceof Error ? err : null);
       return {communities : [] ,total:0};
     } finally { res.conn.release(); }
   }
@@ -215,7 +215,7 @@ export class CommunityRepository implements ICommunityRepository {
         dto.avatar
       );
     } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.createFailed, err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.createFailed, err instanceof Error ? err : null);
       return new Community();
     } finally { res.conn.release(); }
   }
@@ -237,7 +237,7 @@ export class CommunityRepository implements ICommunityRepository {
       
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.updateFailed, err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.updateFailed, err instanceof Error ? err : null);
       return false;
     } finally { res.conn.release(); }
   }
@@ -251,7 +251,7 @@ export class CommunityRepository implements ICommunityRepository {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("CommunityRepository", CommunityLogMessages.deleteFailed, err);
+      this.logger.error("CommunityRepository", CommunityLogMessages.deleteFailed, err instanceof Error ? err : null);
       return false;
     } finally { res.conn.release(); }
   }

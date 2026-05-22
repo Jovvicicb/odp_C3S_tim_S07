@@ -34,7 +34,7 @@ export class PostCommentRepository implements IPostCommentRepository {
                 return acc;
             }, {});
         } catch (err) {
-            this.logger.error("PostCommentRepository", PostLogMessages.countCommentsFailed, err);
+            this.logger.error("PostCommentRepository", PostLogMessages.countCommentsFailed, err instanceof Error ? err : null);
             return {};
         } finally {
             res.conn.release();

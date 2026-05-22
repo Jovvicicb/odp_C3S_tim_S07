@@ -8,6 +8,10 @@ import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import type { CommunityDto } from "../../models/communities/CommunityDto";
 import type { CommunityDetailsDto } from "../../models/communities/CommunityDetailsDto";
 import type { CommunityMemberDetailsDto } from "../../models/communities/CommunityMemberDetailsDto";
+import {
+  getApiErrorMessage,
+  type ApiClientError,
+} from "../../helpers/api/ApiErrorHelper";
 
 const BASE = import.meta.env.VITE_API_URL + "communities";
 
@@ -16,11 +20,9 @@ const authHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-const err = <T>(e: unknown, fallback: string): ApiResponse<T> => ({
+const err = <T>(e: ApiClientError, fallback: string): ApiResponse<T> => ({
   success: false,
-  message: axios.isAxiosError(e)
-    ? (e.response?.data as { message?: string })?.message ?? fallback
-    : fallback,
+  message: getApiErrorMessage(e, fallback),
 });
 
 export const communityApi: ICommunityAPIService = {
@@ -32,7 +34,7 @@ export const communityApi: ICommunityAPIService = {
         },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.createFailed));
+      .catch((e: ApiClientError) => err(e, CommunityMessages.createFailed));
   },
 
   async discover(page = 1, limit = 10, type = "all", search = "") {
@@ -47,37 +49,48 @@ export const communityApi: ICommunityAPIService = {
         },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.discoverFetchFailed));
+      .catch((e: ApiClientError) =>
+        err(e, CommunityMessages.discoverFetchFailed),
+      );
   },
 
   async getAll(page = 1, limit = 10) {
     return axios
       .get<ApiResponse<PaginatedListDto<CommunityDto>>>(`${BASE}/all`, {
         headers: authHeader(),
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+        },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.fetchAllFailed));
+      .catch((e: ApiClientError) => err(e, CommunityMessages.fetchAllFailed));
   },
 
   async getMine(page = 1, limit = 10) {
     return axios
       .get<ApiResponse<PaginatedListDto<CommunityDto>>>(`${BASE}/mine`, {
         headers: authHeader(),
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+        },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.fetchAllFailed));
+      .catch((e: ApiClientError) => err(e, CommunityMessages.fetchAllFailed));
   },
 
   async getPublic(page = 1, limit = 10) {
     return axios
       .get<ApiResponse<PaginatedListDto<CommunityDto>>>(BASE, {
         headers: authHeader(),
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+        },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.fetchAllFailed));
+      .catch((e: ApiClientError) => err(e, CommunityMessages.fetchAllFailed));
   },
 
   async getById(id, membersPage = 1, membersLimit = 10) {
@@ -90,21 +103,29 @@ export const communityApi: ICommunityAPIService = {
         },
       })
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.fetchOneFailed));
+      .catch((e: ApiClientError) => err(e, CommunityMessages.fetchOneFailed));
   },
-    
+
   async join(id) {
     return axios
-      .post<ApiResponse<void>>(`${BASE}/${id}/join`, {}, { headers: authHeader() })
+      .post<ApiResponse<void>>(
+        `${BASE}/${id}/join`,
+        {},
+        {
+          headers: authHeader(),
+        },
+      )
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.joinFailed));
+      .catch((e: ApiClientError) => err(e, CommunityMessages.joinFailed));
   },
 
   async leave(id) {
     return axios
-      .delete<ApiResponse<void>>(`${BASE}/${id}/leave`, { headers: authHeader() })
+      .delete<ApiResponse<void>>(`${BASE}/${id}/leave`, {
+        headers: authHeader(),
+      })
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.leaveFailed));
+      .catch((e: ApiClientError) => err(e, CommunityMessages.leaveFailed));
   },
 
   async getJoinRequests(communityId, page = 1, limit = 10) {
@@ -113,33 +134,50 @@ export const communityApi: ICommunityAPIService = {
         `${BASE}/${communityId}/join-requests`,
         {
           headers: authHeader(),
-          params: { page, limit },
+          params: {
+            page,
+            limit,
+          },
         },
       )
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.joinRequestsFetchFailed));
+      .catch((e: ApiClientError) =>
+        err(e, CommunityMessages.joinRequestsFetchFailed),
+      );
   },
 
   async updateMemberRole(communityId, userId, role) {
     return axios
       .patch<ApiResponse<void>>(
         `${BASE}/${communityId}/members/${userId}/role`,
-        { role },
-        { headers: authHeader() },
+        {
+          role,
+        },
+        {
+          headers: authHeader(),
+        },
       )
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.updateMemberRoleFailed));
+      .catch((e: ApiClientError) =>
+        err(e, CommunityMessages.updateMemberRoleFailed),
+      );
   },
 
   async updateMemberStatus(communityId, userId, action) {
     return axios
       .patch<ApiResponse<void>>(
         `${BASE}/${communityId}/members/${userId}/status`,
-        { action },
-        { headers: authHeader() },
+        {
+          action,
+        },
+        {
+          headers: authHeader(),
+        },
       )
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.updateMemberStatusFailed));
+      .catch((e: ApiClientError) =>
+        err(e, CommunityMessages.updateMemberStatusFailed),
+      );
   },
 
   async removeMember(communityId, userId) {
@@ -148,6 +186,8 @@ export const communityApi: ICommunityAPIService = {
         headers: authHeader(),
       })
       .then((r) => r.data)
-      .catch((e) => err(e, CommunityMessages.removeMemberFailed));
+      .catch((e: ApiClientError) =>
+        err(e, CommunityMessages.removeMemberFailed),
+      );
   },
 };

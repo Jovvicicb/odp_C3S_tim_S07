@@ -40,7 +40,7 @@ export class AuditController {
       const result = await this.auditService.getAll(dto);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, AuditLogMessages.getAllFailed, err);
+      this.logger.error(this.constructor.name, AuditLogMessages.getAllFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,

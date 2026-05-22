@@ -33,7 +33,7 @@ export class PostLikeRepository implements IPostLikeRepository {
                 return acc;
             }, {});
         } catch (err) {
-            this.logger.error("PostLikeRepository", PostLogMessages.countLikesFailed, err);
+            this.logger.error("PostLikeRepository", PostLogMessages.countLikesFailed, err instanceof Error ? err : null);
             return {};
         } finally {
             res.conn.release();
@@ -54,7 +54,7 @@ export class PostLikeRepository implements IPostLikeRepository {
 
             return new PostLike(result.insertId, userId, postId);  
         } catch (err) {
-            this.logger.error("PostLikeRepository", PostLogMessages.likeFailed, err);
+            this.logger.error("PostLikeRepository", PostLogMessages.likeFailed, err instanceof Error ? err : null);
             return new PostLike();
         } finally {
             res.conn.release();
@@ -75,7 +75,7 @@ export class PostLikeRepository implements IPostLikeRepository {
 
             return result.affectedRows > 0;
         } catch (err) {
-            this.logger.error("PostLikeRepository", PostLogMessages.unlikeFailed, err);
+            this.logger.error("PostLikeRepository", PostLogMessages.unlikeFailed, err instanceof Error ? err : null);
             return false;
         } finally {
             res.conn.release();
@@ -97,7 +97,7 @@ export class PostLikeRepository implements IPostLikeRepository {
 
         return rows.length > 0;
         } catch (err) {
-            this.logger.error("PostLikeRepository", PostLogMessages.findLikeFailed, err);
+            this.logger.error("PostLikeRepository", PostLogMessages.findLikeFailed, err instanceof Error ? err : null);
             return false;
         } finally {
             res.conn.release();

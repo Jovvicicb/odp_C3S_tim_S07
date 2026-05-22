@@ -18,7 +18,7 @@ export class AuditHelperService implements IAuditHelperService {
       }
 
     } catch (err) {
-      this.logger.error("AuditHelper", "Audit failed", err);
+      this.logger.error("AuditHelper", "Audit failed", err instanceof Error ? err : null);
     }
   }
 }

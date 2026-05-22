@@ -58,7 +58,7 @@ export class AuthController {
         }
       );
     }catch(err){
-      this.logger.error(this.constructor.name, AuthLogMessages.loginFailed, err);
+      this.logger.error(this.constructor.name, AuthLogMessages.loginFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -101,7 +101,7 @@ export class AuthController {
         data: token 
       });
    }catch(err){
-      this.logger.error(this.constructor.name, AuthLogMessages.registerFailed, err);
+      this.logger.error(this.constructor.name, AuthLogMessages.registerFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -116,7 +116,7 @@ export class AuthController {
       const result =  await this.authService.logout(ctx);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, AuthLogMessages.logoutFailed, err);
+      this.logger.error(this.constructor.name, AuthLogMessages.logoutFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
