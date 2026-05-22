@@ -18,6 +18,7 @@ type Props = {
   onPageChange: (page: number) => void;
   onSortChange: (sort: CommentSortType) => void;
   onCreateComment: (postId: number, content: string) => Promise<boolean>;
+  onCreateReply: (parentId: number, content: string) => Promise<boolean>;
   onLikeComment: (commentId: number) => void;
   onUnlikeComment: (commentId: number) => void;
 };
@@ -34,6 +35,7 @@ export function PostCommentsSection({
   onPageChange,
   onSortChange,
   onCreateComment,
+  onCreateReply,
   onLikeComment,
   onUnlikeComment,
 }: Props) {
@@ -88,7 +90,9 @@ export function PostCommentsSection({
               <CommentPreviewCard
                 key={comment.id}
                 comment={comment}
+                loadingCommentCreate={loadingCommentCreate}
                 loadingCommentLikeId={loadingCommentLikeId}
+                onCreateReply={onCreateReply}
                 onLikeComment={onLikeComment}
                 onUnlikeComment={onUnlikeComment}
               />

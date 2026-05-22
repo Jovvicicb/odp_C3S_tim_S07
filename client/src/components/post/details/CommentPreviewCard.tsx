@@ -1,18 +1,36 @@
+import { useState } from "react";
 import type { CommentTreeDto } from "../../../models/comment/CommentTreeDto";
+import { CommentForm } from "../../comment/CommentForm";
 
 type Props = {
   comment: CommentTreeDto;
   loadingCommentLikeId: number | null;
+  loadingCommentCreate: boolean;
   onLikeComment: (commentId: number) => void;
   onUnlikeComment: (commentId: number) => void;
+  onCreateReply: (parentId: number, content: string) => Promise<boolean>;
 };
 
 export function CommentPreviewCard({
   comment,
   loadingCommentLikeId,
+  loadingCommentCreate,
   onLikeComment,
   onUnlikeComment,
+  onCreateReply,
 }: Props) {
+  const [replyOpen, setReplyOpen] = useState(false);
+
+  const handleCreateReply = async (content: string) => {
+    const success = await onCreateReply(comment.id, content);
+
+    if (success) {
+      setReplyOpen(false);
+    }
+
+    return success;
+  };
+
   return (
     <div className="rounded-3xl border border-white/8 bg-white/3 p-5">
       <CommentHeader comment={comment} label="Comment" />
@@ -26,8 +44,22 @@ export function CommentPreviewCard({
         loadingCommentLikeId={loadingCommentLikeId}
         onLikeComment={onLikeComment}
         onUnlikeComment={onUnlikeComment}
+        onReply={() => setReplyOpen((current) => !current)}
+        showReplyButton={comment.permissions.canReply}
         showRepliesCount
       />
+
+      {replyOpen && (
+        <div className="mt-4">
+          <CommentForm
+            title="Write a reply"
+            placeholder="Write your reply..."
+            submitLabel="Post reply"
+            loading={loadingCommentCreate}
+            onSubmit={handleCreateReply}
+          />
+        </div>
+      )}
 
       {comment.replies.length > 0 && (
         <div className="mt-4 space-y-3 border-l border-white/10 pl-4">
@@ -88,12 +120,16 @@ function CommentActions({
   loadingCommentLikeId,
   onLikeComment,
   onUnlikeComment,
+  onReply,
+  showReplyButton = false,
   showRepliesCount = false,
 }: {
   comment: CommentTreeDto;
   loadingCommentLikeId: number | null;
   onLikeComment: (commentId: number) => void;
   onUnlikeComment: (commentId: number) => void;
+  onReply?: () => void;
+  showReplyButton?: boolean;
   showRepliesCount?: boolean;
 }) {
   const likeLoading = loadingCommentLikeId === comment.id;
@@ -123,6 +159,16 @@ function CommentActions({
             : comment.likedByCurrentUser
               ? "Unlike"
               : "Like"}
+        </button>
+      )}
+
+      {showReplyButton && (
+        <button
+          type="button"
+          onClick={onReply}
+          className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/60 transition-all hover:border-sky-300/20 hover:bg-sky-400/10 hover:text-sky-100"
+        >
+          Reply
         </button>
       )}
 

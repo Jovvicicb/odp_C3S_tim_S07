@@ -57,6 +57,14 @@ export default function PostDetailsPage() {
     navigate(`/posts/${postId}/edit`);
   };
 
+  const handleCreateReply = (parentId: number, content: string) => {
+    if (!postDetails) {
+      return Promise.resolve(false);
+    }
+
+    return handleCreateComment(postDetails.id, content, parentId);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -103,6 +111,7 @@ export default function PostDetailsPage() {
         onPageChange={setCommentsPage}
         onSortChange={setCommentsSort}
         onCreateComment={handleCreateComment}
+        onCreateReply={handleCreateReply}
         onLikeComment={handleLikeComment}
         onUnlikeComment={handleUnlikeComment}
       />
