@@ -13,6 +13,7 @@ import { PostFormIntro } from "./PostFormIntro";
 import { PostImageInput } from "./PostImageInput";
 import { usePostImageInput } from "../../../hooks/posts/form/usePostImageInput";
 import { SubmitButton } from "../../ui/SubmitButton";
+import { PostMarkdownEditor } from "./PostMarkdownEditor";
 
 export default function CreatePostForm() {
   const { communityId } = useParams();
@@ -103,27 +104,7 @@ export default function CreatePostForm() {
           />
         </div>
 
-        <div>
-          <label
-            htmlFor="post-content"
-            className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35"
-          >
-            Content
-          </label>
-
-          <textarea
-            id="post-content"
-            name="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={8}
-            minLength={10}
-            maxLength={10000}
-            required
-            placeholder="Write your post content..."
-            className="w-full resize-none rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm leading-6 text-white placeholder-white/20 outline-none transition-all focus:border-sky-300/40 focus:bg-white/6 focus:shadow-lg focus:shadow-sky-500/5"
-          />
-        </div>
+        <PostMarkdownEditor value={content} onChange={setContent} />
 
         <PostImageInput
           fileKey={fileKey}

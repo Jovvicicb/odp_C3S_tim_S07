@@ -3,26 +3,33 @@ import { CommentValidationMessages } from "../../constants/messages/comment/Comm
 
 type Props = {
   title?: string;
+  description?: string;
   placeholder?: string;
   submitLabel?: string;
   loading?: boolean;
+  compact?: boolean;
   onSubmit: (content: string) => Promise<boolean>;
 };
 
 export function CommentForm({
   title = "Add a comment",
+  description = "Share your thoughts with the discussion.",
   placeholder = "Write your comment...",
   submitLabel = "Post comment",
   loading = false,
+  compact = false,
   onSubmit,
 }: Props) {
   const [content, setContent] = useState("");
   const [localError, setLocalError] = useState("");
 
-  const handleSubmit = async () => {
-    const trimmedContent = content.trim();
+  const characterLimit = 2000;
+  const trimmedContent = content.trim();
+  const isEmpty = trimmedContent.length === 0;
+  const isNearLimit = content.length >= characterLimit * 0.9;
 
-    if (!trimmedContent) {
+  const handleSubmit = async () => {
+    if (isEmpty) {
       setLocalError(CommentValidationMessages.contentRequired);
       return;
     }
@@ -37,8 +44,38 @@ export function CommentForm({
   };
 
   return (
-    <div className="rounded-3xl border border-white/8 bg-white/3 p-5">
-      <h3 className="text-sm font-semibold text-white">{title}</h3>
+    <div
+      className={`rounded-3xl border border-white/8 bg-white/3 shadow-inner shadow-black/10 ${
+        compact ? "p-4" : "p-5"
+      }`}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-sky-300 shadow-[0_0_14px_rgba(125,211,252,0.75)]" />
+
+            <h3 className="text-sm font-bold tracking-tight text-white">
+              {title}
+            </h3>
+          </div>
+
+          {description && (
+            <p className="mt-2 text-xs leading-5 text-white/35">
+              {description}
+            </p>
+          )}
+        </div>
+
+        <span
+          className={`w-fit rounded-xl border px-2.5 py-1 text-[11px] font-semibold ${
+            isNearLimit
+              ? "border-amber-400/20 bg-amber-500/10 text-amber-200"
+              : "border-white/10 bg-white/5 text-white/30"
+          }`}
+        >
+          {content.length}/{characterLimit}
+        </span>
+      </div>
 
       <textarea
         value={content}
@@ -48,23 +85,26 @@ export function CommentForm({
           setLocalError("");
         }}
         placeholder={placeholder}
-        maxLength={2000}
-        rows={4}
-        className="mt-4 w-full resize-none rounded-2xl border border-white/10 bg-[#07111f] px-4 py-3 text-sm leading-6 text-white/80 outline-none transition-all placeholder:text-white/25 hover:border-sky-300/25 focus:border-sky-300/40 disabled:cursor-not-allowed disabled:opacity-60"
+        maxLength={characterLimit}
+        rows={compact ? 3 : 4}
+        className="mt-4 w-full resize-none rounded-2xl border border-white/10 bg-[#07111f]/90 px-4 py-3 text-sm leading-6 text-white/80 outline-none transition-all placeholder:text-white/25 hover:border-sky-300/25 focus:border-sky-300/40 focus:bg-[#081522] disabled:cursor-not-allowed disabled:opacity-60"
       />
 
-      <p className="mt-2 text-right text-xs text-white/25">
-        {content.length}/2000
-      </p>
+      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          {localError ? (
+            <p className="text-xs font-medium text-red-300">{localError}</p>
+          ) : (
+            <p className="text-xs text-white/25">
+              Be respectful. Comments are visible to everyone who can view this
+              post.
+            </p>
+          )}
+        </div>
 
-      {localError && (
-        <p className="mt-2 text-xs font-medium text-red-300">{localError}</p>
-      )}
-
-      <div className="mt-4 flex justify-end">
         <button
           type="button"
-          disabled={loading}
+          disabled={loading || isEmpty}
           onClick={() => void handleSubmit()}
           className="rounded-2xl border border-sky-300/20 bg-sky-400/10 px-5 py-2.5 text-xs font-bold text-sky-100 transition-all hover:bg-sky-400/15 disabled:cursor-not-allowed disabled:opacity-50"
         >

@@ -57,6 +57,7 @@ export default function PostDetailsPage() {
     reloadPostDetails: reload,
     setPostDetails,
   });
+
   const handleEditPost = (postId: number) => {
     navigate(`/posts/${postId}/edit`);
   };
