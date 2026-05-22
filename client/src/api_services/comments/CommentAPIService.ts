@@ -52,4 +52,28 @@ export const commentApi: ICommentAPIService = {
       .then((r) => r.data)
       .catch((e) => err(e, CommentMessages.unlikeFailed));
   },
+
+
+  async delete(id: number) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${id}`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommentMessages.deleteFailed));
+  },
+
+  async flag(id: number) {
+    return axios
+      .patch<ApiResponse<void>>(`${BASE}/${id}/flag`, {}, { headers: authHeader() })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommentMessages.flagFailed));
+  },
+
+  async unflag(id: number) {
+    return axios
+      .patch<ApiResponse<void>>(`${BASE}/${id}/unflag`, {}, { headers: authHeader() })
+      .then((r) => r.data)
+      .catch((e) => err(e, CommentMessages.unflagFailed));
+  },
 };

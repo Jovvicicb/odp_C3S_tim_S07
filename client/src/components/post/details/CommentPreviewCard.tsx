@@ -6,18 +6,28 @@ type Props = {
   comment: CommentTreeDto;
   loadingCommentLikeId: number | null;
   loadingCommentCreate: boolean;
+  loadingCommentDeleteId: number | null;
+  loadingCommentFlagId: number | null;
   onLikeComment: (commentId: number) => void;
   onUnlikeComment: (commentId: number) => void;
   onCreateReply: (parentId: number, content: string) => Promise<boolean>;
+  onDeleteComment: (commentId: number) => void;
+  onFlagComment: (commentId: number) => void;
+  onUnflagComment: (commentId: number) => void;
 };
 
 export function CommentPreviewCard({
   comment,
   loadingCommentLikeId,
   loadingCommentCreate,
+  loadingCommentDeleteId,
+  loadingCommentFlagId,
   onLikeComment,
   onUnlikeComment,
   onCreateReply,
+  onDeleteComment,
+  onFlagComment,
+  onUnflagComment,
 }: Props) {
   const [replyOpen, setReplyOpen] = useState(false);
 
@@ -42,9 +52,14 @@ export function CommentPreviewCard({
       <CommentActions
         comment={comment}
         loadingCommentLikeId={loadingCommentLikeId}
+        loadingCommentDeleteId={loadingCommentDeleteId}
+        loadingCommentFlagId={loadingCommentFlagId}
         onLikeComment={onLikeComment}
         onUnlikeComment={onUnlikeComment}
         onReply={() => setReplyOpen((current) => !current)}
+        onDeleteComment={onDeleteComment}
+        onFlagComment={onFlagComment}
+        onUnflagComment={onUnflagComment}
         showReplyButton={comment.permissions.canReply}
         showRepliesCount
       />
@@ -77,8 +92,13 @@ export function CommentPreviewCard({
               <CommentActions
                 comment={reply}
                 loadingCommentLikeId={loadingCommentLikeId}
+                loadingCommentDeleteId={loadingCommentDeleteId}
+                loadingCommentFlagId={loadingCommentFlagId}
                 onLikeComment={onLikeComment}
                 onUnlikeComment={onUnlikeComment}
+                onDeleteComment={onDeleteComment}
+                onFlagComment={onFlagComment}
+                onUnflagComment={onUnflagComment}
               />
             </div>
           ))}
@@ -114,25 +134,36 @@ function CommentHeader({
     </div>
   );
 }
-
 function CommentActions({
   comment,
   loadingCommentLikeId,
+  loadingCommentDeleteId,
+  loadingCommentFlagId,
   onLikeComment,
   onUnlikeComment,
+  onDeleteComment,
+  onFlagComment,
+  onUnflagComment,
   onReply,
   showReplyButton = false,
   showRepliesCount = false,
 }: {
   comment: CommentTreeDto;
   loadingCommentLikeId: number | null;
+  loadingCommentDeleteId: number | null;
+  loadingCommentFlagId: number | null;
   onLikeComment: (commentId: number) => void;
   onUnlikeComment: (commentId: number) => void;
+  onDeleteComment: (commentId: number) => void;
+  onFlagComment: (commentId: number) => void;
+  onUnflagComment: (commentId: number) => void;
   onReply?: () => void;
   showReplyButton?: boolean;
   showRepliesCount?: boolean;
 }) {
   const likeLoading = loadingCommentLikeId === comment.id;
+  const deleteLoading = loadingCommentDeleteId === comment.id;
+  const flagLoading = loadingCommentFlagId === comment.id;
 
   return (
     <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-white/35">
@@ -169,6 +200,39 @@ function CommentActions({
           className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/60 transition-all hover:border-sky-300/20 hover:bg-sky-400/10 hover:text-sky-100"
         >
           Reply
+        </button>
+      )}
+
+      {comment.permissions.canFlag && (
+        <button
+          type="button"
+          disabled={flagLoading}
+          onClick={() => {
+            if (comment.isFlagged) {
+              onUnflagComment(comment.id);
+              return;
+            }
+
+            onFlagComment(comment.id);
+          }}
+          className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+            comment.isFlagged
+              ? "border-amber-400/20 bg-amber-500/10 text-amber-200 hover:bg-amber-500/15"
+              : "border-white/10 bg-white/5 text-white/60 hover:border-amber-400/20 hover:bg-amber-500/10 hover:text-amber-200"
+          }`}
+        >
+          {flagLoading ? "Saving..." : comment.isFlagged ? "Unflag" : "Flag"}
+        </button>
+      )}
+
+      {comment.permissions.canDelete && (
+        <button
+          type="button"
+          disabled={deleteLoading}
+          onClick={() => onDeleteComment(comment.id)}
+          className="rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-200 transition-all hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {deleteLoading ? "Deleting..." : "Delete"}
         </button>
       )}
 

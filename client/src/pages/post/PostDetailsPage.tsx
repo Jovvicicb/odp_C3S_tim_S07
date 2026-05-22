@@ -8,7 +8,7 @@ import { PostCommentsSection } from "../../components/post/details/PostCommentsS
 
 import { usePostDetails } from "../../hooks/posts/details/usePostDetails";
 import { usePostDetailsActions } from "../../hooks/posts/details/usePostDetailsActions";
-import { useCommentActions } from "../../hooks/comments/useCommentActions";
+import { useCommentActions } from "../../hooks/comments/details/useCommentActions";
 
 export default function PostDetailsPage() {
   const { id } = useParams();
@@ -45,14 +45,18 @@ export default function PostDetailsPage() {
     handleCreateComment,
     handleLikeComment,
     handleUnlikeComment,
+    handleDeleteComment,
+    handleFlagComment,
+    handleUnflagComment,
     loadingCommentCreate,
     loadingCommentLikeId,
+    loadingCommentDeleteId,
+    loadingCommentFlagId,
     commentActionError,
   } = useCommentActions({
     reloadPostDetails: reload,
     setPostDetails,
   });
-
   const handleEditPost = (postId: number) => {
     navigate(`/posts/${postId}/edit`);
   };
@@ -108,12 +112,17 @@ export default function PostDetailsPage() {
         canComment={postDetails.permissions.canComment}
         loadingCommentCreate={loadingCommentCreate}
         loadingCommentLikeId={loadingCommentLikeId}
+        loadingCommentDeleteId={loadingCommentDeleteId}
+        loadingCommentFlagId={loadingCommentFlagId}
         onPageChange={setCommentsPage}
         onSortChange={setCommentsSort}
         onCreateComment={handleCreateComment}
         onCreateReply={handleCreateReply}
         onLikeComment={handleLikeComment}
         onUnlikeComment={handleUnlikeComment}
+        onDeleteComment={handleDeleteComment}
+        onFlagComment={handleFlagComment}
+        onUnflagComment={handleUnflagComment}
       />
     </div>
   );

@@ -15,12 +15,17 @@ type Props = {
   canComment: boolean;
   loadingCommentCreate: boolean;
   loadingCommentLikeId: number | null;
+  loadingCommentDeleteId: number | null;
+  loadingCommentFlagId: number | null;
   onPageChange: (page: number) => void;
   onSortChange: (sort: CommentSortType) => void;
   onCreateComment: (postId: number, content: string) => Promise<boolean>;
   onCreateReply: (parentId: number, content: string) => Promise<boolean>;
   onLikeComment: (commentId: number) => void;
   onUnlikeComment: (commentId: number) => void;
+  onDeleteComment: (commentId: number) => void;
+  onFlagComment: (commentId: number) => void;
+  onUnflagComment: (commentId: number) => void;
 };
 export function PostCommentsSection({
   postId,
@@ -32,12 +37,18 @@ export function PostCommentsSection({
   canComment,
   loadingCommentCreate,
   loadingCommentLikeId,
+  loadingCommentDeleteId,
+  loadingCommentFlagId,
+
   onPageChange,
   onSortChange,
   onCreateComment,
   onCreateReply,
   onLikeComment,
   onUnlikeComment,
+  onDeleteComment,
+  onFlagComment,
+  onUnflagComment,
 }: Props) {
   return (
     <section className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-6 shadow-xl shadow-sky-950/10">
@@ -92,9 +103,14 @@ export function PostCommentsSection({
                 comment={comment}
                 loadingCommentCreate={loadingCommentCreate}
                 loadingCommentLikeId={loadingCommentLikeId}
+                loadingCommentDeleteId={loadingCommentDeleteId}
+                loadingCommentFlagId={loadingCommentFlagId}
                 onCreateReply={onCreateReply}
                 onLikeComment={onLikeComment}
                 onUnlikeComment={onUnlikeComment}
+                onDeleteComment={onDeleteComment}
+                onFlagComment={onFlagComment}
+                onUnflagComment={onUnflagComment}
               />
             ))}
           </div>
