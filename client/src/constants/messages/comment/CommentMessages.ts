@@ -6,4 +6,5 @@ export const CommentMessages = {
   deleteFailed: "Failed to delete comment",
   flagFailed: "Failed to flag comment",
   unflagFailed: "Failed to unflag comment",
+  updateFailed: "Failed to update comment",
 };

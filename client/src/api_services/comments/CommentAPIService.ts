@@ -37,6 +37,22 @@ export const commentApi: ICommentAPIService = {
       .catch((e) => err(e, CommentMessages.createFailed));
   },
 
+  async update(id: number, content: string) {
+    return axios
+      .put<ApiResponse<void>>(
+        `${BASE}/${id}`,
+        {
+          content,
+        },
+        {
+          headers: authHeader(),
+        },
+      )
+      .then((r) => r.data)
+      .catch((e) => err(e, CommentMessages.updateFailed));
+  },
+    
+
   async like(id: number) {
     return axios
       .post<ApiResponse<void>>(`${BASE}/${id}/like`, {}, { headers: authHeader() })

@@ -2,6 +2,7 @@ import type { ApiResponse } from "../../types/common/ApiResponse";
 
 export interface ICommentAPIService {
   create(postId: number, content: string, parentId?: number | null): Promise<ApiResponse<void>>;
+  update(id: number, content: string): Promise<ApiResponse<void>>;
   like(id: number): Promise<ApiResponse<void>>;
   unlike(id: number): Promise<ApiResponse<void>>;
   delete(id: number): Promise<ApiResponse<void>>;

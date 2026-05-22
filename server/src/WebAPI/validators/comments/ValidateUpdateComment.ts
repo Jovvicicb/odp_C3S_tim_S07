@@ -7,7 +7,10 @@ import { UpdateCommentInput } from "../../types/comments/UpdateCommentInput";
 export const validateUpdateComment = (
     input: UpdateCommentInput
 ): ValidateUpdateCommentResult => {
-  const content = StringNormalizer.normalizeSpaces(input.content);
+  const content =
+  typeof input.content === "string"
+    ? StringNormalizer.normalizeSpaces(input.content)
+    : "";
 
   if (!content) {
     return {

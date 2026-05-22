@@ -17,6 +17,7 @@ type Props = {
   loadingCommentLikeId: number | null;
   loadingCommentDeleteId: number | null;
   loadingCommentFlagId: number | null;
+  loadingCommentUpdateId: number | null;
   onPageChange: (page: number) => void;
   onSortChange: (sort: CommentSortType) => void;
   onCreateComment: (postId: number, content: string) => Promise<boolean>;
@@ -26,6 +27,7 @@ type Props = {
   onDeleteComment: (commentId: number) => void;
   onFlagComment: (commentId: number) => void;
   onUnflagComment: (commentId: number) => void;
+  onUpdateComment: (commentId: number, content: string) => Promise<boolean>;
 };
 
 export function PostCommentsSection({
@@ -40,6 +42,7 @@ export function PostCommentsSection({
   loadingCommentLikeId,
   loadingCommentDeleteId,
   loadingCommentFlagId,
+  loadingCommentUpdateId,
   onPageChange,
   onSortChange,
   onCreateComment,
@@ -49,6 +52,7 @@ export function PostCommentsSection({
   onDeleteComment,
   onFlagComment,
   onUnflagComment,
+  onUpdateComment,
 }: Props) {
   const hasComments = comments.items.length > 0;
 
@@ -138,11 +142,13 @@ export function PostCommentsSection({
                   comment={comment}
                   loadingCommentCreate={loadingCommentCreate}
                   loadingCommentLikeId={loadingCommentLikeId}
+                  loadingCommentUpdateId={loadingCommentUpdateId}
                   loadingCommentDeleteId={loadingCommentDeleteId}
                   loadingCommentFlagId={loadingCommentFlagId}
                   onCreateReply={onCreateReply}
                   onLikeComment={onLikeComment}
                   onUnlikeComment={onUnlikeComment}
+                  onUpdateComment={onUpdateComment}
                   onDeleteComment={onDeleteComment}
                   onFlagComment={onFlagComment}
                   onUnflagComment={onUnflagComment}

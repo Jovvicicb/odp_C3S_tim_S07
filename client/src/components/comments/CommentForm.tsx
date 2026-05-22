@@ -8,6 +8,9 @@ type Props = {
   submitLabel?: string;
   loading?: boolean;
   compact?: boolean;
+  initialValue?: string;
+  cancelLabel?: string;
+  onCancel?: () => void;
   onSubmit: (content: string) => Promise<boolean>;
 };
 
@@ -18,9 +21,12 @@ export function CommentForm({
   submitLabel = "Post comment",
   loading = false,
   compact = false,
+  initialValue = "",
+  cancelLabel = "Cancel",
+  onCancel,
   onSubmit,
 }: Props) {
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(initialValue);
   const [localError, setLocalError] = useState("");
 
   const characterLimit = 2000;
@@ -45,7 +51,7 @@ export function CommentForm({
 
   return (
     <div
-      className={`rounded-3xl border border-white/8 bg-white/3 shadow-inner shadow-black/10 ${
+      className={`rounded-3xl border border-white/8 bg-white/[0.03] shadow-inner shadow-black/10 ${
         compact ? "p-4" : "p-5"
       }`}
     >
@@ -102,14 +108,27 @@ export function CommentForm({
           )}
         </div>
 
-        <button
-          type="button"
-          disabled={loading || isEmpty}
-          onClick={() => void handleSubmit()}
-          className="rounded-2xl border border-sky-300/20 bg-sky-400/10 px-5 py-2.5 text-xs font-bold text-sky-100 transition-all hover:bg-sky-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading ? "Posting..." : submitLabel}
-        </button>
+        <div className="flex items-center justify-end gap-2">
+          {onCancel && (
+            <button
+              type="button"
+              disabled={loading}
+              onClick={onCancel}
+              className="rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-bold text-white/55 transition-all hover:bg-white/8 hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {cancelLabel}
+            </button>
+          )}
+
+          <button
+            type="button"
+            disabled={loading || isEmpty}
+            onClick={() => void handleSubmit()}
+            className="rounded-2xl border border-sky-300/20 bg-sky-400/10 px-5 py-2.5 text-xs font-bold text-sky-100 transition-all hover:bg-sky-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading ? "Saving..." : submitLabel}
+          </button>
+        </div>
       </div>
     </div>
   );

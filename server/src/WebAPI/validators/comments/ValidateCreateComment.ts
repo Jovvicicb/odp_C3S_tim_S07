@@ -8,7 +8,10 @@ import { CreateCommentInput } from "../../types/comments/CreateCommentInput";
 
 export const validateCreateComment = (input: CreateCommentInput): ValidateCreateCommentResult => {
 
-  const content = StringNormalizer.normalizeSpaces(input.content);
+  const content =
+  typeof input.content === "string"
+    ? StringNormalizer.normalizeSpaces(input.content)
+    : "";
 
   if (!content) {
     return {

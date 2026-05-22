@@ -45,11 +45,13 @@ export default function PostDetailsPage() {
     handleCreateComment,
     handleLikeComment,
     handleUnlikeComment,
+    handleUpdateComment,
     handleDeleteComment,
     handleFlagComment,
     handleUnflagComment,
     loadingCommentCreate,
     loadingCommentLikeId,
+    loadingCommentUpdateId,
     loadingCommentDeleteId,
     loadingCommentFlagId,
     commentActionError,
@@ -103,6 +105,7 @@ export default function PostDetailsPage() {
         onEditPost={handleEditPost}
         onDeletePost={handleDeletePost}
       />
+
       <PostCommentsSection
         postId={postDetails.id}
         comments={postDetails.comments}
@@ -113,6 +116,7 @@ export default function PostDetailsPage() {
         canComment={postDetails.permissions.canComment}
         loadingCommentCreate={loadingCommentCreate}
         loadingCommentLikeId={loadingCommentLikeId}
+        loadingCommentUpdateId={loadingCommentUpdateId}
         loadingCommentDeleteId={loadingCommentDeleteId}
         loadingCommentFlagId={loadingCommentFlagId}
         onPageChange={setCommentsPage}
@@ -121,6 +125,7 @@ export default function PostDetailsPage() {
         onCreateReply={handleCreateReply}
         onLikeComment={handleLikeComment}
         onUnlikeComment={handleUnlikeComment}
+        onUpdateComment={handleUpdateComment}
         onDeleteComment={handleDeleteComment}
         onFlagComment={handleFlagComment}
         onUnflagComment={handleUnflagComment}
