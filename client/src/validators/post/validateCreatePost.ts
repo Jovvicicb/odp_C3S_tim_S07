@@ -2,7 +2,7 @@ import { FileValidationMessages } from "../../constants/messages/common/FileVali
 import { PostValidationMessages } from "../../constants/messages/post/PostValidationMessages";
 import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
-import type { CreatePostInput } from "../../types/post/CreatePostInput";
+import type { CreatePostInput } from "../../types/posts/CreatePostInput";
 
 export function validateCreatePost(input: CreatePostInput): ValidationResult {
   const normalizedTitle = StringNormalizer.normalizeSpaces(input.title);

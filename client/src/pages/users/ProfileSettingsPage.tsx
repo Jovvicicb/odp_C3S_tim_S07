@@ -1,4 +1,4 @@
-import EditProfileForm from "../../components/user/EditProfileForm";
+import EditProfileForm from "../../components/users/EditProfileForm";
 import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { useUserProfile } from "../../hooks/users/useUserProfile";

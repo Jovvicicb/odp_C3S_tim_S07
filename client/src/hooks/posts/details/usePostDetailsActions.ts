@@ -2,7 +2,7 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
 import { postApi } from "../../../api_services/posts/PostAPIService";
 import { PostMessages } from "../../../constants/messages/post/PostMessages";
-import type { PostDetailsDto } from "../../../models/post/PostDetailsDto";
+import type { PostDetailsDto } from "../../../models/posts/PostDetailsDto";
 import { useToast } from "../../toast/useToast";
 
 

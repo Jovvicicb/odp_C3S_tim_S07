@@ -6,8 +6,8 @@ import {
   Spinner,
 } from "../../components/ui/UI";
 
-import { SearchUsersToolbar } from "../../components/user/search/SearchUsersToolbar";
-import { SearchUsersList } from "../../components/user/search/SearchUsersList";
+import { SearchUsersToolbar } from "../../components/users/search/SearchUsersToolbar";
+import { SearchUsersList } from "../../components/users/search/SearchUsersList";
 
 import { useSearchUsers } from "../../hooks/users/useSearchUsers";
 import { useSearchUsersActions } from "../../hooks/users/search/useSearchUsersActions";

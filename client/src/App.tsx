@@ -8,18 +8,18 @@ import NotFoundPage from "./pages/not_found/NotFoundPage";
 import FeedPage from "./pages/dashboard/FeedPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import CreateCommunity from "./pages/community/CreateCommunityPage";
-import CommunityDetailsPage from "./pages/community/CommunityDetailsPage";
+import CreateCommunity from "./pages/communities/CreateCommunityPage";
+import CommunityDetailsPage from "./pages/communities/CommunityDetailsPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
 import ProfileSettingsPage from "./pages/users/ProfileSettingsPage";
-import MyCommunitiesPage from "./pages/community/MyCommunitiesPage";
-import DiscoverCommunitiesPage from "./pages/community/DiscoverCommunitiesPage";
+import MyCommunitiesPage from "./pages/communities/MyCommunitiesPage";
+import DiscoverCommunitiesPage from "./pages/communities/DiscoverCommunitiesPage";
 import FollowersPage from "./pages/users/FollowersPage";
 import FollowingPage from "./pages/users/FollowingPage";
 import SearchUsersPage from "./pages/users/SearchUsersPage";
-import CreatePostPage from "./pages/post/CreatePostPage";
-import PostDetailsPage from "./pages/post/PostDetailsPage";
+import CreatePostPage from "./pages/posts/CreatePostPage";
+import PostDetailsPage from "./pages/posts/PostDetailsPage";
 
 export default function App() {
   return (

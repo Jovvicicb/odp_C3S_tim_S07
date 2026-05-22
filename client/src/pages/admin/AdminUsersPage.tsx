@@ -5,12 +5,12 @@ import {
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
-import { UserCard } from "../../components/user/UserCard";
+import { UserCard } from "../../components/users/UserCard";
 import { useUsers } from "../../hooks/users/useUsers";
 import { useUpdateUserRole } from "../../hooks/users/useUpdateUserRole";
 import { useToast } from "../../hooks/toast/useToast";
 import { UserMessages } from "../../constants/messages/user/UserMessages";
-import type { UserRole } from "../../types/user/UserRole";
+import type { UserRole } from "../../types/users/UserRole";
 
 export default function AdminUsersPage() {
   const {

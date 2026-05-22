@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { postApi } from "../../../api_services/posts/PostAPIService";
 import { PostMessages } from "../../../constants/messages/post/PostMessages";
-import type { PostDetailsDto } from "../../../models/post/PostDetailsDto";
-import type { CommentSortType } from "../../../types/comment/CommentSortType";
+import type { PostDetailsDto } from "../../../models/posts/PostDetailsDto";
+import type { CommentSortType } from "../../../types/comments/CommentSortType";
 
 export function usePostDetails(
   postId: number | null,

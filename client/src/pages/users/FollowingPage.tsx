@@ -8,7 +8,7 @@ import {
   Spinner,
 } from "../../components/ui/UI";
 
-import { FollowingList } from "../../components/user/follow/FollowingList";
+import { FollowingList } from "../../components/users/follow/FollowingList";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { useUserFollowList } from "../../hooks/users/useUserFollowList";

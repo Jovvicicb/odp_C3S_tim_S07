@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { postApi } from "../../api_services/posts/PostAPIService";
-import type { PostSortType } from "../../types/post/PostSortType";
-import type { PostWithDetailsDto } from "../../models/post/PostWithDetailsDto";
+import type { PostSortType } from "../../types/posts/PostSortType";
+import type { PostWithDetailsDto } from "../../models/posts/PostWithDetailsDto";
 import { PostMessages } from "../../constants/messages/post/PostMessages";
 
 export function useCommunityPosts(

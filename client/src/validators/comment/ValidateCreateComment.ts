@@ -1,7 +1,7 @@
 import { CommentValidationMessages } from "../../constants/messages/comment/CommentValidationMessages";
 import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
-import type { CreateCommentInput } from "../../types/comment/CreateCommentInput";
+import type { CreateCommentInput } from "../../types/comments/CreateCommentInput";
 
 export type ValidateCreateCommentResult = ValidationResult & {
   normalizedContent?: string;

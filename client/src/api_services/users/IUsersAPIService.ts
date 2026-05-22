@@ -1,7 +1,7 @@
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
-import type { UserDto } from "../../models/user/UserDto";
+import type { UserDto } from "../../models/users/UserDto";
 import type { ApiResponse } from "../../types/common/ApiResponse";
-import type { UserRole } from "../../types/user/UserRole";
+import type { UserRole } from "../../types/users/UserRole";
 
 export interface IUsersAPIService {
   getAll(page: number, limit: number): Promise<ApiResponse<PaginatedListDto<UserDto>>>;

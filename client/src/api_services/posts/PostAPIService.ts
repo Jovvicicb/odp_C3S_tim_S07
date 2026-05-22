@@ -3,11 +3,11 @@ import type { IPostAPIService } from "./IPostAPIService";
 import type { ApiResponse } from "../../types/common/ApiResponse";
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import { readItem } from "../../helpers/local_storage";
-import type { PostWithDetailsDto } from "../../models/post/PostWithDetailsDto";
+import type { PostWithDetailsDto } from "../../models/posts/PostWithDetailsDto";
 import { PostMessages } from "../../constants/messages/post/PostMessages";
-import type { PostDto } from "../../models/post/PostDto";
-import type { PostDetailsDto } from "../../models/post/PostDetailsDto";
-import type { CommentSortType } from "../../types/comment/CommentSortType";
+import type { PostDto } from "../../models/posts/PostDto";
+import type { PostDetailsDto } from "../../models/posts/PostDetailsDto";
+import type { CommentSortType } from "../../types/comments/CommentSortType";
 
 const BASE = import.meta.env.VITE_API_URL + "posts";
 

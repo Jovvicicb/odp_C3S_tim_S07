@@ -1,4 +1,4 @@
-import type { CommentActionHookProps } from "./CommentActionTypes";
+import type { CommentActionHookProps } from "./CommentActionHookTypes";
 import { useCommentLikeActions } from "./useCommentLikeActions";
 import { useCommentModerationActions } from "./useCommentModerationActions";
 import { useCreateCommentAction } from "./useCreateCommentAction";

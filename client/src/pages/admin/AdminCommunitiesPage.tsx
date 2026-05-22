@@ -5,8 +5,8 @@ import {
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
-import { CommunityCard } from "../../components/community/CommunityCard";
-import { useAdminCommunities } from "../../hooks/community/useAdminCommunities";
+import { CommunityCard } from "../../components/communities/CommunityCard";
+import { useAdminCommunities } from "../../hooks/communities/useAdminCommunities";
 
 export default function AdminCommunitiesPage() {
   const { communities, loading, error, page, limit, total, setPage } =

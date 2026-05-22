@@ -2,7 +2,7 @@ import { FileValidationMessages } from "../../constants/messages/common/FileVali
 import { CommunityValidationMessages } from "../../constants/messages/community/CommunityValidationMessages";
 import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
-import type { CreateCommunityInput } from "../../types/community/CreateCommunityInput";
+import type { CreateCommunityInput } from "../../types/communities/CreateCommunityInput";
 
 export function validateCreateCommunity(
   input: CreateCommunityInput

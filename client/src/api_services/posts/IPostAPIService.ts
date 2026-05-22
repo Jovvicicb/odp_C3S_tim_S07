@@ -1,10 +1,10 @@
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
-import type { PostDetailsDto } from "../../models/post/PostDetailsDto";
-import type { PostDto } from "../../models/post/PostDto";
-import type { PostWithDetailsDto } from "../../models/post/PostWithDetailsDto";
-import type { CommentSortType } from "../../types/comment/CommentSortType";
+import type { PostDetailsDto } from "../../models/posts/PostDetailsDto";
+import type { PostDto } from "../../models/posts/PostDto";
+import type { PostWithDetailsDto } from "../../models/posts/PostWithDetailsDto";
+import type { CommentSortType } from "../../types/comments/CommentSortType";
 import type { ApiResponse } from "../../types/common/ApiResponse";
-import type { PostSortType } from "../../types/post/PostSortType";
+import type { PostSortType } from "../../types/posts/PostSortType";
 
 export interface IPostAPIService {
     create(formData: FormData): Promise<ApiResponse<PostDto>>;

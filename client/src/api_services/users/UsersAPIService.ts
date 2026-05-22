@@ -1,6 +1,6 @@
 import axios from "axios";
 import type { IUsersAPIService } from "./IUsersAPIService";
-import type { UserDto } from "../../models/user/UserDto";
+import type { UserDto } from "../../models/users/UserDto";
 import { readItem } from "../../helpers/local_storage";
 import type { ApiResponse } from "../../types/common/ApiResponse";
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";

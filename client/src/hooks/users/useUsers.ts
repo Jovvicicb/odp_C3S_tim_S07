@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { usersApi } from "../../api_services/users/UsersAPIService";
-import type { UserDto } from "../../models/user/UserDto";
+import type { UserDto } from "../../models/users/UserDto";
 import { UserMessages } from "../../constants/messages/user/UserMessages";
 
 export function useUsers(initialPage = 1, initialLimit = 10) {

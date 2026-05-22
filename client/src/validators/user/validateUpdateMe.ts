@@ -2,7 +2,7 @@ import { FileValidationMessages } from "../../constants/messages/common/FileVali
 import { UserValidationMessages } from "../../constants/messages/user/UserValidationMessages";
 import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
-import type { UpdateMeInput } from "../../types/user/UpdateMeInput";
+import type { UpdateMeInput } from "../../types/users/UpdateMeInput";
 
 export function validateUpdateMe(input: UpdateMeInput): ValidationResult {
   const normalizedUsername = StringNormalizer.trim(input.username);
