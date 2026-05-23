@@ -61,7 +61,7 @@ export function CommentPreviewCard({
   };
 
   return (
-    <article className="rounded-3xl border border-white/8 bg-white/[0.03] p-5 transition-all hover:border-sky-300/15 hover:bg-white/[0.04]">
+    <article className="rounded-3xl border border-white/8 bg-white/3 p-5 transition-all hover:border-sky-300/15 hover:bg-white/4">
       <CommentHeader comment={comment} label="Comment" />
 
       {editing ? (

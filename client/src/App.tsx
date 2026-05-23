@@ -21,6 +21,7 @@ import SearchUsersPage from "./pages/users/SearchUsersPage";
 import CreatePostPage from "./pages/posts/CreatePostPage";
 import PostDetailsPage from "./pages/posts/PostDetailsPage";
 import EditPostPage from "./pages/posts/EditPostPage";
+import AdminTagsPage from "./pages/admin/AdminTagsPage";
 
 export default function App() {
   return (
@@ -168,6 +169,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <AdminCommunitiesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/tags"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminTagsPage />
           </ProtectedRoute>
         }
       />

@@ -60,6 +60,7 @@ export function Layout({ children }: { children: ReactNode }) {
     { to: "/admin", label: "Dashboard" },
     { to: "/admin/users", label: "Users" },
     { to: "/admin/communities", label: "Communities" },
+    { to: "/admin/tags", label: "Tags" },
   ];
 
   const initial = user?.username?.[0]?.toUpperCase() ?? "P";
