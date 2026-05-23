@@ -13,7 +13,6 @@ import { validatePagination } from "../validators/common/ValidatePagination";
 import { GetUsersDto } from "../../Domain/DTOs/users/GetUsersDto";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { UserLogMessages } from "../../Domain/constants/messages/user/UserLogMessages";
-import { validateUsername } from "../validators/users/ValidateUsername";
 import { UpdateMeInput } from "../types/users/UpdateMeInput";
 import { validateUpdateMe } from "../validators/users/ValidateUpdateMe";
 import { IpHelper } from "../../Shared/helpers/IpHelper";

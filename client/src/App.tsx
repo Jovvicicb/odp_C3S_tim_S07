@@ -20,6 +20,7 @@ import FollowingPage from "./pages/users/FollowingPage";
 import SearchUsersPage from "./pages/users/SearchUsersPage";
 import CreatePostPage from "./pages/posts/CreatePostPage";
 import PostDetailsPage from "./pages/posts/PostDetailsPage";
+import EditPostPage from "./pages/posts/EditPostPage";
 
 export default function App() {
   return (
@@ -122,6 +123,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
             <CreatePostPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/posts/:id/edit"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <EditPostPage />
           </ProtectedRoute>
         }
       />

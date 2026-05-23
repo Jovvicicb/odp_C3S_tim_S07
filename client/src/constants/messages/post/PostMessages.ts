@@ -7,4 +7,6 @@ createSuccess: "Post created successfully",
   likeFailed: "Failed to like post",
   unlikeFailed: "Failed to unlike post",
   deleteFailed: "Failed to delete post",
+  updateFailed: "Failed to update post",
+  updateSuccess: "Post updated successfully",
 } as const;

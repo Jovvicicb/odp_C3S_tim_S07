@@ -39,6 +39,19 @@ export const postApi: IPostAPIService = {
       .catch((e: ApiClientError) => err(e, PostMessages.createFailed));
   },
 
+
+  async update(id, formData) {
+    return axios
+      .put<ApiResponse<void>>(`${BASE}/${id}`, formData, {
+        headers: {
+          ...authHeader(),
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((r) => r.data)
+      .catch((e: ApiClientError) => err(e, PostMessages.updateFailed));
+  },
+
   async getByCommunity(communityId, page = 1, limit = 10, sort = "newest") {
     return axios
       .get<ApiResponse<PaginatedListDto<PostWithDetailsDto>>>(
