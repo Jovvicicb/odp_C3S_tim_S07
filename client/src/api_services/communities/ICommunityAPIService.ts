@@ -17,6 +17,7 @@ export interface ICommunityAPIService {
   getById(id: number, membersPage: number, membersLimit: number,): Promise<ApiResponse<CommunityDetailsDto>>;
   join(id: number): Promise<ApiResponse<void>>;
   leave(id: number): Promise<ApiResponse<void>>;
+  delete(id: number): Promise<ApiResponse<void>>;
 
   getJoinRequests(communityId: number, page: number, limit: number,): Promise<ApiResponse<PaginatedListDto<CommunityMemberDetailsDto>>>;
   updateMemberRole( communityId: number, userId: number, role: CommunityMemberRole,): Promise<ApiResponse<void>>;

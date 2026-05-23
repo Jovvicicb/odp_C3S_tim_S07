@@ -19,4 +19,6 @@ export const CommunityMessages = {
   updateMemberRoleFailed: "Failed to update member role",
   updateMemberStatusFailed: "Failed to update member status",
   removeMemberFailed: "Failed to remove member",
+  deleteFailed: "Failed to delete community",
+  deleteSuccess: "Community deleted successfully",
 } as const;

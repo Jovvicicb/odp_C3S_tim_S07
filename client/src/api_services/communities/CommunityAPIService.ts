@@ -128,6 +128,15 @@ export const communityApi: ICommunityAPIService = {
       .catch((e: ApiClientError) => err(e, CommunityMessages.leaveFailed));
   },
 
+  async delete(id) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${id}`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e: ApiClientError) => err(e, CommunityMessages.deleteFailed));
+  },
+
   async getJoinRequests(communityId, page = 1, limit = 10) {
     return axios
       .get<ApiResponse<PaginatedListDto<CommunityMemberDetailsDto>>>(

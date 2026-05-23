@@ -21,6 +21,7 @@ import type { CommunityDetailsTab } from "../../types/communities/CommunityDetai
 import { CommunityDetailsHero } from "../../components/communities/details/hero/CommunityDetailsHero";
 import { CommunityLockedPanel } from "../../components/communities/details/locked/CommunityLockedPanel";
 import { CommunityMembersSection } from "../../components/communities/details/members/CommunityMembersSection";
+import { useDeleteCommunity } from "../../hooks/communities/details/useDeleteCommunity";
 
 export default function CommunityDetailsPage() {
   const { id } = useParams();
@@ -110,6 +111,12 @@ export default function CommunityDetailsPage() {
     10,
   );
 
+  const {
+    handleDeleteCommunity,
+    loadingCommunityDelete,
+    communityDeleteError,
+  } = useDeleteCommunity();
+
   const visibleActiveTab: CommunityDetailsTab =
     activeTab === "requests" && !canProcessJoinRequests ? "posts" : activeTab;
 
@@ -152,7 +159,8 @@ export default function CommunityDetailsPage() {
     postsError ||
     communityMemberError ||
     requestsError ||
-    joinRequestActionError;
+    joinRequestActionError ||
+    communityDeleteError;
 
   return (
     <div className="space-y-6">
@@ -167,9 +175,11 @@ export default function CommunityDetailsPage() {
       <CommunityDetailsHero
         community={community}
         permissions={permissions}
-        actionLoading={loadingCommunityId === community.id}
+        membershipLoading={loadingCommunityId === community.id}
+        deleteLoading={loadingCommunityDelete}
         onJoin={handleJoin}
         onLeave={handleLeave}
+        onDelete={handleDeleteCommunity}
       />
 
       {!canViewContent ? (

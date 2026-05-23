@@ -4,31 +4,32 @@ import type { CommunityViewerPermissionsDto } from "../../../../models/communiti
 import { ImageHelper } from "../../../../helpers/images/ImageHelper";
 import { SectionLabel } from "../../../ui/SectionLabel";
 
-import { CommunityMembershipButton } from "../../CommunityMembershipButton";
 import { CommunityAvatar } from "../../card/CommunityAvatar";
 import { CommunityTypeBadge } from "../../card/CommunityTypeBadge";
 import { CommunityMembershipBadge } from "../../card/CommunityMembershipBadge";
+import { CommunityHeroActions } from "./CommunityHeroActions";
 
 type Props = {
   community: CommunityDto;
   permissions: CommunityViewerPermissionsDto;
-  actionLoading?: boolean;
+  membershipLoading?: boolean;
+  deleteLoading?: boolean;
   onJoin: (communityId: number) => void;
   onLeave: (communityId: number) => void;
+  onDelete: (communityId: number) => void;
 };
-
 export function CommunityDetailsHero({
   community,
   permissions,
-  actionLoading = false,
+  membershipLoading = false,
+  deleteLoading = false,
   onJoin,
   onLeave,
+  onDelete,
 }: Props) {
   const createdAt = new Date(community.createdAt).toLocaleDateString();
   const imageUrl = ImageHelper.getImageUrl(community.avatar);
   const initial = community.name[0]?.toUpperCase() ?? "#";
-
-  const showMembershipAction = !permissions.isOwner;
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-white/8 bg-[#0b0f17]/80 shadow-xl shadow-sky-950/10">
@@ -88,16 +89,15 @@ export function CommunityDetailsHero({
             </div>
           </div>
 
-          {showMembershipAction && (
-            <div className="shrink-0">
-              <CommunityMembershipButton
-                community={community}
-                loading={actionLoading}
-                onJoin={onJoin}
-                onLeave={onLeave}
-              />
-            </div>
-          )}
+          <CommunityHeroActions
+            community={community}
+            permissions={permissions}
+            membershipLoading={membershipLoading}
+            deleteLoading={deleteLoading}
+            onJoin={onJoin}
+            onLeave={onLeave}
+            onDelete={onDelete}
+          />
         </div>
 
         <div className="mt-6 space-y-4">

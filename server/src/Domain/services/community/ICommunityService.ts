@@ -15,6 +15,6 @@ export interface ICommunityService {
   getAll(page: number, limit: number, viewerId?: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;
   getById(page: number, limit: number, communityId: number, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<CommunityDetailsDto>>;
   create(dto: CreateCommunityDto, ctx:AuditContext): Promise<ServiceResult<CreateCommunityResponseDto>>;
-  update(id: number, dto: UpdateCommunityDto, ctx:AuditContext): Promise<ServiceResult>;
-  delete(id: number, ctx:AuditContext): Promise<ServiceResult>;
+  update(id: number, dto: UpdateCommunityDto, ctx:AuditContext, requesterRole?:UserRole): Promise<ServiceResult>;
+  delete(id: number, ctx:AuditContext, requesterRole?: UserRole): Promise<ServiceResult>;
 }

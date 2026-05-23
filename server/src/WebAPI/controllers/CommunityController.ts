@@ -254,7 +254,8 @@ export class CommunityController {
 
   private async update(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
-
+    const userRole = req.user!.role;
+    
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
     const v = validateId(id);
@@ -272,9 +273,9 @@ export class CommunityController {
         return;
       }
 
-    const ctx = IpHelper.buildAuditContext(req,userId);
+    const ctx = IpHelper.buildAuditContext(req, userId);
     try{
-      const result = await this.communityService.update(id, dto, ctx);
+      const result = await this.communityService.update(id, dto, ctx, userRole);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name,CommunityLogMessages.updateFailed, err instanceof Error ? err : null);
@@ -288,6 +289,7 @@ export class CommunityController {
 
   private async delete(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
+    const userRole = req.user!.role;
 
     const idParam = parseStringValue(req.params.id);
     const id = parseId(idParam);
@@ -300,7 +302,7 @@ export class CommunityController {
 
     const ctx = IpHelper.buildAuditContext(req,userId);
     try{
-      const result = await this.communityService.delete(id,ctx);
+      const result = await this.communityService.delete(id, ctx, userRole);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.deleteFailed, err instanceof Error ? err : null);

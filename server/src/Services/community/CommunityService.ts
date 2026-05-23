@@ -65,6 +65,10 @@ export class CommunityService implements ICommunityService {
     );
   }
 
+  private canManageCommunity(membership: CommunityMember, requesterRole?: UserRole): boolean {
+    return requesterRole === UserRole.ADMIN || this.isActiveModerator(membership);
+  }
+
   private buildViewerPermissions(isOwner: boolean, isModerator: boolean, canViewContent: boolean, membershipStatus: CommunityMemberStatus | null): CommunityViewerPermissionsDto {
     const canCreatePost =
       canViewContent && membershipStatus === CommunityMemberStatus.ACTIVE;
@@ -319,14 +323,14 @@ export class CommunityService implements ICommunityService {
 }
   
 
-  async update(id: number, dto: UpdateCommunityDto,ctx:AuditContext): Promise<ServiceResult> {
+  async update(id: number, dto: UpdateCommunityDto,ctx:AuditContext, requesterRole?:UserRole): Promise<ServiceResult> {
     const existing = await this.communityRepo.findById(id);
     if (existing.id === 0) {
       return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
     }
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(ctx.userId, id);
-    if (!this.isActiveModerator(membership)) {
+    if (!this.canManageCommunity(membership, requesterRole)) {
       return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanUpdate, HttpStatus.forbidden);
     }
 
@@ -346,14 +350,14 @@ export class CommunityService implements ICommunityService {
     return ServiceResultFactory.ok(CommunityMessages.updated, undefined, HttpStatus.ok);
   }
 
-  async delete(id: number,ctx:AuditContext): Promise<ServiceResult> {
+  async delete(id: number,ctx:AuditContext, requesterRole?:UserRole): Promise<ServiceResult> {
     const existing = await this.communityRepo.findById(id);
     if (existing.id === 0) {
       return ServiceResultFactory.fail(CommunityMessages.notFound, HttpStatus.notFound);
     }
 
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(ctx.userId, id);
-    if (!this.isActiveModerator(membership)) {
+    if (!this.canManageCommunity(membership, requesterRole)) {
       return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanDelete, HttpStatus.forbidden);
     }
 
