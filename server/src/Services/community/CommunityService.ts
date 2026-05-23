@@ -30,6 +30,7 @@ import { User } from "../../Domain/models/User";
 import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
 import { CommunityViewerPermissionsDto } from "../../Domain/DTOs/community/CommunityViewerPermissionsDto";
 import { CommunityMemberDetailsDto } from "../../Domain/DTOs/community/CommunityMemberDetailsDto";
+import { Community } from "../../Domain/models/Community";
 
 export class CommunityService implements ICommunityService {
   public constructor(
@@ -39,6 +40,22 @@ export class CommunityService implements ICommunityService {
      private readonly userFollowRepo: IUserFollowRepository,
      private readonly auditHelperService: IAuditHelperService
   ) {}
+
+
+  private async buildOwnerUsernamesById(communities: Community[]): Promise<Record<number, string>> {
+    const ownerIds = Array.from(new Set(communities.map((community) => community.ownerId)));
+
+    if (ownerIds.length === 0) {
+      return {};
+    }
+
+    const owners = await this.userRepo.findByIds(ownerIds);
+
+    return owners.reduce<Record<number, string>>((acc, owner) => {
+      acc[owner.id] = owner.username;
+      return acc;
+    }, {});
+  }
 
   private isActiveModerator(membership: CommunityMember): boolean {
     return (
@@ -72,8 +89,16 @@ export class CommunityService implements ICommunityService {
     ? await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(viewerId, communityIds)
     : {};
 
+    const ownerUsernamesById = await this.buildOwnerUsernamesById(result.communities);
+
     const data = new PaginatedListDto(
-      result.communities.map((c) => CommunityMapper.toDto(c, statusesByCommunityId[c.id] ?? null)),
+      result.communities.map((c) =>
+          CommunityMapper.toDto(
+            c,
+            statusesByCommunityId[c.id] ?? null,
+            ownerUsernamesById[c.ownerId] ?? null
+          )
+        ),
       result.total, 
       page, 
       limit
@@ -92,8 +117,16 @@ export class CommunityService implements ICommunityService {
         ? await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(viewerId, communityIds)
         : {};
 
+    const ownerUsernamesById = await this.buildOwnerUsernamesById(result.communities);
+    
     const data = new PaginatedListDto(
-      result.communities.map((c) => CommunityMapper.toDto(c, statusesByCommunityId[c.id] ?? null)),
+      result.communities.map((c) =>
+          CommunityMapper.toDto(
+            c,
+            statusesByCommunityId[c.id] ?? null,
+            ownerUsernamesById[c.ownerId] ?? null
+          )
+        ),
       result.total,
       dto.page,
       dto.limit
@@ -111,8 +144,16 @@ export class CommunityService implements ICommunityService {
       ? await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(viewerId, communityIds)
       : {};
 
+    const ownerUsernamesById = await this.buildOwnerUsernamesById(result.communities);
+    
     const data = new PaginatedListDto(
-      result.communities.map((c) => CommunityMapper.toDto(c, statusesByCommunityId[c.id] ?? null)),
+      result.communities.map((c) =>
+          CommunityMapper.toDto(
+            c,
+            statusesByCommunityId[c.id] ?? null,
+            ownerUsernamesById[c.ownerId] ?? null
+          )
+        ),
       result.total,
       page, 
       limit
@@ -166,7 +207,9 @@ export class CommunityService implements ICommunityService {
       ? viewerMembership.status
       : null;
 
-  const communityDto = CommunityMapper.toDto(community, membershipStatus);
+  const ownerUsernamesById = await this.buildOwnerUsernamesById([community]);
+
+  const communityDto = CommunityMapper.toDto(community, membershipStatus, ownerUsernamesById[community.ownerId] ?? null);
 
   const isOwner = viewerId !== undefined && community.ownerId === viewerId;
 

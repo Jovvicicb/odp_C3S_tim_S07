@@ -9,8 +9,6 @@ import { useToast } from "../../../hooks/toast/useToast";
 import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
 import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
 import type { CommunityType } from "../../../types/communities/CommunityType";
-
-import { CommunityFormIntro } from "./CommunityFormIntro";
 import { CommunityTypeSelector } from "./CommunityTypeSelector";
 import { CommunityImageInput } from "./CommunityImageInput";
 import { useCommunityImageInput } from "../../../hooks/communities/form/useCommunityImageInput";
@@ -74,92 +72,88 @@ export default function CreateCommunityForm() {
   };
 
   return (
-    <section>
-      <CommunityFormIntro />
+    <form
+      noValidate
+      onSubmit={submit}
+      className="mx-auto flex w-full max-w-2xl flex-col gap-6"
+    >
+      {error && <ErrorBox message={error} />}
 
-      <form
-        noValidate
-        onSubmit={submit}
-        className="mx-auto flex w-full max-w-2xl flex-col gap-6"
-      >
-        {error && <ErrorBox message={error} />}
+      <div>
+        <label
+          htmlFor="community-name"
+          className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35"
+        >
+          Community name
+        </label>
 
-        <div>
-          <label
-            htmlFor="community-name"
-            className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35"
-          >
-            Community name
-          </label>
-
-          <input
-            id="community-name"
-            name="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            minLength={2}
-            maxLength={80}
-            required
-            placeholder="community name"
-            className="w-full rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:border-sky-300/40 focus:bg-white/6 focus:shadow-lg focus:shadow-sky-500/5"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="community-description"
-            className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35"
-          >
-            Description
-          </label>
-
-          <textarea
-            id="community-description"
-            name="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            maxLength={500}
-            placeholder="What is this community about?"
-            className="w-full resize-none rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm leading-6 text-white placeholder-white/20 outline-none transition-all focus:border-sky-300/40 focus:bg-white/6 focus:shadow-lg focus:shadow-sky-500/5"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="community-rules"
-            className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35"
-          >
-            Rules
-          </label>
-
-          <textarea
-            id="community-rules"
-            name="rules"
-            value={rules}
-            onChange={(e) => setRules(e.target.value)}
-            rows={3}
-            maxLength={500}
-            placeholder="Define basic community rules..."
-            className="w-full resize-none rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm leading-6 text-white placeholder-white/20 outline-none transition-all focus:border-sky-300/40 focus:bg-white/6 focus:shadow-lg focus:shadow-sky-500/5"
-          />
-        </div>
-
-        <CommunityTypeSelector value={type} onChange={setType} />
-
-        <CommunityImageInput
-          fileKey={fileKey}
-          preview={preview}
-          onChange={handleImageChange}
+        <input
+          id="community-name"
+          name="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          minLength={2}
+          maxLength={80}
+          required
+          placeholder="community name"
+          className="w-full rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:border-sky-300/40 focus:bg-white/6 focus:shadow-lg focus:shadow-sky-500/5"
         />
+      </div>
 
-        <SubmitButton
-          label="Create community"
-          loadingLabel="Creating community..."
-          loading={loading}
+      <div>
+        <label
+          htmlFor="community-description"
+          className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35"
+        >
+          Description
+        </label>
+
+        <textarea
+          id="community-description"
+          name="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          maxLength={500}
+          placeholder="What is this community about?"
+          className="w-full resize-none rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm leading-6 text-white placeholder-white/20 outline-none transition-all focus:border-sky-300/40 focus:bg-white/6 focus:shadow-lg focus:shadow-sky-500/5"
         />
-      </form>
-    </section>
+      </div>
+
+      <div>
+        <label
+          htmlFor="community-rules"
+          className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/35"
+        >
+          Rules
+        </label>
+
+        <textarea
+          id="community-rules"
+          name="rules"
+          value={rules}
+          onChange={(e) => setRules(e.target.value)}
+          rows={3}
+          maxLength={500}
+          placeholder="Define basic community rules..."
+          className="w-full resize-none rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm leading-6 text-white placeholder-white/20 outline-none transition-all focus:border-sky-300/40 focus:bg-white/6 focus:shadow-lg focus:shadow-sky-500/5"
+        />
+      </div>
+
+      <CommunityTypeSelector value={type} onChange={setType} />
+
+      <CommunityImageInput
+        fileKey={fileKey}
+        preview={preview}
+        onChange={handleImageChange}
+      />
+
+      <SubmitButton
+        label="Create community"
+        loadingLabel="Creating community..."
+        loading={loading}
+      />
+    </form>
   );
 }

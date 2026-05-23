@@ -7,10 +7,13 @@ import {
 } from "../../components/ui/UI";
 import { ActionButton } from "../../components/ui/ActionButton";
 
+import { MyCommunitiesIntro } from "../../components/communities/my/MyCommunitiesIntro";
 import { MyCommunitiesList } from "../../components/communities/my/MyCommunitiesList";
 
 import { useMyCommunities } from "../../hooks/communities/useMyCommunities";
 import { useMyCommunitiesActions } from "../../hooks/communities/my/useMyCommunitiesActions";
+
+import { useAuth } from "../../hooks/auth/useAuthHook";
 
 export default function MyCommunitiesPage() {
   const {
@@ -34,6 +37,8 @@ export default function MyCommunitiesPage() {
       setCommunities,
     });
 
+  const { user } = useAuth();
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -48,6 +53,8 @@ export default function MyCommunitiesPage() {
         }
       />
 
+      <MyCommunitiesIntro total={total} />
+
       {(error || membershipError) && (
         <ErrorBox message={error || membershipError} />
       )}
@@ -57,11 +64,12 @@ export default function MyCommunitiesPage() {
           <Spinner size={24} />
         </div>
       ) : communities.length === 0 && !error ? (
-        <Empty message="You have not joined communities yet." />
+        <Empty message="You are not a member of communities yet." />
       ) : (
         <>
           <MyCommunitiesList
             communities={communities}
+            currentUserId={user?.id ?? null}
             loadingCommunityId={loadingCommunityId}
             onLeave={handleLeave}
           />

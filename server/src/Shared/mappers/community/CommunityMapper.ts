@@ -21,7 +21,8 @@ export class CommunityMapper {
   }
   public static toDto(
     community: Community,
-    membershipStatus: CommunityMemberStatus | null = null
+    membershipStatus: CommunityMemberStatus | null = null,
+    ownerUsername: string | null = null
   ): CommunityDto {
     return new CommunityDto(
       community.id,
@@ -30,6 +31,7 @@ export class CommunityMapper {
       community.rules,
       community.type,
       community.ownerId,
+      ownerUsername,
       community.avatar,
       community.createdAt,
       community.updatedAt,

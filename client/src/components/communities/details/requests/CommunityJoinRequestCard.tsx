@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { ImageHelper } from "../../../helpers/images/ImageHelper";
-import type { CommunityMemberDetailsDto } from "../../../models/communities/CommunityMemberDetailsDto";
+import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
+import { ImageHelper } from "../../../../helpers/images/ImageHelper";
 
 type Props = {
   request: CommunityMemberDetailsDto;

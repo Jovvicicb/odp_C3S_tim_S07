@@ -8,6 +8,7 @@ export type CommunityDto = {
   rules: string | null;
   type: CommunityType;
   ownerId: number;
+  ownerUsername: string | null;
   avatar: string | null;
   createdAt: string;
   updatedAt: string;

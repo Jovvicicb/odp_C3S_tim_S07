@@ -9,6 +9,7 @@ export class CommunityDto {
     public rules: string | null,
     public type: CommunityType,
     public ownerId: number,
+    public ownerUsername: string | null,
     public avatar: string | null,
     public createdAt: Date,
     public updatedAt: Date,

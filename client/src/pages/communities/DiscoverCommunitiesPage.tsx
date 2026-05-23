@@ -15,6 +15,8 @@ import { useDiscoverCommunityActions } from "../../hooks/communities/discover/us
 
 import type { CommunityDiscoverType } from "../../types/communities/CommunityDiscoverType";
 
+import { useAuth } from "../../hooks/auth/useAuthHook";
+
 export default function DiscoverCommunitiesPage() {
   const {
     communities,
@@ -46,6 +48,8 @@ export default function DiscoverCommunitiesPage() {
     setPage(1);
   };
 
+  const { user } = useAuth();
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -64,6 +68,7 @@ export default function DiscoverCommunitiesPage() {
       <DiscoverCommunitiesToolbar
         search={search}
         type={type}
+        total={total}
         onSearchChange={handleSearchChange}
         onTypeChange={handleTypeChange}
       />
@@ -82,17 +87,20 @@ export default function DiscoverCommunitiesPage() {
         <>
           <DiscoverCommunitiesList
             communities={communities}
+            currentUserId={user?.id ?? null}
             loadingCommunityId={loadingCommunityId}
             onJoin={handleJoin}
             onLeave={handleLeave}
           />
 
-          <Pagination
-            page={page}
-            total={total}
-            pageSize={limit}
-            onChange={setPage}
-          />
+          <div className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-4 shadow-xl shadow-sky-950/10">
+            <Pagination
+              page={page}
+              total={total}
+              pageSize={limit}
+              onChange={setPage}
+            />
+          </div>
         </>
       )}
     </div>

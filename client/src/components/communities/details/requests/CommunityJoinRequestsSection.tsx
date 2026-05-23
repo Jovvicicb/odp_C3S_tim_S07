@@ -1,5 +1,5 @@
-import { Empty, Pagination, Spinner } from "../../ui/UI";
-import type { CommunityMemberDetailsDto } from "../../../models/communities/CommunityMemberDetailsDto";
+import { Empty, Pagination, Spinner } from "../../../ui/UI";
+import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
 import { CommunityJoinRequestCard } from "./CommunityJoinRequestCard";
 
 type Props = {

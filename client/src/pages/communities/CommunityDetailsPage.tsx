@@ -3,13 +3,11 @@ import { useParams } from "react-router-dom";
 
 import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
 import { ActionButton } from "../../components/ui/ActionButton";
-import { CommunityCard } from "../../components/communities/CommunityCard";
 
-import { CommunityDetailsTabs } from "../../components/communities/details/CommunityDetailsTabs";
-import { CommunityLockedPanel } from "../../components/communities/details/CommunityLockedPanel";
-import { CommunityMembersSection } from "../../components/communities/details/CommunityMembersSection";
-import { CommunityPostsSection } from "../../components/communities/details/CommunityPostsSection";
-import { CommunityJoinRequestsSection } from "../../components/communities/details/CommunityJoinRequestsSection";
+import { CommunityDetailsTabs } from "../../components/communities/details/navigation/CommunityDetailsTabs";
+
+import { CommunityPostsSection } from "../../components/communities/details/posts/CommunityPostsSection";
+import { CommunityJoinRequestsSection } from "../../components/communities/details/requests/CommunityJoinRequestsSection";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { useCommunityDetails } from "../../hooks/communities/details/useCommunityDetails";
@@ -20,6 +18,9 @@ import { useCommunityJoinRequests } from "../../hooks/communities/details/useCom
 import { useCommunityJoinRequestActions } from "../../hooks/communities/details/useCommunityJoinRequestActions";
 
 import type { CommunityDetailsTab } from "../../types/communities/CommunityDetailsTab";
+import { CommunityDetailsHero } from "../../components/communities/details/hero/CommunityDetailsHero";
+import { CommunityLockedPanel } from "../../components/communities/details/locked/CommunityLockedPanel";
+import { CommunityMembersSection } from "../../components/communities/details/members/CommunityMembersSection";
 
 export default function CommunityDetailsPage() {
   const { id } = useParams();
@@ -163,9 +164,9 @@ export default function CommunityDetailsPage() {
 
       {pageError && <ErrorBox message={pageError} />}
 
-      <CommunityCard
+      <CommunityDetailsHero
         community={community}
-        showMembershipAction
+        permissions={permissions}
         actionLoading={loadingCommunityId === community.id}
         onJoin={handleJoin}
         onLeave={handleLeave}

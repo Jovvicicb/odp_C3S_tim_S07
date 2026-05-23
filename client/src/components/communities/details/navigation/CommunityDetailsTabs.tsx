@@ -1,4 +1,5 @@
-import type { CommunityDetailsTab } from "../../../types/communities/CommunityDetailsTab";
+import type { CommunityDetailsTab } from "../../../../types/communities/CommunityDetailsTab";
+import { SectionLabel } from "../../../ui/SectionLabel";
 
 type Props = {
   activeTab: CommunityDetailsTab;
@@ -42,13 +43,7 @@ export function CommunityDetailsTabs({
   return (
     <section className="overflow-hidden rounded-3xl border border-white/8 bg-[#0b0f17]/80 shadow-xl shadow-sky-950/10">
       <div className="border-b border-white/8 bg-white/2 px-5 py-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-sky-300 shadow-[0_0_16px_rgba(125,211,252,0.8)]" />
-
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-sky-200/70">
-            Community Navigation
-          </p>
-        </div>
+        <SectionLabel label="Community navigation" tone="sky" />
 
         <h2 className="mt-2 text-lg font-bold tracking-tight text-white">
           Explore community sections

@@ -1,13 +1,14 @@
 import { useState } from "react";
 
-import { ActionButton } from "../../ui/ActionButton";
-import { Empty, Pagination, Spinner } from "../../ui/UI";
-import { PostCard } from "../../posts/PostCard";
+import { ActionButton } from "../../../ui/ActionButton";
+import { Empty, Pagination, Spinner } from "../../../ui/UI";
+import { PostCard } from "../../../posts/PostCard";
 
-import type { CommunityDto } from "../../../models/communities/CommunityDto";
-import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
-import type { PostSortType } from "../../../types/posts/PostSortType";
-import type { CommunityViewerPermissionsDto } from "../../../models/communities/CommunityViewerPermissionsDto";
+import type { CommunityDto } from "../../../../models/communities/CommunityDto";
+import type { PostWithDetailsDto } from "../../../../models/posts/PostWithDetailsDto";
+import type { PostSortType } from "../../../../types/posts/PostSortType";
+import type { CommunityViewerPermissionsDto } from "../../../../models/communities/CommunityViewerPermissionsDto";
+import { SectionLabel } from "../../../ui/SectionLabel";
 
 type Props = {
   community: CommunityDto;
@@ -65,13 +66,7 @@ export function CommunityPostsSection({
         <div className="border-b border-white/8 bg-white/2 p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-sky-300 shadow-[0_0_16px_rgba(125,211,252,0.8)]" />
-
-                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-sky-200/70">
-                  Community Feed
-                </p>
-              </div>
+              <SectionLabel label="Community Feed" tone="sky" />
 
               <h2 className="mt-3 text-2xl font-bold tracking-tight text-white">
                 Posts

@@ -5,7 +5,7 @@ import {
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
-import { CommunityCard } from "../../components/communities/CommunityCard";
+import { CommunityCard } from "../../components/communities/card/CommunityCard";
 import { useAdminCommunities } from "../../hooks/communities/useAdminCommunities";
 
 export default function AdminCommunitiesPage() {
