@@ -9,4 +9,8 @@ createSuccess: "Post created successfully",
   deleteFailed: "Failed to delete post",
   updateFailed: "Failed to update post",
   updateSuccess: "Post updated successfully",
+  addTagFailed: "Failed to add tag to post",
+  addTagSuccess: "Tag added to post successfully",
+  removeTagFailed: "Failed to remove tag from post",
+  removeTagSuccess: "Tag removed from post successfully",
 } as const;

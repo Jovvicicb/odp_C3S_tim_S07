@@ -3,8 +3,13 @@ import { TagValidationMessages } from "../../../Domain/constants/messages/tags/T
 import { ValidateCreateTagResult } from "../../../Domain/types/tags/ValidateCreateTagResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
-export const validateCreateTag = (input: { name?: string }) : ValidateCreateTagResult => {
-  const normalizedName = StringNormalizer.normalizeSpaces(input.name).toLowerCase();
+export const validateCreateTag = (
+  input: { name?: string | null }
+): ValidateCreateTagResult => {
+  const normalizedName =
+    typeof input.name === "string"
+      ? StringNormalizer.normalizeSpaces(input.name).toLowerCase()
+      : "";
 
   if (!normalizedName) {
     return {

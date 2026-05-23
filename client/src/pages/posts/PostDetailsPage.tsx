@@ -9,6 +9,7 @@ import { PostCommentsSection } from "../../components/posts/details/PostComments
 import { usePostDetails } from "../../hooks/posts/details/usePostDetails";
 import { usePostDetailsActions } from "../../hooks/posts/details/usePostDetailsActions";
 import { useCommentActions } from "../../hooks/comments/details/useCommentActions";
+import { usePostTagActions } from "../../hooks/posts/details/usePostTagActions";
 
 export default function PostDetailsPage() {
   const { id } = useParams();
@@ -38,6 +39,16 @@ export default function PostDetailsPage() {
     loadingPostDelete,
     postActionError,
   } = usePostDetailsActions({
+    setPostDetails,
+  });
+
+  const {
+    handleAddPostTag,
+    handleRemovePostTag,
+    loadingPostTagAddId,
+    loadingPostTagRemoveId,
+    postTagActionError,
+  } = usePostTagActions({
     setPostDetails,
   });
 
@@ -92,18 +103,29 @@ export default function PostDetailsPage() {
         action={<ActionButton variant="back" label="Back" />}
       />
 
-      {(error || postActionError || commentActionError) && (
-        <ErrorBox message={error || postActionError || commentActionError} />
+      {(error ||
+        postActionError ||
+        postTagActionError ||
+        commentActionError) && (
+        <ErrorBox
+          message={
+            error || postActionError || postTagActionError || commentActionError
+          }
+        />
       )}
 
       <PostDetailsCard
         post={postDetails}
         loadingPostLike={loadingPostLike}
         loadingPostDelete={loadingPostDelete}
+        loadingPostTagAddId={loadingPostTagAddId}
+        loadingPostTagRemoveId={loadingPostTagRemoveId}
         onLikePost={handleLikePost}
         onUnlikePost={handleUnlikePost}
         onEditPost={handleEditPost}
         onDeletePost={handleDeletePost}
+        onAddPostTag={handleAddPostTag}
+        onRemovePostTag={handleRemovePostTag}
       />
 
       <PostCommentsSection

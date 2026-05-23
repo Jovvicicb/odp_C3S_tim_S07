@@ -120,4 +120,28 @@ export const postApi: IPostAPIService = {
       .then((r) => r.data)
       .catch((e: ApiClientError) => err(e, PostMessages.deleteFailed));
   },
+
+  async addTag(postId, tagId) {
+    return axios
+      .post<ApiResponse<void>>(
+        `${BASE}/${postId}/tags`,
+        {
+          tagId,
+        },
+        {
+          headers: authHeader(),
+        },
+      )
+      .then((r) => r.data)
+      .catch((e: ApiClientError) => err(e, PostMessages.addTagFailed));
+  },
+  
+  async removeTag(postId, tagId) {
+    return axios
+      .delete<ApiResponse<void>>(`${BASE}/${postId}/tags/${tagId}`, {
+        headers: authHeader(),
+      })
+      .then((r) => r.data)
+      .catch((e: ApiClientError) => err(e, PostMessages.removeTagFailed));
+  },
 };

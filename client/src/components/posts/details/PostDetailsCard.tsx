@@ -1,27 +1,37 @@
 import { ImageHelper } from "../../../helpers/images/ImageHelper";
 import type { PostDetailsDto } from "../../../models/posts/PostDetailsDto";
+import type { PostTagDto } from "../../../models/tags/PostTagDto";
 import { PostStatsActions } from "./PostStatsActions";
 
 import { MarkdownContent } from "../../markdown/MarkdownContent";
+import { PostTagsPanel } from "./PostTagsPanel";
 
 type Props = {
   post: PostDetailsDto;
   loadingPostLike: boolean;
   loadingPostDelete: boolean;
+  loadingPostTagAddId: number | null;
+  loadingPostTagRemoveId: number | null;
   onLikePost: (postId: number) => void;
   onUnlikePost: (postId: number) => void;
   onEditPost: (postId: number) => void;
   onDeletePost: (postId: number) => void;
+  onAddPostTag: (postId: number, tag: PostTagDto) => Promise<boolean>;
+  onRemovePostTag: (postId: number, tagId: number) => Promise<boolean>;
 };
 
 export function PostDetailsCard({
   post,
   loadingPostLike,
   loadingPostDelete,
+  loadingPostTagAddId,
+  loadingPostTagRemoveId,
   onLikePost,
   onUnlikePost,
   onEditPost,
   onDeletePost,
+  onAddPostTag,
+  onRemovePostTag,
 }: Props) {
   const imageUrl = ImageHelper.getImageUrl(post.mediaUrl);
   const createdAt = new Date(post.createdAt).toLocaleDateString();
@@ -81,18 +91,15 @@ export function PostDetailsCard({
           />
         </div>
 
-        {post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 border-t border-white/6 pt-5">
-            {post.tags.map((tag) => (
-              <span
-                key={tag.id}
-                className="rounded-xl border border-sky-300/15 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-100"
-              >
-                #{tag.name}
-              </span>
-            ))}
-          </div>
-        )}
+        <PostTagsPanel
+          postId={post.id}
+          tags={post.tags}
+          canManageTags={post.permissions.canManageTags}
+          loadingPostTagAddId={loadingPostTagAddId}
+          loadingPostTagRemoveId={loadingPostTagRemoveId}
+          onAddTag={onAddPostTag}
+          onRemoveTag={onRemovePostTag}
+        />
 
         <div className="rounded-3xl border border-white/6 bg-white/3 p-5">
           <MarkdownContent content={post.content} />

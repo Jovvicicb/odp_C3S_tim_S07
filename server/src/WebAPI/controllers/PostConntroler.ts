@@ -26,6 +26,7 @@ import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommun
 import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 import { validatePostSort } from "../validators/posts/ValidatePostSort";
 import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
+import { AddTagInput } from "../types/posts/AddTagInput";
 
 export class PostController {
   private readonly router = Router();
@@ -345,8 +346,8 @@ export class PostController {
       return;
     }
   
-    const {validation, tagId} = validateAddTag(
-      req.body as { tagId? : string}
+    const { validation, tagId } = validateAddTag(
+      req.body as AddTagInput
     );
   
     if (!validation.valid || !tagId) {

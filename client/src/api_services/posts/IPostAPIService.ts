@@ -14,4 +14,6 @@ export interface IPostAPIService {
     like(id: number): Promise<ApiResponse<void>>;
     unlike(id: number): Promise<ApiResponse<void>>;
     delete(id: number): Promise<ApiResponse<void>>;
+    addTag(postId: number, tagId: number): Promise<ApiResponse<void>>;
+    removeTag(postId: number, tagId: number): Promise<ApiResponse<void>>;
 }
