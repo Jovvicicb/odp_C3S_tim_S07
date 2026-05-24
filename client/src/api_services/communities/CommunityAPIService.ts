@@ -37,6 +37,17 @@ export const communityApi: ICommunityAPIService = {
       .catch((e: ApiClientError) => err(e, CommunityMessages.createFailed));
   },
 
+  async update(id, formData) {
+    return axios
+      .put<ApiResponse<void>>(`${BASE}/${id}`, formData, {
+        headers: {
+          ...authHeader(),
+        },
+      })
+      .then((r) => r.data)
+      .catch((e: ApiClientError) => err(e, CommunityMessages.updateFailed));
+  },
+
   async discover(page = 1, limit = 10, type = "all", search = "") {
     return axios
       .get<ApiResponse<PaginatedListDto<CommunityDto>>>(`${BASE}/discover`, {

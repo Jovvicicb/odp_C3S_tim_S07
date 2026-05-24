@@ -7,13 +7,13 @@ import {
 } from "../../components/ui/UI";
 import { ActionButton } from "../../components/ui/ActionButton";
 
-import { MyCommunitiesIntro } from "../../components/communities/my/MyCommunitiesIntro";
 import { MyCommunitiesList } from "../../components/communities/my/MyCommunitiesList";
 
 import { useMyCommunities } from "../../hooks/communities/useMyCommunities";
 import { useMyCommunitiesActions } from "../../hooks/communities/my/useMyCommunitiesActions";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
+import { IntroPanel } from "../../components/ui/IntroPanel";
 
 export default function MyCommunitiesPage() {
   const {
@@ -53,7 +53,12 @@ export default function MyCommunitiesPage() {
         }
       />
 
-      <MyCommunitiesIntro total={total} />
+      <IntroPanel
+        label="Your communities"
+        title="Communities you follow"
+        description="Quickly access communities where you can read posts, join discussions and keep up with members."
+        highlight={`${total} ${total === 1 ? "community" : "communities"} in your list.`}
+      />
 
       {(error || membershipError) && (
         <ErrorBox message={error || membershipError} />

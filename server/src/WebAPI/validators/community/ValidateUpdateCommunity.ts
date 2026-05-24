@@ -13,7 +13,7 @@ export const validateUpdateCommunity = (
   const dto: UpdateCommunityDto = {};
 
 
-  if (input.name !== undefined) {
+  if (input.name !== undefined && input.name !== null) {
     const normalizedName = StringNormalizer.normalizeSpaces(input.name);
 
     if (!normalizedName) {
@@ -33,7 +33,8 @@ export const validateUpdateCommunity = (
 
     dto.name = normalizedName;
   }
-  if (input.description !== undefined) {
+
+  if (input.description !== undefined && input.description !== null) {
     const normalizedDescription = StringNormalizer.trim(input.description);
 
     if (normalizedDescription.length > 500) {
@@ -48,7 +49,7 @@ export const validateUpdateCommunity = (
     dto.description = normalizedDescription ? normalizedDescription : null;
   }
 
-  if (input.rules !== undefined) {
+  if (input.rules !== undefined && input.rules !== null) {
     const normalizedRules = StringNormalizer.trim(input.rules);
 
     if (normalizedRules.length > 500) {
@@ -63,8 +64,8 @@ export const validateUpdateCommunity = (
     dto.rules = normalizedRules ? normalizedRules : null;
   }
   
-  if (input.type !== undefined) {
-    const normalizedType = StringNormalizer.trim(input.type);
+  if (input.type !== undefined && input.type !== null) {
+    const normalizedType = StringNormalizer.trim(input.type).toLowerCase();
 
     if (normalizedType !== "public" && normalizedType !== "private") {
       return {

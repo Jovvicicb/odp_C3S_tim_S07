@@ -21,4 +21,8 @@ export const CommunityMessages = {
   removeMemberFailed: "Failed to remove member",
   deleteFailed: "Failed to delete community",
   deleteSuccess: "Community deleted successfully",
+
+  updateFailed: "Failed to update community",
+  updateSuccess: "Community updated successfully",
+  noChangesToUpdate: "Change at least one field before saving",
 } as const;

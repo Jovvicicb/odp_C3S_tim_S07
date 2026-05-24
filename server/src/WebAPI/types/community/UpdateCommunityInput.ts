@@ -1,7 +1,7 @@
 export type UpdateCommunityInput = {
-  name?: string;
-  description?: string;
-  rules?: string;
-  type?: string;
-  removeAvatar?: boolean;
+  name?: string | null;
+  description?: string | null;
+  rules?: string | null;
+  type?: string | null;
+  removeAvatar?: boolean | string | null;
 };

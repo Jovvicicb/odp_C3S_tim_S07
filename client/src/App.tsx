@@ -22,6 +22,7 @@ import CreatePostPage from "./pages/posts/CreatePostPage";
 import PostDetailsPage from "./pages/posts/PostDetailsPage";
 import EditPostPage from "./pages/posts/EditPostPage";
 import AdminTagsPage from "./pages/admin/AdminTagsPage";
+import EditCommunityPage from "./pages/communities/EditCommunityPage";
 
 export default function App() {
   return (
@@ -71,6 +72,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
             <CommunityDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/communities/:id/edit"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <EditCommunityPage />
           </ProtectedRoute>
         }
       />
