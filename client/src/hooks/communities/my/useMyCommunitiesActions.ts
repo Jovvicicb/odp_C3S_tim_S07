@@ -1,8 +1,9 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import { useToast } from "../../toast/useToast";
-import { useCommunityMembership } from "../useCommunityMembership";
+
 import type { CommunityDto } from "../../../models/communities/CommunityDto";
+import { useCommunityMembership } from "../shared/useCommunityMembership";
 
 type Props = {
   communities: CommunityDto[];

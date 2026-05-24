@@ -10,10 +10,10 @@ import {
 import { DiscoverCommunitiesToolbar } from "../../components/communities/discover/DiscoverCommunitiesToolbar";
 import { DiscoverCommunitiesList } from "../../components/communities/discover/DiscoverCommunitiesList";
 
-import { useDiscoverCommunities } from "../../hooks/communities/useDiscoverCommunities";
+import { useDiscoverCommunities } from "../../hooks/communities/discover/useDiscoverCommunities";
 import { useDiscoverCommunityActions } from "../../hooks/communities/discover/useDiscoverCommunityActions";
 
-import type { CommunityDiscoverType } from "../../types/communities/CommunityDiscoverType";
+import type { CommunityDiscoverType } from "../../types/communities/common/CommunityDiscoverType";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
 

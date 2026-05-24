@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-import { communityApi } from "../../api_services/communities/CommunityAPIService";
-import { CommunityMessages } from "../../constants/messages/community/CommunityMessages";
-import { CommonMessages } from "../../constants/messages/common/CommonMessages";
+import { communityApi } from "../../../api_services/communities/CommunityAPIService";
+import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
+import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
 
 export function useCreateCommunity() {
   const [loading, setLoading] = useState(false);

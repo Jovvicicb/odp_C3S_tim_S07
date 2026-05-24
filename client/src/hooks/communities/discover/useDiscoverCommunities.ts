@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { communityApi } from "../../api_services/communities/CommunityAPIService";
-import { CommunityMessages } from "../../constants/messages/community/CommunityMessages";
-import type { CommunityDto } from "../../models/communities/CommunityDto";
-import type { CommunityDiscoverType } from "../../types/communities/CommunityDiscoverType";
+import { communityApi } from "../../../api_services/communities/CommunityAPIService";
+import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
+import type { CommunityDto } from "../../../models/communities/CommunityDto";
+import type { CommunityDiscoverType } from "../../../types/communities/common/CommunityDiscoverType";
 
 export function useDiscoverCommunities(initialPage = 1, initialLimit = 10) {
   const [communities, setCommunities] = useState<CommunityDto[]>([]);

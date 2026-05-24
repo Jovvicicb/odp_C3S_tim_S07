@@ -1,9 +1,9 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { communityApi } from "../../../api_services/communities/CommunityAPIService";
-import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
-import type { CommunityDetailsDto } from "../../../models/communities/CommunityDetailsDto";
-import type { CommunityMemberRole } from "../../../types/communities/CommunityMemberRole";
-import { useToast } from "../../toast/useToast";
+import { communityApi } from "../../../../api_services/communities/CommunityAPIService";
+import { CommunityMessages } from "../../../../constants/messages/community/CommunityMessages";
+import type { CommunityDetailsDto } from "../../../../models/communities/CommunityDetailsDto";
+import type { CommunityMemberRole } from "../../../../types/communities/members/CommunityMemberRole";
+import { useToast } from "../../../toast/useToast";
 
 type Props = {
   setDetails: Dispatch<SetStateAction<CommunityDetailsDto | null>>;

@@ -6,18 +6,18 @@ import { SubmitButton } from "../../../ui/SubmitButton";
 
 import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
 import { useToast } from "../../../../hooks/toast/useToast";
-import { useUpdateCommunity } from "../../../../hooks/communities/useUpdateCommunity";
-import { useEditCommunityImageInput } from "../../../../hooks/communities/form/useEditCommunityImageInput";
+import { useUpdateCommunity } from "../../../../hooks/communities/edit/useUpdateCommunity";
+import { useEditCommunityImageInput } from "../../../../hooks/communities/edit/useEditCommunityImageInput";
 
 import { validateUpdateCommunity } from "../../../../validators/community/validateUpdateCommunity";
 import { CommunityMessages } from "../../../../constants/messages/community/CommunityMessages";
 import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
 
 import type { CommunityDto } from "../../../../models/communities/CommunityDto";
-import type { CommunityType } from "../../../../types/communities/CommunityType";
+import type { CommunityType } from "../../../../types/communities/common/CommunityType";
 
-import { CommunityTypeSelector } from "../CommunityTypeSelector";
-import { CommunityImageInput } from "../CommunityImageInput";
+import { CommunityTypeSelector } from "../shared/CommunityTypeSelector";
+import { CommunityImageInput } from "../shared/CommunityImageInput";
 
 type Props = {
   community: CommunityDto;

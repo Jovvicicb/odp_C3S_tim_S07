@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-import { communityApi } from "../../api_services/communities/CommunityAPIService";
-import { CommonMessages } from "../../constants/messages/common/CommonMessages";
-import { CommunityMessages } from "../../constants/messages/community/CommunityMessages";
+import { communityApi } from "../../../api_services/communities/CommunityAPIService";
+import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
+import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
 
 export function useUpdateCommunity() {
   const [loading, setLoading] = useState(false);

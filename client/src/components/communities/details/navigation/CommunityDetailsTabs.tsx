@@ -1,4 +1,4 @@
-import type { CommunityDetailsTab } from "../../../../types/communities/CommunityDetailsTab";
+import type { CommunityDetailsTab } from "../../../../types/communities/details/CommunityDetailsTab";
 import { SectionLabel } from "../../../ui/SectionLabel";
 
 type Props = {

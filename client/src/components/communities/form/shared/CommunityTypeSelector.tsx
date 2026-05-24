@@ -1,4 +1,4 @@
-import type { CommunityType } from "../../../types/communities/CommunityType";
+import type { CommunityType } from "../../../../types/communities/common/CommunityType";
 
 type Props = {
   value: CommunityType;

@@ -9,7 +9,7 @@ import { ActionButton } from "../../components/ui/ActionButton";
 
 import { MyCommunitiesList } from "../../components/communities/my/MyCommunitiesList";
 
-import { useMyCommunities } from "../../hooks/communities/useMyCommunities";
+import { useMyCommunities } from "../../hooks/communities/my/useMyCommunities";
 import { useMyCommunitiesActions } from "../../hooks/communities/my/useMyCommunitiesActions";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";

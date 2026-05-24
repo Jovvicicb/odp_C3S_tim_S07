@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { ErrorBox } from "../../ui/UI";
-import { StringNormalizer } from "../../../helpers/normalization/StringNormalizer";
-import { useCreateCommunity } from "../../../hooks/communities/useCreateCommunity";
-import { validateCreateCommunity } from "../../../validators/community/validateCreateCommunity";
-import { useToast } from "../../../hooks/toast/useToast";
-import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
-import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
-import type { CommunityType } from "../../../types/communities/CommunityType";
-import { CommunityTypeSelector } from "./CommunityTypeSelector";
-import { CommunityImageInput } from "./CommunityImageInput";
-import { useCommunityImageInput } from "../../../hooks/communities/form/useCommunityImageInput";
-import { SubmitButton } from "../../ui/SubmitButton";
+import { ErrorBox } from "../../../ui/UI";
+import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
+import { useCreateCommunity } from "../../../../hooks/communities/create/useCreateCommunity";
+import { validateCreateCommunity } from "../../../../validators/community/validateCreateCommunity";
+import { useToast } from "../../../../hooks/toast/useToast";
+import { CommunityMessages } from "../../../../constants/messages/community/CommunityMessages";
+import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
+import type { CommunityType } from "../../../../types/communities/common/CommunityType";
+import { CommunityTypeSelector } from "../shared/CommunityTypeSelector";
+import { CommunityImageInput } from "../shared/CommunityImageInput";
+import { useCommunityImageInput } from "../../../../hooks/communities/create/useCommunityImageInput";
+import { SubmitButton } from "../../../ui/SubmitButton";
 
 export default function CreateCommunityForm() {
   const [name, setName] = useState("");

@@ -1,5 +1,5 @@
-import type { CommunityMemberStatus } from "../../types/communities/CommunityMemberStatus";
-import type { CommunityType } from "../../types/communities/CommunityType";
+import type { CommunityMemberStatus } from "../../types/communities/members/CommunityMemberStatus";
+import type { CommunityType } from "../../types/communities/common/CommunityType";
 
 export type CommunityDto = {
   id: number;

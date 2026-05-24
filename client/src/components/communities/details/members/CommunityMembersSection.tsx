@@ -1,7 +1,7 @@
 import type { PaginatedListDto } from "../../../../models/common/PaginatedListDto";
 import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
 import type { CommunityViewerPermissionsDto } from "../../../../models/communities/CommunityViewerPermissionsDto";
-import type { CommunityMemberRole } from "../../../../types/communities/CommunityMemberRole";
+import type { CommunityMemberRole } from "../../../../types/communities/members/CommunityMemberRole";
 import { UserCard } from "../../../users/UserCard";
 
 type Props = {

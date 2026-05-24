@@ -5,7 +5,7 @@ import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
 
 import { EditCommunityForm } from "../../components/communities/form/edit/EditCommunityForm";
 
-import { useCommunityDetails } from "../../hooks/communities/details/useCommunityDetails";
+import { useCommunityDetails } from "../../hooks/communities/core/useCommunityDetails";
 import { IntroPanel } from "../../components/ui/IntroPanel";
 
 export default function EditCommunityPage() {

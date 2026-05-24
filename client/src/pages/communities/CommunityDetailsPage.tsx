@@ -10,18 +10,19 @@ import { CommunityPostsSection } from "../../components/communities/details/post
 import { CommunityJoinRequestsSection } from "../../components/communities/details/requests/CommunityJoinRequestsSection";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
-import { useCommunityDetails } from "../../hooks/communities/details/useCommunityDetails";
+import { useCommunityDetails } from "../../hooks/communities/core/useCommunityDetails";
 import { useCommunityPosts } from "../../hooks/posts/useCommunityPosts";
-import { useCommunityDetailsActions } from "../../hooks/communities/details/useCommunityDetailsActions";
-import { useCommunityMemberModerationActions } from "../../hooks/communities/details/useCommunityMemberModerationActions";
-import { useCommunityJoinRequests } from "../../hooks/communities/details/useCommunityJoinRequests";
-import { useCommunityJoinRequestActions } from "../../hooks/communities/details/useCommunityJoinRequestActions";
+import { useCommunityDetailsMembershipActions } from "../../hooks/communities/details/membership/useCommunityDetailsMembershipActions";
+import { useCommunityMemberFollowActions } from "../../hooks/communities/details/members/useCommunityMemberFollowActions";
+import { useCommunityMemberModerationActions } from "../../hooks/communities/details/members/useCommunityMemberModerationActions";
+import { useCommunityJoinRequests } from "../../hooks/communities/details/requests/useCommunityJoinRequests";
+import { useCommunityJoinRequestActions } from "../../hooks/communities/details/requests/useCommunityJoinRequestActions";
 
-import type { CommunityDetailsTab } from "../../types/communities/CommunityDetailsTab";
+import type { CommunityDetailsTab } from "../../types/communities/details/CommunityDetailsTab";
 import { CommunityDetailsHero } from "../../components/communities/details/hero/CommunityDetailsHero";
 import { CommunityLockedPanel } from "../../components/communities/details/locked/CommunityLockedPanel";
 import { CommunityMembersSection } from "../../components/communities/details/members/CommunityMembersSection";
-import { useDeleteCommunity } from "../../hooks/communities/details/useDeleteCommunity";
+import { useDeleteCommunity } from "../../hooks/communities/details/menagement/useDeleteCommunity";
 
 export default function CommunityDetailsPage() {
   const { id } = useParams();
@@ -38,19 +39,16 @@ export default function CommunityDetailsPage() {
     10,
   );
 
-  const {
-    handleJoin,
-    handleLeave,
-    handleFollow,
-    handleUnfollow,
-    loadingCommunityId,
-    loadingUserId,
-    membershipError,
-    followError,
-  } = useCommunityDetailsActions({
-    setDetails,
-    reload,
-  });
+  const { handleJoin, handleLeave, loadingCommunityId, membershipError } =
+    useCommunityDetailsMembershipActions({
+      setDetails,
+      reload,
+    });
+
+  const { handleFollow, handleUnfollow, loadingUserId, followError } =
+    useCommunityMemberFollowActions({
+      setDetails,
+    });
 
   const {
     handleCommunityRoleChange,

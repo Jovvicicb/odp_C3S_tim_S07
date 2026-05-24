@@ -4,7 +4,7 @@ import type { CommunityDto } from "../../../models/communities/CommunityDto";
 import { ImageHelper } from "../../../helpers/images/ImageHelper";
 import { SectionLabel } from "../../ui/SectionLabel";
 
-import { CommunityMembershipButton } from "../CommunityMembershipButton";
+import { CommunityMembershipButton } from "../shared/CommunityMembershipButton";
 import { CommunityAvatar } from "./CommunityAvatar";
 import { CommunityTypeBadge } from "./CommunityTypeBadge";
 import { CommunityMembershipBadge } from "./CommunityMembershipBadge";

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { communityApi } from "../../../api_services/communities/CommunityAPIService";
-import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
-import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
-import { useToast } from "../../toast/useToast";
+import { communityApi } from "../../../../api_services/communities/CommunityAPIService";
+import { CommunityMessages } from "../../../../constants/messages/community/CommunityMessages";
+import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
+import { useToast } from "../../../toast/useToast";
 
 export function useDeleteCommunity() {
   const navigate = useNavigate();

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { communityApi } from "../../api_services/communities/CommunityAPIService";
-import { CommunityMessages } from "../../constants/messages/community/CommunityMessages";
-import type { CommunityDto } from "../../models/communities/CommunityDto";
+import { communityApi } from "../../../api_services/communities/CommunityAPIService";
+import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
+import type { CommunityDto } from "../../../models/communities/CommunityDto";
 
-export function useAdminCommunities(initialPage = 1, initialLimit = 10) {
+export function useMyCommunities(initialPage = 1, initialLimit = 10) {
   const [communities, setCommunities] = useState<CommunityDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,12 +18,12 @@ export function useAdminCommunities(initialPage = 1, initialLimit = 10) {
       setError("");
 
       try {
-        const res = await communityApi.getAll(pageValue, limitValue);
+        const res = await communityApi.getMine(pageValue, limitValue);
 
         if (!res.success || !res.data) {
           setCommunities([]);
           setTotal(0);
-          setError(res.message ?? CommunityMessages.fetchAllFailed);
+          setError(res.message ?? CommunityMessages.fetchMineFailed);
           return;
         }
 
@@ -32,14 +32,15 @@ export function useAdminCommunities(initialPage = 1, initialLimit = 10) {
       } catch {
         setCommunities([]);
         setTotal(0);
-        setError(CommunityMessages.fetchAllFailed);
+        setError(CommunityMessages.fetchMineFailed);
       } finally {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
+  
   useEffect(() => {
     queueMicrotask(() => {
       void fetchCommunities(page, limit);
@@ -48,13 +49,14 @@ export function useAdminCommunities(initialPage = 1, initialLimit = 10) {
 
   return {
     communities,
+    setCommunities,
     loading,
     error,
     page,
     limit,
     total,
+    setTotal,
     setPage,
     setLimit,
-    reload: () => fetchCommunities(page, limit),
   };
 }

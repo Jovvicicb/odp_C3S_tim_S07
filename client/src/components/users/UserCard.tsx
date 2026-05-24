@@ -3,7 +3,7 @@ import { ImageHelper } from "../../helpers/images/ImageHelper";
 import type { UserDto } from "../../models/users/UserDto";
 import type { UserRole } from "../../types/users/UserRole";
 import type { UserFollowStatus } from "../../types/users/UserFollowStatus";
-import type { CommunityMemberRole } from "../../types/communities/CommunityMemberRole";
+import type { CommunityMemberRole } from "../../types/communities/members/CommunityMemberRole";
 import { RoleBadge } from "../ui/UI";
 
 type Props = {

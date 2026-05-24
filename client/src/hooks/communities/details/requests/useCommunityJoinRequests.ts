@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { communityApi } from "../../../api_services/communities/CommunityAPIService";
-import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
-import type { CommunityMemberDetailsDto } from "../../../models/communities/CommunityMemberDetailsDto";
+import { communityApi } from "../../../../api_services/communities/CommunityAPIService";
+import { CommunityMessages } from "../../../../constants/messages/community/CommunityMessages";
+import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
 
 export function useCommunityJoinRequests(
   communityId: number | null,

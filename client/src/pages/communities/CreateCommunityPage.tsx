@@ -1,4 +1,4 @@
-import CreateCommunityForm from "../../components/communities/form/CreateCommunityForm";
+import CreateCommunityForm from "../../components/communities/form/create/CreateCommunityForm";
 import { ActionButton } from "../../components/ui/ActionButton";
 import { IntroPanel } from "../../components/ui/IntroPanel";
 import { PageHeader } from "../../components/ui/UI";

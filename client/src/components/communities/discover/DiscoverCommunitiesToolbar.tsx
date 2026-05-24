@@ -1,4 +1,4 @@
-import type { CommunityDiscoverType } from "../../../types/communities/CommunityDiscoverType";
+import type { CommunityDiscoverType } from "../../../types/communities/common/CommunityDiscoverType";
 import { SectionLabel } from "../../ui/SectionLabel";
 
 type Props = {

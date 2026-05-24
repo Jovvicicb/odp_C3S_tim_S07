@@ -1,4 +1,4 @@
-import type { CommunityType } from "./CommunityType";
+import type { CommunityType } from "../common/CommunityType";
 
 export type UpdateCommunityInput = {
   name: string;

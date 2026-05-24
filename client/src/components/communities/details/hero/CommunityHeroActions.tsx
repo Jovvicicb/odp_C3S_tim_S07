@@ -1,7 +1,7 @@
 import type { CommunityDto } from "../../../../models/communities/CommunityDto";
 import type { CommunityViewerPermissionsDto } from "../../../../models/communities/CommunityViewerPermissionsDto";
 
-import { CommunityMembershipButton } from "../../CommunityMembershipButton";
+import { CommunityMembershipButton } from "../../shared/CommunityMembershipButton";
 
 import { useNavigate } from "react-router-dom";
 

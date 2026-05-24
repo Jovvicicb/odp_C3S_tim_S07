@@ -2,7 +2,7 @@ import { FileValidationMessages } from "../../constants/messages/common/FileVali
 import { CommunityValidationMessages } from "../../constants/messages/community/CommunityValidationMessages";
 import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
-import type { UpdateCommunityInput } from "../../types/communities/UpdateCommunityInput";
+import type { UpdateCommunityInput } from "../../types/communities/form/UpdateCommunityInput";
 
 export function validateUpdateCommunity(input: UpdateCommunityInput): ValidationResult {
   const normalizedName = StringNormalizer.normalizeSpaces(input.name);

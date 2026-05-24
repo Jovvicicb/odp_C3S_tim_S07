@@ -1,4 +1,4 @@
-import type { CommunityDto } from "../../models/communities/CommunityDto";
+import type { CommunityDto } from "../../../models/communities/CommunityDto";
 
 type Props = {
   community: CommunityDto;
