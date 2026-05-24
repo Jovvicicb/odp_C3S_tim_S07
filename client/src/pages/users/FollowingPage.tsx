@@ -1,12 +1,14 @@
 import { useParams } from "react-router-dom";
 
 import {
-  Empty,
   ErrorBox,
   PageHeader,
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
+import { CountBadge } from "../../components/ui/CountBadge";
+import { SectionCard } from "../../components/ui/SectionCard";
+import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
 
 import { FollowingList } from "../../components/users/follow/FollowingList";
 
@@ -50,34 +52,62 @@ export default function FollowingPage() {
       setPage,
     });
 
+  const pageError = error || followError;
+
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Users" title="Following" />
 
-      {(error || followError) && <ErrorBox message={error || followError} />}
+      {pageError && <ErrorBox message={pageError} />}
 
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size={24} />
-        </div>
-      ) : users.length === 0 && !error ? (
-        <Empty message="No following users found." />
-      ) : (
-        <>
-          <FollowingList
-            followingUsers={users}
-            followLoadingUserId={followLoadingUserId}
-            onUnfollow={handleUnfollow}
+      <SectionCard
+        label="Following"
+        title={isMyFollowingPage ? "People you follow" : "Users being followed"}
+        description={
+          isMyFollowingPage
+            ? "Browse people you follow and unfollow profiles you no longer want in your network."
+            : "Browse profiles this user follows and open them to view more details."
+        }
+        action={
+          <CountBadge count={total} singular="following" plural="following" />
+        }
+      >
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Spinner size={24} />
+          </div>
+        ) : users.length === 0 && !error ? (
+          <SectionEmptyState
+            title={
+              isMyFollowingPage
+                ? "You are not following anyone yet."
+                : "No followed users yet."
+            }
+            description={
+              isMyFollowingPage
+                ? "When you follow people, their profiles will appear here."
+                : "This user is not following other profiles yet."
+            }
           />
+        ) : (
+          <>
+            <FollowingList
+              followingUsers={users}
+              followLoadingUserId={followLoadingUserId}
+              onUnfollow={handleUnfollow}
+            />
 
-          <Pagination
-            page={page}
-            total={total}
-            pageSize={limit}
-            onChange={setPage}
-          />
-        </>
-      )}
+            <div className="mt-6">
+              <Pagination
+                page={page}
+                total={total}
+                pageSize={limit}
+                onChange={setPage}
+              />
+            </div>
+          </>
+        )}
+      </SectionCard>
     </div>
   );
 }
