@@ -1,22 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { ErrorBox, Spinner } from "../../ui/UI";
-import { SubmitButton } from "../../ui/SubmitButton";
-import { StringNormalizer } from "../../../helpers/normalization/StringNormalizer";
-import { ImageHelper } from "../../../helpers/images/ImageHelper";
-import { useToast } from "../../../hooks/toast/useToast";
-import { usePostDetails } from "../../../hooks/posts/details/usePostDetails";
-import { useUpdatePost } from "../../../hooks/posts/useUpdatePost";
-import { usePostImageInput } from "../../../hooks/posts/form/usePostImageInput";
-import { validateUpdatePost } from "../../../validators/post/validateUpdatePost";
-import { PostMessages } from "../../../constants/messages/post/PostMessages";
-import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
-import type { PostDetailsDto } from "../../../models/posts/PostDetailsDto";
-
-import { PostTitleInput } from "./PostTitleInput";
-import { PostMarkdownEditor } from "./PostMarkdownEditor";
-import { PostImageInput } from "./PostImageInput";
+import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
+import { PostMessages } from "../../../../constants/messages/post/PostMessages";
+import { ImageHelper } from "../../../../helpers/images/ImageHelper";
+import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
+import { usePostDetails } from "../../../../hooks/posts/details/core/usePostDetails";
+import { usePostImageInput } from "../../../../hooks/posts/create/usePostImageInput";
+import { useUpdatePost } from "../../../../hooks/posts/edit/useUpdatePost";
+import { useToast } from "../../../../hooks/toast/useToast";
+import type { PostDetailsDto } from "../../../../models/posts/PostDetailsDto";
+import { validateUpdatePost } from "../../../../validators/post/validateUpdatePost";
+import { SubmitButton } from "../../../ui/SubmitButton";
+import { Spinner, ErrorBox } from "../../../ui/UI";
+import { PostImageInput } from "../shared/PostImageInput";
+import { PostMarkdownEditor } from "../shared/PostMarkdownEditor";
+import { PostTitleInput } from "../shared/PostTitleInput";
 
 type Props = {
   postId: number;

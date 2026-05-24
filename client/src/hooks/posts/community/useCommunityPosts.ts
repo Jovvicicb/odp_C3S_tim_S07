@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { postApi } from "../../api_services/posts/PostAPIService";
-import type { PostSortType } from "../../types/posts/PostSortType";
-import type { PostWithDetailsDto } from "../../models/posts/PostWithDetailsDto";
-import { PostMessages } from "../../constants/messages/post/PostMessages";
+import { postApi } from "../../../api_services/posts/PostAPIService";
+import type { PostSortType } from "../../../types/posts/PostSortType";
+import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
+import { PostMessages } from "../../../constants/messages/post/PostMessages";
 
 export function useCommunityPosts(
   communityId: number | null,

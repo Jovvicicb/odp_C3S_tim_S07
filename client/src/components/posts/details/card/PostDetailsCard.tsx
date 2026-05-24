@@ -1,10 +1,10 @@
-import { ImageHelper } from "../../../helpers/images/ImageHelper";
-import type { PostDetailsDto } from "../../../models/posts/PostDetailsDto";
-import type { PostTagDto } from "../../../models/tags/PostTagDto";
-import { PostStatsActions } from "./PostStatsActions";
+import { ImageHelper } from "../../../../helpers/images/ImageHelper";
+import type { PostDetailsDto } from "../../../../models/posts/PostDetailsDto";
+import type { PostTagDto } from "../../../../models/tags/PostTagDto";
+import { PostStatsActions } from "../stats/PostStatsActions";
 
-import { MarkdownContent } from "../../markdown/MarkdownContent";
-import { PostTagsPanel } from "./PostTagsPanel";
+import { MarkdownContent } from "../../../markdown/MarkdownContent";
+import { PostTagsPanel } from "../tags/PostTagsPanel";
 
 type Props = {
   post: PostDetailsDto;

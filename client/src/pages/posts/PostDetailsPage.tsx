@@ -3,13 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
 import { ActionButton } from "../../components/ui/ActionButton";
 
-import { PostDetailsCard } from "../../components/posts/details/PostDetailsCard";
-import { PostCommentsSection } from "../../components/posts/details/PostCommentsSection";
+import { PostDetailsCard } from "../../components/posts/details/card/PostDetailsCard";
+import { PostCommentsSection } from "../../components/posts/details/comments/PostCommentsSection";
 
-import { usePostDetails } from "../../hooks/posts/details/usePostDetails";
-import { usePostDetailsActions } from "../../hooks/posts/details/usePostDetailsActions";
+import { usePostDetails } from "../../hooks/posts/details/core/usePostDetails";
 import { useCommentActions } from "../../hooks/comments/details/useCommentActions";
-import { usePostTagActions } from "../../hooks/posts/details/usePostTagActions";
+import { usePostTagActions } from "../../hooks/posts/details/tags/usePostTagActions";
+import { usePostLikeActions } from "../../hooks/posts/details/actions/usePostLikeActions";
+import { usePostDeleteAction } from "../../hooks/posts/details/actions/usePostDeleteAction";
 
 export default function PostDetailsPage() {
   const { id } = useParams();
@@ -31,16 +32,13 @@ export default function PostDetailsPage() {
     reload,
   } = usePostDetails(parsedPostId, 1, 10, "newest");
 
-  const {
-    handleLikePost,
-    handleUnlikePost,
-    handleDeletePost,
-    loadingPostLike,
-    loadingPostDelete,
-    postActionError,
-  } = usePostDetailsActions({
-    setPostDetails,
-  });
+  const { handleLikePost, handleUnlikePost, loadingPostLike, postLikeError } =
+    usePostLikeActions({
+      setPostDetails,
+    });
+
+  const { handleDeletePost, loadingPostDelete, postDeleteError } =
+    usePostDeleteAction();
 
   const {
     handleAddPostTag,
@@ -104,12 +102,17 @@ export default function PostDetailsPage() {
       />
 
       {(error ||
-        postActionError ||
+        postLikeError ||
+        postDeleteError ||
         postTagActionError ||
         commentActionError) && (
         <ErrorBox
           message={
-            error || postActionError || postTagActionError || commentActionError
+            error ||
+            postLikeError ||
+            postDeleteError ||
+            postTagActionError ||
+            commentActionError
           }
         />
       )}

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { ActionButton } from "../../../ui/ActionButton";
 import { Empty, Pagination, Spinner } from "../../../ui/UI";
-import { PostCard } from "../../../posts/PostCard";
+import { PostCard } from "../../../posts/card/PostCard";
 
 import type { CommunityDto } from "../../../../models/communities/CommunityDto";
 import type { PostWithDetailsDto } from "../../../../models/posts/PostWithDetailsDto";

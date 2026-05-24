@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { ErrorBox } from "../../ui/UI";
-import { StringNormalizer } from "../../../helpers/normalization/StringNormalizer";
-import { useCreatePost } from "../../../hooks/posts/useCreatePost";
-import { validateCreatePost } from "../../../validators/post/validateCreatePost";
-import { useToast } from "../../../hooks/toast/useToast";
-import { PostMessages } from "../../../constants/messages/post/PostMessages";
-import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
-
-import { PostFormIntro } from "./PostFormIntro";
-import { PostImageInput } from "./PostImageInput";
-import { usePostImageInput } from "../../../hooks/posts/form/usePostImageInput";
-import { SubmitButton } from "../../ui/SubmitButton";
-import { PostMarkdownEditor } from "./PostMarkdownEditor";
-import { PostTitleInput } from "./PostTitleInput";
+import { ErrorBox } from "../../../ui/UI";
+import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
+import { PostMessages } from "../../../../constants/messages/post/PostMessages";
+import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
+import { usePostImageInput } from "../../../../hooks/posts/create/usePostImageInput";
+import { useCreatePost } from "../../../../hooks/posts/create/useCreatePost";
+import { useToast } from "../../../../hooks/toast/useToast";
+import { validateCreatePost } from "../../../../validators/post/validateCreatePost";
+import { SubmitButton } from "../../../ui/SubmitButton";
+import { PostImageInput } from "../shared/PostImageInput";
+import { PostMarkdownEditor } from "../shared/PostMarkdownEditor";
+import { PostTitleInput } from "../shared/PostTitleInput";
+import { IntroPanel } from "../../../ui/IntroPanel";
 
 export default function CreatePostForm() {
   const { communityId } = useParams();
@@ -74,7 +73,11 @@ export default function CreatePostForm() {
 
   return (
     <section>
-      <PostFormIntro />
+      <IntroPanel
+        label="Create post"
+        title="Share something with the community"
+        description="Write a clear title, use Markdown for the content and optionally attach an image to make your post more engaging."
+      />
 
       <form
         noValidate

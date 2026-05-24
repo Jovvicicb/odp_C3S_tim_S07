@@ -11,7 +11,7 @@ import { CommunityJoinRequestsSection } from "../../components/communities/detai
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { useCommunityDetails } from "../../hooks/communities/core/useCommunityDetails";
-import { useCommunityPosts } from "../../hooks/posts/useCommunityPosts";
+import { useCommunityPosts } from "../../hooks/posts/community/useCommunityPosts";
 import { useCommunityDetailsMembershipActions } from "../../hooks/communities/details/membership/useCommunityDetailsMembershipActions";
 import { useCommunityMemberFollowActions } from "../../hooks/communities/details/members/useCommunityMemberFollowActions";
 import { useCommunityMemberModerationActions } from "../../hooks/communities/details/members/useCommunityMemberModerationActions";

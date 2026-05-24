@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MarkdownContent } from "../../markdown/MarkdownContent";
+import { MarkdownContent } from "../../../markdown/MarkdownContent";
 
 type Props = {
   value: string;

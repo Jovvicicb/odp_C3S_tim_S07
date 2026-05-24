@@ -1,9 +1,9 @@
-import { Empty, Pagination } from "../../ui/UI";
-import type { PaginatedListDto } from "../../../models/common/PaginatedListDto";
-import type { CommentTreeDto } from "../../../models/comments/CommentTreeDto";
-import type { CommentSortType } from "../../../types/comments/CommentSortType";
-import { CommentPreviewCard } from "../../comments/CommentPreviewCard";
-import { CommentForm } from "../../comments/CommentForm";
+import { Empty, Pagination } from "../../../ui/UI";
+import type { PaginatedListDto } from "../../../../models/common/PaginatedListDto";
+import type { CommentTreeDto } from "../../../../models/comments/CommentTreeDto";
+import type { CommentSortType } from "../../../../types/comments/CommentSortType";
+import { CommentPreviewCard } from "../../../comments/CommentPreviewCard";
+import { CommentForm } from "../../../comments/CommentForm";
 
 type Props = {
   postId: number;

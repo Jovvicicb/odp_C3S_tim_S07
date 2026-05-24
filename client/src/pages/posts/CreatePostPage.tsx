@@ -1,4 +1,4 @@
-import CreatePostForm from "../../components/posts/form/CreatePostForm";
+import CreatePostForm from "../../components/posts/form/create/CreatePostForm";
 import { ActionButton } from "../../components/ui/ActionButton";
 import { PageHeader } from "../../components/ui/UI";
 

@@ -1,9 +1,9 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { postApi } from "../../../api_services/posts/PostAPIService";
-import { PostMessages } from "../../../constants/messages/post/PostMessages";
-import type { PostDetailsDto } from "../../../models/posts/PostDetailsDto";
-import type { PostTagDto } from "../../../models/tags/PostTagDto";
-import { useToast } from "../../toast/useToast";
+import { postApi } from "../../../../api_services/posts/PostAPIService";
+import { PostMessages } from "../../../../constants/messages/post/PostMessages";
+import type { PostDetailsDto } from "../../../../models/posts/PostDetailsDto";
+import type { PostTagDto } from "../../../../models/tags/PostTagDto";
+import { useToast } from "../../../toast/useToast";
 
 type Props = {
   setPostDetails: Dispatch<SetStateAction<PostDetailsDto | null>>;

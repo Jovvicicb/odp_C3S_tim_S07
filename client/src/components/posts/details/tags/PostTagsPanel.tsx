@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { tagApi } from "../../../api_services/tags/TagAPIService";
-import { TagMessages } from "../../../constants/messages/tag/TagMessages";
-import type { TagDto } from "../../../models/tags/TagDto";
-import type { PostTagDto } from "../../../models/tags/PostTagDto";
+import { tagApi } from "../../../../api_services/tags/TagAPIService";
+import { TagMessages } from "../../../../constants/messages/tag/TagMessages";
+import type { TagDto } from "../../../../models/tags/TagDto";
+import type { PostTagDto } from "../../../../models/tags/PostTagDto";
 
 type Props = {
   postId: number;

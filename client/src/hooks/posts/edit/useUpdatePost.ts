@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { postApi } from "../../api_services/posts/PostAPIService";
-import { CommonMessages } from "../../constants/messages/common/CommonMessages";
-import { PostMessages } from "../../constants/messages/post/PostMessages";
+import { postApi } from "../../../api_services/posts/PostAPIService";
+import { PostMessages } from "../../../constants/messages/post/PostMessages";
+import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
 
 export function useUpdatePost() {
   const [loading, setLoading] = useState(false);
