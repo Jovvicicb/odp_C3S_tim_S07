@@ -1,10 +1,11 @@
 import { Pagination, Spinner } from "../../../ui/UI";
+import { CountBadge } from "../../../ui/CountBadge";
 import { SectionCard } from "../../../ui/SectionCard";
+import { SectionEmptyState } from "../../../ui/SectionEmptyState";
 
 import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
 
 import { CommunityJoinRequestCard } from "./CommunityJoinRequestCard";
-import { CountBadge } from "../../../ui/CountBadge";
 
 type Props = {
   requests: CommunityMemberDetailsDto[];
@@ -30,6 +31,7 @@ export function CommunityJoinRequestsSection({
   onDeny,
 }: Props) {
   const hasRequests = requests.length > 0;
+  const showPagination = total > limit;
 
   return (
     <SectionCard
@@ -43,7 +45,10 @@ export function CommunityJoinRequestsSection({
           <Spinner size={24} />
         </div>
       ) : !hasRequests ? (
-        <JoinRequestsEmptyState />
+        <SectionEmptyState
+          title="No pending requests."
+          description="New join requests will appear here when users ask to enter this private community."
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
@@ -58,31 +63,18 @@ export function CommunityJoinRequestsSection({
             ))}
           </div>
 
-          <div className="mt-6">
-            <Pagination
-              page={page}
-              total={total}
-              pageSize={limit}
-              onChange={setPage}
-            />
-          </div>
+          {showPagination && (
+            <div className="mt-6">
+              <Pagination
+                page={page}
+                total={total}
+                pageSize={limit}
+                onChange={setPage}
+              />
+            </div>
+          )}
         </>
       )}
     </SectionCard>
-  );
-}
-
-function JoinRequestsEmptyState() {
-  return (
-    <div className="rounded-2xl border border-white/8 bg-white/3 px-5 py-6">
-      <p className="text-sm font-semibold text-white/55">
-        No pending requests.
-      </p>
-
-      <p className="mt-1 text-sm leading-6 text-white/30">
-        New join requests will appear here when users ask to enter this private
-        community.
-      </p>
-    </div>
   );
 }

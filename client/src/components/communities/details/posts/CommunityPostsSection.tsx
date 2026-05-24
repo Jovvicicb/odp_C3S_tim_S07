@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { ActionButton } from "../../../ui/ActionButton";
-import { Empty, Pagination, Spinner } from "../../../ui/UI";
+import { ActionButton } from "../../../ui/button/ActionButton";
+import { Pagination, Spinner } from "../../../ui/UI";
 import { SectionCard } from "../../../ui/SectionCard";
 import { PostCard } from "../../../posts/card/PostCard";
 
@@ -12,6 +12,7 @@ import type { CommunityViewerPermissionsDto } from "../../../../models/communiti
 
 import { CommunityPostsToolbar } from "./CommunityPostsToolbar";
 import { CountBadge } from "../../../ui/CountBadge";
+import { SectionEmptyState } from "../../../ui/SectionEmptyState";
 
 type Props = {
   community: CommunityDto;
@@ -112,15 +113,18 @@ export function CommunityPostsSection({
           <Spinner size={24} />
         </div>
       ) : visiblePosts.length === 0 && !postsError ? (
-        <div className="rounded-3xl border border-dashed border-white/10 bg-[#0b0f17]/60 p-8">
-          <Empty
-            message={
-              selectedTagId === null
-                ? "No posts found in this community."
-                : "No posts found for selected tag."
-            }
-          />
-        </div>
+        <SectionEmptyState
+          title={
+            selectedTagId === null ? "No posts yet." : "No posts for this tag."
+          }
+          description={
+            selectedTagId === null
+              ? permissions.canCreatePost
+                ? "Be the first to start a discussion in this community."
+                : "Posts will appear here when community members create them."
+              : "Try selecting another tag or clearing the current filter."
+          }
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-5">
@@ -129,14 +133,14 @@ export function CommunityPostsSection({
             ))}
           </div>
 
-          <div className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-4 shadow-xl shadow-sky-950/10">
+          {postsTotal > postsLimit && (
             <Pagination
               page={postsPage}
               total={postsTotal}
               pageSize={postsLimit}
               onChange={handlePageChange}
             />
-          </div>
+          )}
         </>
       )}
     </section>

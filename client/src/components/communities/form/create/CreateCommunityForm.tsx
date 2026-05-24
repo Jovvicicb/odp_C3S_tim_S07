@@ -12,7 +12,7 @@ import type { CommunityType } from "../../../../types/communities/common/Communi
 import { CommunityTypeSelector } from "../shared/CommunityTypeSelector";
 import { CommunityImageInput } from "../shared/CommunityImageInput";
 import { useCommunityImageInput } from "../../../../hooks/communities/create/useCommunityImageInput";
-import { SubmitButton } from "../../../ui/SubmitButton";
+import { SubmitButton } from "../../../ui/button/SubmitButton";
 
 export default function CreateCommunityForm() {
   const [name, setName] = useState("");

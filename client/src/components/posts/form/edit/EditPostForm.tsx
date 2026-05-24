@@ -10,7 +10,7 @@ import { useUpdatePost } from "../../../../hooks/posts/edit/useUpdatePost";
 import { useToast } from "../../../../hooks/toast/useToast";
 import type { PostDetailsDto } from "../../../../models/posts/PostDetailsDto";
 import { validateUpdatePost } from "../../../../validators/post/validateUpdatePost";
-import { SubmitButton } from "../../../ui/SubmitButton";
+import { SubmitButton } from "../../../ui/button/SubmitButton";
 import { Spinner, ErrorBox } from "../../../ui/UI";
 import { PostImageInput } from "../shared/PostImageInput";
 import { PostMarkdownEditor } from "../shared/PostMarkdownEditor";

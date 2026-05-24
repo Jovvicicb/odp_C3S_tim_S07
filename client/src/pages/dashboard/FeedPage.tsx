@@ -1,4 +1,4 @@
-import { ActionButton } from "../../components/ui/ActionButton";
+import { ActionButton } from "../../components/ui/button/ActionButton";
 import { PageHeader, StatCard } from "../../components/ui/UI";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 

@@ -91,19 +91,6 @@ export function NodeBadge({ status }: { status: string }) {
   );
 }
 
-export function RoleBadge({ role }: { role: string }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-xl border px-2.5 py-1 text-xs font-semibold capitalize ${
-        role === "admin"
-          ? "border-amber-400/20 bg-amber-400/10 text-amber-300"
-          : "border-sky-400/15 bg-sky-400/10 text-sky-200/70"
-      }`}
-    >
-      {role}
-    </span>
-  );
-}
 export function Pagination({
   page,
   total,

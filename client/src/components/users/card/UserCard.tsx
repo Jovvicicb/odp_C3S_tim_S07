@@ -5,7 +5,7 @@ import type { UserRole } from "../../../types/users/UserRole";
 import type { UserFollowStatus } from "../../../types/users/UserFollowStatus";
 import type { CommunityMemberRole } from "../../../types/communities/members/CommunityMemberRole";
 
-import { RoleBadge } from "../../ui/UI";
+import { RoleBadge } from "../../ui/RoleBadge";
 import { UserAvatar } from "./UserAvatar";
 import { UserCommunityMetaBadges } from "./UserCommunityMetaBadges";
 import { UserFollowButton } from "./UserFollowButton";

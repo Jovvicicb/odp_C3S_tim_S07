@@ -121,10 +121,6 @@ export function CommunityCard({
               status={effectiveMembershipStatus}
               isOwner={isOwner}
             />
-
-            <span className="rounded-xl border border-white/8 bg-white/3 px-3 py-1.5 text-xs font-semibold text-white/35">
-              Preview
-            </span>
           </div>
 
           <span className="text-xs font-bold text-sky-200/60 transition-colors group-hover:text-sky-200">

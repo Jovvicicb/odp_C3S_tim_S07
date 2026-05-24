@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { ErrorBox } from "../../../ui/UI";
-import { SubmitButton } from "../../../ui/SubmitButton";
+import { SubmitButton } from "../../../ui/button/SubmitButton";
 
 import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
 import { useToast } from "../../../../hooks/toast/useToast";

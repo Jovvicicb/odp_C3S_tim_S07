@@ -2,11 +2,13 @@ import type { CommunityDto } from "../../../../models/communities/CommunityDto";
 import type { CommunityViewerPermissionsDto } from "../../../../models/communities/CommunityViewerPermissionsDto";
 
 import { ImageHelper } from "../../../../helpers/images/ImageHelper";
+
+import { Badge } from "../../../ui/Badge";
 import { SectionLabel } from "../../../ui/SectionLabel";
 
 import { CommunityAvatar } from "../../card/CommunityAvatar";
-import { CommunityTypeBadge } from "../../card/CommunityTypeBadge";
 import { CommunityMembershipBadge } from "../../card/CommunityMembershipBadge";
+import { CommunityTypeBadge } from "../../card/CommunityTypeBadge";
 import { CommunityHeroActions } from "./CommunityHeroActions";
 
 type Props = {
@@ -18,6 +20,7 @@ type Props = {
   onLeave: (communityId: number) => void;
   onDelete: (communityId: number) => void;
 };
+
 export function CommunityDetailsHero({
   community,
   permissions,
@@ -48,9 +51,6 @@ export function CommunityDetailsHero({
           membership from one place.
         </p>
       </div>
-
-      <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-sky-400/5 blur-3xl" />
-      <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-sky-500/3 blur-3xl" />
 
       <div className="relative z-10 p-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -101,7 +101,7 @@ export function CommunityDetailsHero({
         </div>
 
         <div className="mt-6 space-y-4">
-          <div className="rounded-2xl border border-sky-300/10 bg-sky-400/[0.04] px-5 py-4">
+          <div className="rounded-2xl border border-sky-300/10 bg-sky-400/4 px-5 py-4">
             <SectionLabel label="Description" tone="sky" />
 
             <p className="whitespace-pre-wrap text-sm leading-7 text-white/65">
@@ -112,7 +112,7 @@ export function CommunityDetailsHero({
           <div className="border-l border-amber-300/20 pl-4">
             <SectionLabel label="Rules" tone="amber" />
 
-            <p className="whitespace-pre-wrap text-sm leading-7 text-white/42">
+            <p className="whitespace-pre-wrap text-sm leading-7 text-white/45">
               {community.rules || "No rules defined."}
             </p>
           </div>
@@ -126,15 +126,15 @@ export function CommunityDetailsHero({
             />
 
             {permissions.isModerator && (
-              <span className="rounded-xl border border-amber-300/15 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-200/70">
+              <Badge tone="amber" className="rounded-2xl px-3 py-1.5">
                 Moderator access
-              </span>
+              </Badge>
             )}
 
             {permissions.canCreatePost && (
-              <span className="rounded-xl border border-sky-300/10 bg-sky-400/5 px-3 py-1.5 text-xs font-semibold text-sky-100/55">
+              <Badge tone="sky" className="rounded-2xl px-3 py-1.5">
                 Can create posts
-              </span>
+              </Badge>
             )}
           </div>
 

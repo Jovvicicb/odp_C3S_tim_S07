@@ -1,9 +1,10 @@
+import { useNavigate } from "react-router-dom";
+
 import type { CommunityDto } from "../../../../models/communities/CommunityDto";
 import type { CommunityViewerPermissionsDto } from "../../../../models/communities/CommunityViewerPermissionsDto";
 
+import { Button } from "../../../ui/button/Button";
 import { CommunityMembershipButton } from "../../shared/CommunityMembershipButton";
-
-import { useNavigate } from "react-router-dom";
 
 type Props = {
   community: CommunityDto;
@@ -24,12 +25,13 @@ export function CommunityHeroActions({
   onLeave,
   onDelete,
 }: Props) {
-  const showMembershipAction = !permissions.isOwner;
-  const showDeleteAction = permissions.canDeleteCommunity;
   const navigate = useNavigate();
-  const showEditAction = permissions.canUpdateCommunity;
 
-  if (!showMembershipAction && !showDeleteAction) {
+  const showMembershipAction = !permissions.isOwner;
+  const showEditAction = permissions.canUpdateCommunity;
+  const showDeleteAction = permissions.canDeleteCommunity;
+
+  if (!showMembershipAction && !showEditAction && !showDeleteAction) {
     return null;
   }
 
@@ -45,24 +47,21 @@ export function CommunityHeroActions({
       )}
 
       {showEditAction && (
-        <button
-          type="button"
+        <Button
+          label="Edit community"
+          variant="warning"
           onClick={() => navigate(`/communities/${community.id}/edit`)}
-          className="rounded-2xl border border-white/10 bg-white/4 px-4 py-2.5 text-xs font-bold text-white/65 transition-all hover:-translate-y-0.5 hover:border-sky-300/20 hover:bg-sky-400/10 hover:text-sky-100"
-        >
-          Edit community
-        </button>
+        />
       )}
 
       {showDeleteAction && (
-        <button
-          type="button"
-          disabled={deleteLoading}
+        <Button
+          label="Delete community"
+          loadingLabel="Deleting..."
+          loading={deleteLoading}
+          variant="danger"
           onClick={() => onDelete(community.id)}
-          className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-2.5 text-xs font-bold text-red-200 transition-all hover:-translate-y-0.5 hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
-        >
-          {deleteLoading ? "Deleting..." : "Delete community"}
-        </button>
+        />
       )}
     </div>
   );

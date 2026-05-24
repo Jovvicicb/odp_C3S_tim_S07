@@ -1,4 +1,4 @@
-import { ActionButton } from "../../components/ui/ActionButton";
+import { ActionButton } from "../../components/ui/button/ActionButton";
 import {
   Empty,
   ErrorBox,

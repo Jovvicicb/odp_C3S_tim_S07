@@ -9,7 +9,7 @@ import { CommonMessages } from "../../../constants/messages/common/CommonMessage
 
 import { LoginFormHeader } from "./LoginFormHeader";
 import { AuthRedirectBox } from "../AuthRedirectBox";
-import { SubmitButton } from "../../ui/SubmitButton";
+import { SubmitButton } from "../../ui/button/SubmitButton";
 
 export function LoginForm({ authApi }: { authApi: IAuthAPIService }) {
   const { login } = useAuth();

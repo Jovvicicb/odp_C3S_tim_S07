@@ -11,7 +11,7 @@ import { RegisterFormHeader } from "./RegisterFormHeader";
 import { RegisterProfileImageInput } from "./RegisterProfileImageInput";
 import { AuthRedirectBox } from "../AuthRedirectBox";
 import { useRegisterImageInput } from "../../../hooks/auth/register/useRegisterImageInput";
-import { SubmitButton } from "../../ui/SubmitButton";
+import { SubmitButton } from "../../ui/button/SubmitButton";
 
 export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
   const { login } = useAuth();

@@ -1,5 +1,5 @@
 import CreatePostForm from "../../components/posts/form/create/CreatePostForm";
-import { ActionButton } from "../../components/ui/ActionButton";
+import { ActionButton } from "../../components/ui/button/ActionButton";
 import { IntroPanel } from "../../components/ui/IntroPanel";
 import { PageHeader } from "../../components/ui/UI";
 

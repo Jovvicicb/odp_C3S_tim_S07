@@ -5,7 +5,7 @@ import {
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
-import { ActionButton } from "../../components/ui/ActionButton";
+import { ActionButton } from "../../components/ui/button/ActionButton";
 
 import { MyCommunitiesList } from "../../components/communities/my/MyCommunitiesList";
 

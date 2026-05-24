@@ -9,7 +9,7 @@ import { usePostImageInput } from "../../../../hooks/posts/create/usePostImageIn
 import { useCreatePost } from "../../../../hooks/posts/create/useCreatePost";
 import { useToast } from "../../../../hooks/toast/useToast";
 import { validateCreatePost } from "../../../../validators/post/validateCreatePost";
-import { SubmitButton } from "../../../ui/SubmitButton";
+import { SubmitButton } from "../../../ui/button/SubmitButton";
 import { PostImageInput } from "../shared/PostImageInput";
 import { PostMarkdownEditor } from "../shared/PostMarkdownEditor";
 import { PostTitleInput } from "../shared/PostTitleInput";

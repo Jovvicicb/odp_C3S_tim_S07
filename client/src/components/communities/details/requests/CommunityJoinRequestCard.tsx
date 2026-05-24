@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
 import { UserAvatar } from "../../../users/card/UserAvatar";
+import { Badge } from "../../../ui/Badge";
 
 type Props = {
   request: CommunityMemberDetailsDto;
@@ -39,7 +40,9 @@ export function CommunityJoinRequestCard({
                     {user.username}
                   </h3>
 
-                  <PendingBadge />
+                  <Badge tone="amber" className="text-[11px] font-bold">
+                    Pending
+                  </Badge>
                 </div>
 
                 <p className="mt-1 truncate text-sm text-white/40">
@@ -59,49 +62,34 @@ export function CommunityJoinRequestCard({
             </div>
 
             <p className="mt-4 text-xs leading-5 text-white/30">
-              This user requested access to the community and is waiting for a
-              moderator decision.
+              This user is waiting for approval to join the community.
             </p>
           </div>
         </div>
 
         <div
           onClick={(e) => e.stopPropagation()}
-          className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-4"
+          className="mt-5 flex flex-wrap items-center gap-2 border-t border-white/8 pt-4"
         >
-          <span className="text-xs font-medium text-white/25">
-            Review request
-          </span>
+          <button
+            type="button"
+            disabled={actionLoading}
+            onClick={() => onDeny(user.id)}
+            className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-200 transition-all hover:-translate-y-0.5 hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+          >
+            {actionLoading ? "Saving..." : "Deny"}
+          </button>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              disabled={actionLoading}
-              onClick={() => onDeny(user.id)}
-              className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-200 transition-all hover:-translate-y-0.5 hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
-            >
-              {actionLoading ? "Saving..." : "Deny"}
-            </button>
-
-            <button
-              type="button"
-              disabled={actionLoading}
-              onClick={() => onAccept(user.id)}
-              className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-200 transition-all hover:-translate-y-0.5 hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
-            >
-              {actionLoading ? "Saving..." : "Accept"}
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled={actionLoading}
+            onClick={() => onAccept(user.id)}
+            className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-200 transition-all hover:-translate-y-0.5 hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+          >
+            {actionLoading ? "Saving..." : "Accept"}
+          </button>
         </div>
       </div>
     </article>
-  );
-}
-
-function PendingBadge() {
-  return (
-    <span className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[11px] font-bold text-amber-300">
-      Pending
-    </span>
   );
 }

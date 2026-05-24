@@ -1,5 +1,5 @@
 import { ErrorBox, PageHeader } from "../../components/ui/UI";
-import { ActionButton } from "../../components/ui/ActionButton";
+import { ActionButton } from "../../components/ui/button/ActionButton";
 import { AdminTagForm } from "../../components/tags/admin/AdminTagForm";
 import { AdminTagList } from "../../components/tags/admin/AdminTagList";
 import { useAdminTags } from "../../hooks/tags/useAdminTags";

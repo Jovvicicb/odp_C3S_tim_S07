@@ -1,4 +1,5 @@
 import type { CommunityDto } from "../../../models/communities/CommunityDto";
+import { Badge } from "../../ui/Badge";
 import { getCommunityMembershipLabel } from "./CommunityMembershipHelper";
 
 type Props = {
@@ -9,9 +10,16 @@ type Props = {
 export function CommunityMembershipBadge({ status, isOwner = false }: Props) {
   const label = getCommunityMembershipLabel(status, isOwner);
 
+  const tone =
+    isOwner || status === "active"
+      ? "sky"
+      : status === "pending"
+        ? "amber"
+        : "muted";
+
   return (
-    <span className="rounded-xl border border-sky-300/10 bg-sky-400/5 px-3 py-1.5 text-xs font-semibold text-sky-100/55">
+    <Badge tone={tone} className="rounded-2xl px-3 py-1.5">
       {label}
-    </span>
+    </Badge>
   );
 }

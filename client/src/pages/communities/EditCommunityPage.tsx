@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 
-import { ActionButton } from "../../components/ui/ActionButton";
+import { ActionButton } from "../../components/ui/button/ActionButton";
 import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
 
 import { EditCommunityForm } from "../../components/communities/form/edit/EditCommunityForm";

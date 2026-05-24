@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 
 import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
-import { ActionButton } from "../../components/ui/ActionButton";
+import { ActionButton } from "../../components/ui/button/ActionButton";
 
 import { PostDetailsCard } from "../../components/posts/details/card/PostDetailsCard";
 import { PostCommentsSection } from "../../components/posts/details/comments/PostCommentsSection";

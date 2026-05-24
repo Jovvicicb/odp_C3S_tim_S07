@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/auth/useAuthHook";
-import { RoleBadge } from "../ui/UI";
+import { RoleBadge } from "../ui/RoleBadge";
 import { useToast } from "../../hooks/toast/useToast";
 import { SidebarGroup } from "./SidebarGroup";
 
