@@ -93,14 +93,12 @@ export default function DiscoverCommunitiesPage() {
             onLeave={handleLeave}
           />
 
-          <div className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-4 shadow-xl shadow-sky-950/10">
-            <Pagination
-              page={page}
-              total={total}
-              pageSize={limit}
-              onChange={setPage}
-            />
-          </div>
+          <Pagination
+            page={page}
+            total={total}
+            pageSize={limit}
+            onChange={setPage}
+          />
         </>
       )}
     </div>

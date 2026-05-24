@@ -1,4 +1,4 @@
-import { UserCard } from "../UserCard";
+import { UserCard } from "../card/UserCard";
 import type { UserDto } from "../../../models/users/UserDto";
 
 type Props = {

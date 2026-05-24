@@ -13,7 +13,6 @@ import { SubmitButton } from "../../../ui/SubmitButton";
 import { PostImageInput } from "../shared/PostImageInput";
 import { PostMarkdownEditor } from "../shared/PostMarkdownEditor";
 import { PostTitleInput } from "../shared/PostTitleInput";
-import { IntroPanel } from "../../../ui/IntroPanel";
 
 export default function CreatePostForm() {
   const { communityId } = useParams();
@@ -73,12 +72,6 @@ export default function CreatePostForm() {
 
   return (
     <section>
-      <IntroPanel
-        label="Create post"
-        title="Share something with the community"
-        description="Write a clear title, use Markdown for the content and optionally attach an image to make your post more engaging."
-      />
-
       <form
         noValidate
         onSubmit={submit}

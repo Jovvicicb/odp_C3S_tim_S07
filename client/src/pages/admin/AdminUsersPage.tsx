@@ -5,7 +5,7 @@ import {
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
-import { UserCard } from "../../components/users/UserCard";
+import { UserCard } from "../../components/users/card/UserCard";
 import { useUsers } from "../../hooks/users/useUsers";
 import { useUpdateUserRole } from "../../hooks/users/useUpdateUserRole";
 import { useToast } from "../../hooks/toast/useToast";

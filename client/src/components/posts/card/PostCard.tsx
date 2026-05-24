@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
 import { ImageHelper } from "../../../helpers/images/ImageHelper";
+import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
 
 type Props = {
   post: PostWithDetailsDto;

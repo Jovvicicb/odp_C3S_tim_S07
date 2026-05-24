@@ -1,6 +1,10 @@
-import { Empty, Pagination, Spinner } from "../../../ui/UI";
+import { Pagination, Spinner } from "../../../ui/UI";
+import { SectionCard } from "../../../ui/SectionCard";
+
 import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
+
 import { CommunityJoinRequestCard } from "./CommunityJoinRequestCard";
+import { CountBadge } from "../../../ui/CountBadge";
 
 type Props = {
   requests: CommunityMemberDetailsDto[];
@@ -25,30 +29,24 @@ export function CommunityJoinRequestsSection({
   onAccept,
   onDeny,
 }: Props) {
+  const hasRequests = requests.length > 0;
+
   return (
-    <section className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-6 shadow-xl shadow-sky-950/10">
-      <div>
-        <h2 className="text-xl font-semibold tracking-tight text-white">
-          Join requests
-        </h2>
-
-        <p className="mt-2 text-sm leading-6 text-white/35">
-          Review pending requests from users who want to join this private
-          community.
-        </p>
-      </div>
-
+    <SectionCard
+      label="Join requests"
+      title="Pending membership requests"
+      description="Review users waiting to join this private community and decide who should get access."
+      action={<CountBadge count={total} singular="request" plural="requests" />}
+    >
       {loading ? (
         <div className="flex justify-center py-16">
           <Spinner size={24} />
         </div>
-      ) : requests.length === 0 ? (
-        <div className="mt-5">
-          <Empty message="No pending join requests." />
-        </div>
+      ) : !hasRequests ? (
+        <JoinRequestsEmptyState />
       ) : (
         <>
-          <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
             {requests.map((request) => (
               <CommunityJoinRequestCard
                 key={request.user.id}
@@ -70,6 +68,21 @@ export function CommunityJoinRequestsSection({
           </div>
         </>
       )}
-    </section>
+    </SectionCard>
+  );
+}
+
+function JoinRequestsEmptyState() {
+  return (
+    <div className="rounded-2xl border border-white/8 bg-white/3 px-5 py-6">
+      <p className="text-sm font-semibold text-white/55">
+        No pending requests.
+      </p>
+
+      <p className="mt-1 text-sm leading-6 text-white/30">
+        New join requests will appear here when users ask to enter this private
+        community.
+      </p>
+    </div>
   );
 }
