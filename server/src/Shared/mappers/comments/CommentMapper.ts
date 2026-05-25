@@ -31,11 +31,12 @@ export class CommentMapper {
     );
   }
 
-  public static toTreeDto(comment: Comment, likeCount: number, likedByCurrentUser: boolean, permissions: CommentViewerPermissionsDto, replies: CommentTreeDto[] = []): CommentTreeDto {
+  public static toTreeDto(comment: Comment, authorUsername: string | null, likeCount: number, likedByCurrentUser: boolean, permissions: CommentViewerPermissionsDto, replies: CommentTreeDto[] = []): CommentTreeDto {
     return new CommentTreeDto(
       comment.id,
       comment.isDeleted ? "[komentar obrisan]" : comment.content,
       comment.userId,
+      authorUsername,
       comment.postId,
       comment.parentId,
       comment.isDeleted,

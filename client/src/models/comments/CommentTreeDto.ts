@@ -4,6 +4,7 @@ export type CommentTreeDto = {
   id: number;
   content: string;
   userId: number;
+  authorUsername: string | null;
   postId: number;
   parentId: number | null;
   isDeleted: boolean;

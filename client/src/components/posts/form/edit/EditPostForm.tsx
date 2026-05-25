@@ -122,43 +122,35 @@ function EditPostFieldsForm({ post }: { post: PostDetailsDto }) {
   };
 
   return (
-    <section>
-      <div className="mb-7 rounded-2xl border border-white/8 bg-white/3 px-5 py-4">
-        <p className="text-base leading-7 text-white/55">
-          Review your post and update only the fields you want to change.
-        </p>
-      </div>
+    <form
+      noValidate
+      onSubmit={submit}
+      className="mx-auto flex w-full max-w-2xl flex-col gap-6"
+    >
+      {updateError && <ErrorBox message={updateError} />}
 
-      <form
-        noValidate
-        onSubmit={submit}
-        className="mx-auto flex w-full max-w-2xl flex-col gap-6"
-      >
-        {updateError && <ErrorBox message={updateError} />}
+      <PostTitleInput value={title} onChange={setTitle} />
 
-        <PostTitleInput value={title} onChange={setTitle} />
+      <PostMarkdownEditor value={content} onChange={setContent} />
 
-        <PostMarkdownEditor value={content} onChange={setContent} />
+      <PostImageInput
+        fileKey={fileKey}
+        preview={preview}
+        currentImageUrl={currentImageUrl}
+        removeCurrentImage={removeMedia}
+        onChange={(file) => {
+          setRemoveMedia(false);
+          handleImageChange(file);
+        }}
+        onRemoveCurrentImage={() => setRemoveMedia(true)}
+        onUndoRemoveCurrentImage={() => setRemoveMedia(false)}
+      />
 
-        <PostImageInput
-          fileKey={fileKey}
-          preview={preview}
-          currentImageUrl={currentImageUrl}
-          removeCurrentImage={removeMedia}
-          onChange={(file) => {
-            setRemoveMedia(false);
-            handleImageChange(file);
-          }}
-          onRemoveCurrentImage={() => setRemoveMedia(true)}
-          onUndoRemoveCurrentImage={() => setRemoveMedia(false)}
-        />
-
-        <SubmitButton
-          label="Save post changes"
-          loadingLabel="Saving post..."
-          loading={updateLoading}
-        />
-      </form>
-    </section>
+      <SubmitButton
+        label="Save post changes"
+        loadingLabel="Saving post..."
+        loading={updateLoading}
+      />
+    </form>
   );
 }

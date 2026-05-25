@@ -5,6 +5,7 @@ export class CommentTreeDto {
     public id: number,
     public content: string,
     public userId: number,
+    public authorUsername: string | null,
     public postId: number,
     public parentId: number | null,
     public isDeleted: boolean,

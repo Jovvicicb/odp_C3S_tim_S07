@@ -31,6 +31,7 @@ import { CommentViewerPermissionsDto } from "../../Domain/DTOs/comments/CommentV
 import { Community } from "../../Domain/models/Community";
 import { CommunityMember } from "../../Domain/models/CommunityMember";
 import { Post } from "../../Domain/models/Post";
+import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
 
 type CommentAccessCheckResult =
   | {
@@ -52,6 +53,7 @@ export class CommentService implements ICommentService {
     private readonly communityRepo: ICommunityRepository,
     private readonly communityMemberRepo: ICommunityMemberRepository,
     private readonly commentLikeRepo: ICommentLikeRepository,
+    private readonly userRepo: IUserRepository,
     private readonly auditHelperService: IAuditHelperService
   ) {}
 
@@ -356,15 +358,30 @@ export class CommentService implements ICommentService {
 
     const replies = await this.commentRepo.findRepliesByParentIds(rootIds);
 
-    const allCommentIds = [
-      ...rootIds,
-      ...replies.map((reply) => reply.id),
-    ];
+    const allComments = [...rootResult.comments, ...replies];
+
+    const allCommentIds = allComments.map((comment) => comment.id);
+
+    const userIds = Array.from(
+      new Set(allComments.map((comment) => comment.userId))
+    );
+
+    const users = userIds.length > 0
+      ? await this.userRepo.findByIds(userIds)
+      : [];
+
+    const usernameByUserId = users.reduce<Record<number, string>>((acc, user) => {
+      acc[user.id] = user.username;
+      return acc;
+    }, {});
 
     const likeCounts = await this.commentLikeRepo.countByCommentIds(allCommentIds);
 
     const likedCommentIds = viewerId
-      ? await this.commentLikeRepo.findLikedCommentIdsByUserId(viewerId, allCommentIds)
+      ? await this.commentLikeRepo.findLikedCommentIdsByUserId(
+          viewerId,
+          allCommentIds
+        )
       : [];
 
     const likedCommentIdsSet = new Set(likedCommentIds);
@@ -373,6 +390,7 @@ export class CommentService implements ICommentService {
       (acc, reply) => {
         const replyDto = CommentMapper.toTreeDto(
           reply,
+          usernameByUserId[reply.userId] ?? null,
           likeCounts[reply.id] ?? 0,
           likedCommentIdsSet.has(reply.id),
           this.buildCommentPermissions(
@@ -400,6 +418,7 @@ export class CommentService implements ICommentService {
     const items = rootResult.comments.map((root) => {
       return CommentMapper.toTreeDto(
         root,
+        usernameByUserId[root.userId] ?? null,
         likeCounts[root.id] ?? 0,
         likedCommentIdsSet.has(root.id),
         this.buildCommentPermissions(

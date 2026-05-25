@@ -1,5 +1,6 @@
 import type { CommentTreeDto } from "../../../models/comments/CommentTreeDto";
-import { CommentActionButton } from "./CommentActionButton";
+import { Button } from "../../ui/button/Button";
+import { Badge } from "../../ui/Badge";
 
 type Props = {
   comment: CommentTreeDto;
@@ -43,9 +44,12 @@ export function CommentActions({
     <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-2">
         {comment.permissions.canLike && (
-          <CommentActionButton
-            disabled={likeLoading}
-            tone={comment.likedByCurrentUser ? "danger" : "primary"}
+          <Button
+            label={comment.likedByCurrentUser ? "Unlike" : "Like"}
+            loadingLabel="Loading..."
+            loading={likeLoading}
+            variant={comment.likedByCurrentUser ? "danger" : "primary"}
+            size="sm"
             onClick={() => {
               if (comment.likedByCurrentUser) {
                 onUnlikeComment(comment.id);
@@ -54,35 +58,36 @@ export function CommentActions({
 
               onLikeComment(comment.id);
             }}
-          >
-            {likeLoading
-              ? "Loading..."
-              : comment.likedByCurrentUser
-                ? "Unlike"
-                : "Like"}
-          </CommentActionButton>
+          />
         )}
 
         {showReplyButton && (
-          <CommentActionButton tone="neutral" onClick={onReply}>
-            Reply
-          </CommentActionButton>
+          <Button
+            label="Reply"
+            variant="secondary"
+            size="sm"
+            onClick={onReply}
+          />
         )}
 
         {comment.permissions.canUpdate && onEditComment && (
-          <CommentActionButton
-            disabled={updateLoading}
-            tone="warning"
+          <Button
+            label="Edit"
+            loadingLabel="Saving..."
+            loading={updateLoading}
+            variant="warning"
+            size="sm"
             onClick={() => onEditComment(comment.id)}
-          >
-            {updateLoading ? "Saving..." : "Edit"}
-          </CommentActionButton>
+          />
         )}
 
         {comment.permissions.canFlag && (
-          <CommentActionButton
-            disabled={flagLoading}
-            tone={comment.isFlagged ? "warning" : "neutral"}
+          <Button
+            label={comment.isFlagged ? "Unflag" : "Flag"}
+            loadingLabel="Saving..."
+            loading={flagLoading}
+            variant={comment.isFlagged ? "warning" : "secondary"}
+            size="sm"
             onClick={() => {
               if (comment.isFlagged) {
                 onUnflagComment(comment.id);
@@ -91,30 +96,31 @@ export function CommentActions({
 
               onFlagComment(comment.id);
             }}
-          >
-            {flagLoading ? "Saving..." : comment.isFlagged ? "Unflag" : "Flag"}
-          </CommentActionButton>
+          />
         )}
 
         {comment.permissions.canDelete && (
-          <CommentActionButton
-            disabled={deleteLoading}
-            tone="danger"
+          <Button
+            label="Delete"
+            loadingLabel="Deleting..."
+            loading={deleteLoading}
+            variant="danger"
+            size="sm"
             onClick={() => onDeleteComment(comment.id)}
-          >
-            {deleteLoading ? "Deleting..." : "Delete"}
-          </CommentActionButton>
+          />
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-white/30">
-        <span>{comment.likeCount} likes</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge tone="muted" className="rounded-2xl px-3 py-1.5">
+          {comment.likeCount} {comment.likeCount === 1 ? "like" : "likes"}
+        </Badge>
 
         {showRepliesCount && (
-          <>
-            <span>·</span>
-            <span>{comment.replies.length} replies</span>
-          </>
+          <Badge tone="muted" className="rounded-2xl px-3 py-1.5">
+            {comment.replies.length}{" "}
+            {comment.replies.length === 1 ? "reply" : "replies"}
+          </Badge>
         )}
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { CommentTreeDto } from "../../../models/comments/CommentTreeDto";
-import { CommentForm } from "../CommentForm";
-import { CommentActions } from "./CommentActions";
-import { CommentContent } from "./CommentContent";
-import { CommentHeader } from "./CommentHeader";
+import { CommentForm } from "../form/CommentForm";
+import { CommentActions } from "../shared/CommentActions";
+import { CommentContent } from "../shared/CommentContent";
+import { CommentHeader } from "../shared/CommentHeader";
 
 type Props = {
   reply: CommentTreeDto;

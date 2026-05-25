@@ -1,10 +1,12 @@
 import { useState } from "react";
-import type { CommentTreeDto } from "../../models/comments/CommentTreeDto";
-import { CommentForm } from "./CommentForm";
-import { CommentActions } from "./preview/CommentActions";
-import { CommentContent } from "./preview/CommentContent";
-import { CommentHeader } from "./preview/CommentHeader";
-import { ReplyCard } from "./preview/ReplyCard";
+
+import type { CommentTreeDto } from "../../../models/comments/CommentTreeDto";
+
+import { CommentForm } from "../form/CommentForm";
+import { CommentActions } from "../shared/CommentActions";
+import { CommentContent } from "../shared/CommentContent";
+import { CommentHeader } from "../shared/CommentHeader";
+import { ReplyCard } from "./ReplyCard";
 
 type Props = {
   comment: CommentTreeDto;
@@ -39,6 +41,10 @@ export function CommentPreviewCard({
 }: Props) {
   const [replyOpen, setReplyOpen] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [repliesOpen, setRepliesOpen] = useState(false);
+
+  const repliesCount = comment.replies.length;
+  const hasReplies = repliesCount > 0;
 
   const handleCreateReply = async (content: string) => {
     const success = await onCreateReply(comment.id, content);
@@ -114,24 +120,44 @@ export function CommentPreviewCard({
         </div>
       )}
 
-      {comment.replies.length > 0 && (
-        <div className="mt-5 space-y-3 border-l border-sky-300/15 pl-4">
-          {comment.replies.map((reply) => (
-            <ReplyCard
-              key={reply.id}
-              reply={reply}
-              loadingCommentLikeId={loadingCommentLikeId}
-              loadingCommentUpdateId={loadingCommentUpdateId}
-              loadingCommentDeleteId={loadingCommentDeleteId}
-              loadingCommentFlagId={loadingCommentFlagId}
-              onLikeComment={onLikeComment}
-              onUnlikeComment={onUnlikeComment}
-              onUpdateComment={onUpdateComment}
-              onDeleteComment={onDeleteComment}
-              onFlagComment={onFlagComment}
-              onUnflagComment={onUnflagComment}
-            />
-          ))}
+      {hasReplies && !editing && (
+        <div className="mt-5">
+          <button
+            type="button"
+            onClick={() => setRepliesOpen((current) => !current)}
+            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/4 px-4 py-2 text-xs font-bold text-white/55 transition-all hover:border-sky-300/20 hover:bg-sky-400/10 hover:text-sky-100"
+          >
+            <span>
+              {repliesOpen
+                ? "Hide replies"
+                : `Show ${repliesCount} ${
+                    repliesCount === 1 ? "reply" : "replies"
+                  }`}
+            </span>
+
+            <span>{repliesOpen ? "↑" : "↓"}</span>
+          </button>
+
+          {repliesOpen && (
+            <div className="mt-4 space-y-3 border-l border-sky-300/15 pl-4">
+              {comment.replies.map((reply) => (
+                <ReplyCard
+                  key={reply.id}
+                  reply={reply}
+                  loadingCommentLikeId={loadingCommentLikeId}
+                  loadingCommentUpdateId={loadingCommentUpdateId}
+                  loadingCommentDeleteId={loadingCommentDeleteId}
+                  loadingCommentFlagId={loadingCommentFlagId}
+                  onLikeComment={onLikeComment}
+                  onUnlikeComment={onUnlikeComment}
+                  onUpdateComment={onUpdateComment}
+                  onDeleteComment={onDeleteComment}
+                  onFlagComment={onFlagComment}
+                  onUnflagComment={onUnflagComment}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </article>

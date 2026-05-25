@@ -1,4 +1,7 @@
+import { Badge } from "../../../ui/Badge";
+import { Button } from "../../../ui/button/Button";
 import { SectionLabel } from "../../../ui/SectionLabel";
+
 import type { PostTagDto } from "../../../../models/tags/PostTagDto";
 import type { PostSortType } from "../../../../types/posts/PostSortType";
 
@@ -21,6 +24,8 @@ export function CommunityPostsToolbar({
   onTagChange,
   onSortChange,
 }: Props) {
+  const hasTags = tags.length > 0;
+
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px] xl:items-start">
       <div>
@@ -28,7 +33,7 @@ export function CommunityPostsToolbar({
           <div>
             <SectionLabel label="Filter by tag" tone="muted" />
 
-            <p className="text-xs text-white/25">
+            <p className="text-xs text-white/30">
               Active filter:{" "}
               <span className="font-semibold text-sky-100/70">
                 {selectedTagId === null
@@ -39,13 +44,12 @@ export function CommunityPostsToolbar({
           </div>
 
           {selectedTagId !== null && (
-            <button
-              type="button"
+            <Button
+              label="Clear filter"
+              variant="ghost"
+              size="sm"
               onClick={() => onTagChange(null)}
-              className="w-fit rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/45 transition-all hover:bg-white/8 hover:text-white/70"
-            >
-              Clear filter
-            </button>
+            />
           )}
         </div>
 
@@ -65,10 +69,10 @@ export function CommunityPostsToolbar({
             />
           ))}
 
-          {tags.length === 0 && (
-            <span className="rounded-xl border border-white/8 bg-white/3 px-3 py-2 text-xs font-medium text-white/25">
+          {!hasTags && (
+            <Badge tone="muted" className="rounded-2xl px-3 py-2">
               No tags yet
-            </span>
+            </Badge>
           )}
         </div>
       </div>
@@ -98,7 +102,7 @@ export function CommunityPostsToolbar({
           </option>
         </select>
 
-        <p className="mt-2 text-xs text-white/25">
+        <p className="mt-2 text-xs text-white/30">
           Sorting resets the selected tag filter.
         </p>
       </div>

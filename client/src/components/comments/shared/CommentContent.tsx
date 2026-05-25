@@ -8,7 +8,7 @@ type Props = {
 export function CommentContent({ comment, compact = false }: Props) {
   if (comment.isDeleted) {
     return (
-      <p className="mt-3 rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3 text-sm italic text-white/30">
+      <p className="mt-3 rounded-2xl border border-white/6 bg-white/2 px-4 py-3 text-sm italic text-white/30">
         This comment was deleted.
       </p>
     );

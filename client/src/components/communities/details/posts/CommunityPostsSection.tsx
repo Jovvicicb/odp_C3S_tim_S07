@@ -1,18 +1,18 @@
 import { useState } from "react";
 
 import { ActionButton } from "../../../ui/button/ActionButton";
+import { CountBadge } from "../../../ui/CountBadge";
 import { Pagination, Spinner } from "../../../ui/UI";
 import { SectionCard } from "../../../ui/SectionCard";
+import { SectionEmptyState } from "../../../ui/SectionEmptyState";
 import { PostCard } from "../../../posts/card/PostCard";
 
 import type { CommunityDto } from "../../../../models/communities/CommunityDto";
+import type { CommunityViewerPermissionsDto } from "../../../../models/communities/CommunityViewerPermissionsDto";
 import type { PostWithDetailsDto } from "../../../../models/posts/PostWithDetailsDto";
 import type { PostSortType } from "../../../../types/posts/PostSortType";
-import type { CommunityViewerPermissionsDto } from "../../../../models/communities/CommunityViewerPermissionsDto";
 
 import { CommunityPostsToolbar } from "./CommunityPostsToolbar";
-import { CountBadge } from "../../../ui/CountBadge";
-import { SectionEmptyState } from "../../../ui/SectionEmptyState";
 
 type Props = {
   community: CommunityDto;
@@ -133,14 +133,12 @@ export function CommunityPostsSection({
             ))}
           </div>
 
-          {postsTotal > postsLimit && (
-            <Pagination
-              page={postsPage}
-              total={postsTotal}
-              pageSize={postsLimit}
-              onChange={handlePageChange}
-            />
-          )}
+          <Pagination
+            page={postsPage}
+            total={postsTotal}
+            pageSize={postsLimit}
+            onChange={handlePageChange}
+          />
         </>
       )}
     </section>

@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+
 import { tagApi } from "../../../../api_services/tags/TagAPIService";
 import { TagMessages } from "../../../../constants/messages/tag/TagMessages";
+
 import type { TagDto } from "../../../../models/tags/TagDto";
 import type { PostTagDto } from "../../../../models/tags/PostTagDto";
+
+import { Button } from "../../../ui/button/Button";
+import { CountBadge } from "../../../ui/CountBadge";
+import { SectionEmptyState } from "../../../ui/SectionEmptyState";
+import { SectionLabel } from "../../../ui/SectionLabel";
+import { PostTagBadge } from "../../shared/PostTagBadge";
 
 type Props = {
   postId: number;
@@ -30,7 +38,9 @@ export function PostTagsPanel({
   const [localError, setLocalError] = useState("");
 
   useEffect(() => {
-    if (!canManageTags) return;
+    if (!canManageTags) {
+      return;
+    }
 
     let cancelled = false;
 
@@ -38,7 +48,9 @@ export function PostTagsPanel({
       try {
         const res = await tagApi.getAll(1, 100);
 
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         if (!res.success || !res.data) {
           setAvailableTagsError(res.message ?? TagMessages.fetchAllFailed);
@@ -77,6 +89,9 @@ export function PostTagsPanel({
     [availableTags, assignedTagIds],
   );
 
+  const hasTags = tags.length > 0;
+  const addLoading = loadingPostTagAddId !== null;
+
   const handleAddTag = async () => {
     if (!selectedTagId) {
       setLocalError("Select a tag first");
@@ -106,45 +121,38 @@ export function PostTagsPanel({
 
   return (
     <section className="rounded-3xl border border-white/8 bg-white/3 p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-sky-300 shadow-[0_0_16px_rgba(125,211,252,0.8)]" />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <SectionLabel label="Tags" tone="sky" />
 
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-sky-200/70">
-            TAGS
+          <p className="mt-2 text-sm leading-6 text-white/35">
+            Tags describe the main topics covered in this post.
           </p>
         </div>
 
-        <span className="rounded-xl border border-white/10 bg-white/4 px-3 py-1 text-xs font-semibold text-white/35">
-          {tags.length} {tags.length === 1 ? "tag" : "tags"}
-        </span>
+        <CountBadge count={tags.length} singular="tag" plural="tags" />
       </div>
 
       <div className="mt-4">
-        {tags.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/10 bg-black/10 px-4 py-4 text-sm text-white/30">
-            No tags attached.
-          </div>
+        {!hasTags ? (
+          <SectionEmptyState
+            title="No tags attached."
+            description={
+              canManageTags
+                ? "Select a global tag below to describe this post."
+                : "Tags will appear here when they are attached to this post."
+            }
+          />
         ) : (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
-              <span
+              <PostTagBadge
                 key={tag.id}
-                className="inline-flex items-center gap-2 rounded-xl border border-sky-300/15 bg-sky-400/10 px-3 py-1.5 text-xs font-semibold text-sky-100 transition-all hover:border-sky-300/25 hover:bg-sky-400/15"
-              >
-                #{tag.name}
-                {canManageTags && (
-                  <button
-                    type="button"
-                    disabled={loadingPostTagRemoveId === tag.id}
-                    onClick={() => void onRemoveTag(postId, tag.id)}
-                    className="rounded-lg px-1.5 py-0.5 text-sky-100/55 transition-all hover:bg-red-500/15 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-50"
-                    aria-label={`Remove ${tag.name} tag`}
-                  >
-                    {loadingPostTagRemoveId === tag.id ? "..." : "×"}
-                  </button>
-                )}
-              </span>
+                name={tag.name}
+                removable={canManageTags}
+                removing={loadingPostTagRemoveId === tag.id}
+                onRemove={() => void onRemoveTag(postId, tag.id)}
+              />
             ))}
           </div>
         )}
@@ -153,6 +161,10 @@ export function PostTagsPanel({
       {canManageTags && (
         <div className="mt-4 grid grid-cols-1 gap-3 border-t border-white/8 pt-4 md:grid-cols-[1fr_auto] md:items-start">
           <div>
+            <label htmlFor="post-tag-select" className="block">
+              <SectionLabel label="Add tag" tone="muted" />
+            </label>
+
             <select
               id="post-tag-select"
               value={selectedTagId}
@@ -187,20 +199,21 @@ export function PostTagsPanel({
             {availableTagsLoaded &&
               !availableTagsError &&
               availableOptions.length === 0 && (
-                <p className="mt-2 text-xs text-white/25">
+                <p className="mt-2 text-xs text-white/30">
                   All global tags are already attached.
                 </p>
               )}
           </div>
 
-          <button
-            type="button"
-            disabled={!selectedTagId || loadingPostTagAddId !== null}
+          <Button
+            label="Add tag"
+            loadingLabel="Adding..."
+            loading={addLoading}
+            disabled={!selectedTagId}
+            variant="primary"
+            className="md:mt-5"
             onClick={() => void handleAddTag()}
-            className="rounded-2xl border border-sky-300/20 bg-sky-400/10 px-5 py-3 text-xs font-bold text-sky-100 transition-all hover:bg-sky-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loadingPostTagAddId !== null ? "Adding..." : "Add tag"}
-          </button>
+          />
         </div>
       )}
     </section>
