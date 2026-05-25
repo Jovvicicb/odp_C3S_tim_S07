@@ -1,5 +1,12 @@
 import { useState } from "react";
+
 import { CommentValidationMessages } from "../../../constants/messages/comment/CommentValidationMessages";
+import {
+  getMentionQuery,
+  insertMention,
+} from "../../../helpers/comments/CommentMentionHelper";
+import { useUserMentionSearch } from "../../../hooks/users/search/useUserMentionSearch";
+
 import { Badge } from "../../ui/Badge";
 import { Button } from "../../ui/button/Button";
 
@@ -35,6 +42,18 @@ export function CommentForm({
   const trimmedContent = content.trim();
   const isEmpty = trimmedContent.length === 0;
   const isNearLimit = content.length >= characterLimit * 0.9;
+
+  const mentionQuery = getMentionQuery(content);
+
+  const { users: mentionUsers, loading: mentionLoading } =
+    useUserMentionSearch(mentionQuery);
+
+  const showMentionSuggestions = mentionQuery.length >= 2;
+
+  const handleInsertMention = (username: string) => {
+    setContent((current) => insertMention(current, username));
+    setLocalError("");
+  };
 
   const handleSubmit = async () => {
     if (isEmpty) {
@@ -95,14 +114,49 @@ export function CommentForm({
         className="mt-4 w-full resize-none rounded-2xl border border-white/10 bg-[#07111f]/90 px-4 py-3 text-sm leading-6 text-white/80 outline-none transition-all placeholder:text-white/25 hover:border-sky-300/25 focus:border-sky-300/40 focus:bg-[#081522] disabled:cursor-not-allowed disabled:opacity-60"
       />
 
+      {showMentionSuggestions && (
+        <div className="mt-2 overflow-hidden rounded-2xl border border-white/10 bg-[#07111f] shadow-xl shadow-sky-950/20">
+          {mentionLoading ? (
+            <p className="px-4 py-3 text-xs text-white/35">
+              Searching users...
+            </p>
+          ) : mentionUsers.length === 0 ? (
+            <p className="px-4 py-3 text-xs text-white/35">
+              No users found for @{mentionQuery}.
+            </p>
+          ) : (
+            <div className="max-h-56 overflow-y-auto p-2">
+              {mentionUsers.map((user) => (
+                <button
+                  key={user.id}
+                  type="button"
+                  onClick={() => handleInsertMention(user.username)}
+                  className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition-all hover:bg-sky-400/10"
+                >
+                  <span className="text-sm font-semibold text-sky-100/80">
+                    @{user.username}
+                  </span>
+
+                  {user.fullname && (
+                    <span className="truncate text-xs text-white/30">
+                      {user.fullname}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           {localError ? (
             <p className="text-xs font-medium text-red-300">{localError}</p>
           ) : (
             <p className="text-xs text-white/25">
-              Be respectful. Comments are visible to everyone who can view this
-              post.
+              Use @username to mention users. Comments are visible to everyone
+              who can view this post.
             </p>
           )}
         </div>

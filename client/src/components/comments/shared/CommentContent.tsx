@@ -1,4 +1,5 @@
 import type { CommentTreeDto } from "../../../models/comments/CommentTreeDto";
+import { renderContentWithMentions } from "../../../helpers/comments/CommentMentionHelper";
 
 type Props = {
   comment: CommentTreeDto;
@@ -20,7 +21,7 @@ export function CommentContent({ comment, compact = false }: Props) {
         compact ? "text-white/55" : "text-white/65"
       }`}
     >
-      {comment.content}
+      {renderContentWithMentions(comment.content)}
     </p>
   );
 }
