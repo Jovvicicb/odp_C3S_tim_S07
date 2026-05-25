@@ -1,7 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import type { PostDetailsDto } from "../../../models/posts/PostDetailsDto";
-import { commentApi } from "../../../api_services/comments/CommentAPIService";
-import { CommentMessages } from "../../../constants/messages/comment/CommentMessages";
+import type { PostDetailsDto } from "../../../../models/posts/PostDetailsDto";
+import { commentApi } from "../../../../api_services/comments/CommentAPIService";
+import { CommentMessages } from "../../../../constants/messages/comment/CommentMessages";
 
 
 type Props = {

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { commentApi } from "../../../api_services/comments/CommentAPIService";
-import { CommentMessages } from "../../../constants/messages/comment/CommentMessages";
-import { validateUpdateComment } from "../../../validators/comment/ValidateUpdateComment";
-import { useToast } from "../../toast/useToast";
+import { commentApi } from "../../../../api_services/comments/CommentAPIService";
+import { CommentMessages } from "../../../../constants/messages/comment/CommentMessages";
+import { validateUpdateComment } from "../../../../validators/comment/ValidateUpdateComment";
+import { useToast } from "../../../toast/useToast";
 
 type Props = {
   reloadPostDetails: () => Promise<void>;

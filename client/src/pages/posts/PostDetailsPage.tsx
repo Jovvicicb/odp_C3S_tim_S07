@@ -7,7 +7,7 @@ import { PostDetailsCard } from "../../components/posts/details/card/PostDetails
 import { PostCommentsSection } from "../../components/posts/details/comments/PostCommentsSection";
 
 import { usePostDetails } from "../../hooks/posts/details/core/usePostDetails";
-import { useCommentActions } from "../../hooks/comments/details/useCommentActions";
+import { useCommentActions } from "../../hooks/comments/details/actions/useCommentActions";
 import { usePostTagActions } from "../../hooks/posts/details/tags/usePostTagActions";
 import { usePostLikeActions } from "../../hooks/posts/details/actions/usePostLikeActions";
 import { usePostDeleteAction } from "../../hooks/posts/details/actions/usePostDeleteAction";

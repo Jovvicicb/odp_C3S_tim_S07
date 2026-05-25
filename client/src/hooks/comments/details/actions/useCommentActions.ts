@@ -1,8 +1,9 @@
-import type { CommentActionHookProps } from "./CommentActionHookTypes";
+import type { CommentActionHookProps } from "../type/CommentActionHookTypes";
 
 import { useCommentLikeActions } from "./useCommentLikeActions";
 import { useCommentModerationActions } from "./useCommentModerationActions";
 import { useCommentUpdateAction } from "./useCommentUpdateAction";
+
 import { useCreateCommentAction } from "./useCreateCommentAction";
 
 export function useCommentActions({
