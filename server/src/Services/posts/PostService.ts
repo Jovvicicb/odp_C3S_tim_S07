@@ -126,6 +126,22 @@ export class PostService implements IPostService {
       {}
     );
 
+     const communityIds = Array.from(
+      new Set(posts.map((post) => post.communityId))
+    );
+
+    const communities = communityIds.length > 0
+      ? await this.communityRepo.findByIds(communityIds)
+      : [];
+
+    const communityNameById = communities.reduce<Record<number, string>>(
+      (acc, community) => {
+        acc[community.id] = community.name;
+        return acc;
+      },
+      {}
+    );
+
     const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds(postIds);
 
     const uniqueTagIds = Array.from(
@@ -152,6 +168,7 @@ export class PostService implements IPostService {
       return PostMapper.toWithDetailsDto(
         post,
         authorUsernameById[post.authorId] ?? null,
+         communityNameById[post.communityId] ?? null,
         postTags,
         likeCounts[post.id] ?? 0,
         commentCounts[post.id] ?? 0

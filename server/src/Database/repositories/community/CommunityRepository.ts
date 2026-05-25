@@ -8,8 +8,6 @@ import { CommunityMapper } from "../../../Shared/mappers/community/CommunityMapp
 import { UpdateCommunityDto } from "../../../Domain/DTOs/community/UpdateCommunityDto";
 import { CommunityLogMessages } from "../../../Domain/constants/messages/community/CommunityLogMessages";
 import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
-import { DiscoverCommunitiesDto } from "../../../Domain/DTOs/community/DiscoverCommunitiesDto";
-import { CommunityDiscoverType } from "../../../Domain/enums/communities/CommunityDiscoverType";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 

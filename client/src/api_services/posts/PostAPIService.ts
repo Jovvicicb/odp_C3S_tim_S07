@@ -144,4 +144,17 @@ export const postApi: IPostAPIService = {
       .then((r) => r.data)
       .catch((e: ApiClientError) => err(e, PostMessages.removeTagFailed));
   },
+
+  async getFeed(page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<PostWithDetailsDto>>>(`${BASE}/feed`, {
+        headers: authHeader(),
+        params: {
+          page,
+          limit,
+        },
+      })
+      .then((r) => r.data)
+      .catch((e: ApiClientError) => err(e, PostMessages.feedFetchFailed));
+  },
 };

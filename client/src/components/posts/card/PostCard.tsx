@@ -8,9 +8,10 @@ import { PostTagBadge } from "../shared/PostTagBadge";
 
 type Props = {
   post: PostWithDetailsDto;
+  showCommunity?: boolean;
 };
 
-export function PostCard({ post }: Props) {
+export function PostCard({ post, showCommunity = false }: Props) {
   const navigate = useNavigate();
 
   const imageUrl = ImageHelper.getImageUrl(post.mediaUrl);
@@ -48,6 +49,19 @@ export function PostCard({ post }: Props) {
                     {post.authorUsername ?? "Unavailable user"}
                   </span>
                 </span>
+
+                {showCommunity && (
+                  <>
+                    <span className="text-white/15">•</span>
+
+                    <span>
+                      in{" "}
+                      <span className="font-semibold text-sky-100/65">
+                        {post.communityName ?? `Community #${post.communityId}`}
+                      </span>
+                    </span>
+                  </>
+                )}
 
                 <span className="text-white/15">•</span>
 

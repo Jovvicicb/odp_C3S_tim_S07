@@ -16,4 +16,5 @@ export interface IPostAPIService {
     delete(id: number): Promise<ApiResponse<void>>;
     addTag(postId: number, tagId: number): Promise<ApiResponse<void>>;
     removeTag(postId: number, tagId: number): Promise<ApiResponse<void>>;
+    getFeed(page: number, limit: number,): Promise<ApiResponse<PaginatedListDto<PostWithDetailsDto>>>;
 }

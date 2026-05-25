@@ -9,6 +9,7 @@ export class PostWithDetailsDto {
     public authorId: number,
     public authorUsername: string | null,
     public communityId: number,
+    public communityName: string | null,
     public createdAt: Date,
     public updatedAt: Date | null,
     public tags: PostTagDto[],

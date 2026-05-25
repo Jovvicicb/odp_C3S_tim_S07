@@ -8,6 +8,7 @@ export type PostWithDetailsDto = {
   authorId: number;
   authorUsername: string | null;
   communityId: number;
+  communityName: string | null;
   createdAt: string;
   updatedAt: string | null;
   tags: PostTagDto[];

@@ -37,7 +37,7 @@ export class PostMapper {
     );
   }
 
-  public static toWithDetailsDto(post: Post, authorUsername: string | null, tags: PostTagDto[], likeCount: number, commentCount: number): PostWithDetailsDto {
+  public static toWithDetailsDto(post: Post, authorUsername: string | null, communityName: string | null, tags: PostTagDto[], likeCount: number, commentCount: number): PostWithDetailsDto {
     return new PostWithDetailsDto(
       post.id,
       post.title,
@@ -46,6 +46,7 @@ export class PostMapper {
       post.authorId,
       authorUsername,
       post.communityId,
+      communityName,
       post.createdAt,
       post.updatedAt,
       tags,

@@ -13,4 +13,5 @@ createSuccess: "Post created successfully",
   addTagSuccess: "Tag added to post successfully",
   removeTagFailed: "Failed to remove tag from post",
   removeTagSuccess: "Tag removed from post successfully",
+  feedFetchFailed: "Failed to fetch feed posts",
 } as const;
