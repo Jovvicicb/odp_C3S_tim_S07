@@ -6,6 +6,7 @@ export type PostWithDetailsDto = {
   content: string;
   mediaUrl: string | null;
   authorId: number;
+  authorUsername: string | null;
   communityId: number;
   createdAt: string;
   updatedAt: string | null;

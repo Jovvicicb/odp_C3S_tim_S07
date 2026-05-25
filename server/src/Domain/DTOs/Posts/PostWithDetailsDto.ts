@@ -7,6 +7,7 @@ export class PostWithDetailsDto {
     public content: string,
     public mediaUrl: string | null,
     public authorId: number,
+    public authorUsername: string | null,
     public communityId: number,
     public createdAt: Date,
     public updatedAt: Date | null,

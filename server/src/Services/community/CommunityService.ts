@@ -190,63 +190,123 @@ export class CommunityService implements ICommunityService {
     return ServiceResultFactory.ok(CommunityMessages.created, createdDto, HttpStatus.created);
   }
 
- async getById(page: number, limit: number, communityId: number, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<CommunityDetailsDto>> {
-  const community = await this.communityRepo.findById(communityId);
+  async getById(page: number, limit: number, communityId: number, viewerId?: number, viewerRole?: UserRole): Promise<ServiceResult<CommunityDetailsDto>> {
+    const community = await this.communityRepo.findById(communityId);
 
-  if (community.id === 0) {
-    return ServiceResultFactory.fail<CommunityDetailsDto>(CommunityMessages.notFound, HttpStatus.notFound);
-  }
+    if (community.id === 0) {
+      return ServiceResultFactory.fail<CommunityDetailsDto>(CommunityMessages.notFound, HttpStatus.notFound);
+    }
 
-  const isAdmin = viewerRole === UserRole.ADMIN;
+    const isAdmin = viewerRole === UserRole.ADMIN;
 
-  const viewerMembership = viewerId
-    ? await this.communityMemberRepo.findByUserIdAndCommunityId(
-        viewerId,
-        communityId
-      )
-    : undefined;
+    const viewerMembership = viewerId
+      ? await this.communityMemberRepo.findByUserIdAndCommunityId(
+          viewerId,
+          communityId
+        )
+      : undefined;
 
-  const membershipStatus =
-    viewerMembership && viewerMembership.id !== 0
-      ? viewerMembership.status
-      : null;
+    const membershipStatus =
+      viewerMembership && viewerMembership.id !== 0
+        ? viewerMembership.status
+        : null;
 
-  const ownerUsernamesById = await this.buildOwnerUsernamesById([community]);
+    const ownerUsernamesById = await this.buildOwnerUsernamesById([community]);
 
-  const communityDto = CommunityMapper.toDto(community, membershipStatus, ownerUsernamesById[community.ownerId] ?? null);
+    const communityDto = CommunityMapper.toDto(community, membershipStatus, ownerUsernamesById[community.ownerId] ?? null);
 
-  const isOwner = viewerId !== undefined && community.ownerId === viewerId;
+    const isOwner = viewerId !== undefined && community.ownerId === viewerId;
 
-  const isActiveModerator =
-    viewerMembership !== undefined && this.isActiveModerator(viewerMembership);
+    const isActiveModerator =
+      viewerMembership !== undefined && this.isActiveModerator(viewerMembership);
 
-  const isModerator = isAdmin || isActiveModerator;
+    const isModerator = isAdmin || isActiveModerator;
 
-  const canViewContent =
-    community.type === CommunityType.PUBLIC ||
-    isAdmin ||
-    membershipStatus === CommunityMemberStatus.ACTIVE;
+    const canViewContent =
+      community.type === CommunityType.PUBLIC ||
+      isAdmin ||
+      membershipStatus === CommunityMemberStatus.ACTIVE;
 
-  const permissions = this.buildViewerPermissions(
-    isOwner,
-    isModerator,
-    canViewContent,
-    membershipStatus
-  );
-
-  if (!canViewContent) {
-    const data = new CommunityDetailsDto(communityDto, null, false, permissions);
-
-    return ServiceResultFactory.ok(CommunityMessages.fetchOneSuccess, data, HttpStatus.ok
+    const permissions = this.buildViewerPermissions(
+      isOwner,
+      isModerator,
+      canViewContent,
+      membershipStatus
     );
-  }
 
-  const membersResult =
-    await this.communityMemberRepo.findActiveMembersByCommunityId(page, limit, communityId);
+    if (!canViewContent) {
+      const data = new CommunityDetailsDto(communityDto, null, false, permissions);
 
-  if (membersResult.members.length === 0) {
-    const members = new PaginatedListDto<CommunityMemberDetailsDto>(
-      [],
+      return ServiceResultFactory.ok(CommunityMessages.fetchOneSuccess, data, HttpStatus.ok
+      );
+    }
+
+    const membersResult =
+      await this.communityMemberRepo.findActiveMembersByCommunityId(page, limit, communityId);
+
+    if (membersResult.members.length === 0) {
+      const members = new PaginatedListDto<CommunityMemberDetailsDto>(
+        [],
+        membersResult.total,
+        page,
+        limit
+      );
+
+      const data = new CommunityDetailsDto(
+        communityDto,
+        members,
+        true,
+        permissions
+      );
+
+      return ServiceResultFactory.ok(CommunityMessages.fetchOneSuccess, data, HttpStatus.ok);
+    }
+
+    const memberUserIds = membersResult.members.map((member) => member.userId);
+
+    const users = await this.userRepo.findByIds(memberUserIds);
+
+    const followedMemberIds = viewerId
+      ? await this.userFollowRepo.findFollowingIdsFromList(
+          viewerId,
+          memberUserIds
+        )
+      : [];
+
+    const followedMemberIdsSet = new Set(followedMemberIds);
+
+    const usersById = users.reduce<Record<number, User>>((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+
+    const membersDto = membersResult.members
+      .map((member) => {
+        const user = usersById[member.userId];
+
+        if (!user) {
+          return undefined;
+        }
+
+        const followStatus =
+          !viewerId
+            ? null
+            : user.id === viewerId
+              ? UserFollowStatus.SELF
+              : followedMemberIdsSet.has(user.id)
+                ? UserFollowStatus.FOLLOWING
+                : UserFollowStatus.NOT_FOLLOWING;
+
+        const userDto = UserMapper.toDto(user, followStatus);
+
+        return new CommunityMemberDetailsDto(userDto, member.role, member.status,  community.ownerId === user.id);
+      })
+      .filter(
+        (member): member is CommunityMemberDetailsDto => member !== undefined
+      );
+
+    const members = new PaginatedListDto(
+      membersDto,
       membersResult.total,
       page,
       limit
@@ -261,67 +321,7 @@ export class CommunityService implements ICommunityService {
 
     return ServiceResultFactory.ok(CommunityMessages.fetchOneSuccess, data, HttpStatus.ok);
   }
-
-  const memberUserIds = membersResult.members.map((member) => member.userId);
-
-  const users = await this.userRepo.findByIds(memberUserIds);
-
-  const followedMemberIds = viewerId
-    ? await this.userFollowRepo.findFollowingIdsFromList(
-        viewerId,
-        memberUserIds
-      )
-    : [];
-
-  const followedMemberIdsSet = new Set(followedMemberIds);
-
-  const usersById = users.reduce<Record<number, User>>((acc, user) => {
-    acc[user.id] = user;
-    return acc;
-  }, {});
-
-  const membersDto = membersResult.members
-    .map((member) => {
-      const user = usersById[member.userId];
-
-      if (!user) {
-        return undefined;
-      }
-
-      const followStatus =
-        !viewerId
-          ? null
-          : user.id === viewerId
-            ? UserFollowStatus.SELF
-            : followedMemberIdsSet.has(user.id)
-              ? UserFollowStatus.FOLLOWING
-              : UserFollowStatus.NOT_FOLLOWING;
-
-      const userDto = UserMapper.toDto(user, followStatus);
-
-      return new CommunityMemberDetailsDto(userDto, member.role, member.status,  community.ownerId === user.id);
-    })
-    .filter(
-      (member): member is CommunityMemberDetailsDto => member !== undefined
-    );
-
-  const members = new PaginatedListDto(
-    membersDto,
-    membersResult.total,
-    page,
-    limit
-  );
-
-  const data = new CommunityDetailsDto(
-    communityDto,
-    members,
-    true,
-    permissions
-  );
-
-  return ServiceResultFactory.ok(CommunityMessages.fetchOneSuccess, data, HttpStatus.ok);
-}
-  
+    
 
   async update(id: number, dto: UpdateCommunityDto,ctx:AuditContext, requesterRole?:UserRole): Promise<ServiceResult> {
     const existing = await this.communityRepo.findById(id);

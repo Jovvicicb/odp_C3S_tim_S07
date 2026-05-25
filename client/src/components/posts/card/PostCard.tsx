@@ -43,19 +43,15 @@ export function PostCard({ post }: Props) {
 
               <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-white/35">
                 <span>
-                  Posted in{" "}
+                  By{" "}
                   <span className="font-semibold text-sky-100/65">
-                    Community #{post.communityId}
+                    {post.authorUsername ?? "Unavailable user"}
                   </span>
                 </span>
 
                 <span className="text-white/15">•</span>
 
                 <span>Created {createdAt}</span>
-
-                <span className="text-white/15">•</span>
-
-                <span>Post #{post.id}</span>
               </div>
             </div>
 

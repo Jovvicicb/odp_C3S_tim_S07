@@ -110,15 +110,35 @@ export class PostService implements IPostService {
 
     const postIds = posts.map((post) => post.id);
 
+    const authorIds = Array.from(
+      new Set(posts.map((post) => post.authorId))
+    );
+
+    const authors = authorIds.length > 0
+      ? await this.userRepo.findByIds(authorIds)
+      : [];
+
+    const authorUsernameById = authors.reduce<Record<number, string>>(
+      (acc, user) => {
+        acc[user.id] = user.username;
+        return acc;
+      },
+      {}
+    );
+
     const tagIdsByPostId = await this.postTagRepo.findTagIdsByPostIds(postIds);
-    const uniqueTagIds = Array.from(new Set(Object.values(tagIdsByPostId).flat()));
+
+    const uniqueTagIds = Array.from(
+      new Set(Object.values(tagIdsByPostId).flat())
+    );
+
     const tags = uniqueTagIds.length > 0
       ? await this.tagRepo.findByIds(uniqueTagIds)
       : [];
 
     const tagsById = tags.reduce<Record<number, PostTagDto>>((acc, tag) => {
-        acc[tag.id] = new PostTagDto(tag.id, tag.name);
-        return acc;
+      acc[tag.id] = new PostTagDto(tag.id, tag.name);
+      return acc;
     }, {});
 
     const likeCounts = await this.postLikeRepo.countByPostIds(postIds);
@@ -131,6 +151,7 @@ export class PostService implements IPostService {
 
       return PostMapper.toWithDetailsDto(
         post,
+        authorUsernameById[post.authorId] ?? null,
         postTags,
         likeCounts[post.id] ?? 0,
         commentCounts[post.id] ?? 0
