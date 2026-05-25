@@ -1,7 +1,8 @@
-// TODO: Replace with statistics relevant to your domain
 export class StatisticsDto {
   constructor(
-    public totalEntities: number = 0,
-    public totalUsers: number    = 0,
+    public joinedCommunitiesCount: number = 0,
+    public postsCount: number = 0,
+    public followersCount: number = 0,
+    public followingCount: number = 0,
   ) {}
 }

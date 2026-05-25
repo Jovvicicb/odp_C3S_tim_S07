@@ -44,7 +44,9 @@ import { CommentLikeRepository } from "./Database/repositories/comments/CommentL
 import { CommentLikeService } from "./Services/comments/CommentLikeService";
 import { HealthController } from "./WebAPI/controllers/HealthController";
 import { HealthService } from "./Services/health/HealthService";
-
+import { StatisticsRepository } from "./Database/repositories/statistics/StatisticsRepository";
+import { StatisticsService } from "./Services/statistics/StatisticsService";
+import { StatisticsController } from "./WebAPI/controllers/StatisticsController";
 
 export const logger = new ConsoleLoggerService();
 export const db     = new DbManager(logger);
@@ -62,8 +64,7 @@ const postLikeRepo = new PostLikeRepository(db,logger);
 const postCommentRepo = new PostCommentRepository(db,logger);
 const commentRepo = new CommentRepository(db,logger);
 const commentLikeRepo = new CommentLikeRepository(db,logger);
-
-
+const statisticsRepo = new StatisticsRepository(db, logger);
 
 // Services
 const auditService =new AuditService(auditRepo);
@@ -80,8 +81,7 @@ const postTagService = new PostTagService(postRepo,communityMemberRepo,tagRepo,p
 const postLikeService = new PostLikeService(postRepo,postLikeRepo,communityRepo,communityMemberRepo);
 const commentLikeService = new CommentLikeService(commentRepo,commentLikeRepo,postRepo,communityRepo,communityMemberRepo);
 const healthService = new HealthService(db); 
-
-
+const statisticsService = new StatisticsService(statisticsRepo);
 
 // Express
 const app = express();
@@ -103,10 +103,7 @@ app.use("/api/v1", new AuditController(auditService,logger).getRouter());
 app.use("/api/v1", new TagController(tagService,logger).getRouter());
 app.use("/api/v1", new PostController(postService,postTagService,postLikeService,logger).getRouter());
 app.use("/api/v1", new CommentController(commentService,commentLikeService,logger).getRouter());
-
-
-
-
+app.use("/api/v1", new StatisticsController(statisticsService, logger).getRouter());
 
 app.use(errorHandler);
 
