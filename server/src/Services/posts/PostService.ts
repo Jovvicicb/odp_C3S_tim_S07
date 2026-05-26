@@ -2,6 +2,7 @@ import { AuditActions } from "../../Domain/constants/messages/audits/AuditAction
 import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
 import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
+import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { CommentTreeDto } from "../../Domain/DTOs/comments/CommentTreeDto";
@@ -9,6 +10,7 @@ import { GetCommentsByPostDto } from "../../Domain/DTOs/comments/GetCommentsByPo
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { CreatePostDto } from "../../Domain/DTOs/Posts/CreatePostDto";
 import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommunityDto";
+import { GetPostsByUserDto } from "../../Domain/DTOs/Posts/GetPostsByUserDto";
 import { PostDetailsDto } from "../../Domain/DTOs/Posts/PostDetailsDto";
 import { PostDto } from "../../Domain/DTOs/Posts/PostDto";
 import { PostViewerPermissionsDto } from "../../Domain/DTOs/Posts/PostViewerPermissionsDto";
@@ -204,7 +206,64 @@ export class PostService implements IPostService {
       comments
     );
   }
-  
+
+  private async getVisibleCommunityIdsForViewer(communityIds: number[], viewerId: number, viewerRole?: UserRole,): Promise<number[]> {
+    if (communityIds.length === 0) {
+      return [];
+    }
+
+    if (viewerRole === UserRole.ADMIN) {
+      return communityIds;
+    }
+
+    const communities = await this.communityRepo.findByIds(communityIds);
+
+    if (communities.length === 0) {
+      return [];
+    }
+
+    const membershipStatuses = await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(viewerId, communityIds,);
+
+    return communities
+      .filter((community) => {
+        const membershipStatus = membershipStatuses[community.id] ?? null;
+
+        if (
+          membershipStatus === CommunityMemberStatus.BANNED ||
+          membershipStatus === CommunityMemberStatus.PENDING
+        ) {
+          return false;
+        }
+
+        if (community.type === CommunityType.PUBLIC) {
+          return true;
+        }
+
+        return membershipStatus === CommunityMemberStatus.ACTIVE;
+      })
+      .map((community) => community.id);
+  }
+
+  private async getVisibleUserPosts(dto: GetPostsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<{ posts: Post[]; total: number }> {
+    const authorCommunityIds = await this.postRepo.findCommunityIdsByAuthorId(dto.userId);
+
+    if (authorCommunityIds.length === 0) {
+      return { posts: [], total: 0 };
+    }
+
+    const visibleCommunityIds = await this.getVisibleCommunityIdsForViewer(
+      authorCommunityIds,
+      viewerId,
+      viewerRole,
+    );
+
+    if (visibleCommunityIds.length === 0) {
+      return { posts: [], total: 0 };
+    }
+
+    return this.postRepo.findByAuthorIdAndCommunityIds(dto, visibleCommunityIds,);
+  }
+    
   async create(dto: CreatePostDto, ctx: AuditContext): Promise<ServiceResult<PostDto>> {
     const community = await this.communityRepo.findById(dto.communityId);
     if (community.id === 0) {
@@ -441,6 +500,41 @@ export class PostService implements IPostService {
     );
 
     return ServiceResultFactory.ok(PostMessages.detailsFetched, data, HttpStatus.ok);
+  }
+
+
+  async getByUser(dto: GetPostsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<ServiceResult<PaginatedListDto<PostWithDetailsDto>>> {
+    const user = await this.userRepo.findById(dto.userId);
+    if (user.id === 0) {
+      return ServiceResultFactory.fail<PaginatedListDto<PostWithDetailsDto>>(UserMessages.notFound, HttpStatus.notFound,);
+    }
+
+    const isAdmin = viewerRole === UserRole.ADMIN;
+    const result = isAdmin
+      ? await this.postRepo.findByAuthorId(dto)
+      : await this.getVisibleUserPosts(dto, viewerId, viewerRole);
+
+    if (result.posts.length === 0) {
+      const data = new PaginatedListDto<PostWithDetailsDto>(
+        [],
+        result.total,
+        dto.page,
+        dto.limit,
+      );
+
+      return ServiceResultFactory.ok(PostMessages.userPostsFetched, data, HttpStatus.ok,);
+    }
+
+    const items = await this.buildPostsWithDetails(result.posts);
+
+    const data = new PaginatedListDto<PostWithDetailsDto>(
+      items,
+      result.total,
+      dto.page,
+      dto.limit,
+    );
+
+    return ServiceResultFactory.ok(PostMessages.userPostsFetched, data, HttpStatus.ok,);
   }
 
 }

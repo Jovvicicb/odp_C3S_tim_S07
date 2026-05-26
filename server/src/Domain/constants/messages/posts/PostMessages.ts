@@ -54,4 +54,7 @@ export const PostMessages = {
   fetchDetailsFailed: "Failed to fetch post details",
   postAccessForbidden: "You are not allowed to view this post",
   postAccessAllowed: "Post access allowed",
+
+  userPostsFetched: "User posts fetched successfully",
+  fetchByUserFailed: "Failed to fetch user posts",
 } as const;

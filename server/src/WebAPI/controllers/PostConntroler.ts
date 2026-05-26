@@ -27,6 +27,7 @@ import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 import { validatePostSort } from "../validators/posts/ValidatePostSort";
 import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
 import { AddTagInput } from "../types/posts/AddTagInput";
+import { GetPostsByUserDto } from "../../Domain/DTOs/Posts/GetPostsByUserDto";
 
 export class PostController {
   private readonly router = Router();
@@ -39,6 +40,7 @@ export class PostController {
         this.router.get("/posts/community/:communityId",                                                                             this.getByCommunity.bind(this));
         this.router.get("/posts/feed",               authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getFeed.bind(this));
         this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
+        this.router.get("/posts/user/:userId",       authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getByUser.bind(this),);
         this.router.get("/posts/:id",                                                                                                this.getById.bind(this));
         this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
         this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
@@ -121,7 +123,7 @@ export class PostController {
     try {
       const result = await this.postService.getFeed(userId, page, limit);
       ResponseHelper.send(res, result);
-    } catch (err) {err
+    } catch (err) {
       this.logger.error(this.constructor.name, PostLogMessages.getFeedFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
@@ -157,6 +159,57 @@ export class PostController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: PostMessages.createFailed
+      });
+    }
+  }
+
+  private async getByUser(req: Request, res: Response): Promise<void> {
+    const userIdParam = parseStringValue(req.params.userId);
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+
+    const userId = parseId(userIdParam);
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const userIdValidation = validateId(userId);
+
+    if (!userIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: userIdValidation.message,
+      });
+      return;
+    }
+
+    const paginationValidation = validatePagination(page, limit);
+
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    const dto = new GetPostsByUserDto(userId, page, limit);
+
+    const viewerId = req.user!.id;
+    const viewerRole = req.user!.role;
+
+    try {
+      const result = await this.postService.getByUser(
+        dto,
+        viewerId,
+        viewerRole,
+      );
+
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(this.constructor.name, PostLogMessages.getByUserFailed, err instanceof Error ? err : null,);
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: PostMessages.fetchByUserFailed,
       });
     }
   }

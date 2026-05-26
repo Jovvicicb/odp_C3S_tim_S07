@@ -1,6 +1,7 @@
 export const PostLogMessages = {
   // controller
   getFeedFailed: "Get feed failed",
+  getByUserFailed: "Get posts by user failed",
 
   // repository
   findByIdFailed: "Find post by id failed",
@@ -12,6 +13,8 @@ export const PostLogMessages = {
   countCommentsFailed: "Count post comments failed",
   findFeedFailed: "Find feed posts failed",
   findDetailsFailed: "Find post details failed",
+  findByAuthorIdFailed: "Find posts by author id failed",
+  findAuthorPostCommunityIdsFailed: "Find author post community ids failed",
 
   // shared
   createFailed: "Create post failed",

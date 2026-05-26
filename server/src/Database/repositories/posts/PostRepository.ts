@@ -9,6 +9,7 @@ import { PostMapper } from "../../../Shared/mappers/posts/PostMapper";
 import { UpdatePostDto } from "../../../Domain/DTOs/Posts/UpdatePostDto";
 import { GetPostsByCommunityDto } from "../../../Domain/DTOs/Posts/GetPostsByCommunityDto";
 import { PostSortType } from "../../../Domain/enums/posts/PostSortType";
+import { GetPostsByUserDto } from "../../../Domain/DTOs/Posts/GetPostsByUserDto";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -191,6 +192,129 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
     }
   }
 
+  async findCommunityIdsByAuthorId(authorId: number): Promise<number[]> {
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return [];
+    }
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT DISTINCT community_id
+        FROM posts
+        WHERE author_id = ?`,
+        [authorId],
+      );
+
+      return rows.map((row) => Number(row.community_id));
+    } catch (err) {
+      this.logger.error(
+        "PostRepository",
+        PostLogMessages.findAuthorPostCommunityIdsFailed,
+        err instanceof Error ? err : null,
+      );
+
+      return [];
+    } finally {
+      res.conn.release();
+    }
+  }
+
+  async findByAuthorId(dto: GetPostsByUserDto,): Promise<{ posts: Post[]; total: number }> {
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return { posts: [], total: 0 };
+    }
+
+    const offset = safeInt((dto.page - 1) * dto.limit);
+    const lim = safeInt(dto.limit);
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM posts
+        WHERE author_id = ?
+        ORDER BY created_at DESC
+        LIMIT ${lim} OFFSET ${offset}`,
+        [dto.userId],
+      );
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) AS total
+        FROM posts
+        WHERE author_id = ?`,
+        [dto.userId],
+      );
+
+      return {
+        posts: rows.map((row) => PostMapper.toModel(row)),
+        total: Number(cnt[0]?.total ?? 0),
+      };
+    } catch (err) {
+      this.logger.error(
+        "PostRepository",
+        PostLogMessages.findByAuthorIdFailed,
+        err instanceof Error ? err : null,
+      );
+
+      return { posts: [], total: 0 };
+    } finally {
+      res.conn.release();
+    }
+  }
+
+  async findByAuthorIdAndCommunityIds(dto: GetPostsByUserDto, communityIds: number[],): Promise<{ posts: Post[]; total: number }> {
+    if (communityIds.length === 0) {
+      return { posts: [], total: 0 };
+    }
+
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return { posts: [], total: 0 };
+    }
+
+    const offset = safeInt((dto.page - 1) * dto.limit);
+    const lim = safeInt(dto.limit);
+    const placeholders = communityIds.map(() => "?").join(",");
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM posts
+        WHERE author_id = ?
+        AND community_id IN (${placeholders})
+        ORDER BY created_at DESC
+        LIMIT ${lim} OFFSET ${offset}`,
+        [dto.userId, ...communityIds],
+      );
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) AS total
+        FROM posts
+        WHERE author_id = ?
+        AND community_id IN (${placeholders})`,
+        [dto.userId, ...communityIds],
+      );
+
+      return {
+        posts: rows.map((row) => PostMapper.toModel(row)),
+        total: Number(cnt[0]?.total ?? 0),
+      };
+    } catch (err) {
+      this.logger.error(
+        "PostRepository",
+        PostLogMessages.findByAuthorIdFailed,
+        err instanceof Error ? err : null,
+      );
+
+      return { posts: [], total: 0 };
+    } finally {
+      res.conn.release();
+    }
+  }
 
   async update(postId: number, dto: UpdatePostDto): Promise<boolean> {
     const fieldMap: Record<string, string> = {
