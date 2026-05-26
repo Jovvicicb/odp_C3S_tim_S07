@@ -71,6 +71,22 @@ export const postApi: IPostAPIService = {
       );
   },
 
+  async getByUser(userId, page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<PostWithDetailsDto>>>(
+        `${BASE}/user/${userId}`,
+        {
+          headers: authHeader(),
+          params: {
+            page,
+            limit,
+          },
+        },
+      )
+      .then((r) => r.data)
+      .catch((e: ApiClientError) => err(e, PostMessages.fetchByUserFailed));
+  },
+
   async getById(
     id,
     commentsPage = 1,
