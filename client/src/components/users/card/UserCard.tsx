@@ -6,11 +6,11 @@ import type { UserFollowStatus } from "../../../types/users/UserFollowStatus";
 import type { CommunityMemberRole } from "../../../types/communities/members/CommunityMemberRole";
 
 import { RoleBadge } from "../../ui/RoleBadge";
-import { UserAvatar } from "./UserAvatar";
-import { UserCommunityMetaBadges } from "./UserCommunityMetaBadges";
-import { UserFollowButton } from "./UserFollowButton";
-import { UserRoleSelect } from "./UserRoleSelect";
-import { UserCommunityMemberActions } from "./UserCommunityMemberActions";
+import { UserAvatar } from "../shared/UserAvatar";
+import { UserCommunityMetaBadges } from "../shared/UserCommunityMetaBadges";
+import { UserFollowButton } from "../shared/UserFollowButton";
+import { UserRoleSelect } from "../shared/UserRoleSelect";
+import { UserCommunityMemberActions } from "../shared/UserCommunityMemberActions";
 
 type Props = {
   user: UserDto;

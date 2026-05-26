@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
-import { UserAvatar } from "../../../users/card/UserAvatar";
+import { UserAvatar } from "../../../users/shared/UserAvatar";
 import { Badge } from "../../../ui/Badge";
 
 type Props = {

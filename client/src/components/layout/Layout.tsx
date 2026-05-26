@@ -120,7 +120,9 @@ export function Layout({ children }: { children: ReactNode }) {
               type="button"
               onClick={() => {
                 closeGroups();
-                navigate("/me");
+                if (user?.id) {
+                  navigate(`/users/${user.id}`);
+                }
               }}
               className="mb-3 flex w-full items-center gap-3 rounded-2xl p-1 text-left transition-all hover:bg-white/4"
             >

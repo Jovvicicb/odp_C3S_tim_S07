@@ -12,7 +12,7 @@ import CreateCommunity from "./pages/communities/CreateCommunityPage";
 import CommunityDetailsPage from "./pages/communities/CommunityDetailsPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
-import ProfileSettingsPage from "./pages/users/ProfileSettingsPage";
+import EditUserProfilePage from "./pages/users/EditUserProfilePage";
 import MyCommunitiesPage from "./pages/communities/MyCommunitiesPage";
 import DiscoverCommunitiesPage from "./pages/communities/DiscoverCommunitiesPage";
 import FollowersPage from "./pages/users/FollowersPage";
@@ -23,6 +23,7 @@ import PostDetailsPage from "./pages/posts/PostDetailsPage";
 import EditPostPage from "./pages/posts/EditPostPage";
 import AdminTagsPage from "./pages/admin/AdminTagsPage";
 import EditCommunityPage from "./pages/communities/EditCommunityPage";
+import UserProfilePage from "./pages/users/UserProfilePage";
 
 export default function App() {
   return (
@@ -86,19 +87,28 @@ export default function App() {
       />
 
       <Route
-        path="/profile"
+        path="/communities/mine"
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <ProfileSettingsPage />
+            <MyCommunitiesPage />
           </ProtectedRoute>
         }
       />
 
       <Route
-        path="/communities/mine"
+        path="/users/:id"
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <MyCommunitiesPage />
+            <UserProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users/:id/edit"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <EditUserProfilePage />
           </ProtectedRoute>
         }
       />

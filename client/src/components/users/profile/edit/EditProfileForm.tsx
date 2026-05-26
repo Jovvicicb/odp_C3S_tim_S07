@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { ErrorBox } from "../ui/UI";
-import { FileValidationMessages } from "../../constants/messages/common/FileValidationMessages";
-import { ImageHelper } from "../../helpers/images/ImageHelper";
-import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
-import { useUpdateMe } from "../../hooks/users/useUpdateMe";
-import type { UserDto } from "../../models/users/UserDto";
-import { validateUpdateMe } from "../../validators/user/validateUpdateMe";
-import { useToast } from "../../hooks/toast/useToast";
-import { UserMessages } from "../../constants/messages/user/UserMessages";
-import { CommonMessages } from "../../constants/messages/common/CommonMessages";
+import { ErrorBox } from "../../../ui/UI";
+import { FileValidationMessages } from "../../../../constants/messages/common/FileValidationMessages";
+import { ImageHelper } from "../../../../helpers/images/ImageHelper";
+import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
+import { useUpdateMe } from "../../../../hooks/users/useUpdateMe";
+import type { UserDto } from "../../../../models/users/UserDto";
+import { validateUpdateMe } from "../../../../validators/user/validateUpdateMe";
+import { useToast } from "../../../../hooks/toast/useToast";
+import { UserMessages } from "../../../../constants/messages/user/UserMessages";
+import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
 
 type Props = {
   profile: UserDto;
@@ -115,13 +115,6 @@ export default function EditProfileForm({ profile, onUpdated }: Props) {
 
   return (
     <section>
-      <div className="mb-7 rounded-2xl border border-white/8 bg-white/3 px-5 py-4">
-        <p className="text-base leading-7 text-white/55">
-          Review your current profile information and update only the fields you
-          want to change.
-        </p>
-      </div>
-
       <form
         noValidate
         onSubmit={submit}

@@ -1,4 +1,5 @@
 import type { CommunityMemberRole } from "../../../types/communities/members/CommunityMemberRole";
+import { Button } from "../../ui/button/Button";
 
 type Props = {
   userId: number;
@@ -22,27 +23,23 @@ export function UserCommunityMemberActions({
 
   return (
     <>
-      <button
-        type="button"
-        disabled={loading}
+      <Button
+        label={roleButtonLabel}
+        loadingLabel="Saving..."
+        loading={loading}
+        variant={communityRole === "moderator" ? "warning" : "primary"}
+        size="sm"
         onClick={() => onCommunityRoleChange?.(userId, nextCommunityRole)}
-        className={`rounded-2xl border px-4 py-2 text-xs font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
-          communityRole === "moderator"
-            ? "border-amber-400/20 bg-amber-500/10 text-amber-200 hover:bg-amber-500/15"
-            : "border-sky-300/20 bg-sky-400/10 text-sky-100 hover:bg-sky-400/15"
-        }`}
-      >
-        {loading ? "Saving..." : roleButtonLabel}
-      </button>
+      />
 
-      <button
-        type="button"
-        disabled={loading}
+      <Button
+        label="Remove"
+        loadingLabel="Removing..."
+        loading={loading}
+        variant="danger"
+        size="sm"
         onClick={() => onRemoveCommunityMember?.(userId)}
-        className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-200 transition-all hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading ? "Removing..." : "Remove"}
-      </button>
+      />
     </>
   );
 }

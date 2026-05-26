@@ -24,6 +24,7 @@ import { GetFollowersDto } from "../../Domain/DTOs/users/GetFollowersDto";
 import { GetFollowingDto } from "../../Domain/DTOs/users/GetFollowingDto";
 import { UserValidationMessages } from "../../Domain/constants/messages/user/UserValidationMessages";
 import { StringNormalizer } from "../../Shared/normalization/StringNormalizer";
+import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 
 export class UserController {
   private readonly router = Router();
@@ -84,8 +85,10 @@ export class UserController {
        return;
     } 
 
+    const viewer = OptionalAuthHelper.getUser(req);
+
     try{
-      const result = await this.userService.getById(id);
+      const result = await this.userService.getById(id, viewer?.id);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, UserLogMessages.getByIdFailed, err instanceof Error ? err : null);

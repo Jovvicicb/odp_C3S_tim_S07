@@ -3,13 +3,14 @@ import { ImageHelper } from "../../../helpers/images/ImageHelper";
 type Props = {
   username: string;
   image?: string | null;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 };
 
 const sizeStyles: Record<NonNullable<Props["size"]>, string> = {
   sm: "h-10 w-10 rounded-xl text-sm",
   md: "h-14 w-14 rounded-2xl text-lg",
   lg: "h-16 w-16 rounded-2xl text-xl",
+  xl: "h-24 w-24 rounded-3xl text-3xl",
 };
 
 export function UserAvatar({ username, image, size = "md" }: Props) {

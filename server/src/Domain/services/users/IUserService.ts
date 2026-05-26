@@ -8,7 +8,7 @@ import { ServiceResult } from "../../types/service/ServiceResult";
 
 export interface IUserService {
   getAll(dto:GetUsersDto): Promise<ServiceResult<PaginatedListDto<UserDto>>>;
-  getById(id: number): Promise<ServiceResult<UserDto>>;
+  getById(id: number, viewerId?: number): Promise<ServiceResult<UserDto>>;
   getByUsername(username:string): Promise<ServiceResult<UserDto>>;
   search(username: string, page: number, limit: number, viewerId: number): Promise<ServiceResult<PaginatedListDto<UserDto>>>;
   exists(id:number):Promise<boolean>;

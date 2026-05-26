@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+
 import { usersApi } from "../../api_services/users/UsersAPIService";
 import { UserMessages } from "../../constants/messages/user/UserMessages";
 import type { UserDto } from "../../models/users/UserDto";
@@ -43,6 +44,7 @@ export function useUserProfile(userId?: number) {
 
   return {
     profile,
+    setProfile,
     loading,
     error,
     reload: fetchProfile,
