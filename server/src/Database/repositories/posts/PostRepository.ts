@@ -221,37 +221,23 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
     }
   }
 
-  async findByAuthorId(dto: GetPostsByUserDto,): Promise<{ posts: Post[]; total: number }> {
+  async findAllByAuthorId(dto: GetPostsByUserDto,): Promise<Post[]> {
     const res = await this.db.getReadConnection();
 
     if (!res) {
-      return { posts: [], total: 0 };
+      return [];
     }
-
-    const offset = safeInt((dto.page - 1) * dto.limit);
-    const lim = safeInt(dto.limit);
 
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
         `SELECT *
         FROM posts
         WHERE author_id = ?
-        ORDER BY created_at DESC
-        LIMIT ${lim} OFFSET ${offset}`,
+        ORDER BY created_at DESC`,
         [dto.userId],
       );
 
-      const [cnt] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT COUNT(*) AS total
-        FROM posts
-        WHERE author_id = ?`,
-        [dto.userId],
-      );
-
-      return {
-        posts: rows.map((row) => PostMapper.toModel(row)),
-        total: Number(cnt[0]?.total ?? 0),
-      };
+      return rows.map((row) => PostMapper.toModel(row));
     } catch (err) {
       this.logger.error(
         "PostRepository",
@@ -259,50 +245,35 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
         err instanceof Error ? err : null,
       );
 
-      return { posts: [], total: 0 };
+      return [];
     } finally {
       res.conn.release();
     }
   }
 
-  async findByAuthorIdAndCommunityIds(dto: GetPostsByUserDto, communityIds: number[],): Promise<{ posts: Post[]; total: number }> {
+  async findAllByAuthorIdAndCommunityIds(dto: GetPostsByUserDto, communityIds: number[],): Promise<Post[]> {
     if (communityIds.length === 0) {
-      return { posts: [], total: 0 };
+      return [];
     }
 
     const res = await this.db.getReadConnection();
 
     if (!res) {
-      return { posts: [], total: 0 };
+      return [];
     }
 
-    const offset = safeInt((dto.page - 1) * dto.limit);
-    const lim = safeInt(dto.limit);
     const placeholders = communityIds.map(() => "?").join(",");
-
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
         `SELECT *
         FROM posts
         WHERE author_id = ?
         AND community_id IN (${placeholders})
-        ORDER BY created_at DESC
-        LIMIT ${lim} OFFSET ${offset}`,
+        ORDER BY created_at DESC`,
         [dto.userId, ...communityIds],
       );
 
-      const [cnt] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT COUNT(*) AS total
-        FROM posts
-        WHERE author_id = ?
-        AND community_id IN (${placeholders})`,
-        [dto.userId, ...communityIds],
-      );
-
-      return {
-        posts: rows.map((row) => PostMapper.toModel(row)),
-        total: Number(cnt[0]?.total ?? 0),
-      };
+      return rows.map((row) => PostMapper.toModel(row));
     } catch (err) {
       this.logger.error(
         "PostRepository",
@@ -310,7 +281,7 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
         err instanceof Error ? err : null,
       );
 
-      return { posts: [], total: 0 };
+      return [];
     } finally {
       res.conn.release();
     }

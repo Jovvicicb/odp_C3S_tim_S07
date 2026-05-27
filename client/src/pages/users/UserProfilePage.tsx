@@ -30,11 +30,7 @@ export default function UserProfilePage() {
     posts,
     loading: postsLoading,
     error: postsError,
-    page: postsPage,
-    limit: postsLimit,
-    total: postsTotal,
-    setPage: setPostsPage,
-  } = useUserPosts(profile?.id, 1, 10);
+  } = useUserPosts(profile?.id);
 
   const isOwnProfile = user?.id === profile?.id;
 
@@ -74,10 +70,6 @@ export default function UserProfilePage() {
         posts={posts}
         loading={postsLoading}
         isOwnProfile={isOwnProfile}
-        page={postsPage}
-        limit={postsLimit}
-        total={postsTotal}
-        onPageChange={setPostsPage}
       />
     </div>
   );

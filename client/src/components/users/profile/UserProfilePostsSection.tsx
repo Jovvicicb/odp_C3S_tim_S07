@@ -1,5 +1,5 @@
 import { CountBadge } from "../../ui/CountBadge";
-import { Pagination, Spinner } from "../../ui/UI";
+import { Spinner } from "../../ui/UI";
 import { SectionCard } from "../../ui/SectionCard";
 import { SectionEmptyState } from "../../ui/SectionEmptyState";
 import { PostCard } from "../../posts/card/PostCard";
@@ -10,20 +10,12 @@ type Props = {
   posts: PostWithDetailsDto[];
   loading: boolean;
   isOwnProfile: boolean;
-  page: number;
-  limit: number;
-  total: number;
-  onPageChange: (page: number) => void;
 };
 
 export function UserProfilePostsSection({
   posts,
   loading,
   isOwnProfile,
-  page,
-  limit,
-  total,
-  onPageChange,
 }: Props) {
   return (
     <SectionCard
@@ -34,7 +26,9 @@ export function UserProfilePostsSection({
           ? "Posts you shared across communities you participate in."
           : "Posts this user shared in communities you can view."
       }
-      action={<CountBadge count={total} singular="post" plural="posts" />}
+      action={
+        <CountBadge count={posts.length} singular="post" plural="posts" />
+      }
     >
       {loading ? (
         <div className="flex justify-center py-16">
@@ -52,20 +46,11 @@ export function UserProfilePostsSection({
           }
         />
       ) : (
-        <>
-          <div className="grid grid-cols-1 gap-5">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} showCommunity />
-            ))}
-          </div>
-
-          <Pagination
-            page={page}
-            total={total}
-            pageSize={limit}
-            onChange={onPageChange}
-          />
-        </>
+        <div className="grid grid-cols-1 gap-5">
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} showCommunity />
+          ))}
+        </div>
       )}
     </SectionCard>
   );

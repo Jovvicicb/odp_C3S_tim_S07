@@ -1,42 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { postApi } from "../../../api_services/posts/PostAPIService";
 import { PostMessages } from "../../../constants/messages/post/PostMessages";
 import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
 
-export function useUserPosts(userId?: number, initialPage = 1, limit = 10) {
+export function useUserPosts(userId?: number) {
   const [posts, setPosts] = useState<PostWithDetailsDto[]>([]);
-  const [pageByUserId, setPageByUserId] = useState<Record<number, number>>({});
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const page = useMemo(() => {
-    if (!userId) {
-      return initialPage;
-    }
-
-    return pageByUserId[userId] ?? initialPage;
-  }, [userId, pageByUserId, initialPage]);
-
-  const setPage = useCallback(
-    (nextPage: number) => {
-      if (!userId) {
-        return;
-      }
-
-      setPageByUserId((current) => ({
-        ...current,
-        [userId]: nextPage,
-      }));
-    },
-    [userId],
-  );
 
   const load = useCallback(async () => {
     if (!userId) {
       setPosts([]);
-      setTotal(0);
       return;
     }
 
@@ -44,25 +19,22 @@ export function useUserPosts(userId?: number, initialPage = 1, limit = 10) {
     setError("");
 
     try {
-      const res = await postApi.getByUser(userId, page, limit);
+      const res = await postApi.getByUser(userId);
 
       if (!res.success || !res.data) {
         setPosts([]);
-        setTotal(0);
         setError(res.message ?? PostMessages.fetchByUserFailed);
         return;
       }
 
-      setPosts(res.data.items);
-      setTotal(res.data.total);
+      setPosts(res.data);
     } catch {
       setPosts([]);
-      setTotal(0);
       setError(PostMessages.fetchByUserFailed);
     } finally {
       setLoading(false);
     }
-  }, [userId, page, limit]);
+  }, [userId]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -75,10 +47,6 @@ export function useUserPosts(userId?: number, initialPage = 1, limit = 10) {
     setPosts,
     loading,
     error,
-    page,
-    limit,
-    total,
-    setPage,
     reload: load,
   };
 }

@@ -165,14 +165,9 @@ export class PostController {
 
   private async getByUser(req: Request, res: Response): Promise<void> {
     const userIdParam = parseStringValue(req.params.userId);
-    const pageParam = parseStringValue(req.query.page);
-    const limitParam = parseStringValue(req.query.limit);
-
     const userId = parseId(userIdParam);
-    const { page, limit } = parsePagination(pageParam, limitParam);
 
     const userIdValidation = validateId(userId);
-
     if (!userIdValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -181,27 +176,13 @@ export class PostController {
       return;
     }
 
-    const paginationValidation = validatePagination(page, limit);
-
-    if (!paginationValidation.valid) {
-      res.status(HttpStatus.badRequest).json({
-        success: false,
-        message: paginationValidation.message,
-      });
-      return;
-    }
-
-    const dto = new GetPostsByUserDto(userId, page, limit);
+    const dto = new GetPostsByUserDto(userId);
 
     const viewerId = req.user!.id;
     const viewerRole = req.user!.role;
 
     try {
-      const result = await this.postService.getByUser(
-        dto,
-        viewerId,
-        viewerRole,
-      );
+      const result = await this.postService.getByUser( dto, viewerId, viewerRole,);
 
       ResponseHelper.send(res, result);
     } catch (err) {

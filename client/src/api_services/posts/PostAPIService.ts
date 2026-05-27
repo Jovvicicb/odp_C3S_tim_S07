@@ -70,19 +70,12 @@ export const postApi: IPostAPIService = {
         err(e, PostMessages.fetchByCommunityFailed),
       );
   },
-
-  async getByUser(userId, page = 1, limit = 10) {
+    
+  async getByUser(userId) {
     return axios
-      .get<ApiResponse<PaginatedListDto<PostWithDetailsDto>>>(
-        `${BASE}/user/${userId}`,
-        {
-          headers: authHeader(),
-          params: {
-            page,
-            limit,
-          },
-        },
-      )
+      .get<ApiResponse<PostWithDetailsDto[]>>(`${BASE}/user/${userId}`, {
+        headers: authHeader(),
+      })
       .then((r) => r.data)
       .catch((e: ApiClientError) => err(e, PostMessages.fetchByUserFailed));
   },

@@ -217,7 +217,6 @@ export class PostService implements IPostService {
     }
 
     const communities = await this.communityRepo.findByIds(communityIds);
-
     if (communities.length === 0) {
       return [];
     }
@@ -244,11 +243,11 @@ export class PostService implements IPostService {
       .map((community) => community.id);
   }
 
-  private async getVisibleUserPosts(dto: GetPostsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<{ posts: Post[]; total: number }> {
+  private async getVisibleUserPosts(dto: GetPostsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<Post[]> {
     const authorCommunityIds = await this.postRepo.findCommunityIdsByAuthorId(dto.userId);
 
     if (authorCommunityIds.length === 0) {
-      return { posts: [], total: 0 };
+      return [];
     }
 
     const visibleCommunityIds = await this.getVisibleCommunityIdsForViewer(
@@ -258,10 +257,10 @@ export class PostService implements IPostService {
     );
 
     if (visibleCommunityIds.length === 0) {
-      return { posts: [], total: 0 };
+      return [];
     }
 
-    return this.postRepo.findByAuthorIdAndCommunityIds(dto, visibleCommunityIds,);
+    return this.postRepo.findAllByAuthorIdAndCommunityIds(dto, visibleCommunityIds,);
   }
     
   async create(dto: CreatePostDto, ctx: AuditContext): Promise<ServiceResult<PostDto>> {
@@ -503,36 +502,22 @@ export class PostService implements IPostService {
   }
 
 
-  async getByUser(dto: GetPostsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<ServiceResult<PaginatedListDto<PostWithDetailsDto>>> {
+  async getByUser(dto: GetPostsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<ServiceResult<PostWithDetailsDto[]>> {
     const user = await this.userRepo.findById(dto.userId);
     if (user.id === 0) {
-      return ServiceResultFactory.fail<PaginatedListDto<PostWithDetailsDto>>(UserMessages.notFound, HttpStatus.notFound,);
+      return ServiceResultFactory.fail<PostWithDetailsDto[]>(UserMessages.notFound, HttpStatus.notFound,);
     }
 
     const isAdmin = viewerRole === UserRole.ADMIN;
-    const result = isAdmin
-      ? await this.postRepo.findByAuthorId(dto)
+    const posts  = isAdmin
+      ? await this.postRepo.findAllByAuthorId(dto)
       : await this.getVisibleUserPosts(dto, viewerId, viewerRole);
 
-    if (result.posts.length === 0) {
-      const data = new PaginatedListDto<PostWithDetailsDto>(
-        [],
-        result.total,
-        dto.page,
-        dto.limit,
-      );
-
-      return ServiceResultFactory.ok(PostMessages.userPostsFetched, data, HttpStatus.ok,);
+    if (posts.length === 0) {
+      return ServiceResultFactory.ok(PostMessages.userPostsFetched, [], HttpStatus.ok,);
     }
 
-    const items = await this.buildPostsWithDetails(result.posts);
-
-    const data = new PaginatedListDto<PostWithDetailsDto>(
-      items,
-      result.total,
-      dto.page,
-      dto.limit,
-    );
+    const data  = await this.buildPostsWithDetails(posts);
 
     return ServiceResultFactory.ok(PostMessages.userPostsFetched, data, HttpStatus.ok,);
   }
