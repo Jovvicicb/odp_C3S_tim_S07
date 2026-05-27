@@ -4,6 +4,7 @@ import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
 import { ActionButton } from "../../components/ui/button/ActionButton";
 import { UserProfileHero } from "../../components/users/profile/UserProfileHero";
 import { UserProfilePostsSection } from "../../components/users/profile/UserProfilePostsSection";
+import { UserActiveTagsPanel } from "../../components/users/profile/UserActiveTagsPanel";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { useUserProfile } from "../../hooks/users/useUserProfile";
@@ -64,6 +65,12 @@ export default function UserProfilePage() {
         followLoading={loadingUserId === profile.id}
         onFollow={handleFollow}
         onUnfollow={handleUnfollow}
+      />
+
+      <UserActiveTagsPanel
+        posts={posts}
+        loading={postsLoading}
+        isOwnProfile={isOwnProfile}
       />
 
       <UserProfilePostsSection
