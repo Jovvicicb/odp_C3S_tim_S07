@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import { useToast } from "../../toast/useToast";
-import { useUserFollow } from "../useUserFollow";
+import { useUserFollow } from "../follow/useUserFollow";
 import type { UserDto } from "../../../models/users/UserDto";
 
 type Props = {

@@ -10,6 +10,7 @@ import { SectionLabel } from "../../ui/SectionLabel";
 
 import { UserAvatar } from "../shared/UserAvatar";
 import { UserFollowButton } from "../shared/UserFollowButton";
+import { UserProfileNetworkStats } from "./UserProfileNetworkStats";
 
 type Props = {
   profile: UserDto;
@@ -92,23 +93,32 @@ export function UserProfileHero({
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-wrap items-center gap-3">
-            {isOwnProfile ? (
-              <ActionButton
-                variant="create"
-                label="Edit profile"
-                icon="✎"
-                onClick={() => navigate(`/users/${profile.id}/edit`)}
-              />
-            ) : (
-              <UserFollowButton
-                userId={profile.id}
-                followStatus={followStatus}
-                loading={followLoading}
-                onFollow={onFollow}
-                onUnfollow={onUnfollow}
-              />
-            )}
+          <div className="flex shrink-0 flex-col gap-3 lg:items-end">
+            <UserProfileNetworkStats
+              userId={profile.id}
+              followersCount={profile.followersCount}
+              followingCount={profile.followingCount}
+              isOwnProfile={isOwnProfile}
+            />
+
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              {isOwnProfile ? (
+                <ActionButton
+                  variant="create"
+                  label="Edit profile"
+                  icon="✎"
+                  onClick={() => navigate(`/users/${profile.id}/edit`)}
+                />
+              ) : (
+                <UserFollowButton
+                  userId={profile.id}
+                  followStatus={followStatus}
+                  loading={followLoading}
+                  onFollow={onFollow}
+                  onUnfollow={onUnfollow}
+                />
+              )}
+            </div>
           </div>
         </div>
 

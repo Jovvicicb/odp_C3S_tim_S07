@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { usersApi } from "../../api_services/users/UsersAPIService";
-import { UserMessages } from "../../constants/messages/user/UserMessages";
-import type { UserDto } from "../../models/users/UserDto";
+import { usersApi } from "../../../api_services/users/UsersAPIService";
+import { UserMessages } from "../../../constants/messages/user/UserMessages";
+import type { UserDto } from "../../../models/users/UserDto";
 
 export function useSearchUsers(initialPage = 1, initialLimit = 10) {
   const [users, setUsers] = useState<UserDto[]>([]);

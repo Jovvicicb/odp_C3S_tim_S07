@@ -3,16 +3,16 @@ import {
   PageHeader,
   Pagination,
   Spinner,
-} from "../../components/ui/UI";
-import { CountBadge } from "../../components/ui/CountBadge";
-import { SectionCard } from "../../components/ui/SectionCard";
+} from "../../../components/ui/UI";
+import { CountBadge } from "../../../components/ui/CountBadge";
+import { SectionCard } from "../../../components/ui/SectionCard";
 
-import { SearchUsersToolbar } from "../../components/users/search/SearchUsersToolbar";
-import { SearchUsersList } from "../../components/users/search/SearchUsersList";
+import { SearchUsersToolbar } from "../../../components/users/search/SearchUsersToolbar";
+import { SearchUsersList } from "../../../components/users/search/SearchUsersList";
 
-import { useSearchUsers } from "../../hooks/users/useSearchUsers";
-import { useSearchUsersActions } from "../../hooks/users/search/useSearchUsersActions";
-import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+import { useSearchUsers } from "../../../hooks/users/search/useSearchUsers";
+import { useSearchUsersActions } from "../../../hooks/users/search/useSearchUsersActions";
+import { SectionEmptyState } from "../../../components/ui/SectionEmptyState";
 
 export default function SearchUsersPage() {
   const {

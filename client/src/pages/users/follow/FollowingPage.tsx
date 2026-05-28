@@ -5,16 +5,17 @@ import {
   PageHeader,
   Pagination,
   Spinner,
-} from "../../components/ui/UI";
-import { CountBadge } from "../../components/ui/CountBadge";
-import { SectionCard } from "../../components/ui/SectionCard";
-import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+} from "../../../components/ui/UI";
+import { CountBadge } from "../../../components/ui/CountBadge";
+import { SectionCard } from "../../../components/ui/SectionCard";
+import { SectionEmptyState } from "../../../components/ui/SectionEmptyState";
 
-import { FollowingList } from "../../components/users/follow/FollowingList";
+import { FollowingList } from "../../../components/users/follow/FollowingList";
 
-import { useAuth } from "../../hooks/auth/useAuthHook";
-import { useUserFollowList } from "../../hooks/users/useUserFollowList";
-import { useFollowingActions } from "../../hooks/users/follow/useFollowingActions";
+import { useAuth } from "../../../hooks/auth/useAuthHook";
+import { useUserFollowList } from "../../../hooks/users/follow/useUserFollowList";
+import { useFollowingActions } from "../../../hooks/users/follow/useFollowingActions";
+import { ActionButton } from "../../../components/ui/button/ActionButton";
 
 export default function FollowingPage() {
   const { id } = useParams();
@@ -56,7 +57,11 @@ export default function FollowingPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Users" title="Following" />
+      <PageHeader
+        eyebrow="Users"
+        title="Following"
+        action={<ActionButton variant="back" label="Back" />}
+      />
 
       {pageError && <ErrorBox message={pageError} />}
 

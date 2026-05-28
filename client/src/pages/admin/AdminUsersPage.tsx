@@ -6,8 +6,8 @@ import {
   Spinner,
 } from "../../components/ui/UI";
 import { UserCard } from "../../components/users/card/UserCard";
-import { useUsers } from "../../hooks/users/useUsers";
-import { useUpdateUserRole } from "../../hooks/users/useUpdateUserRole";
+import { useUsers } from "../../hooks/users/core/useUsers";
+import { useUpdateUserRole } from "../../hooks/users/settings/useUpdateUserRole";
 import { useToast } from "../../hooks/toast/useToast";
 import { UserMessages } from "../../constants/messages/user/UserMessages";
 import type { UserRole } from "../../types/users/UserRole";

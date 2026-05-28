@@ -1,21 +1,26 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
-import { ActionButton } from "../../components/ui/button/ActionButton";
-import { UserProfileHero } from "../../components/users/profile/UserProfileHero";
-import { UserProfilePostsSection } from "../../components/users/profile/UserProfilePostsSection";
-import { UserActiveTagsPanel } from "../../components/users/profile/UserActiveTagsPanel";
-import { UserProfileCommentsSection } from "../../components/users/profile/UserProfileCommentsSection";
-import { UserProfileTabs } from "../../components/users/profile/navigation/UserProfileTabs";
+import {
+  Empty,
+  ErrorBox,
+  PageHeader,
+  Spinner,
+} from "../../../components/ui/UI";
+import { ActionButton } from "../../../components/ui/button/ActionButton";
+import { UserProfileHero } from "../../../components/users/profile/UserProfileHero";
+import { UserProfilePostsSection } from "../../../components/users/profile/UserProfilePostsSection";
+import { UserActiveTagsPanel } from "../../../components/users/profile/UserActiveTagsPanel";
+import { UserProfileCommentsSection } from "../../../components/users/profile/UserProfileCommentsSection";
+import { UserProfileTabs } from "../../../components/users/profile/navigation/UserProfileTabs";
 
-import { useAuth } from "../../hooks/auth/useAuthHook";
-import { useUserProfile } from "../../hooks/users/useUserProfile";
-import { useUserProfileFollowActions } from "../../hooks/users/profile/useUserProfileFollowActions";
-import { useUserPosts } from "../../hooks/posts/user/useUserPosts";
-import { useUserComments } from "../../hooks/comments/user/useUserComments";
+import { useAuth } from "../../../hooks/auth/useAuthHook";
+import { useUserProfile } from "../../../hooks/users/core/useUserProfile";
+import { useUserProfileFollowActions } from "../../../hooks/users/profile/useUserProfileFollowActions";
+import { useUserPosts } from "../../../hooks/posts/user/useUserPosts";
+import { useUserComments } from "../../../hooks/comments/user/useUserComments";
 
-import type { UserProfileTab } from "../../types/users/profile/UserProfileTab";
+import type { UserProfileTab } from "../../../types/users/profile/UserProfileTab";
 
 export default function UserProfilePage() {
   const { id } = useParams();

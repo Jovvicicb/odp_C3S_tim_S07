@@ -1,5 +1,10 @@
+import { useNavigate } from "react-router-dom";
+
 import { Spinner } from "../ui/UI";
 import { StatCard } from "../ui/StatCard";
+
+import { useAuth } from "../../hooks/auth/useAuthHook";
+
 import type { StatisticsDto } from "../../models/statistics/StatisticsDto";
 
 type Props = {
@@ -8,6 +13,9 @@ type Props = {
 };
 
 export function DashboardStatsGrid({ statistics, loading }: Props) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   if (loading) {
     return (
       <div className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-6 shadow-xl shadow-sky-950/10">
@@ -32,18 +40,33 @@ export function DashboardStatsGrid({ statistics, loading }: Props) {
         sub="Published posts"
       />
 
-      <StatCard
-        label="Followers"
-        value={String(statistics?.followersCount ?? 0)}
-        sub="People following you"
-      />
+      <button
+        type="button"
+        disabled={!user?.id}
+        onClick={() => user?.id && navigate(`/users/${user.id}/followers`)}
+        className="text-left disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        <StatCard
+          label="Followers"
+          value={String(statistics?.followersCount ?? 0)}
+          sub="People following you"
+          color="text-emerald-300"
+        />
+      </button>
 
-      <StatCard
-        label="Following"
-        value={String(statistics?.followingCount ?? 0)}
-        sub="People you follow"
-        color="text-emerald-300"
-      />
+      <button
+        type="button"
+        disabled={!user?.id}
+        onClick={() => user?.id && navigate(`/users/${user.id}/following`)}
+        className="text-left disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        <StatCard
+          label="Following"
+          value={String(statistics?.followingCount ?? 0)}
+          sub="People you follow"
+          color="text-emerald-300"
+        />
+      </button>
     </div>
   );
 }

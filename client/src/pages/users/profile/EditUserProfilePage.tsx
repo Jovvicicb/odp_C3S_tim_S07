@@ -1,12 +1,17 @@
 import { useParams } from "react-router-dom";
 
-import EditProfileForm from "../../components/users/profile/edit/EditProfileForm";
-import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
-import { ActionButton } from "../../components/ui/button/ActionButton";
-import { IntroPanel } from "../../components/ui/IntroPanel";
+import EditProfileForm from "../../../components/users/profile/edit/EditProfileForm";
+import {
+  Empty,
+  ErrorBox,
+  PageHeader,
+  Spinner,
+} from "../../../components/ui/UI";
+import { ActionButton } from "../../../components/ui/button/ActionButton";
+import { IntroPanel } from "../../../components/ui/IntroPanel";
 
-import { useAuth } from "../../hooks/auth/useAuthHook";
-import { useUserProfile } from "../../hooks/users/useUserProfile";
+import { useAuth } from "../../../hooks/auth/useAuthHook";
+import { useUserProfile } from "../../../hooks/users/core/useUserProfile";
 
 export default function EditUserProfilePage() {
   const { id } = useParams();

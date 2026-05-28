@@ -5,16 +5,17 @@ import {
   PageHeader,
   Pagination,
   Spinner,
-} from "../../components/ui/UI";
-import { CountBadge } from "../../components/ui/CountBadge";
-import { SectionCard } from "../../components/ui/SectionCard";
+} from "../../../components/ui/UI";
+import { CountBadge } from "../../../components/ui/CountBadge";
+import { SectionCard } from "../../../components/ui/SectionCard";
 
-import { FollowersList } from "../../components/users/follow/FollowersList";
+import { FollowersList } from "../../../components/users/follow/FollowersList";
 
-import { useAuth } from "../../hooks/auth/useAuthHook";
-import { useUserFollowList } from "../../hooks/users/useUserFollowList";
-import { useFollowersActions } from "../../hooks/users/follow/useFollowersActions";
-import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+import { useAuth } from "../../../hooks/auth/useAuthHook";
+import { useUserFollowList } from "../../../hooks/users/follow/useUserFollowList";
+import { useFollowersActions } from "../../../hooks/users/follow/useFollowersActions";
+import { SectionEmptyState } from "../../../components/ui/SectionEmptyState";
+import { ActionButton } from "../../../components/ui/button/ActionButton";
 
 export default function FollowersPage() {
   const { id } = useParams();
@@ -54,7 +55,11 @@ export default function FollowersPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Users" title="Followers" />
+      <PageHeader
+        eyebrow="Users"
+        title="Followers"
+        action={<ActionButton variant="back" label="Back" />}
+      />
 
       {pageError && <ErrorBox message={pageError} />}
 

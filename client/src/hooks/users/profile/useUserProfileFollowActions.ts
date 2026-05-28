@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import { useToast } from "../../toast/useToast";
-import { useUserFollow } from "../useUserFollow";
+import { useUserFollow } from "../follow/useUserFollow";
 
 import type { UserDto } from "../../../models/users/UserDto";
 
@@ -26,14 +26,17 @@ export function useUserProfileFollowActions({ setProfile }: Props) {
       return;
     }
 
-    setProfile((current) =>
-      current && current.id === userId
-        ? {
-            ...current,
-            followStatus: "following",
-          }
-        : current,
-    );
+    setProfile((current) => {
+      if (!current || current.id !== userId) {
+        return current;
+      }
+
+      return {
+        ...current,
+        followStatus: "following",
+        followersCount: current.followersCount + 1,
+      };
+    });
 
     showToast({
       type: "success",
@@ -48,14 +51,17 @@ export function useUserProfileFollowActions({ setProfile }: Props) {
       return;
     }
 
-    setProfile((current) =>
-      current && current.id === userId
-        ? {
-            ...current,
-            followStatus: "not_following",
-          }
-        : current,
-    );
+    setProfile((current) => {
+      if (!current || current.id !== userId) {
+        return current;
+      }
+
+      return {
+        ...current,
+        followStatus: "not_following",
+        followersCount: Math.max(0, current.followersCount - 1),
+      };
+    });
 
     showToast({
       type: "success",

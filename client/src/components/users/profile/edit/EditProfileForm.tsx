@@ -3,7 +3,7 @@ import { ErrorBox } from "../../../ui/UI";
 import { FileValidationMessages } from "../../../../constants/messages/common/FileValidationMessages";
 import { ImageHelper } from "../../../../helpers/images/ImageHelper";
 import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
-import { useUpdateMe } from "../../../../hooks/users/useUpdateMe";
+import { useUpdateMe } from "../../../../hooks/users/settings/useUpdateMe";
 import type { UserDto } from "../../../../models/users/UserDto";
 import { validateUpdateMe } from "../../../../validators/user/validateUpdateMe";
 import { useToast } from "../../../../hooks/toast/useToast";

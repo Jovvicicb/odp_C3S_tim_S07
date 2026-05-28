@@ -50,12 +50,9 @@ export function Layout({ children }: { children: ReactNode }) {
   ];
 
   const userItems = user
-    ? [
-        { to: "/users/search", label: "Search users" },
-        { to: `/users/${user.id}/followers`, label: "Followers" },
-        { to: `/users/${user.id}/following`, label: "Following" },
-      ]
+    ? [{ to: "/users/search", label: "Search users" }]
     : [];
+
   const adminItems = [
     { to: "/admin", label: "Dashboard" },
     { to: "/admin/users", label: "Users" },

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { usersApi } from "../../api_services/users/UsersAPIService";
-import { CommonMessages } from "../../constants/messages/common/CommonMessages";
-import { UserMessages } from "../../constants/messages/user/UserMessages";
+import { usersApi } from "../../../api_services/users/UsersAPIService";
+import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
+import { UserMessages } from "../../../constants/messages/user/UserMessages";
 
 export function useUserFollow() {
   const [loadingUserId, setLoadingUserId] = useState<number | null>(null);

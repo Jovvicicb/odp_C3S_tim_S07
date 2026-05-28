@@ -12,18 +12,18 @@ import CreateCommunity from "./pages/communities/CreateCommunityPage";
 import CommunityDetailsPage from "./pages/communities/CommunityDetailsPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
-import EditUserProfilePage from "./pages/users/EditUserProfilePage";
+import EditUserProfilePage from "./pages/users/profile/EditUserProfilePage";
 import MyCommunitiesPage from "./pages/communities/MyCommunitiesPage";
 import DiscoverCommunitiesPage from "./pages/communities/DiscoverCommunitiesPage";
-import FollowersPage from "./pages/users/FollowersPage";
-import FollowingPage from "./pages/users/FollowingPage";
-import SearchUsersPage from "./pages/users/SearchUsersPage";
+import FollowersPage from "./pages/users/follow/FollowersPage";
+import FollowingPage from "./pages/users/follow/FollowingPage";
+import SearchUsersPage from "./pages/users/search/SearchUsersPage";
 import CreatePostPage from "./pages/posts/CreatePostPage";
 import PostDetailsPage from "./pages/posts/PostDetailsPage";
 import EditPostPage from "./pages/posts/EditPostPage";
 import AdminTagsPage from "./pages/admin/AdminTagsPage";
 import EditCommunityPage from "./pages/communities/EditCommunityPage";
-import UserProfilePage from "./pages/users/UserProfilePage";
+import UserProfilePage from "./pages/users/profile/UserProfilePage";
 
 export default function App() {
   return (

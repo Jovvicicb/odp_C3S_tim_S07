@@ -13,4 +13,6 @@ export type UserDto = {
   createdAt: string;
   updatedAt: string;
   followStatus: UserFollowStatus | null;
+  followersCount: number;
+  followingCount: number;
 };

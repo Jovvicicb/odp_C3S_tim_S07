@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import { useToast } from "../../../toast/useToast";
-import { useUserFollow } from "../../../users/useUserFollow";
+import { useUserFollow } from "../../../users/follow/useUserFollow";
 
 import type { CommunityDetailsDto } from "../../../../models/communities/CommunityDetailsDto";
 
