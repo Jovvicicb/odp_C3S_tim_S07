@@ -2,6 +2,7 @@ import { useState } from "react";
 import { communityApi } from "../../../api_services/communities/CommunityAPIService";
 import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
 import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
+import { notifyMyCommunitiesChanged } from "../../../helpers/events/SidebarEvents";
 
 export function useCommunityMembership() {
   const [loadingCommunityId, setLoadingCommunityId] = useState<number | null>(
@@ -21,6 +22,8 @@ export function useCommunityMembership() {
         setError(res.message ?? CommunityMessages.joinFailed);
         return null;
       }
+
+      notifyMyCommunitiesChanged();
 
       return res.message || CommunityMessages.joined;
     } catch {
@@ -42,6 +45,8 @@ export function useCommunityMembership() {
         setError(res.message ?? CommunityMessages.leaveFailed);
         return null;
       }
+
+      notifyMyCommunitiesChanged();
 
       return res.message || CommunityMessages.left;
     } catch {

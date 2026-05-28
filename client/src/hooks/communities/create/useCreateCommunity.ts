@@ -3,6 +3,7 @@ import { useState } from "react";
 import { communityApi } from "../../../api_services/communities/CommunityAPIService";
 import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
 import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
+import { notifyMyCommunitiesChanged } from "../../../helpers/events/SidebarEvents";
 
 export function useCreateCommunity() {
   const [loading, setLoading] = useState(false);
@@ -19,6 +20,8 @@ export function useCreateCommunity() {
         setError(res.message ?? CommunityMessages.createFailed);
         return null;
       }
+
+      notifyMyCommunitiesChanged();
 
       return res.data;
     } catch {

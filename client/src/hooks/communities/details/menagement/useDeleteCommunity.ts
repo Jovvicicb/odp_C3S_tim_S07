@@ -5,6 +5,7 @@ import { communityApi } from "../../../../api_services/communities/CommunityAPIS
 import { CommunityMessages } from "../../../../constants/messages/community/CommunityMessages";
 import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
 import { useToast } from "../../../toast/useToast";
+import { notifyMyCommunitiesChanged } from "../../../../helpers/events/SidebarEvents";
 
 export function useDeleteCommunity() {
   const navigate = useNavigate();
@@ -32,6 +33,8 @@ export function useDeleteCommunity() {
         setCommunityDeleteError(res.message ?? CommunityMessages.deleteFailed);
         return;
       }
+
+      notifyMyCommunitiesChanged();
 
       showToast({
         type: "success",

@@ -1,9 +1,10 @@
 import { useState, type ReactNode } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { RoleBadge } from "../ui/RoleBadge";
 import { useToast } from "../../hooks/toast/useToast";
 import { SidebarGroup } from "./SidebarGroup";
+import { SidebarMyCommunitiesPreview } from "./SidebarMyCommunitiesPreview";
 
 type SidebarLinkProps = {
   to: string;
@@ -32,6 +33,7 @@ export function SidebarLink({ to, label, onClick }: SidebarLinkProps) {
 export function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
 
   const [openGroup, setOpenGroup] = useState<string | null>(null);
@@ -44,10 +46,10 @@ export function Layout({ children }: { children: ReactNode }) {
     setOpenGroup(null);
   };
 
-  const communityItems = [
-    { to: "/communities", label: "Discover" },
-    { to: "/communities/mine", label: "My communities" },
-  ];
+  const communityItems = [{ to: "/communities", label: "Discover" }];
+
+  const communitiesGroupOpen =
+    openGroup === "Communities" || location.pathname.startsWith("/communities");
 
   const userItems = user
     ? [{ to: "/users/search", label: "Search users" }]
@@ -86,10 +88,17 @@ export function Layout({ children }: { children: ReactNode }) {
           <SidebarGroup
             title="Communities"
             items={communityItems}
-            open={openGroup === "Communities"}
+            open={communitiesGroupOpen}
             onToggle={() => toggleGroup("Communities")}
             onNavigate={closeGroups}
           />
+
+          {user && (
+            <SidebarMyCommunitiesPreview
+              visible={communitiesGroupOpen}
+              onNavigate={closeGroups}
+            />
+          )}
 
           {user && (
             <SidebarGroup

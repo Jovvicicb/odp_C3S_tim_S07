@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+
 import { communityApi } from "../../../api_services/communities/CommunityAPIService";
 import { CommunityMessages } from "../../../constants/messages/community/CommunityMessages";
 import type { CommunityDto } from "../../../models/communities/CommunityDto";
@@ -40,12 +41,15 @@ export function useMyCommunities(initialPage = 1, initialLimit = 10) {
     [],
   );
 
-  
+  const reload = useCallback(async () => {
+    await fetchCommunities(page, limit);
+  }, [fetchCommunities, page, limit]);
+
   useEffect(() => {
     queueMicrotask(() => {
-      void fetchCommunities(page, limit);
+      void reload();
     });
-  }, [page, limit, fetchCommunities]);
+  }, [reload]);
 
   return {
     communities,
@@ -58,5 +62,6 @@ export function useMyCommunities(initialPage = 1, initialLimit = 10) {
     setTotal,
     setPage,
     setLimit,
+    reload,
   };
 }
