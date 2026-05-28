@@ -20,4 +20,8 @@ export const CommentLogMessages = {
   unflagFailed: "Unflag comment failed",
   updateFlagStatusFailed: "Update comment flag status failed",
   findLikedCommentsFailed: "Find liked comments failed",
+
+  fetchByUserFailed: "Fetch comments by user failed",
+  findByUserFailed: "Find comments by user failed",
+  findUserCommentPostIdsFailed: "Find user comment post ids failed",
   } as const;

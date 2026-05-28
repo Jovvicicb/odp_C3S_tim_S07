@@ -22,6 +22,7 @@ import { validatePagination } from "../validators/common/ValidatePagination";
 import { GetCommentsByPostDto } from "../../Domain/DTOs/comments/GetCommentsByPostDto";
 import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
+import { GetCommentsByUserDto } from "../../Domain/DTOs/comments/GetCommentsByUserDto";
 
 export class CommentController {
   private readonly router = Router();
@@ -33,6 +34,7 @@ export class CommentController {
     
   ) {
     this.router.get("/comments/post/:postId",                                                                this.getByPost.bind(this));
+    this.router.get("/comments/user/:userId",        authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getByUser.bind(this),);
     this.router.post("/comments",                    authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.create.bind(this));
     this.router.put("/comments/:id",                 authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.update.bind(this));
     this.router.delete("/comments/:id",              authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.delete.bind(this));
@@ -96,6 +98,58 @@ export class CommentController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommentMessages.fetchByPostFailed,
+      });
+    }
+  }
+
+
+  private async getByUser(req: Request, res: Response): Promise<void> {
+    const userIdParam = parseStringValue(req.params.userId);
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+
+    const userId = parseId(userIdParam);
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const userIdValidation = validateId(userId);
+
+    if (!userIdValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: userIdValidation.message,
+      });
+      return;
+    }
+
+    const paginationValidation = validatePagination(page, limit);
+
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    const dto = new GetCommentsByUserDto(userId, page, limit);
+
+    const viewerId = req.user!.id;
+    const viewerRole = req.user!.role;
+
+    try {
+      const result = await this.commentService.getByUser(dto, viewerId, viewerRole,);
+
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(
+        this.constructor.name,
+        CommentLogMessages.fetchByUserFailed,
+        err instanceof Error ? err : null,
+      );
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: CommentMessages.fetchByUserFailed,
       });
     }
   }

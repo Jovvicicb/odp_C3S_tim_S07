@@ -40,6 +40,41 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
       }
   }
 
+  async findByIds(ids: number[]): Promise<Post[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return [];
+    }
+
+    const placeholders = ids.map(() => "?").join(",");
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM posts
+        WHERE id IN (${placeholders})`,
+        ids,
+      );
+
+      return rows.map((row) => PostMapper.toModel(row));
+    } catch (err) {
+      this.logger.error(
+        "PostRepository",
+        PostLogMessages.findByIdsFailed,
+        err instanceof Error ? err : null,
+      );
+
+      return [];
+    } finally {
+      res.conn.release();
+    }
+  }
+  
   async create(dto: CreatePostDto): Promise<Post> {
     const res = await this.db.getWriteConnection();
     if (!res) return new Post();

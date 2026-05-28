@@ -32,6 +32,9 @@ import { Community } from "../../Domain/models/Community";
 import { CommunityMember } from "../../Domain/models/CommunityMember";
 import { Post } from "../../Domain/models/Post";
 import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
+import { UserProfileCommentDto } from "../../Domain/DTOs/comments/UserProfileCommentDto";
+import { GetCommentsByUserDto } from "../../Domain/DTOs/comments/GetCommentsByUserDto";
+import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 
 type CommentAccessCheckResult =
   | {
@@ -193,7 +196,195 @@ export class CommentService implements ICommentService {
     return this.isActiveModeratorMembership(membership);
   }
 
-      
+  private async getVisiblePostIdsForViewer(postIds: number[], viewerId: number, viewerRole?: UserRole,): Promise<number[]> {
+    if (postIds.length === 0) {
+      return [];
+    }
+
+    const posts = await this.postRepo.findByIds(postIds);
+
+    if (posts.length === 0) {
+      return [];
+    }
+
+    if (viewerRole === UserRole.ADMIN) {
+      return posts.map((post) => post.id);
+    }
+
+    const communityIds = Array.from(
+      new Set(posts.map((post) => post.communityId)),
+    );
+
+    const communities = await this.communityRepo.findByIds(communityIds);
+
+    const communityById = communities.reduce<Record<number, Community>>(
+      (acc, community) => {
+        acc[community.id] = community;
+        return acc;
+      },
+      {},
+    );
+
+    const membershipStatuses = await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(
+        viewerId,
+        communityIds,
+      );
+
+    return posts
+      .filter((post) => {
+        const community = communityById[post.communityId];
+
+        if (!community) {
+          return false;
+        }
+
+        const membershipStatus = membershipStatuses[post.communityId] ?? null;
+
+        if (
+          membershipStatus === CommunityMemberStatus.BANNED ||
+          membershipStatus === CommunityMemberStatus.PENDING
+        ) {
+          return false;
+        }
+
+        if (community.type === CommunityType.PUBLIC) {
+          return true;
+        }
+
+        return membershipStatus === CommunityMemberStatus.ACTIVE;
+      })
+      .map((post) => post.id);
+  }
+
+
+  private async buildUserProfileComments(comments: Comment[],): Promise<UserProfileCommentDto[]> {
+    if (comments.length === 0) {
+      return [];
+    }
+
+    const commentIds = comments.map((comment) => comment.id);
+
+    const postIds = Array.from(
+      new Set(comments.map((comment) => comment.postId)),
+    );
+
+    const userIds = Array.from(
+      new Set(comments.map((comment) => comment.userId)),
+    );
+
+    const posts =
+      postIds.length > 0
+        ? await this.postRepo.findByIds(postIds)
+        : [];
+
+    const postById = posts.reduce<Record<number, Post>>((acc, post) => {
+      acc[post.id] = post;
+      return acc;
+    }, {});
+
+    const communityIds = Array.from(
+      new Set(posts.map((post) => post.communityId)),
+    );
+
+    const communities =
+      communityIds.length > 0
+        ? await this.communityRepo.findByIds(communityIds)
+        : [];
+
+    const communityById = communities.reduce<Record<number, Community>>(
+      (acc, community) => {
+        acc[community.id] = community;
+        return acc;
+      },
+      {},
+    );
+
+    const users =
+      userIds.length > 0
+        ? await this.userRepo.findByIds(userIds)
+        : [];
+
+    const usernameByUserId = users.reduce<Record<number, string>>((acc, user) => {
+      acc[user.id] = user.username;
+      return acc;
+    }, {});
+
+    const likeCountsByCommentId =
+      await this.commentLikeRepo.countByCommentIds(commentIds);
+
+    return CommentMapper.toUserProfileDtos(
+      comments,
+      usernameByUserId,
+      postById,
+      communityById,
+      likeCountsByCommentId,
+    );
+  }
+
+  async getByUser(dto: GetCommentsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<ServiceResult<PaginatedListDto<UserProfileCommentDto>>> {
+    const user = await this.userRepo.findById(dto.userId);
+    if (user.id === 0) {
+      return ServiceResultFactory.fail<PaginatedListDto<UserProfileCommentDto>>(UserMessages.notFound, HttpStatus.notFound,);
+    }
+
+    const userCommentPostIds = await this.commentRepo.findPostIdsByUserId(dto.userId,);
+
+    if (userCommentPostIds.length === 0) {
+      const data = new PaginatedListDto<UserProfileCommentDto>(
+        [],
+        0,
+        dto.page,
+        dto.limit,
+      );
+
+      return ServiceResultFactory.ok(CommentMessages.userCommentsFetched, data, HttpStatus.ok,);
+    }
+
+    const visiblePostIds = await this.getVisiblePostIdsForViewer(
+      userCommentPostIds,
+      viewerId,
+      viewerRole,
+    );
+
+    if (visiblePostIds.length === 0) {
+      const data = new PaginatedListDto<UserProfileCommentDto>(
+        [],
+        0,
+        dto.page,
+        dto.limit,
+      );
+
+      return ServiceResultFactory.ok(CommentMessages.userCommentsFetched, data, HttpStatus.ok,);
+    }
+
+    const result = await this.commentRepo.findByUserIdAndPostIds(
+      dto,
+      visiblePostIds,
+    );
+
+    if (result.comments.length === 0) {
+      const data = new PaginatedListDto<UserProfileCommentDto>(
+        [],
+        result.total,
+        dto.page,
+        dto.limit,
+      );
+
+      return ServiceResultFactory.ok(CommentMessages.userCommentsFetched, data, HttpStatus.ok,);
+    }
+
+    const items = await this.buildUserProfileComments(result.comments);
+
+    const data = new PaginatedListDto<UserProfileCommentDto>(
+      items,
+      result.total,
+      dto.page,
+      dto.limit,
+    );
+
+    return ServiceResultFactory.ok(CommentMessages.userCommentsFetched, data, HttpStatus.ok,);
+  }
+          
 
   async create(dto: CreateCommentDto, ctx: AuditContext): Promise<ServiceResult<CommentDto>> {
     const access = await this.checkCommentAccess(dto.userId, dto.postId);

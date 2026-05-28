@@ -9,6 +9,7 @@ import { CommentMapper } from "../../../Shared/mappers/comments/CommentMapper";
 import { UpdateCommentDto } from "../../../Domain/DTOs/comments/UpdateCommentDto";
 import { GetCommentsByPostDto } from "../../../Domain/DTOs/comments/GetCommentsByPostDto";
 import { CommentSortType } from "../../../Domain/enums/comments/CommentSortType";
+import { GetCommentsByUserDto } from "../../../Domain/DTOs/comments/GetCommentsByUserDto";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -208,6 +209,88 @@ export class CommentRepository implements ICommentRepository {
     } catch (err) {
       this.logger.error("CommentRepository", CommentLogMessages.updateFlagStatusFailed, err instanceof Error ? err : null);
       return false;
+    } finally {
+      res.conn.release();
+    }
+  }
+
+
+  async findPostIdsByUserId(userId: number): Promise<number[]> {
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return [];
+    }
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT DISTINCT post_id
+        FROM comments
+        WHERE user_id = ?`,
+        [userId],
+      );
+
+      return rows.map((row) => Number(row.post_id));
+    } catch (err) {
+      this.logger.error(
+        "CommentRepository",
+        CommentLogMessages.findUserCommentPostIdsFailed,
+        err instanceof Error ? err : null,
+      );
+
+      return [];
+    } finally {
+      res.conn.release();
+    }
+  }
+
+
+  async findByUserIdAndPostIds(dto: GetCommentsByUserDto, postIds: number[],): Promise<{ comments: Comment[]; total: number }> {
+    if (postIds.length === 0) {
+      return { comments: [], total: 0 };
+    }
+
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return { comments: [], total: 0 };
+    }
+
+    const offset = safeInt((dto.page - 1) * dto.limit);
+    const lim = safeInt(dto.limit);
+    const placeholders = postIds.map(() => "?").join(",");
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM comments
+        WHERE user_id = ?
+        AND post_id IN (${placeholders})
+        ORDER BY created_at DESC
+        LIMIT ${lim} OFFSET ${offset}`,
+        [dto.userId, ...postIds],
+      );
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) AS total
+        FROM comments
+        WHERE user_id = ?
+        AND post_id IN (${placeholders})`,
+        [dto.userId, ...postIds],
+      );
+
+      return {
+        comments: rows.map((row) => CommentMapper.toModel(row)),
+        total: Number(cnt[0]?.total ?? 0),
+      };
+    } catch (err) {
+      this.logger.error(
+        "CommentRepository",
+        CommentLogMessages.findByUserFailed,
+        err instanceof Error ? err : null,
+      );
+
+      return { comments: [], total: 0 };
     } finally {
       res.conn.release();
     }

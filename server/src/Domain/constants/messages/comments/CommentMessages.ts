@@ -48,4 +48,7 @@ export const CommentMessages = {
   cannotUnflagDeleted: "Cannot unflag a deleted comment",
   accessAllowed: "Comment access allowed",
 
+  userCommentsFetched: "User comments fetched successfully",
+  fetchByUserFailed: "Failed to fetch user comments",
+
 } as const;

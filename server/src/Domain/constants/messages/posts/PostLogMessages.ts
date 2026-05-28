@@ -15,6 +15,7 @@ export const PostLogMessages = {
   findDetailsFailed: "Find post details failed",
   findByAuthorIdFailed: "Find posts by author id failed",
   findAuthorPostCommunityIdsFailed: "Find author post community ids failed",
+  findByIdsFailed: "Find posts by ids failed",
 
   // shared
   createFailed: "Create post failed",
