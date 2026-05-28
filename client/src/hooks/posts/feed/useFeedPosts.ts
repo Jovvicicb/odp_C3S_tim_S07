@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { postApi } from "../../../api_services/posts/PostAPIService";
+import { PostMessages } from "../../../constants/messages/post/PostMessages";
+
 import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
 
 export function useFeedPosts(initialPage = 1, initialLimit = 10) {
@@ -20,7 +22,7 @@ export function useFeedPosts(initialPage = 1, initialLimit = 10) {
       const res = await postApi.getFeed(page, limit);
 
       if (!res.success || !res.data) {
-        setError(res.message ?? "Failed to fetch feed posts");
+        setError(res.message ?? PostMessages.feedFetchFailed);
         setPosts([]);
         setTotal(0);
         return;
@@ -29,7 +31,7 @@ export function useFeedPosts(initialPage = 1, initialLimit = 10) {
       setPosts(res.data.items);
       setTotal(res.data.total);
     } catch {
-      setError("Failed to fetch feed posts");
+      setError(PostMessages.feedFetchFailed);
       setPosts([]);
       setTotal(0);
     } finally {
@@ -37,7 +39,7 @@ export function useFeedPosts(initialPage = 1, initialLimit = 10) {
     }
   }, [page, limit]);
 
-   useEffect(() => {
+  useEffect(() => {
     queueMicrotask(() => {
       void load();
     });

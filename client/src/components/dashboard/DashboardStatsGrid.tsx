@@ -28,17 +28,32 @@ export function DashboardStatsGrid({ statistics, loading }: Props) {
 
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-      <StatCard
-        label="Communities"
-        value={String(statistics?.joinedCommunitiesCount ?? 0)}
-        sub="Joined communities"
-      />
+      <button
+        type="button"
+        onClick={() => navigate("/communities/mine")}
+        className="text-left"
+      >
+        <StatCard
+          label="Communities"
+          value={String(statistics?.joinedCommunitiesCount ?? 0)}
+          sub="Joined communities"
+          color="text-emerald-300"
+        />
+      </button>
 
-      <StatCard
-        label="Posts"
-        value={String(statistics?.postsCount ?? 0)}
-        sub="Published posts"
-      />
+      <button
+        type="button"
+        disabled={!user?.id}
+        onClick={() => user?.id && navigate(`/users/${user.id}`)}
+        className="text-left disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        <StatCard
+          label="Posts"
+          value={String(statistics?.postsCount ?? 0)}
+          sub="Published posts"
+          color="text-emerald-300"
+        />
+      </button>
 
       <button
         type="button"
