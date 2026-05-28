@@ -22,7 +22,11 @@ export class UserMapper {
     );
   }
     
-  public static toDto(user: User,  followStatus: UserFollowStatus | null = null): UserDto {
+  public static toDto(
+    user: User,  
+    followStatus: UserFollowStatus | null = null, 
+    followersCount: number = 0,
+    followingCount: number = 0,): UserDto {
     return new UserDto(
       user.id,
       user.username,
@@ -34,7 +38,9 @@ export class UserMapper {
       user.isActive,
       user.createdAt,
       user.updatedAt,
-      followStatus
+      followStatus,
+      followersCount,
+      followingCount,
     );
   }
 }

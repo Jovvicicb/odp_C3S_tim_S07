@@ -7,6 +7,7 @@ export const UserLogMessages = {
   followFailed: "Follow user failed",
   unfollowFailed: "Unfollow user failed",
 
+
   // repository
   findAllFailed: "Find all users failed",
   findByIdFailed: "Find user by id failed",
@@ -19,6 +20,8 @@ export const UserLogMessages = {
   deleteFollowUserFailed: "Delete follow failed",
   existsFollowUserFailed: "Check follow existence failed",
   removeFollowerFailed: "Remove follower failed",
+  countFollowersFailed: "Count followers failed",
+  countFollowingFailed: "Count following failed",
 
   // shared
   createFailed: "Create user failed",
@@ -29,4 +32,6 @@ export const UserLogMessages = {
 
   getFollowersFailed: "Get followers failed",
   getFollowingFailed: "Get following failed",
+
+  
 } as const;

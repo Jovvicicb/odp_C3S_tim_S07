@@ -41,22 +41,32 @@ export class UserService implements IUserService {
 
   async getById(id: number, viewerId?: number): Promise<ServiceResult<UserDto>> {
     const user = await this.userRepo.findById(id);
-    if (user.id === 0){
+    if (user.id === 0) {
       return ServiceResultFactory.fail(UserMessages.notFound, HttpStatus.notFound);
     }
 
-    const dto = UserMapper.toDto(user);
+    const [followersCount, followingCount] = await Promise.all([
+      this.userFollowRepo.countFollowers(id),
+      this.userFollowRepo.countFollowing(id),
+    ]);
 
-    if (viewerId) {
-      dto.followStatus =
-        viewerId === id
+    const followStatus =
+      viewerId === undefined
+        ? null
+        : viewerId === id
           ? UserFollowStatus.SELF
           : (await this.userFollowRepo.exists(viewerId, id))
             ? UserFollowStatus.FOLLOWING
             : UserFollowStatus.NOT_FOLLOWING;
-    }
-    
-    return ServiceResultFactory.ok(UserMessages.fetchOneSuccess, dto, HttpStatus.ok);
+
+    const dto = UserMapper.toDto(
+      user,
+      followStatus,
+      followersCount,
+      followingCount,
+    );
+
+    return ServiceResultFactory.ok(UserMessages.fetchOneSuccess, dto, HttpStatus.ok,);
   }
 
   async search(username: string, page: number, limit: number, viewerId: number): Promise<ServiceResult<PaginatedListDto<UserDto>>> {

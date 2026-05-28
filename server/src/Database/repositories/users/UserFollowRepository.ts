@@ -198,6 +198,65 @@ export class UserFollowRepository implements IUserFollowRepository {
     } finally {
         res.conn.release();
     }
+  }
+
+
+    async countFollowers(userId: number): Promise<number> {
+        const res = await this.db.getReadConnection();
+
+        if (!res) {
+            return 0;
+        }
+
+        try {
+            const [rows] = await res.conn.execute<RowDataPacket[]>(
+            `SELECT COUNT(*) AS total
+            FROM user_follows
+            WHERE following_id = ?`,
+            [userId],
+            );
+
+            return Number(rows[0]?.total ?? 0);
+        } catch (err) {
+            this.logger.error(
+            "UserFollowRepository",
+            UserLogMessages.countFollowersFailed,
+            err instanceof Error ? err : null,
+            );
+
+            return 0;
+        } finally {
+            res.conn.release();
+        }
+    }
+
+    async countFollowing(userId: number): Promise<number> {
+        const res = await this.db.getReadConnection();
+
+        if (!res) {
+            return 0;
+        }
+
+        try {
+            const [rows] = await res.conn.execute<RowDataPacket[]>(
+            `SELECT COUNT(*) AS total
+            FROM user_follows
+            WHERE follower_id = ?`,
+            [userId],
+            );
+
+            return Number(rows[0]?.total ?? 0);
+        } catch (err) {
+            this.logger.error(
+            "UserFollowRepository",
+            UserLogMessages.countFollowingFailed,
+            err instanceof Error ? err : null,
+            );
+
+            return 0;
+        } finally {
+            res.conn.release();
+        }
     }
 
 }

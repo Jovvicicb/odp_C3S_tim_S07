@@ -13,6 +13,8 @@ export class UserDto {
     public isActive: number,
     public createdAt: Date,
     public updatedAt: Date,
-    public followStatus: UserFollowStatus | null = null
+    public followStatus: UserFollowStatus | null = null,
+    public followersCount: number = 0,
+    public followingCount: number = 0,
   ) {}
 }
