@@ -4,14 +4,13 @@ import { postApi } from "../../../api_services/posts/PostAPIService";
 import { PostMessages } from "../../../constants/messages/post/PostMessages";
 import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
 
-export function useUserPosts(userId?: number) {
+export function useUserPosts(userId?: number, enabled = true) {
   const [posts, setPosts] = useState<PostWithDetailsDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
-    if (!userId) {
-      setPosts([]);
+    if (!enabled || !userId) {
       return;
     }
 
@@ -34,7 +33,7 @@ export function useUserPosts(userId?: number) {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, enabled]);
 
   useEffect(() => {
     queueMicrotask(() => {

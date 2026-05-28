@@ -7,6 +7,8 @@ import {
   getApiErrorMessage,
   type ApiClientError,
 } from "../../helpers/api/ApiErrorHelper";
+import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
+import type { UserProfileCommentDto } from "../../models/comments/UserProfileCommentDto";
 
 const BASE = import.meta.env.VITE_API_URL + "comments";
 
@@ -52,6 +54,22 @@ export const commentApi: ICommentAPIService = {
       )
       .then((r) => r.data)
       .catch((e: ApiClientError) => err(e, CommentMessages.updateFailed));
+  },
+
+  async getByUser(userId, page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<UserProfileCommentDto>>>(
+        `${BASE}/user/${userId}`,
+        {
+          headers: authHeader(),
+          params: {
+            page,
+            limit,
+          },
+        },
+      )
+      .then((r) => r.data)
+      .catch((e: ApiClientError) => err(e, CommentMessages.fetchByUserFailed));
   },
 
   async like(id) {

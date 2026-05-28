@@ -1,0 +1,1 @@
+export type UserProfileTab = "posts" | "comments";
