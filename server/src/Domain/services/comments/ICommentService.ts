@@ -11,7 +11,7 @@ import { GetCommentsByUserDto } from "../../DTOs/comments/GetCommentsByUserDto";
 import { UserProfileCommentDto } from "../../DTOs/comments/UserProfileCommentDto";
 
 export interface ICommentService {
-  getByUser(dto: GetCommentsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<ServiceResult<PaginatedListDto<UserProfileCommentDto>>>;
+  getByUser(dto: GetCommentsByUserDto, viewerId?: number, viewerRole?: UserRole,): Promise<ServiceResult<PaginatedListDto<UserProfileCommentDto>>>;
   create(dto: CreateCommentDto, ctx: AuditContext): Promise<ServiceResult<CommentDto>>;
   update(id: number, dto: UpdateCommentDto, ctx: AuditContext): Promise<ServiceResult>;
   delete(id: number, ctx: AuditContext, requesterRole?: UserRole): Promise<ServiceResult>;

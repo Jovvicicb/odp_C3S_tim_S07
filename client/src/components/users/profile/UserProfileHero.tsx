@@ -15,6 +15,7 @@ import { UserProfileNetworkStats } from "./UserProfileNetworkStats";
 type Props = {
   profile: UserDto;
   isOwnProfile: boolean;
+  isAuthenticated: boolean;
   followLoading: boolean;
   onFollow: (userId: number) => void;
   onUnfollow: (userId: number) => void;
@@ -23,6 +24,7 @@ type Props = {
 export function UserProfileHero({
   profile,
   isOwnProfile,
+  isAuthenticated,
   followLoading,
   onFollow,
   onUnfollow,
@@ -99,26 +101,29 @@ export function UserProfileHero({
               followersCount={profile.followersCount}
               followingCount={profile.followingCount}
               isOwnProfile={isOwnProfile}
+              isAuthenticated={isAuthenticated}
             />
 
-            <div className="flex flex-wrap items-center justify-end gap-3">
-              {isOwnProfile ? (
-                <ActionButton
-                  variant="create"
-                  label="Edit profile"
-                  icon="✎"
-                  onClick={() => navigate(`/users/${profile.id}/edit`)}
-                />
-              ) : (
-                <UserFollowButton
-                  userId={profile.id}
-                  followStatus={followStatus}
-                  loading={followLoading}
-                  onFollow={onFollow}
-                  onUnfollow={onUnfollow}
-                />
-              )}
-            </div>
+            {isAuthenticated && (
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                {isOwnProfile ? (
+                  <ActionButton
+                    variant="create"
+                    label="Edit profile"
+                    icon="✎"
+                    onClick={() => navigate(`/users/${profile.id}/edit`)}
+                  />
+                ) : (
+                  <UserFollowButton
+                    userId={profile.id}
+                    followStatus={followStatus}
+                    loading={followLoading}
+                    onFollow={onFollow}
+                    onUnfollow={onUnfollow}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -149,11 +154,13 @@ export function UserProfileHero({
               {profile.isActive ? "Active account" : "Inactive account"}
             </Badge>
 
-            {!isOwnProfile && followStatus === "following" && (
-              <Badge tone="sky" className="rounded-2xl px-3 py-1.5">
-                Following
-              </Badge>
-            )}
+            {isAuthenticated &&
+              !isOwnProfile &&
+              followStatus === "following" && (
+                <Badge tone="sky" className="rounded-2xl px-3 py-1.5">
+                  Following
+                </Badge>
+              )}
           </div>
 
           <span className="text-xs font-semibold text-white/30">

@@ -1,8 +1,10 @@
 import { useState, type ReactNode } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+
 import { useAuth } from "../../hooks/auth/useAuthHook";
-import { RoleBadge } from "../ui/RoleBadge";
 import { useToast } from "../../hooks/toast/useToast";
+
+import { RoleBadge } from "../ui/RoleBadge";
 import { SidebarGroup } from "./SidebarGroup";
 import { SidebarMyCommunitiesPreview } from "./SidebarMyCommunitiesPreview";
 
@@ -32,6 +34,7 @@ export function SidebarLink({ to, label, onClick }: SidebarLinkProps) {
 
 export function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
@@ -51,9 +54,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const communitiesGroupOpen =
     openGroup === "Communities" || location.pathname.startsWith("/communities");
 
-  const userItems = user
-    ? [{ to: "/users/search", label: "Search users" }]
-    : [];
+  const userItems = [{ to: "/users/search", label: "Search users" }];
 
   const adminItems = [
     { to: "/admin", label: "Dashboard" },
@@ -71,7 +72,6 @@ export function Layout({ children }: { children: ReactNode }) {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.04),transparent_35%)]" />
 
       <aside className="sticky top-4 z-10 m-4 mr-0 flex h-[calc(100vh-2rem)] w-64 shrink-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0b0f17]/90 shadow-2xl shadow-sky-950/20">
-        {" "}
         <div className="flex h-20 items-center justify-between border-b border-white/5 px-5">
           <img
             src="/pulsenet-logo6.png"
@@ -80,34 +80,43 @@ export function Layout({ children }: { children: ReactNode }) {
             draggable={false}
           />
 
-          <RoleBadge role={user?.role ?? "user"} />
-        </div>
-        <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
-          <SidebarLink to="/feed" label="Dashboard" onClick={closeGroups} />
-
-          <SidebarGroup
-            title="Communities"
-            items={communityItems}
-            open={communitiesGroupOpen}
-            onToggle={() => toggleGroup("Communities")}
-            onNavigate={closeGroups}
-          />
-
-          {user && (
-            <SidebarMyCommunitiesPreview
-              visible={communitiesGroupOpen}
-              onNavigate={closeGroups}
-            />
+          {user ? (
+            <RoleBadge role={user.role} />
+          ) : (
+            <span className="rounded-xl border border-white/8 bg-white/4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">
+              Guest
+            </span>
           )}
+        </div>
 
-          {user && (
-            <SidebarGroup
-              title="Users"
-              items={userItems}
-              open={openGroup === "Users"}
-              onToggle={() => toggleGroup("Users")}
-              onNavigate={closeGroups}
-            />
+        <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
+          {user ? (
+            <>
+              <SidebarLink to="/feed" label="Dashboard" onClick={closeGroups} />
+
+              <SidebarGroup
+                title="Communities"
+                items={communityItems}
+                open={communitiesGroupOpen}
+                onToggle={() => toggleGroup("Communities")}
+                onNavigate={closeGroups}
+              />
+
+              <SidebarMyCommunitiesPreview
+                visible={communitiesGroupOpen}
+                onNavigate={closeGroups}
+              />
+
+              <SidebarGroup
+                title="Users"
+                items={userItems}
+                open={openGroup === "Users"}
+                onToggle={() => toggleGroup("Users")}
+                onNavigate={closeGroups}
+              />
+            </>
+          ) : (
+            <SidebarLink to="/" label="Home" onClick={closeGroups} />
           )}
 
           {user?.role === "admin" && (
@@ -120,56 +129,88 @@ export function Layout({ children }: { children: ReactNode }) {
             />
           )}
         </nav>
+
         <div className="border-t border-white/8 p-4">
           <div className="rounded-2xl border border-white/8 bg-white/4 p-3">
-            <button
-              type="button"
-              onClick={() => {
-                closeGroups();
-                if (user?.id) {
-                  navigate(`/users/${user.id}`);
-                }
-              }}
-              className="mb-3 flex w-full items-center gap-3 rounded-2xl p-1 text-left transition-all hover:bg-white/4"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-sky-300/20 bg-sky-400/10">
-                <span className="text-sm font-bold text-sky-200">
-                  {initial}
-                </span>
-              </div>
-
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white/85">
-                  {user?.username}
-                </p>
-                <p
-                  className={`text-xs font-medium capitalize ${
-                    user?.role === "admin"
-                      ? "text-amber-300/80"
-                      : "text-sky-200/60"
-                  }`}
+            {user ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeGroups();
+                    navigate(`/users/${user.id}`);
+                  }}
+                  className="mb-3 flex w-full items-center gap-3 rounded-2xl p-1 text-left transition-all hover:bg-white/4"
                 >
-                  {user?.role}
-                </p>{" "}
-              </div>
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/3 text-white/25 transition-all group-hover:border-sky-300/20 group-hover:bg-sky-400/10 group-hover:text-sky-200">
-                <span className="text-sm leading-none">↗</span>
-              </div>
-            </button>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-sky-300/20 bg-sky-400/10">
+                    <span className="text-sm font-bold text-sky-200">
+                      {initial}
+                    </span>
+                  </div>
 
-            <button
-              onClick={() => {
-                logout();
-                showToast({
-                  type: "info",
-                  message: "You have been signed out",
-                });
-                navigate("/login");
-              }}
-              className="w-full rounded-xl border border-white/8 bg-white/4 px-3 py-2 text-left text-xs font-medium text-white/40 transition-all hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-200"
-            >
-              Sign out →
-            </button>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-white/85">
+                      {user.username}
+                    </p>
+
+                    <p
+                      className={`text-xs font-medium capitalize ${
+                        user.role === "admin"
+                          ? "text-amber-300/80"
+                          : "text-sky-200/60"
+                      }`}
+                    >
+                      {user.role}
+                    </p>
+                  </div>
+
+                  <div className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/3 text-white/25 transition-all hover:border-sky-300/20 hover:bg-sky-400/10 hover:text-sky-200">
+                    <span className="text-sm leading-none">↗</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+
+                    showToast({
+                      type: "info",
+                      message: "You have been signed out",
+                    });
+
+                    navigate("/login");
+                  }}
+                  className="w-full rounded-xl border border-white/8 bg-white/4 px-3 py-2 text-left text-xs font-medium text-white/40 transition-all hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-200"
+                >
+                  Sign out →
+                </button>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeGroups();
+                    navigate("/login");
+                  }}
+                  className="w-full rounded-xl border border-sky-300/15 bg-sky-400/10 px-3 py-2 text-left text-xs font-bold text-sky-100/70 transition-all hover:border-sky-300/25 hover:bg-sky-400/15 hover:text-sky-100"
+                >
+                  Sign in →
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeGroups();
+                    navigate("/register");
+                  }}
+                  className="w-full rounded-xl border border-white/8 bg-white/4 px-3 py-2 text-left text-xs font-medium text-white/45 transition-all hover:border-white/15 hover:bg-white/8 hover:text-white/75"
+                >
+                  Create account →
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </aside>

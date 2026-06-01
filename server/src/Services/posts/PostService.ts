@@ -207,7 +207,7 @@ export class PostService implements IPostService {
     );
   }
 
-  private async getVisibleCommunityIdsForViewer(communityIds: number[], viewerId: number, viewerRole?: UserRole,): Promise<number[]> {
+  private async getVisibleCommunityIdsForViewer(communityIds: number[], viewerId?: number, viewerRole?: UserRole,): Promise<number[]> {
     if (communityIds.length === 0) {
       return [];
     }
@@ -219,6 +219,12 @@ export class PostService implements IPostService {
     const communities = await this.communityRepo.findByIds(communityIds);
     if (communities.length === 0) {
       return [];
+    }
+
+    if (!viewerId) {
+      return communities
+        .filter((community) => community.type === CommunityType.PUBLIC)
+        .map((community) => community.id);
     }
 
     const membershipStatuses = await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(viewerId, communityIds,);
@@ -243,7 +249,7 @@ export class PostService implements IPostService {
       .map((community) => community.id);
   }
 
-  private async getVisibleUserPosts(dto: GetPostsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<Post[]> {
+  private async getVisibleUserPosts(dto: GetPostsByUserDto, viewerId?: number, viewerRole?: UserRole,): Promise<Post[]> {
     const authorCommunityIds = await this.postRepo.findCommunityIdsByAuthorId(dto.userId);
 
     if (authorCommunityIds.length === 0) {
@@ -502,7 +508,7 @@ export class PostService implements IPostService {
   }
 
 
-  async getByUser(dto: GetPostsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<ServiceResult<PostWithDetailsDto[]>> {
+  async getByUser(dto: GetPostsByUserDto, viewerId?: number, viewerRole?: UserRole,): Promise<ServiceResult<PostWithDetailsDto[]>> {
     const user = await this.userRepo.findById(dto.userId);
     if (user.id === 0) {
       return ServiceResultFactory.fail<PostWithDetailsDto[]>(UserMessages.notFound, HttpStatus.notFound,);

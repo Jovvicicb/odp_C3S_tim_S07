@@ -1,35 +1,80 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+
 import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
+import { PublicLayoutRoute } from "./components/routes/PublicLayoutRute";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import NotFoundPage from "./pages/not_found/NotFoundPage";
 
-import FeedPage from "./pages/dashboard/FeedPage";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import CreateCommunity from "./pages/communities/CreateCommunityPage";
-import CommunityDetailsPage from "./pages/communities/CommunityDetailsPage";
-import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import LandingPage from "./pages/public/LandingPage";
-import EditUserProfilePage from "./pages/users/profile/EditUserProfilePage";
-import MyCommunitiesPage from "./pages/communities/MyCommunitiesPage";
+
+import FeedPage from "./pages/dashboard/FeedPage";
+
 import DiscoverCommunitiesPage from "./pages/communities/DiscoverCommunitiesPage";
-import FollowersPage from "./pages/users/follow/FollowersPage";
-import FollowingPage from "./pages/users/follow/FollowingPage";
-import SearchUsersPage from "./pages/users/search/SearchUsersPage";
+import MyCommunitiesPage from "./pages/communities/MyCommunitiesPage";
+import CreateCommunity from "./pages/communities/CreateCommunityPage";
+import EditCommunityPage from "./pages/communities/EditCommunityPage";
+import CommunityDetailsPage from "./pages/communities/CommunityDetailsPage";
+
 import CreatePostPage from "./pages/posts/CreatePostPage";
 import PostDetailsPage from "./pages/posts/PostDetailsPage";
 import EditPostPage from "./pages/posts/EditPostPage";
-import AdminTagsPage from "./pages/admin/AdminTagsPage";
-import EditCommunityPage from "./pages/communities/EditCommunityPage";
+
 import UserProfilePage from "./pages/users/profile/UserProfilePage";
+import EditUserProfilePage from "./pages/users/profile/EditUserProfilePage";
+import FollowersPage from "./pages/users/follow/FollowersPage";
+import FollowingPage from "./pages/users/follow/FollowingPage";
+import SearchUsersPage from "./pages/users/search/SearchUsersPage";
+
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
+import AdminTagsPage from "./pages/admin/AdminTagsPage";
 
 export default function App() {
   return (
     <Routes>
+      {/* Auth routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+
+      {/* Public routes */}
+      <Route
+        path="/"
+        element={
+          <PublicLayoutRoute>
+            <LandingPage />
+          </PublicLayoutRoute>
+        }
+      />
+
+      <Route
+        path="/communities/:id"
+        element={
+          <PublicLayoutRoute>
+            <CommunityDetailsPage />
+          </PublicLayoutRoute>
+        }
+      />
+
+      <Route
+        path="/posts/:id"
+        element={
+          <PublicLayoutRoute>
+            <PostDetailsPage />
+          </PublicLayoutRoute>
+        }
+      />
+
+      <Route
+        path="/users/:id"
+        element={
+          <PublicLayoutRoute>
+            <UserProfilePage />
+          </PublicLayoutRoute>
+        }
+      />
 
       {/* User routes */}
       <Route
@@ -51,28 +96,10 @@ export default function App() {
       />
 
       <Route
-        path="/communities/:id"
-        element={
-          <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <CommunityDetailsPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
         path="/communities/create"
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
             <CreateCommunity />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/communities/:id"
-        element={
-          <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <CommunityDetailsPage />
           </ProtectedRoute>
         }
       />
@@ -96,10 +123,28 @@ export default function App() {
       />
 
       <Route
-        path="/users/:id"
+        path="/communities/:communityId/posts/create"
         element={
           <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <UserProfilePage />
+            <CreatePostPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/posts/:id/edit"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <EditPostPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users/search"
+        element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            <SearchUsersPage />
           </ProtectedRoute>
         }
       />
@@ -130,41 +175,6 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/users/search"
-        element={
-          <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <SearchUsersPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/communities/:communityId/posts/create"
-        element={
-          <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <CreatePostPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/posts/:id/edit"
-        element={
-          <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <EditPostPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/posts/:id"
-        element={
-          <ProtectedRoute allowedRoles={["user", "admin"]}>
-            <PostDetailsPage />
-          </ProtectedRoute>
-        }
-      />
 
       {/* Admin routes */}
       <Route
@@ -175,6 +185,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/users"
         element={
@@ -202,8 +213,15 @@ export default function App() {
         }
       />
 
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/404" element={<NotFoundPage />} />
+      <Route
+        path="/404"
+        element={
+          <PublicLayoutRoute>
+            <NotFoundPage />
+          </PublicLayoutRoute>
+        }
+      />
+
       <Route path="*" element={<Navigate to="/404" replace />} />
     </Routes>
   );

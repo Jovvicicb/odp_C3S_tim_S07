@@ -196,7 +196,7 @@ export class CommentService implements ICommentService {
     return this.isActiveModeratorMembership(membership);
   }
 
-  private async getVisiblePostIdsForViewer(postIds: number[], viewerId: number, viewerRole?: UserRole,): Promise<number[]> {
+  private async getVisiblePostIdsForViewer(postIds: number[], viewerId?: number, viewerRole?: UserRole,): Promise<number[]> {
     if (postIds.length === 0) {
       return [];
     }
@@ -224,6 +224,17 @@ export class CommentService implements ICommentService {
       },
       {},
     );
+
+    if (!viewerId) {
+      return posts
+        .filter((post) => {
+          const community = communityById[post.communityId];
+
+          return community?.type === CommunityType.PUBLIC;
+        })
+        .map((post) => post.id);
+    }
+
 
     const membershipStatuses = await this.communityMemberRepo.findStatusesByUserIdAndCommunityIds(
         viewerId,
@@ -321,7 +332,7 @@ export class CommentService implements ICommentService {
     );
   }
 
-  async getByUser(dto: GetCommentsByUserDto, viewerId: number, viewerRole?: UserRole,): Promise<ServiceResult<PaginatedListDto<UserProfileCommentDto>>> {
+  async getByUser(dto: GetCommentsByUserDto, viewerId?: number, viewerRole?: UserRole,): Promise<ServiceResult<PaginatedListDto<UserProfileCommentDto>>> {
     const user = await this.userRepo.findById(dto.userId);
     if (user.id === 0) {
       return ServiceResultFactory.fail<PaginatedListDto<UserProfileCommentDto>>(UserMessages.notFound, HttpStatus.notFound,);

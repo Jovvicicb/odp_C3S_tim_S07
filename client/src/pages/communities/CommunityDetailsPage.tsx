@@ -27,6 +27,7 @@ import { useDeleteCommunity } from "../../hooks/communities/details/menagement/u
 export default function CommunityDetailsPage() {
   const { id } = useParams();
   const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
 
   const communityId = Number(id);
   const parsedCommunityId = Number.isNaN(communityId) ? null : communityId;
@@ -173,6 +174,7 @@ export default function CommunityDetailsPage() {
       <CommunityDetailsHero
         community={community}
         permissions={permissions}
+        isAuthenticated={isAuthenticated}
         membershipLoading={loadingCommunityId === community.id}
         deleteLoading={loadingCommunityDelete}
         onJoin={handleJoin}
@@ -212,6 +214,7 @@ export default function CommunityDetailsPage() {
               members={members}
               permissions={permissions}
               currentUserId={user?.id}
+              isAuthenticated={isAuthenticated}
               loadingUserId={loadingUserId}
               loadingMemberActionUserId={loadingMemberActionUserId}
               onFollow={handleFollow}

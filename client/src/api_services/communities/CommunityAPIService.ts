@@ -48,6 +48,8 @@ export const communityApi: ICommunityAPIService = {
       .catch((e: ApiClientError) => err(e, CommunityMessages.updateFailed));
   },
 
+
+
   async discover(page = 1, limit = 10, type = "all", search = "") {
     return axios
       .get<ApiResponse<PaginatedListDto<CommunityDto>>>(`${BASE}/discover`, {
@@ -101,7 +103,7 @@ export const communityApi: ICommunityAPIService = {
         },
       })
       .then((r) => r.data)
-      .catch((e: ApiClientError) => err(e, CommunityMessages.fetchAllFailed));
+      .catch((e: ApiClientError) => err(e, CommunityMessages.fetchPublicFailed));
   },
 
   async getById(id, membersPage = 1, membersLimit = 10) {

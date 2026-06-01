@@ -2,8 +2,8 @@ import type { PaginatedListDto } from "../../../../models/common/PaginatedListDt
 import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
 import type { CommunityViewerPermissionsDto } from "../../../../models/communities/CommunityViewerPermissionsDto";
 import type { CommunityMemberRole } from "../../../../types/communities/members/CommunityMemberRole";
-import { CountBadge } from "../../../ui/CountBadge";
 
+import { CountBadge } from "../../../ui/CountBadge";
 import { SectionCard } from "../../../ui/SectionCard";
 import { SectionEmptyState } from "../../../ui/SectionEmptyState";
 import { UserCard } from "../../../users/card/UserCard";
@@ -13,6 +13,7 @@ type Props = {
   members: PaginatedListDto<CommunityMemberDetailsDto> | null;
   permissions: CommunityViewerPermissionsDto;
   currentUserId?: number;
+  isAuthenticated: boolean;
   loadingUserId: number | null;
   loadingMemberActionUserId: number | null;
   onFollow: (userId: number) => void;
@@ -30,6 +31,7 @@ export function CommunityMembersSection({
   members,
   permissions,
   currentUserId,
+  isAuthenticated,
   loadingUserId,
   loadingMemberActionUserId,
   onFollow,
@@ -43,7 +45,11 @@ export function CommunityMembersSection({
     <SectionCard
       label="Members"
       title="Community members"
-      description="Browse people inside this community, follow members and manage roles when you have permission."
+      description={
+        isAuthenticated
+          ? "Browse people inside this community, follow members and manage roles when you have permission."
+          : "Browse people inside this community and open their public profiles."
+      }
       action={
         <CountBadge
           count={members?.total ?? 0}
@@ -64,7 +70,10 @@ export function CommunityMembersSection({
             const isCurrentUser = currentUserId === user.id;
 
             const canManageThisMember =
-              permissions.canManageMembers && !member.isOwner && !isCurrentUser;
+              isAuthenticated &&
+              permissions.canManageMembers &&
+              !member.isOwner &&
+              !isCurrentUser;
 
             return (
               <UserCard
@@ -74,7 +83,7 @@ export function CommunityMembersSection({
                 communityRole={member.communityRole}
                 isCommunityOwner={member.isOwner}
                 isCurrentUser={isCurrentUser}
-                showFollowAction
+                showFollowAction={isAuthenticated}
                 followLoading={loadingUserId === user.id}
                 onFollow={onFollow}
                 onUnfollow={onUnfollow}

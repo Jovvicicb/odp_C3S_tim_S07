@@ -9,6 +9,7 @@ import { CommunityMembershipButton } from "../../shared/CommunityMembershipButto
 type Props = {
   community: CommunityDto;
   permissions: CommunityViewerPermissionsDto;
+  isAuthenticated: boolean;
   membershipLoading?: boolean;
   deleteLoading?: boolean;
   onJoin: (communityId: number) => void;
@@ -19,6 +20,7 @@ type Props = {
 export function CommunityHeroActions({
   community,
   permissions,
+  isAuthenticated,
   membershipLoading = false,
   deleteLoading = false,
   onJoin,
@@ -27,9 +29,9 @@ export function CommunityHeroActions({
 }: Props) {
   const navigate = useNavigate();
 
-  const showMembershipAction = !permissions.isOwner;
-  const showEditAction = permissions.canUpdateCommunity;
-  const showDeleteAction = permissions.canDeleteCommunity;
+  const showMembershipAction = isAuthenticated && !permissions.isOwner;
+  const showEditAction = isAuthenticated && permissions.canUpdateCommunity;
+  const showDeleteAction = isAuthenticated && permissions.canDeleteCommunity;
 
   if (!showMembershipAction && !showEditAction && !showDeleteAction) {
     return null;

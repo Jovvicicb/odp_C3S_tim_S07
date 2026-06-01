@@ -34,7 +34,7 @@ export class CommentController {
     
   ) {
     this.router.get("/comments/post/:postId",                                                                this.getByPost.bind(this));
-    this.router.get("/comments/user/:userId",        authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getByUser.bind(this),);
+    this.router.get("/comments/user/:userId",                                                                this.getByUser.bind(this));
     this.router.post("/comments",                    authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.create.bind(this));
     this.router.put("/comments/:id",                 authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.update.bind(this));
     this.router.delete("/comments/:id",              authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.delete.bind(this));
@@ -133,11 +133,10 @@ export class CommentController {
 
     const dto = new GetCommentsByUserDto(userId, page, limit);
 
-    const viewerId = req.user!.id;
-    const viewerRole = req.user!.role;
+    const viewer = OptionalAuthHelper.getUser(req);
 
     try {
-      const result = await this.commentService.getByUser(dto, viewerId, viewerRole,);
+      const result = await this.commentService.getByUser(dto, viewer?.id, viewer?.role);
 
       ResponseHelper.send(res, result);
     } catch (err) {

@@ -40,7 +40,7 @@ export class PostController {
         this.router.get("/posts/community/:communityId",                                                                             this.getByCommunity.bind(this));
         this.router.get("/posts/feed",               authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getFeed.bind(this));
         this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
-        this.router.get("/posts/user/:userId",       authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getByUser.bind(this),);
+        this.router.get("/posts/user/:userId",                                                                                       this.getByUser.bind(this));
         this.router.get("/posts/:id",                                                                                                this.getById.bind(this));
         this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
         this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
@@ -178,11 +178,10 @@ export class PostController {
 
     const dto = new GetPostsByUserDto(userId);
 
-    const viewerId = req.user!.id;
-    const viewerRole = req.user!.role;
+    const viewer = OptionalAuthHelper.getUser(req);
 
     try {
-      const result = await this.postService.getByUser( dto, viewerId, viewerRole,);
+      const result = await this.postService.getByUser( dto, viewer?.id, viewer?.role,);
 
       ResponseHelper.send(res, result);
     } catch (err) {

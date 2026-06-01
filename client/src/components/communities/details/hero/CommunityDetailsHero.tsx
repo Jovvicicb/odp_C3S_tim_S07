@@ -14,6 +14,7 @@ import { CommunityHeroActions } from "./CommunityHeroActions";
 type Props = {
   community: CommunityDto;
   permissions: CommunityViewerPermissionsDto;
+  isAuthenticated: boolean;
   membershipLoading?: boolean;
   deleteLoading?: boolean;
   onJoin: (communityId: number) => void;
@@ -24,6 +25,7 @@ type Props = {
 export function CommunityDetailsHero({
   community,
   permissions,
+  isAuthenticated,
   membershipLoading = false,
   deleteLoading = false,
   onJoin,
@@ -92,6 +94,7 @@ export function CommunityDetailsHero({
           <CommunityHeroActions
             community={community}
             permissions={permissions}
+            isAuthenticated={isAuthenticated}
             membershipLoading={membershipLoading}
             deleteLoading={deleteLoading}
             onJoin={onJoin}

@@ -29,6 +29,7 @@ export default function UserProfilePage() {
   const parsedProfileId = Number.isNaN(profileId) ? undefined : profileId;
 
   const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
 
   const [activeTab, setActiveTab] = useState<UserProfileTab>("posts");
 
@@ -103,6 +104,7 @@ export default function UserProfilePage() {
       <UserProfileHero
         profile={profile}
         isOwnProfile={isOwnProfile}
+        isAuthenticated={isAuthenticated}
         followLoading={loadingUserId === profile.id}
         onFollow={handleFollow}
         onUnfollow={handleUnfollow}
