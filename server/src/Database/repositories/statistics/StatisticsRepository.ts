@@ -5,6 +5,8 @@ import { StatisticsDto } from "../../../Domain/DTOs/statistics/StatisticsDto";
 import { IStatisticsRepository } from "../../../Domain/repositories/statistics/IStatisticsRepository";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { CommunityMemberStatus } from "../../../Domain/enums/communities/CommunityMemberStatus";
+import { AdminStatisticsDto } from "../../../Domain/DTOs/statistics/AdminStatisticsDto";
+import { StatisticsLogMessages } from "../../../Domain/constants/messages/statistics/StatisticsLogMessages";
 
 export class StatisticsRepository implements IStatisticsRepository {
   constructor(
@@ -57,11 +59,51 @@ export class StatisticsRepository implements IStatisticsRepository {
     } catch (err) {
       this.logger.error(
         "StatisticsRepository",
-        "Failed to fetch dashboard statistics",
+        StatisticsLogMessages.getDashboardStatisticsFailed,
         err instanceof Error ? err : null,
       );
 
       return new StatisticsDto();
+    } finally {
+      res.conn.release();
+    }
+  }
+
+
+
+  async getAdminDashboardStatistics(): Promise<AdminStatisticsDto> {
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return new AdminStatisticsDto(0, 0, 0);
+    }
+
+    try {
+      const [usersRows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total FROM users`
+      );
+
+      const [communitiesRows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total FROM communities`
+      );
+
+      const [tagsRows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total FROM tags`
+      );
+
+      return new AdminStatisticsDto(
+        Number(usersRows[0]?.total ?? 0),
+        Number(communitiesRows[0]?.total ?? 0),
+        Number(tagsRows[0]?.total ?? 0),
+      );
+    } catch (err) {
+      this.logger.error(
+        "StatisticsRepository",
+        StatisticsLogMessages.getAdminDashboardStatisticsFailed,
+        err instanceof Error ? err : null,
+      );
+
+      return new AdminStatisticsDto(0, 0, 0);
     } finally {
       res.conn.release();
     }

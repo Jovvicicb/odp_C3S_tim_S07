@@ -9,6 +9,7 @@ import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { StatisticsMessages } from "../../Domain/constants/messages/statistics/StatisticsMessages";
+import { StatisticsLogMessages } from "../../Domain/constants/messages/statistics/StatisticsLogMessages";
 
 export class StatisticsController {
   private readonly router: Router;
@@ -22,7 +23,8 @@ export class StatisticsController {
   }
 
   private initializeRoutes(): void {
-    this.router.get("/statistics/dashboard", authenticate, authorize(UserRole.USER, UserRole.ADMIN), this.getDashboardStatistics.bind(this),);
+    this.router.get("/statistics/dashboard",           authenticate, authorize(UserRole.USER, UserRole.ADMIN), this.getDashboardStatistics.bind(this));
+    this.router.get("/statistics/admin/dashboard",     authenticate,authorize(UserRole.ADMIN),this.getAdminDashboardStatistics.bind(this));
   }
 
   getRouter(): Router {
@@ -38,13 +40,36 @@ export class StatisticsController {
     } catch (err) {
       this.logger.error(
         this.constructor.name,
-        StatisticsMessages.fetchDashboardStatisticsFailed,
+        StatisticsLogMessages.getDashboardStatisticsFailed,
         err instanceof Error ? err : null,
       );
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: StatisticsMessages.fetchDashboardStatisticsFailed,
+      });
+    }
+  }
+
+
+
+  private async getAdminDashboardStatistics(
+    req: Request,
+    res: Response,
+  ): Promise<void> {
+    try {
+      const result = await this.statisticsService.getAdminDashboardStatistics();
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(
+        this.constructor.name,
+        StatisticsLogMessages.getAdminDashboardStatisticsFailed,
+        err instanceof Error ? err : null,
+      );
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: StatisticsMessages.fetchAdminStatisticsFailed,
       });
     }
   }
