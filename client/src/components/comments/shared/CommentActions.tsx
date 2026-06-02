@@ -1,6 +1,7 @@
 import type { CommentTreeDto } from "../../../models/comments/CommentTreeDto";
-import { Button } from "../../ui/button/Button";
+
 import { Badge } from "../../ui/Badge";
+import { Button } from "../../ui/button/Button";
 
 type Props = {
   comment: CommentTreeDto;
@@ -40,76 +41,85 @@ export function CommentActions({
   const deleteLoading = loadingCommentDeleteId === comment.id;
   const flagLoading = loadingCommentFlagId === comment.id;
 
+  const hasActionButtons =
+    comment.permissions.canLike ||
+    showReplyButton ||
+    (comment.permissions.canUpdate && onEditComment) ||
+    comment.permissions.canFlag ||
+    comment.permissions.canDelete;
+
   return (
     <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-wrap items-center gap-2">
-        {comment.permissions.canLike && (
-          <Button
-            label={comment.likedByCurrentUser ? "Unlike" : "Like"}
-            loadingLabel="Loading..."
-            loading={likeLoading}
-            variant={comment.likedByCurrentUser ? "danger" : "primary"}
-            size="sm"
-            onClick={() => {
-              if (comment.likedByCurrentUser) {
-                onUnlikeComment(comment.id);
-                return;
-              }
+      {hasActionButtons && (
+        <div className="flex flex-wrap items-center gap-2">
+          {comment.permissions.canLike && (
+            <Button
+              label={comment.likedByCurrentUser ? "Unlike" : "Like"}
+              loadingLabel="Loading..."
+              loading={likeLoading}
+              variant={comment.likedByCurrentUser ? "danger" : "primary"}
+              size="sm"
+              onClick={() => {
+                if (comment.likedByCurrentUser) {
+                  onUnlikeComment(comment.id);
+                  return;
+                }
 
-              onLikeComment(comment.id);
-            }}
-          />
-        )}
+                onLikeComment(comment.id);
+              }}
+            />
+          )}
 
-        {showReplyButton && (
-          <Button
-            label="Reply"
-            variant="secondary"
-            size="sm"
-            onClick={onReply}
-          />
-        )}
+          {showReplyButton && (
+            <Button
+              label="Reply"
+              variant="secondary"
+              size="sm"
+              onClick={onReply}
+            />
+          )}
 
-        {comment.permissions.canUpdate && onEditComment && (
-          <Button
-            label="Edit"
-            loadingLabel="Saving..."
-            loading={updateLoading}
-            variant="warning"
-            size="sm"
-            onClick={() => onEditComment(comment.id)}
-          />
-        )}
+          {comment.permissions.canUpdate && onEditComment && (
+            <Button
+              label="Edit"
+              loadingLabel="Saving..."
+              loading={updateLoading}
+              variant="warning"
+              size="sm"
+              onClick={() => onEditComment(comment.id)}
+            />
+          )}
 
-        {comment.permissions.canFlag && (
-          <Button
-            label={comment.isFlagged ? "Unflag" : "Flag"}
-            loadingLabel="Saving..."
-            loading={flagLoading}
-            variant={comment.isFlagged ? "warning" : "secondary"}
-            size="sm"
-            onClick={() => {
-              if (comment.isFlagged) {
-                onUnflagComment(comment.id);
-                return;
-              }
+          {comment.permissions.canFlag && (
+            <Button
+              label={comment.isFlagged ? "Unflag" : "Flag"}
+              loadingLabel="Saving..."
+              loading={flagLoading}
+              variant={comment.isFlagged ? "warning" : "secondary"}
+              size="sm"
+              onClick={() => {
+                if (comment.isFlagged) {
+                  onUnflagComment(comment.id);
+                  return;
+                }
 
-              onFlagComment(comment.id);
-            }}
-          />
-        )}
+                onFlagComment(comment.id);
+              }}
+            />
+          )}
 
-        {comment.permissions.canDelete && (
-          <Button
-            label="Delete"
-            loadingLabel="Deleting..."
-            loading={deleteLoading}
-            variant="danger"
-            size="sm"
-            onClick={() => onDeleteComment(comment.id)}
-          />
-        )}
-      </div>
+          {comment.permissions.canDelete && (
+            <Button
+              label="Delete"
+              loadingLabel="Deleting..."
+              loading={deleteLoading}
+              variant="danger"
+              size="sm"
+              onClick={() => onDeleteComment(comment.id)}
+            />
+          )}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone="muted" className="rounded-2xl px-3 py-1.5">

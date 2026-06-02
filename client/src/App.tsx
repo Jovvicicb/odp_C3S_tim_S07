@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
-import { PublicLayoutRoute } from "./components/routes/PublicLayoutRute";
+import { PublicLayoutRoute } from "./components/routes/PublicLayoutRoute";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";

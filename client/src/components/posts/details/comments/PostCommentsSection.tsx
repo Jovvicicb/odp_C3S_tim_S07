@@ -117,8 +117,8 @@ export function PostCommentsSection({
           />
         ) : (
           <SectionEmptyState
-            title="Commenting is not available."
-            description="Sign in or join the discussion to write a comment."
+            title="Read-only discussion."
+            description="Sign in and join the community to write comments or replies."
           />
         )}
 
