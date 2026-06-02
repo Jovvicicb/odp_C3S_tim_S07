@@ -8,6 +8,7 @@ import { ServerHealthPanel } from "../../components/admin/health/ServerHealthPan
 import { useDbHealth } from "../../hooks/health/useDbHealth";
 import { useHealthFailover } from "../../hooks/health/useHealthFailover";
 import { useServerHealth } from "../../hooks/health/useServerHealth";
+import { ActionButton } from "../../components/ui/button/ActionButton";
 
 export default function AdminHealthPage() {
   const {
@@ -29,7 +30,11 @@ export default function AdminHealthPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Admin panel" title="System health" />
+      <PageHeader
+        eyebrow="Admin panel"
+        title="System health"
+        action={<ActionButton variant="back" label="Back" />}
+      />
 
       <IntroPanel
         label="Health monitoring"

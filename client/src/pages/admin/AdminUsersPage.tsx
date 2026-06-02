@@ -1,5 +1,4 @@
 import { ErrorBox, PageHeader } from "../../components/ui/UI";
-import { IntroPanel } from "../../components/ui/IntroPanel";
 import { AdminUsersSection } from "../../components/admin/users/AdminUsersSection";
 
 import { useToast } from "../../hooks/toast/useToast";
@@ -9,6 +8,7 @@ import { useUpdateUserRole } from "../../hooks/users/settings/useUpdateUserRole"
 import { UserMessages } from "../../constants/messages/user/UserMessages";
 
 import type { UserRole } from "../../types/users/UserRole";
+import { ActionButton } from "../../components/ui/button/ActionButton";
 
 export default function AdminUsersPage() {
   const { users, setUsers, loading, error, page, limit, total, setPage } =
@@ -50,13 +50,10 @@ export default function AdminUsersPage() {
   };
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Admin panel" title="Users" />
-
-      <IntroPanel
-        label="Accounts"
-        title="Manage platform users"
-        description="Browse registered accounts, open user profiles and update account roles from the admin panel."
-        highlight={`${total} ${total === 1 ? "user" : "users"} registered.`}
+      <PageHeader
+        eyebrow="Admin panel"
+        title="Users"
+        action={<ActionButton variant="back" label="Back" />}
       />
 
       {(error || updateError) && <ErrorBox message={error || updateError} />}
