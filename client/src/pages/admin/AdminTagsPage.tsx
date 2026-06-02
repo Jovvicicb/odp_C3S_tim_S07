@@ -1,7 +1,7 @@
 import { ErrorBox, PageHeader } from "../../components/ui/UI";
 import { ActionButton } from "../../components/ui/button/ActionButton";
-import { AdminTagForm } from "../../components/tags/admin/AdminTagForm";
-import { AdminTagList } from "../../components/tags/admin/AdminTagList";
+import { AdminTagForm } from "../../components/admin/tags/AdminTagForm";
+import { AdminTagList } from "../../components/admin/tags/AdminTagList";
 import { useAdminTags } from "../../hooks/tags/useAdminTags";
 
 export default function AdminTagsPage() {

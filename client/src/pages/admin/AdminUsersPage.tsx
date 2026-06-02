@@ -1,29 +1,18 @@
-import {
-  Empty,
-  ErrorBox,
-  PageHeader,
-  Pagination,
-  Spinner,
-} from "../../components/ui/UI";
-import { UserCard } from "../../components/users/card/UserCard";
+import { ErrorBox, PageHeader } from "../../components/ui/UI";
+import { IntroPanel } from "../../components/ui/IntroPanel";
+import { AdminUsersSection } from "../../components/admin/users/AdminUsersSection";
+
+import { useToast } from "../../hooks/toast/useToast";
 import { useUsers } from "../../hooks/users/core/useUsers";
 import { useUpdateUserRole } from "../../hooks/users/settings/useUpdateUserRole";
-import { useToast } from "../../hooks/toast/useToast";
+
 import { UserMessages } from "../../constants/messages/user/UserMessages";
+
 import type { UserRole } from "../../types/users/UserRole";
 
 export default function AdminUsersPage() {
-  const {
-    users,
-    setUsers,
-    loading,
-    error,
-    page,
-    limit,
-    total,
-    setPage,
-    reload,
-  } = useUsers(1, 10);
+  const { users, setUsers, loading, error, page, limit, total, setPage } =
+    useUsers(1, 10);
 
   const { updateRole, loadingUserId, error: updateError } = useUpdateUserRole();
 
@@ -33,7 +22,9 @@ export default function AdminUsersPage() {
     try {
       const updated = await updateRole(userId, role);
 
-      if (!updated) return;
+      if (!updated) {
+        return;
+      }
 
       setUsers((current) =>
         current.map((user) =>
@@ -50,8 +41,6 @@ export default function AdminUsersPage() {
         type: "success",
         message: UserMessages.roleUpdated,
       });
-
-      void reload();
     } catch {
       showToast({
         type: "error",
@@ -59,41 +48,29 @@ export default function AdminUsersPage() {
       });
     }
   };
-
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Admin panel" title="Users" />
 
+      <IntroPanel
+        label="Accounts"
+        title="Manage platform users"
+        description="Browse registered accounts, open user profiles and update account roles from the admin panel."
+        highlight={`${total} ${total === 1 ? "user" : "users"} registered.`}
+      />
+
       {(error || updateError) && <ErrorBox message={error || updateError} />}
 
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size={24} />
-        </div>
-      ) : users.length === 0 && !error ? (
-        <Empty message="No users found" />
-      ) : (
-        <>
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            {users.map((user) => (
-              <UserCard
-                key={user.id}
-                user={user}
-                showRoleControl
-                roleLoading={loadingUserId === user.id}
-                onRoleChange={handleRoleChange}
-              />
-            ))}
-          </div>
-
-          <Pagination
-            page={page}
-            total={total}
-            pageSize={limit}
-            onChange={setPage}
-          />
-        </>
-      )}
+      <AdminUsersSection
+        users={users}
+        loading={loading}
+        page={page}
+        limit={limit}
+        total={total}
+        loadingUserId={loadingUserId}
+        onPageChange={setPage}
+        onRoleChange={handleRoleChange}
+      />
     </div>
   );
 }
