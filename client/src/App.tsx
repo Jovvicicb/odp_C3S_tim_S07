@@ -31,6 +31,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import AdminTagsPage from "./pages/admin/AdminTagsPage";
+import AdminHealthPage from "./pages/admin/AdminHealthPage";
 
 export default function App() {
   return (
@@ -209,6 +210,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <AdminTagsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/health"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminHealthPage />
           </ProtectedRoute>
         }
       />
