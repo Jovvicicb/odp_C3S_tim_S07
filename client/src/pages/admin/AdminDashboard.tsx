@@ -1,35 +1,27 @@
-import { PageHeader, StatCard } from "../../components/ui/UI";
+import { ErrorBox, PageHeader } from "../../components/ui/UI";
+import { IntroPanel } from "../../components/ui/IntroPanel";
+
+import { AdminStatsGrid } from "../../components/admin/dashboard/AdminStatsGrid";
+
+import { useAdminDashboardStatistics } from "../../hooks/statistics/useAdminDashboardStatistics";
 
 export default function AdminDashboard() {
+  const { statistics, loading, error } = useAdminDashboardStatistics();
+
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Admin panel" title="Dashboard" />
 
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Users" value="124" sub="Registered accounts" />
+      <IntroPanel
+        label="Administration"
+        title="PulseNet administration"
+        description="Manage platform users, communities, global tags and operational monitoring from one place."
+        highlight="Use the dashboard cards to open each admin section."
+      />
 
-        <StatCard label="Communities" value="32" sub="Active communities" />
+      {error && <ErrorBox message={error} />}
 
-        <StatCard label="Posts" value="1,248" sub="Published posts" />
-
-        <StatCard
-          label="System"
-          value="Healthy"
-          sub="All replication nodes online"
-          color="text-emerald-300"
-        />
-      </div>
-
-      <div className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-6 shadow-xl shadow-sky-950/10">
-        <p className="text-lg font-semibold text-white">
-          Welcome to PulseNet administration
-        </p>
-
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-white/40">
-          Manage users, communities, posts and monitor the state of the
-          distributed system infrastructure.
-        </p>
-      </div>
+      <AdminStatsGrid statistics={statistics} loading={loading} />
     </div>
   );
 }
