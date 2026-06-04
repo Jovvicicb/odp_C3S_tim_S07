@@ -1,6 +1,6 @@
 import { FileValidationMessages } from "../../../Domain/constants/messages/common/FileValidationMessages";
 import { PostValidationMessages } from "../../../Domain/constants/messages/posts/PostValidationMessages";
-import { CreatePostDto } from "../../../Domain/DTOs/Posts/CreatePostDto";
+import { CreatePostDto } from "../../../Domain/DTOs/posts/CreatePostDto";
 import { ValidateCreatePostResut } from "../../../Domain/types/posts/ValidateCreatePostResut";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 import { parseId } from "../../parser/common/ParseId";

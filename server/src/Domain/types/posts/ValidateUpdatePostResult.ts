@@ -1,4 +1,4 @@
-import { UpdatePostDto } from "../../DTOs/Posts/UpdatePostDto";
+import { UpdatePostDto } from "../../DTOs/posts/UpdatePostDto";
 import { ValidationResult } from "../ValidationResult";
 
 export type ValidateUpdatePostResult = {

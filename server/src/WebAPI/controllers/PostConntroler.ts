@@ -22,12 +22,13 @@ import { IPostTagService } from "../../Domain/services/posts/IPostTagService";
 import { IPostLikeService } from "../../Domain/services/posts/IPostLikeService";
 import { parsePagination } from "../parser/common/ParsePagination";
 import { validatePagination } from "../validators/common/ValidatePagination";
-import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommunityDto";
+import { GetPostsByCommunityDto } from "../../Domain/DTOs/posts/GetPostsByCommunityDto";
 import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
 import { validatePostSort } from "../validators/posts/ValidatePostSort";
 import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
 import { AddTagInput } from "../types/posts/AddTagInput";
-import { GetPostsByUserDto } from "../../Domain/DTOs/Posts/GetPostsByUserDto";
+import { GetPostsByUserDto } from "../../Domain/DTOs/posts/GetPostsByUserDto";
+import { GetAdminPostsDto } from "../../Domain/DTOs/posts/GetAdminPostsDto";
 
 export class PostController {
   private readonly router = Router();
@@ -41,6 +42,7 @@ export class PostController {
         this.router.get("/posts/feed",               authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getFeed.bind(this));
         this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
         this.router.get("/posts/user/:userId",                                                                                       this.getByUser.bind(this));
+        this.router.get("/posts/admin/all",          authenticate, authorize(UserRole.ADMIN),                                        this.getAllForAdmin.bind(this));
         this.router.get("/posts/:id",                                                                                                this.getById.bind(this));
         this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
         this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
@@ -190,6 +192,40 @@ export class PostController {
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: PostMessages.fetchByUserFailed,
+      });
+    }
+  }
+
+  private async getAllForAdmin(req: Request, res: Response): Promise<void> {
+    const pageParam = parseStringValue(req.query.page);
+    const limitParam = parseStringValue(req.query.limit);
+
+    const { page, limit } = parsePagination(pageParam, limitParam);
+
+    const paginationValidation = validatePagination(page, limit);
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({
+        success: false,
+        message: paginationValidation.message,
+      });
+      return;
+    }
+
+    const dto = new GetAdminPostsDto(page, limit);
+
+    try {
+      const result = await this.postService.getAllForAdmin(dto);
+      ResponseHelper.send(res, result);
+    } catch (err) {
+      this.logger.error(
+        this.constructor.name,
+        PostLogMessages.findAllFailed,
+        err instanceof Error ? err : null,
+      );
+
+      res.status(HttpStatus.internalServerError).json({
+        success: false,
+        message: PostMessages.fetchAllFailed,
       });
     }
   }

@@ -1,6 +1,6 @@
 import { FileValidationMessages } from "../../../Domain/constants/messages/common/FileValidationMessages";
 import { PostValidationMessages } from "../../../Domain/constants/messages/posts/PostValidationMessages";
-import { UpdatePostDto } from "../../../Domain/DTOs/Posts/UpdatePostDto";
+import { UpdatePostDto } from "../../../Domain/DTOs/posts/UpdatePostDto";
 import { ValidateUpdatePostResult } from "../../../Domain/types/posts/ValidateUpdatePostResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 import { UpdatePostInput } from "../../types/posts/UpdatePostInput";

@@ -9,14 +9,15 @@ import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { CommentTreeDto } from "../../Domain/DTOs/comments/CommentTreeDto";
 import { GetCommentsByPostDto } from "../../Domain/DTOs/comments/GetCommentsByPostDto";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
-import { CreatePostDto } from "../../Domain/DTOs/Posts/CreatePostDto";
-import { GetPostsByCommunityDto } from "../../Domain/DTOs/Posts/GetPostsByCommunityDto";
-import { GetPostsByUserDto } from "../../Domain/DTOs/Posts/GetPostsByUserDto";
-import { PostDetailsDto } from "../../Domain/DTOs/Posts/PostDetailsDto";
-import { PostDto } from "../../Domain/DTOs/Posts/PostDto";
-import { PostViewerPermissionsDto } from "../../Domain/DTOs/Posts/PostViewerPermissionsDto";
-import { PostWithDetailsDto } from "../../Domain/DTOs/Posts/PostWithDetailsDto";
-import { UpdatePostDto } from "../../Domain/DTOs/Posts/UpdatePostDto";
+import { CreatePostDto } from "../../Domain/DTOs/posts/CreatePostDto";
+import { GetAdminPostsDto } from "../../Domain/DTOs/posts/GetAdminPostsDto";
+import { GetPostsByCommunityDto } from "../../Domain/DTOs/posts/GetPostsByCommunityDto";
+import { GetPostsByUserDto } from "../../Domain/DTOs/posts/GetPostsByUserDto";
+import { PostDetailsDto } from "../../Domain/DTOs/posts/PostDetailsDto";
+import { PostDto } from "../../Domain/DTOs/posts/PostDto";
+import { PostViewerPermissionsDto } from "../../Domain/DTOs/posts/PostViewerPermissionsDto";
+import { PostWithDetailsDto } from "../../Domain/DTOs/posts/PostWithDetailsDto";
+import { UpdatePostDto } from "../../Domain/DTOs/posts/UpdatePostDto";
 import { PostTagDto } from "../../Domain/DTOs/tags/PostTagDto";
 import { CommentSortType } from "../../Domain/enums/comments/CommentSortType";
 import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
@@ -270,7 +271,28 @@ export class PostService implements IPostService {
 
     return this.postRepo.findAllByAuthorIdAndCommunityIds(dto, visibleCommunityIds,);
   }
-    
+
+  async getAllForAdmin(dto: GetAdminPostsDto,): Promise<ServiceResult<PaginatedListDto<PostWithDetailsDto>>> {
+    const result = await this.postRepo.findAll(dto);
+
+    if (result.posts.length === 0) {
+      const data = new PaginatedListDto([], result.total, dto.page, dto.limit);
+
+      return ServiceResultFactory.ok(PostMessages.fetchAllSuccess, data, HttpStatus.ok);
+    }
+
+    const items = await this.buildPostsWithDetails(result.posts);
+
+    const data = new PaginatedListDto(
+      items,
+      result.total,
+      dto.page,
+      dto.limit,
+    );
+
+    return ServiceResultFactory.ok(PostMessages.fetchAllSuccess, data, HttpStatus.ok);
+  }
+      
   async create(dto: CreatePostDto, ctx: AuditContext): Promise<ServiceResult<PostDto>> {
     const community = await this.communityRepo.findById(dto.communityId);
     if (community.id === 0) {

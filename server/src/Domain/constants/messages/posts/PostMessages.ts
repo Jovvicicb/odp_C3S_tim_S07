@@ -57,4 +57,6 @@ export const PostMessages = {
 
   userPostsFetched: "User posts fetched successfully",
   fetchByUserFailed: "Failed to fetch user posts",
+  fetchAllSuccess: "Posts fetched successfully",
+  fetchAllFailed: "Failed to fetch posts",
 } as const;

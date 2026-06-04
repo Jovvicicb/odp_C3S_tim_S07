@@ -1,10 +1,12 @@
-import { CreatePostDto } from "../../DTOs/Posts/CreatePostDto";
-import { GetPostsByCommunityDto } from "../../DTOs/Posts/GetPostsByCommunityDto";
-import { GetPostsByUserDto } from "../../DTOs/Posts/GetPostsByUserDto";
-import { UpdatePostDto } from "../../DTOs/Posts/UpdatePostDto";
+import { CreatePostDto } from "../../DTOs/posts/CreatePostDto";
+import { GetAdminPostsDto } from "../../DTOs/posts/GetAdminPostsDto";
+import { GetPostsByCommunityDto } from "../../DTOs/posts/GetPostsByCommunityDto";
+import { GetPostsByUserDto } from "../../DTOs/posts/GetPostsByUserDto";
+import { UpdatePostDto } from "../../DTOs/posts/UpdatePostDto";
 import { Post } from "../../models/Post";
 
 export interface IPostRepository {
+    findAll(dto: GetAdminPostsDto): Promise<{ posts: Post[]; total: number }>;
     findById(id: number): Promise<Post>;
     findByIds(ids: number[]): Promise<Post[]>;
     findByCommunity(dto: GetPostsByCommunityDto): Promise<{posts: Post[]; total: number;}>;

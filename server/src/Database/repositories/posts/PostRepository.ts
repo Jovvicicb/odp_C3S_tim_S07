@@ -2,14 +2,15 @@ import { RowDataPacket, ResultSetHeader } from "mysql2";
 import { DbManager } from "../../connection/DbConnectionPool";
 import { IPostRepository } from "../../../Domain/repositories/posts/IPostRepository";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
-import { CreatePostDto } from "../../../Domain/DTOs/Posts/CreatePostDto";
+import { CreatePostDto } from "../../../Domain/DTOs/posts/CreatePostDto";
 import { Post } from "../../../Domain/models/Post";
 import { PostLogMessages } from "../../../Domain/constants/messages/posts/PostLogMessages";
 import { PostMapper } from "../../../Shared/mappers/posts/PostMapper";
-import { UpdatePostDto } from "../../../Domain/DTOs/Posts/UpdatePostDto";
-import { GetPostsByCommunityDto } from "../../../Domain/DTOs/Posts/GetPostsByCommunityDto";
+import { UpdatePostDto } from "../../../Domain/DTOs/posts/UpdatePostDto";
+import { GetPostsByCommunityDto } from "../../../Domain/DTOs/posts/GetPostsByCommunityDto";
 import { PostSortType } from "../../../Domain/enums/posts/PostSortType";
-import { GetPostsByUserDto } from "../../../Domain/DTOs/Posts/GetPostsByUserDto";
+import { GetPostsByUserDto } from "../../../Domain/DTOs/posts/GetPostsByUserDto";
+import { GetAdminPostsDto } from "../../../Domain/DTOs/posts/GetAdminPostsDto";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));
 
@@ -19,6 +20,45 @@ const safeInt = (n: number): number => Math.max(0, Math.floor(n));
     private readonly logger: ILoggerService,
   ) {}
 
+  async findAll(dto: GetAdminPostsDto): Promise<{ posts: Post[]; total: number }> {
+    const res = await this.db.getReadConnection();
+
+    if (!res) {
+      return { posts: [], total: 0 };
+    }
+
+    const offset = safeInt((dto.page - 1) * dto.limit);
+    const lim = safeInt(dto.limit);
+
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT *
+        FROM posts
+        ORDER BY created_at DESC
+        LIMIT ${lim} OFFSET ${offset}`,
+      );
+
+      const [cnt] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total
+        FROM posts`,
+      );
+
+      return {
+        posts: rows.map((row) => PostMapper.toModel(row)),
+        total: Number(cnt[0]?.total ?? 0),
+      };
+    } catch (err) {
+      this.logger.error(
+        "PostRepository",
+        PostLogMessages.findAllFailed,
+        err instanceof Error ? err : null,
+      );
+
+      return { posts: [], total: 0 };
+    } finally {
+      res.conn.release();
+    }
+  }
 
     
   async findById(id: number): Promise<Post> {

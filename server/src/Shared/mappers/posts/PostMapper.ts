@@ -1,13 +1,13 @@
 import { RowDataPacket } from "mysql2";
 import { Post } from "../../../Domain/models/Post";
-import { PostDto } from "../../../Domain/DTOs/Posts/PostDto";
+import { PostDto } from "../../../Domain/DTOs/posts/PostDto";
 import { PostTagDto } from "../../../Domain/DTOs/tags/PostTagDto";
-import { PostWithDetailsDto } from "../../../Domain/DTOs/Posts/PostWithDetailsDto";
+import { PostWithDetailsDto } from "../../../Domain/DTOs/posts/PostWithDetailsDto";
 import { CommentTreeDto } from "../../../Domain/DTOs/comments/CommentTreeDto";
-import { PostDetailsDto } from "../../../Domain/DTOs/Posts/PostDetailsDto";
+import { PostDetailsDto } from "../../../Domain/DTOs/posts/PostDetailsDto";
 import { UserDto } from "../../../Domain/DTOs/users/UserDto";
 import { CommunityDto } from "../../../Domain/DTOs/community/CommunityDto";
-import { PostViewerPermissionsDto } from "../../../Domain/DTOs/Posts/PostViewerPermissionsDto";
+import { PostViewerPermissionsDto } from "../../../Domain/DTOs/posts/PostViewerPermissionsDto";
 import { PaginatedListDto } from "../../../Domain/DTOs/common/PaginatedListDto";
 
 export class PostMapper {
