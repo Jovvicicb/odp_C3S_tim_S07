@@ -1,3 +1,4 @@
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
@@ -14,7 +15,8 @@ import { UserMapper } from "../../Shared/mappers/users/UserMapper";
 export class UserFollowService implements IUserFollowService{
     public constructor(
         private readonly userFollowRepo:IUserFollowRepository,
-        private readonly userRepo: IUserRepository
+        private readonly userRepo: IUserRepository,
+        private readonly db: DbManager,
     ){}
 
 
@@ -31,6 +33,11 @@ export class UserFollowService implements IUserFollowService{
         const alreadyExists = await this.userFollowRepo.exists(userId,targetUserId);
         if(alreadyExists){
             return ServiceResultFactory.fail(UserMessages.alreadyFollowing, HttpStatus.conflict);
+        }
+
+        const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+        if(writeUnavailableMessage){
+            return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
         }
 
         const created = await this.userFollowRepo.create(userId,targetUserId);
@@ -56,6 +63,11 @@ export class UserFollowService implements IUserFollowService{
             return ServiceResultFactory.fail(UserMessages.notFollowing, HttpStatus.notFound);
         }
 
+        const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+        if(writeUnavailableMessage){
+            return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
+        }
+
         const deleted = await this.userFollowRepo.delete(userId,targetUserId);
         if(!deleted){
             return ServiceResultFactory.fail(UserMessages.unfollowFailed, HttpStatus.internalServerError);
@@ -77,6 +89,11 @@ export class UserFollowService implements IUserFollowService{
         const exists = await this.userFollowRepo.exists(followerId, userId);
         if (!exists) {
             return ServiceResultFactory.fail(UserMessages.notYourFollower, HttpStatus.notFound);
+        }
+
+        const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+        if(writeUnavailableMessage){
+            return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
         }
 
         const deleted = await this.userFollowRepo.delete(followerId, userId);

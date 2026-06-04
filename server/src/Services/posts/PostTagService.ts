@@ -1,3 +1,4 @@
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 import { AuditActions } from "../../Domain/constants/messages/audits/AuditActions";
 import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
@@ -24,10 +25,11 @@ import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFa
       private readonly communityMemberRepo: ICommunityMemberRepository,
       private readonly tagRepo: ITagRepository,
       private readonly postTagRepo: IPostTagRepository,
-      private readonly auditHelperService: IAuditHelperService
+      private readonly auditHelperService: IAuditHelperService,
+      private readonly db: DbManager,
     ) {}
 
-    private async canManagePostTags(postAuthorId: number, communityId: number, requesterId: number, requesterRole?: UserRole): Promise<boolean> {
+  private async canManagePostTags(postAuthorId: number, communityId: number, requesterId: number, requesterRole?: UserRole): Promise<boolean> {
     const isAuthor = postAuthorId === requesterId;
     const isAdmin = requesterRole === UserRole.ADMIN;
 
@@ -79,6 +81,11 @@ import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFa
       return ServiceResultFactory.fail(PostMessages.tagAlreadyAdded, HttpStatus.conflict);
     }
 
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if(writeUnavailableMessage){
+      return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
+    }
+
     const created = await this.postTagRepo.create(postId, tagId);
     if (created.id === 0) {
       return ServiceResultFactory.fail(PostMessages.addTagFailed, HttpStatus.internalServerError);
@@ -109,6 +116,11 @@ import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFa
     const exists = await this.postTagRepo.exists(postId, tagId);
     if(!exists){
       return ServiceResultFactory.fail(PostMessages.tagNotAdded, HttpStatus.notFound);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if(writeUnavailableMessage){
+      return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
     }
 
     const deleted = await this.postTagRepo.delete(postId, tagId);

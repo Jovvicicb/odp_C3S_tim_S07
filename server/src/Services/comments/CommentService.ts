@@ -35,6 +35,7 @@ import { IUserRepository } from "../../Domain/repositories/users/IUserRepository
 import { UserProfileCommentDto } from "../../Domain/DTOs/comments/UserProfileCommentDto";
 import { GetCommentsByUserDto } from "../../Domain/DTOs/comments/GetCommentsByUserDto";
 import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 
 type CommentAccessCheckResult =
   | {
@@ -57,7 +58,8 @@ export class CommentService implements ICommentService {
     private readonly communityMemberRepo: ICommunityMemberRepository,
     private readonly commentLikeRepo: ICommentLikeRepository,
     private readonly userRepo: IUserRepository,
-    private readonly auditHelperService: IAuditHelperService
+    private readonly auditHelperService: IAuditHelperService,
+    private readonly db: DbManager,
   ) {}
 
   private isActiveModeratorMembership(membership?: {id: number; role: CommunityMemberRole; status: CommunityMemberStatus;}): boolean {
@@ -423,6 +425,11 @@ export class CommentService implements ICommentService {
       }
     }
 
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail<CommentDto>(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
+    }
+
     const created = await this.commentRepo.create(dto);
     if (created.id === 0) {
       return ServiceResultFactory.fail<CommentDto>(CommentMessages.createFailed, HttpStatus.internalServerError);
@@ -450,6 +457,11 @@ export class CommentService implements ICommentService {
     const access = await this.checkCommentAccess(ctx.userId, comment.postId);
     if (!access.allowed) {
       return ServiceResultFactory.fail(access.message,  access.status);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
     const updated = await this.commentRepo.update(id, dto);
@@ -483,6 +495,11 @@ export class CommentService implements ICommentService {
     const canDelete = await this.canDeleteComment(comment, comment.postId, ctx.userId, requesterRole);
     if (!canDelete) {
       return ServiceResultFactory.fail(CommentMessages.onlyAuthorOrModeratorCanDelete, HttpStatus.forbidden);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
     const deleted = await this.commentRepo.softDelete(id);
@@ -662,6 +679,11 @@ export class CommentService implements ICommentService {
       return ServiceResultFactory.fail(CommentMessages.alreadyFlagged,HttpStatus.conflict);
     }
 
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
+    }
+
     const updated = await this.commentRepo.updateFlagStatus(id, 1);
     if (!updated) {
       return ServiceResultFactory.fail(CommentMessages.flagFailed, HttpStatus.internalServerError);
@@ -696,6 +718,11 @@ export class CommentService implements ICommentService {
 
     if (!comment.isFlagged) {
       return ServiceResultFactory.fail( CommentMessages.notFlagged, HttpStatus.conflict);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
     const updated = await this.commentRepo.updateFlagStatus(id, 0);

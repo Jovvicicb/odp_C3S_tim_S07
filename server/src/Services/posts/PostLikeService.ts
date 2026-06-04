@@ -1,3 +1,4 @@
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
@@ -17,6 +18,7 @@ export class PostLikeService implements IPostLikeService {
     private readonly postLikeRepo: IPostLikeRepository,
     private readonly communityRepo: ICommunityRepository,
     private readonly communityMemberRepo: ICommunityMemberRepository,
+    private readonly db: DbManager,
   ) {}
 
 
@@ -69,6 +71,11 @@ export class PostLikeService implements IPostLikeService {
             return ServiceResultFactory.fail(PostMessages.alreadyLiked, HttpStatus.conflict);
         }
 
+        const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+        if(writeUnavailableMessage){
+            return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
+        }
+
         const created = await this.postLikeRepo.create(userId,postId);
         if(created.id === 0) {
             return ServiceResultFactory.fail(PostMessages.likeFailed, HttpStatus.internalServerError);
@@ -91,6 +98,11 @@ export class PostLikeService implements IPostLikeService {
         const exists = await this.postLikeRepo.exists(userId, postId);
         if (!exists) {
             return ServiceResultFactory.fail(PostMessages.notLiked, HttpStatus.notFound);
+        }
+
+        const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+        if(writeUnavailableMessage){
+            return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
         }
 
         const deleted = await this.postLikeRepo.delete(userId, postId);

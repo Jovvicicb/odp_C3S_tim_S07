@@ -31,6 +31,7 @@ import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFoll
 import { CommunityViewerPermissionsDto } from "../../Domain/DTOs/community/CommunityViewerPermissionsDto";
 import { CommunityMemberDetailsDto } from "../../Domain/DTOs/community/CommunityMemberDetailsDto";
 import { Community } from "../../Domain/models/Community";
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 
 export class CommunityService implements ICommunityService {
   public constructor(
@@ -38,7 +39,8 @@ export class CommunityService implements ICommunityService {
      private readonly communityMemberRepo: ICommunityMemberRepository,
      private readonly userRepo: IUserRepository,
      private readonly userFollowRepo: IUserFollowRepository,
-     private readonly auditHelperService: IAuditHelperService
+     private readonly auditHelperService: IAuditHelperService,
+     private readonly db: DbManager,
   ) {}
 
 
@@ -170,6 +172,11 @@ export class CommunityService implements ICommunityService {
     const existing = await this.communityRepo.findByName(dto.name);
     if (existing.id !== 0) {
       return ServiceResultFactory.fail<CreateCommunityResponseDto>(CommunityMessages.nameTaken,  HttpStatus.conflict);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail<CreateCommunityResponseDto>(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
     const community = await this.communityRepo.create(dto);
@@ -340,6 +347,12 @@ export class CommunityService implements ICommunityService {
         return ServiceResultFactory.fail(CommunityMessages.nameTaken, HttpStatus.conflict);
       }
     }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
+    }
+
     const isUpdated = await this.communityRepo.update(id, dto);
     if (!isUpdated) {
       return ServiceResultFactory.fail(CommunityMessages.updateFailed, HttpStatus.internalServerError);
@@ -359,6 +372,11 @@ export class CommunityService implements ICommunityService {
     const membership = await this.communityMemberRepo.findByUserIdAndCommunityId(ctx.userId, id);
     if (!this.canManageCommunity(membership, requesterRole)) {
       return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanDelete, HttpStatus.forbidden);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
     const isDeleted  = await this.communityRepo.delete(id);

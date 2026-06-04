@@ -1,3 +1,4 @@
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 import { AuditActions } from "../../Domain/constants/messages/audits/AuditActions";
 import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
 import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
@@ -58,7 +59,8 @@ export class PostService implements IPostService {
     private readonly userFollowRepo: IUserFollowRepository,
     private readonly userRepo: IUserRepository,
     private readonly commentService: ICommentService,
-    private readonly auditHelperService: IAuditHelperService
+    private readonly auditHelperService: IAuditHelperService,
+    private readonly db: DbManager,
   ) {}
 
   private isActiveModerator(membership?: CommunityMember): boolean {
@@ -280,6 +282,11 @@ export class PostService implements IPostService {
         return ServiceResultFactory.fail<PostDto>(PostMessages.notMember, HttpStatus.forbidden);
     }
 
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail<PostDto>(writeUnavailableMessage, HttpStatus.serviceUnavailable);
+    }
+
     const created = await this.postRepo.create(dto);
     if (created.id === 0) {
       return ServiceResultFactory.fail<PostDto>(PostMessages.createFailed, HttpStatus.internalServerError);
@@ -304,6 +311,11 @@ export class PostService implements IPostService {
     const canManage = this.canManagePost(post, requesterId, requesterRole, membership);
     if (!canManage) {
       return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanUpdate, HttpStatus.forbidden);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
     }
 
     const updated = await this.postRepo.update(id,dto);
@@ -331,6 +343,11 @@ export class PostService implements IPostService {
 
     if (!canManage) {
       return ServiceResultFactory.fail(PostMessages.onlyAuthorOrModeratorCanDelete, HttpStatus.forbidden);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
     }
     
     const deleted = await this.postRepo.delete(id);

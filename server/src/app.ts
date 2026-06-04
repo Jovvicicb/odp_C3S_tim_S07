@@ -47,6 +47,9 @@ import { HealthService } from "./Services/health/HealthService";
 import { StatisticsRepository } from "./Database/repositories/statistics/StatisticsRepository";
 import { StatisticsService } from "./Services/statistics/StatisticsService";
 import { StatisticsController } from "./WebAPI/controllers/StatisticsController";
+import { CreateAuditDto } from "./Domain/DTOs/audits/CreateAuditDto";
+import { AuditActions } from "./Domain/constants/messages/audits/AuditActions";
+import { AuditDetails } from "./Domain/constants/messages/audits/AuditDetails";
 
 export const logger = new ConsoleLoggerService();
 export const db     = new DbManager(logger);
@@ -69,17 +72,29 @@ const statisticsRepo = new StatisticsRepository(db, logger);
 // Services
 const auditService =new AuditService(auditRepo);
 const auditHelperService = new AuditHelperService(auditService,logger);
-const authService   = new AuthService(userRepo,auditHelperService);
-const userService   = new UserService(userRepo,userFollowRepo,auditHelperService);
-const communityService = new CommunityService(communityRepo,communityMemberRepo,userRepo,userFollowRepo,auditHelperService);
-const userFollowService   = new UserFollowService(userFollowRepo,userRepo);
-const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo,userRepo,userFollowRepo,auditHelperService);
-const tagService = new TagService(tagRepo,auditHelperService);
-const commentService = new CommentService(commentRepo,postRepo,communityRepo,communityMemberRepo,commentLikeRepo,userRepo,auditHelperService);
-const postService = new PostService(postRepo,communityRepo,communityMemberRepo,postTagRepo,postLikeRepo,tagRepo,postCommentRepo,userFollowRepo,userRepo,commentService,auditHelperService);
-const postTagService = new PostTagService(postRepo,communityMemberRepo,tagRepo,postTagRepo,auditHelperService);
-const postLikeService = new PostLikeService(postRepo,postLikeRepo,communityRepo,communityMemberRepo);
-const commentLikeService = new CommentLikeService(commentRepo,commentLikeRepo,postRepo,communityRepo,communityMemberRepo);
+const authService   = new AuthService(userRepo,auditHelperService,db);
+
+db.registerFailoverListener(async (event) => {
+  await auditHelperService.safeCreate(
+    new CreateAuditDto(
+      null,
+      AuditActions.DB_FAILOVER,
+      `${AuditDetails.DB_FAILOVER} (${event.reason}): ${event.oldMasterName}:${event.oldMasterPort} -> ${event.newMasterName}:${event.newMasterPort}`,
+      "system",
+    ),
+  );
+});
+
+const userService   = new UserService(userRepo,userFollowRepo,auditHelperService,db);
+const communityService = new CommunityService(communityRepo,communityMemberRepo,userRepo,userFollowRepo,auditHelperService,db);
+const userFollowService   = new UserFollowService(userFollowRepo,userRepo,db);
+const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo,userRepo,userFollowRepo,auditHelperService,db);
+const tagService = new TagService(tagRepo,auditHelperService,db);
+const commentService = new CommentService(commentRepo,postRepo,communityRepo,communityMemberRepo,commentLikeRepo,userRepo,auditHelperService,db);
+const postService = new PostService(postRepo,communityRepo,communityMemberRepo,postTagRepo,postLikeRepo,tagRepo,postCommentRepo,userFollowRepo,userRepo,commentService,auditHelperService,db);
+const postTagService = new PostTagService(postRepo,communityMemberRepo,tagRepo,postTagRepo,auditHelperService,db);
+const postLikeService = new PostLikeService(postRepo,postLikeRepo,communityRepo,communityMemberRepo,db);
+const commentLikeService = new CommentLikeService(commentRepo,commentLikeRepo,postRepo,communityRepo,communityMemberRepo,db);
 const healthService = new HealthService(db); 
 const statisticsService = new StatisticsService(statisticsRepo);
 

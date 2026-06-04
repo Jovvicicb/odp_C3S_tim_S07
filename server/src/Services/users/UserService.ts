@@ -18,12 +18,14 @@ import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { UserRole } from "../../Domain/enums/users/UserRole";
 import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";
 import { UserFollowStatus } from "../../Domain/enums/users/UserFollowStatus";
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 
 export class UserService implements IUserService {
     private readonly saltRounds = parseInt(process.env.SALT_ROUNDS ?? "10", 10);
     public constructor(private readonly userRepo: IUserRepository,
     private readonly userFollowRepo: IUserFollowRepository,
     private readonly auditHelperService: IAuditHelperService,
+    private readonly db: DbManager,
   ) {}
 
   async getAll(dto:GetUsersDto): Promise<ServiceResult<PaginatedListDto<UserDto>>> {
@@ -152,6 +154,11 @@ export class UserService implements IUserService {
       updateDto.password = hash;
     }
 
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
+    }
+
     const isUpdated = await this.userRepo.update(userId, updateDto);
     if (!isUpdated) {
       return ServiceResultFactory.fail(UserMessages.updateFailed, HttpStatus.internalServerError);
@@ -172,6 +179,11 @@ export class UserService implements IUserService {
 
     if (ctx.userId === id) {
       return ServiceResultFactory.fail(UserMessages.cannotChangeOwnRole, HttpStatus.forbidden);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
     }
 
     const isUpdated = await this.userRepo.updateRole(id, role);

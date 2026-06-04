@@ -1,3 +1,4 @@
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 import { CommentMessages } from "../../Domain/constants/messages/comments/CommentMessages";
 import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
@@ -19,7 +20,8 @@ export class CommentLikeService implements ICommentLikeService {
     private readonly commentLikeRepo: ICommentLikeRepository,
     private readonly postRepo: IPostRepository,
     private readonly communityRepo: ICommunityRepository,
-    private readonly communityMemberRepo: ICommunityMemberRepository
+    private readonly communityMemberRepo: ICommunityMemberRepository,
+    private readonly db: DbManager,
   ) {}
 
    private async checkCommentLikeAccess(userId: number, commentId: number, forbiddenMessage: string): Promise<ServiceResult> {
@@ -77,6 +79,11 @@ export class CommentLikeService implements ICommentLikeService {
         return ServiceResultFactory.fail(CommentMessages.alreadyLiked, HttpStatus.conflict);
     }
 
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
+    }
+
     const created = await this.commentLikeRepo.create(userId, commentId);
     if (created.id === 0) {
         return ServiceResultFactory.fail(CommentMessages.likeFailed, HttpStatus.internalServerError );
@@ -94,6 +101,11 @@ export class CommentLikeService implements ICommentLikeService {
     const exists = await this.commentLikeRepo.exists(userId, commentId);
     if (!exists) {
         return ServiceResultFactory.fail(CommentMessages.notLiked, HttpStatus.notFound);
+    }
+    
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
     const deleted = await this.commentLikeRepo.delete(userId, commentId);

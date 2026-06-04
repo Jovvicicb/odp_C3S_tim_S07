@@ -25,6 +25,7 @@ import { IUserFollowRepository } from '../../Domain/repositories/users/IUserFoll
 import { User } from '../../Domain/models/User';
 import { UserFollowStatus } from '../../Domain/enums/users/UserFollowStatus';
 import { UserMapper } from '../../Shared/mappers/users/UserMapper';
+import { DbManager } from '../../Database/connection/DbConnectionPool';
 
 export class CommunityMemberService implements ICommunityMemberService {
   public constructor(
@@ -32,7 +33,8 @@ export class CommunityMemberService implements ICommunityMemberService {
     private readonly communityRepo: ICommunityRepository,
     private readonly userRepo: IUserRepository,
     private readonly userFollowRepo: IUserFollowRepository,
-    private readonly auditHelperService: IAuditHelperService
+    private readonly auditHelperService: IAuditHelperService,
+    private readonly db: DbManager,
   ) {}
 
 
@@ -70,10 +72,16 @@ export class CommunityMemberService implements ICommunityMemberService {
         ? CommunityMemberStatus.ACTIVE
         : CommunityMemberStatus.PENDING;
 
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
+    }
+
     const created = await this.communityMemberRepo.create(userId, communityId, CommunityMemberRole.MEMBER, status);
     if (!created) {
         return ServiceResultFactory.fail(CommunityMessages.joinFailed, HttpStatus.internalServerError);
     }
+
     return ServiceResultFactory.ok(
         status === CommunityMemberStatus.ACTIVE
             ? CommunityMessages.joined
@@ -100,6 +108,11 @@ export class CommunityMemberService implements ICommunityMemberService {
 
     if (membership.status === CommunityMemberStatus.BANNED) {
         return ServiceResultFactory.fail(CommunityMessages.notMember, HttpStatus.notFound);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
     
     const deleted = await this.communityMemberRepo.delete(userId, communityId);
@@ -157,7 +170,7 @@ export class CommunityMemberService implements ICommunityMemberService {
 
     const requesterId = ctx.userId;
     const requesterMembership = await this.communityMemberRepo.findByUserIdAndCommunityId(requesterId, communityId);
-   if (!this.isActiveModerator(requesterMembership)) {
+    if (!this.isActiveModerator(requesterMembership)) {
         return ServiceResultFactory.fail(CommunityMessages.onlyModeratorCanChangeMemberRole, HttpStatus.forbidden);
     }
 
@@ -176,6 +189,11 @@ export class CommunityMemberService implements ICommunityMemberService {
     }
     if(targetMembership.role === role){
         return ServiceResultFactory.ok(CommunityMessages.memberRoleAlreadySet, undefined, HttpStatus.ok);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
     const updated = await this.communityMemberRepo.updateRole(targetUserId,communityId,role);
@@ -212,6 +230,11 @@ export class CommunityMemberService implements ICommunityMemberService {
 
     if(targetMembership.status !== CommunityMemberStatus.PENDING){
         return ServiceResultFactory.fail(CommunityMessages.onlyPendingRequestCanBeProcessed, HttpStatus.conflict);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
     if(action === CommunityMemberStatusAction.ACCEPT){
@@ -263,6 +286,11 @@ export class CommunityMemberService implements ICommunityMemberService {
 
     if (requesterId === targetUserId) {
         return ServiceResultFactory.fail(CommunityMessages.cannotRemoveYourself, HttpStatus.badRequest);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+        return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
     const deleted = await this.communityMemberRepo.delete(targetUserId, communityId);

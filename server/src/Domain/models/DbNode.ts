@@ -14,5 +14,6 @@ export class DbNode {
     public readonly name: string,
     public readonly host: string,
     public readonly port: number,
+    public readonly replicaHost: string,
   ) {}
 }

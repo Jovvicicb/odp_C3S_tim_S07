@@ -6,6 +6,7 @@ export class HealthMapper {
   public static toDbNodeHealthDto(
     node: DbNode,
     role: DbNodeRole,
+    canServeReads: boolean,
   ): DbNodeHealthDto {
     return new DbNodeHealthDto(
       node.name,
@@ -14,6 +15,7 @@ export class HealthMapper {
       node.port,
       node.status,
       node.lastCheck,
+      canServeReads,
       node.successfulReads,
       node.failedReads,
       node.successfulWrites,

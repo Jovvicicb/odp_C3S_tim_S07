@@ -36,7 +36,8 @@ export const AuditActions = {
   COMMENT_FLAGGED: "COMMENT_FLAGGED",
   COMMENT_UNFLAGGED: "COMMENT_UNFLAGGED",
 
-
+  //FAILOVER
+  DB_FAILOVER: "DB_FAILOVER",
 
 } as const;
 

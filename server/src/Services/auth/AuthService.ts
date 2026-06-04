@@ -14,6 +14,7 @@ import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
 import { AuthMessages } from "../../Domain/constants/messages/auth/AuthMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 
 export class AuthService implements IAuthService {
   private readonly saltRounds = parseInt(process.env.SALT_ROUNDS ?? "10", 10);
@@ -21,6 +22,7 @@ export class AuthService implements IAuthService {
   public constructor(
     private readonly userRepo: IUserRepository,
     private readonly auditHelperService: IAuditHelperService,
+    private readonly db: DbManager,
   ) {}
 
   async login(username: string, password: string,ctx: AuditContext): Promise<ServiceResult<AuthUserDto>> {
@@ -53,6 +55,11 @@ export class AuthService implements IAuthService {
     const hash = await bcrypt.hash(dto.password, this.saltRounds).catch(() => "");
     if (!hash) {
        return ServiceResultFactory.fail<AuthUserDto>(AuthMessages.registerFailed, HttpStatus.internalServerError);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail<AuthUserDto>(writeUnavailableMessage, HttpStatus.serviceUnavailable,);
     }
 
    const created = await this.userRepo.create(

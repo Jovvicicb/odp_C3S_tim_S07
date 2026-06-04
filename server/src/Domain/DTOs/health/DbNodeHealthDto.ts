@@ -9,6 +9,7 @@ export class DbNodeHealthDto {
     public port: number,
     public status: NodeStatus,
     public lastCheck: Date,
+    public canServeReads: boolean,
     public successfulReads: number,
     public failedReads: number,
     public successfulWrites: number,

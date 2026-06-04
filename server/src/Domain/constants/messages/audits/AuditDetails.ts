@@ -36,6 +36,9 @@ export const AuditDetails = {
   COMMENT_FLAGGED: "Comment flagged",
   COMMENT_UNFLAGGED: "Comment unflagged",
 
+  //FAILOVER
+  DB_FAILOVER: "Database failover completed",
+
 } as const;
 
 

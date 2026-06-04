@@ -1,3 +1,4 @@
+import { DbManager } from "../../Database/connection/DbConnectionPool";
 import { AuditActions } from "../../Domain/constants/messages/audits/AuditActions";
 import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
 import { TagMessages } from "../../Domain/constants/messages/tags/TagMessages";
@@ -17,7 +18,8 @@ import { TagMapper } from "../../Shared/mappers/tags/TagMapper";
 export class TagService implements ITagService {
   public constructor(
     private readonly tagRepo: ITagRepository,
-    private readonly auditHelperService: IAuditHelperService
+    private readonly auditHelperService: IAuditHelperService,
+    private readonly db: DbManager,
   ) {}
 
 
@@ -25,6 +27,11 @@ export class TagService implements ITagService {
     const existing = await this.tagRepo.findByName(dto.name);
     if(existing.id !== 0){
       return ServiceResultFactory.fail<TagDto>(TagMessages.nameTaken, HttpStatus.conflict);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail<TagDto>(writeUnavailableMessage, HttpStatus.serviceUnavailable);
     }
 
     const created = await this.tagRepo.create(dto);
@@ -41,6 +48,11 @@ export class TagService implements ITagService {
     const existing = await this.tagRepo.findById(id);
     if(existing.id === 0){
       return ServiceResultFactory.fail(TagMessages.notFound, HttpStatus.notFound);
+    }
+
+    const writeUnavailableMessage = this.db.getWriteUnavailableMessage();
+    if (writeUnavailableMessage) {
+      return ServiceResultFactory.fail(writeUnavailableMessage, HttpStatus.serviceUnavailable);
     }
 
     const deleted = await this.tagRepo.delete(id);

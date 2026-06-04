@@ -7,6 +7,7 @@ export const HealthMessages = {
 
   failoverSuccess: "Database failover completed successfully",
   failoverFailed: "Failed to perform database failover",
+  failoverInProgress: "Database failover is already in progress.",
 
   noHealthySlave: "No healthy slave node available for failover",
 } as const;
