@@ -1,22 +1,26 @@
 import { useState } from "react";
+
 import { tagApi } from "../../api_services/tags/TagAPIService";
 import { TagMessages } from "../../constants/messages/tag/TagMessages";
+import { useToast } from "../toast/useToast";
+
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import type { TagDto } from "../../models/tags/TagDto";
-import { useToast } from "../toast/useToast";
 
 type Props = {
   tags: PaginatedListDto<TagDto>;
-  currentPage: number;
-  reloadTags: (targetPage?: number) => Promise<void>;
-  setPageState: (page: number) => void;
+  page: number;
+  setPage: (page: number) => void;
+  setTags: React.Dispatch<React.SetStateAction<PaginatedListDto<TagDto>>>;
+  reloadTags: (targetPage?: number, delayMs?: number) => Promise<void>;
 };
 
 export function useDeleteTag({
   tags,
-  currentPage,
+  page,
+  setPage,
+  setTags,
   reloadTags,
-  setPageState,
 }: Props) {
   const { showToast } = useToast();
 
@@ -31,7 +35,15 @@ export function useDeleteTag({
       const res = await tagApi.delete(id);
 
       if (!res.success) {
-        setDeleteError(res.message ?? TagMessages.deleteFailed);
+        const message = res.message ?? TagMessages.deleteFailed;
+
+        setDeleteError(message);
+
+        showToast({
+          type: "error",
+          message,
+        });
+
         return;
       }
 
@@ -40,16 +52,28 @@ export function useDeleteTag({
         message: res.message ?? TagMessages.deleteSuccess,
       });
 
-      const shouldGoToPreviousPage = tags.items.length === 1 && currentPage > 1;
-      const nextPage = shouldGoToPreviousPage ? currentPage - 1 : currentPage;
+      const shouldGoToPreviousPage = tags.items.length === 1 && page > 1;
+      const nextPage = shouldGoToPreviousPage ? page - 1 : page;
 
-      if (nextPage !== currentPage) {
-        setPageState(nextPage);
-      } else {
-        await reloadTags(nextPage);
+      if (shouldGoToPreviousPage) {
+        setPage(nextPage);
+        return;
       }
+
+      setTags((current) => ({
+        ...current,
+        items: current.items.filter((tag) => tag.id !== id),
+        total: Math.max(0, current.total - 1),
+      }));
+
+      await reloadTags(nextPage, 300);
     } catch {
       setDeleteError(TagMessages.deleteFailed);
+
+      showToast({
+        type: "error",
+        message: TagMessages.deleteFailed,
+      });
     } finally {
       setLoadingDeleteId(null);
     }

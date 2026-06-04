@@ -1,19 +1,27 @@
 import { useState } from "react";
+
 import { tagApi } from "../../api_services/tags/TagAPIService";
 import { TagMessages } from "../../constants/messages/tag/TagMessages";
 import { validateCreateTag } from "../../validators/tag/validateCreateTag";
 import { useToast } from "../toast/useToast";
 
+import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
+import type { TagDto } from "../../models/tags/TagDto";
+
 type Props = {
-  currentPage: number;
-  reloadTags: (targetPage?: number) => Promise<void>;
-  setPageState: (page: number) => void;
+  page: number;
+  limit: number;
+  setPage: (page: number) => void;
+  setTags: React.Dispatch<React.SetStateAction<PaginatedListDto<TagDto>>>;
+  reloadTags: (targetPage?: number, delayMs?: number) => Promise<void>;
 };
 
 export function useCreateTag({
-  currentPage,
+  page,
+  limit,
+  setPage,
+  setTags,
   reloadTags,
-  setPageState,
 }: Props) {
   const { showToast } = useToast();
 
@@ -34,8 +42,16 @@ export function useCreateTag({
     try {
       const res = await tagApi.create(validation.normalizedName);
 
-      if (!res.success) {
-        setCreateError(res.message ?? TagMessages.createFailed);
+      if (!res.success || !res.data) {
+        const message = res.message ?? TagMessages.createFailed;
+
+        setCreateError(message);
+
+        showToast({
+          type: "error",
+          message,
+        });
+
         return false;
       }
 
@@ -44,15 +60,34 @@ export function useCreateTag({
         message: res.message ?? TagMessages.createSuccess,
       });
 
-      if (currentPage !== 1) {
-        setPageState(1);
-      } else {
-        await reloadTags(1);
+      if (page !== 1) {
+        setPage(1);
+        return true;
       }
+
+      setTags((current) => {
+        const nextItems = [res.data!, ...current.items]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .slice(0, limit);
+
+        return {
+          ...current,
+          items: nextItems,
+          total: current.total + 1,
+        };
+      });
+
+      await reloadTags(1, 300);
 
       return true;
     } catch {
       setCreateError(TagMessages.createFailed);
+
+      showToast({
+        type: "error",
+        message: TagMessages.createFailed,
+      });
+
       return false;
     } finally {
       setLoadingCreate(false);
