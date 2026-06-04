@@ -169,31 +169,6 @@ export function StatCard({
   );
 }
 
-export function Table({ children }: { children: ReactNode }) {
-  return (
-    <div className="overflow-hidden rounded-3xl border border-white/8 bg-[#0b0f17]/80 shadow-xl shadow-sky-950/10">
-      <table className="w-full text-sm">{children}</table>
-    </div>
-  );
-}
-
-export function TableHead({ columns }: { columns: string[] }) {
-  return (
-    <thead>
-      <tr className="border-b border-white/8 bg-white/3">
-        {columns.map((c) => (
-          <th
-            key={c}
-            className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-[0.25em] text-sky-200/35"
-          >
-            {c}
-          </th>
-        ))}
-      </tr>
-    </thead>
-  );
-}
-
 export function PageHeader({
   eyebrow,
   title,

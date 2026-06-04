@@ -59,6 +59,7 @@ export function Layout({ children }: { children: ReactNode }) {
     { to: "/admin/communities", label: "Communities" },
     { to: "/admin/tags", label: "Tags" },
     { to: "/admin/health", label: "Health" },
+    { to: "/admin/audits", label: "Audit logs" },
   ];
 
   return (
