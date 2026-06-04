@@ -13,28 +13,29 @@ export default function AdminTagsPage() {
   const {
     tags,
     setTags,
-    page,
-    limit,
     loading,
     listError,
+    page,
+    limit,
+    total,
     setPage,
-    reloadTags,
+    setTotal,
   } = useAdminTagList(1, 10);
 
   const { createTag, loadingCreate, createError } = useCreateTag({
     page,
     limit,
-    setPage,
     setTags,
-    reloadTags,
+    setTotal,
+    setPage,
   });
 
   const { deleteTag, loadingDeleteId, deleteError } = useDeleteTag({
     tags,
     page,
-    setPage,
     setTags,
-    reloadTags,
+    setTotal,
+    setPage,
   });
 
   const error = listError || createError || deleteError;
@@ -55,6 +56,7 @@ export default function AdminTagsPage() {
         tags={tags}
         page={page}
         limit={limit}
+        total={total}
         loading={loading}
         loadingDeleteId={loadingDeleteId}
         onPageChange={setPage}

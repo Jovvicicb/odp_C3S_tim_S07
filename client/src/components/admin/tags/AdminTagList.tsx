@@ -3,13 +3,13 @@ import { SectionEmptyState } from "../../ui/SectionEmptyState";
 
 import { AdminTagCard } from "./AdminTagCard";
 
-import type { PaginatedListDto } from "../../../models/common/PaginatedListDto";
 import type { TagDto } from "../../../models/tags/TagDto";
 
 type Props = {
-  tags: PaginatedListDto<TagDto>;
+  tags: TagDto[];
   page: number;
   limit: number;
+  total: number;
   loading: boolean;
   loadingDeleteId: number | null;
   onPageChange: (page: number) => void;
@@ -20,6 +20,7 @@ export function AdminTagList({
   tags,
   page,
   limit,
+  total,
   loading,
   loadingDeleteId,
   onPageChange,
@@ -33,7 +34,7 @@ export function AdminTagList({
     );
   }
 
-  if (tags.items.length === 0) {
+  if (tags.length === 0) {
     return (
       <SectionEmptyState
         title="No tags found."
@@ -45,7 +46,7 @@ export function AdminTagList({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {tags.items.map((tag) => (
+        {tags.map((tag) => (
           <AdminTagCard
             key={tag.id}
             tag={tag}
@@ -58,7 +59,7 @@ export function AdminTagList({
       <div className="border-t border-white/8 pt-5">
         <Pagination
           page={page}
-          total={tags.total}
+          total={total}
           pageSize={limit}
           onChange={onPageChange}
         />

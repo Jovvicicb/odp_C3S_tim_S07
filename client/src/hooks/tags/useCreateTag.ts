@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 
 import { tagApi } from "../../api_services/tags/TagAPIService";
@@ -5,23 +6,22 @@ import { TagMessages } from "../../constants/messages/tag/TagMessages";
 import { validateCreateTag } from "../../validators/tag/validateCreateTag";
 import { useToast } from "../toast/useToast";
 
-import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import type { TagDto } from "../../models/tags/TagDto";
 
 type Props = {
   page: number;
   limit: number;
-  setPage: (page: number) => void;
-  setTags: React.Dispatch<React.SetStateAction<PaginatedListDto<TagDto>>>;
-  reloadTags: (targetPage?: number, delayMs?: number) => Promise<void>;
+  setTags: Dispatch<SetStateAction<TagDto[]>>;
+  setTotal: Dispatch<SetStateAction<number>>;
+  setPage: Dispatch<SetStateAction<number>>;
 };
 
 export function useCreateTag({
   page,
   limit,
-  setPage,
   setTags,
-  reloadTags,
+  setTotal,
+  setPage,
 }: Props) {
   const { showToast } = useToast();
 
@@ -60,24 +60,18 @@ export function useCreateTag({
         message: res.message ?? TagMessages.createSuccess,
       });
 
+      setTotal((current) => current + 1);
+
       if (page !== 1) {
         setPage(1);
         return true;
       }
 
-      setTags((current) => {
-        const nextItems = [res.data!, ...current.items]
+      setTags((current) =>
+        [res.data!, ...current]
           .sort((a, b) => a.name.localeCompare(b.name))
-          .slice(0, limit);
-
-        return {
-          ...current,
-          items: nextItems,
-          total: current.total + 1,
-        };
-      });
-
-      await reloadTags(1, 300);
+          .slice(0, limit),
+      );
 
       return true;
     } catch {

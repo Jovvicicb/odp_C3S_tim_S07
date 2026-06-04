@@ -1,26 +1,27 @@
+import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 
 import { tagApi } from "../../api_services/tags/TagAPIService";
+import { CommonMessages } from "../../constants/messages/common/CommonMessages";
 import { TagMessages } from "../../constants/messages/tag/TagMessages";
 import { useToast } from "../toast/useToast";
 
-import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import type { TagDto } from "../../models/tags/TagDto";
 
 type Props = {
-  tags: PaginatedListDto<TagDto>;
+  tags: TagDto[];
   page: number;
-  setPage: (page: number) => void;
-  setTags: React.Dispatch<React.SetStateAction<PaginatedListDto<TagDto>>>;
-  reloadTags: (targetPage?: number, delayMs?: number) => Promise<void>;
+  setTags: Dispatch<SetStateAction<TagDto[]>>;
+  setTotal: Dispatch<SetStateAction<number>>;
+  setPage: Dispatch<SetStateAction<number>>;
 };
 
 export function useDeleteTag({
   tags,
   page,
-  setPage,
   setTags,
-  reloadTags,
+  setTotal,
+  setPage,
 }: Props) {
   const { showToast } = useToast();
 
@@ -47,32 +48,24 @@ export function useDeleteTag({
         return;
       }
 
+      setTags((current) => current.filter((tag) => tag.id !== id));
+
+      setTotal((current) => Math.max(0, current - 1));
+
       showToast({
         type: "success",
         message: res.message ?? TagMessages.deleteSuccess,
       });
 
-      const shouldGoToPreviousPage = tags.items.length === 1 && page > 1;
-      const nextPage = shouldGoToPreviousPage ? page - 1 : page;
-
-      if (shouldGoToPreviousPage) {
-        setPage(nextPage);
-        return;
+      if (tags.length === 1 && page > 1) {
+        setPage(page - 1);
       }
-
-      setTags((current) => ({
-        ...current,
-        items: current.items.filter((tag) => tag.id !== id),
-        total: Math.max(0, current.total - 1),
-      }));
-
-      await reloadTags(nextPage, 300);
     } catch {
-      setDeleteError(TagMessages.deleteFailed);
+      setDeleteError(CommonMessages.unexpectedError);
 
       showToast({
         type: "error",
-        message: TagMessages.deleteFailed,
+        message: CommonMessages.unexpectedError,
       });
     } finally {
       setLoadingDeleteId(null);

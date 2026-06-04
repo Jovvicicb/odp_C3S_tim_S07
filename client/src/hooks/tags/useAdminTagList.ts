@@ -3,105 +3,59 @@ import { useCallback, useEffect, useState } from "react";
 import { tagApi } from "../../api_services/tags/TagAPIService";
 import { TagMessages } from "../../constants/messages/tag/TagMessages";
 
-import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import type { TagDto } from "../../models/tags/TagDto";
 
-const createEmptyTags = (
-  page: number,
-  limit: number,
-): PaginatedListDto<TagDto> => ({
-  items: [],
-  total: 0,
-  page,
-  limit,
-});
-
-const wait = (ms: number): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
 export function useAdminTagList(initialPage = 1, initialLimit = 10) {
-  const [tags, setTags] = useState<PaginatedListDto<TagDto>>(
-    createEmptyTags(initialPage, initialLimit),
-  );
-
-  const [page, setPageState] = useState(initialPage);
-  const [limit] = useState(initialLimit);
-
-  const [loading, setLoading] = useState(true);
+  const [tags, setTags] = useState<TagDto[]>([]);
+  const [loading, setLoading] = useState(false);
   const [listError, setListError] = useState("");
 
-  const loadTags = useCallback(
-    async (targetPage: number, signal?: AbortSignal, delayMs = 0) => {
-      setLoading(true);
+  const [page, setPage] = useState(initialPage);
+  const [limit, setLimit] = useState(initialLimit);
+  const [total, setTotal] = useState(0);
 
-      if (delayMs > 0) {
-        await wait(delayMs);
+  const fetchTags = useCallback(async () => {
+    setLoading(true);
+    setListError("");
+
+    try {
+      const res = await tagApi.getAll(page, limit);
+
+      if (!res.success || !res.data) {
+        setTags([]);
+        setTotal(0);
+        setListError(res.message ?? TagMessages.fetchAllFailed);
+        return;
       }
 
-      if (signal?.aborted) return;
-
-      try {
-        const res = await tagApi.getAll(targetPage, limit);
-
-        if (signal?.aborted) return;
-
-        if (!res.success || !res.data) {
-          setListError(res.message ?? TagMessages.fetchAllFailed);
-          setTags(createEmptyTags(targetPage, limit));
-          return;
-        }
-
-        setListError("");
-        setTags(res.data);
-      } catch {
-        if (signal?.aborted) return;
-
-        setListError(TagMessages.fetchAllFailed);
-        setTags(createEmptyTags(targetPage, limit));
-      } finally {
-        if (!signal?.aborted) {
-          setLoading(false);
-        }
-      }
-    },
-    [limit],
-  );
+      setTags(res.data.items ?? []);
+      setTotal(res.data.total ?? 0);
+    } catch {
+      setTags([]);
+      setTotal(0);
+      setListError(TagMessages.fetchAllFailed);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit]);
 
   useEffect(() => {
-    const controller = new AbortController();
-
     queueMicrotask(() => {
-      void loadTags(page, controller.signal);
+      void fetchTags();
     });
-
-    return () => {
-      controller.abort();
-    };
-  }, [page, loadTags]);
-
-  const reloadTags = useCallback(
-    async (targetPage = page, delayMs = 0) => {
-      await loadTags(targetPage, undefined, delayMs);
-    },
-    [page, loadTags],
-  );
-
-  const setPage = (nextPage: number) => {
-    if (nextPage === page) return;
-
-    setPageState(nextPage);
-  };
+  }, [fetchTags]);
 
   return {
     tags,
     setTags,
-    page,
-    limit,
     loading,
     listError,
+    page,
+    limit,
+    total,
     setPage,
-    reloadTags,
+    setLimit,
+    setTotal,
+    reload: fetchTags,
   };
 }

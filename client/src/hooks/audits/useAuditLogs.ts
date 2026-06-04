@@ -24,55 +24,36 @@ export function useAuditLogs(initialPage = 1, initialLimit = 10) {
   const [page, setPageState] = useState(initialPage);
   const [limit] = useState(initialLimit);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const loadAudits = useCallback(
-    async (targetPage: number, signal?: AbortSignal) => {
-      setLoading(true);
-      setError("");
+  const fetchAudits = useCallback(async () => {
+    setLoading(true);
+    setError("");
 
-      try {
-        const res = await auditApi.getAll(targetPage, limit);
+    try {
+      const res = await auditApi.getAll(page, limit);
 
-        if (signal?.aborted) return;
-
-        if (!res.success || !res.data) {
-          setError(res.message ?? AuditMessages.fetchAllFailed);
-          setAudits(createEmptyAudits(targetPage, limit));
-          return;
-        }
-
-        setAudits(res.data);
-      } catch {
-        if (signal?.aborted) return;
-
-        setError(AuditMessages.fetchAllFailed);
-        setAudits(createEmptyAudits(targetPage, limit));
-      } finally {
-        if (!signal?.aborted) {
-          setLoading(false);
-        }
+      if (!res.success || !res.data) {
+        setAudits(createEmptyAudits(page, limit));
+        setError(res.message ?? AuditMessages.fetchAllFailed);
+        return;
       }
-    },
-    [limit],
-  );
+
+      setAudits(res.data);
+    } catch {
+      setAudits(createEmptyAudits(page, limit));
+      setError(AuditMessages.fetchAllFailed);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit]);
 
   useEffect(() => {
-    const controller = new AbortController();
-
     queueMicrotask(() => {
-      void loadAudits(page, controller.signal);
+      void fetchAudits();
     });
-
-    return () => {
-      controller.abort();
-    };
-  }, [page, loadAudits]);
-
-  const reload = useCallback(async () => {
-    await loadAudits(page);
-  }, [page, loadAudits]);
+  }, [fetchAudits]);
 
   const setPage = (nextPage: number) => {
     if (nextPage === page) return;
@@ -87,6 +68,6 @@ export function useAuditLogs(initialPage = 1, initialLimit = 10) {
     loading,
     error,
     setPage,
-    reload,
+    reload: fetchAudits,
   };
 }
