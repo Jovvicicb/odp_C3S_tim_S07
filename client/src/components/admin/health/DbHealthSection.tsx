@@ -26,7 +26,7 @@ export function DbHealthSection({
     <SectionCard
       label="Database nodes"
       title="Replication health"
-      description="Review current master and slave roles, database node status and separated read/write operation counters."
+      description="Review current master and slave roles, read availability, database node status and separated read/write operation counters."
       action={
         <CountBadge count={nodes.length} singular="node" plural="nodes" />
       }

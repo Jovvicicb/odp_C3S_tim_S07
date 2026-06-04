@@ -9,6 +9,7 @@ export type DbNodeHealthDto = {
   port: number;
   status: DbNodeStatus;
   lastCheck: string;
+  canServeReads: boolean;
   successfulReads: number;
   failedReads: number;
   successfulWrites: number;

@@ -14,6 +14,7 @@ type Props = {
 export function AdminHealthSummary({ nodes, loading }: Props) {
   const summary = useMemo(() => {
     const totalNodes = nodes.length;
+    const readableNodes = nodes.filter((node) => node.canServeReads).length;
 
     const healthyNodes = nodes.filter((node) =>
       HealthStatusHelper.isHealthy(node.status),
@@ -44,6 +45,7 @@ export function AdminHealthSummary({ nodes, loading }: Props) {
     return {
       totalNodes,
       healthyNodes,
+      readableNodes,
       masterNode,
       overallStatus,
       totalReads,
@@ -99,7 +101,7 @@ export function AdminHealthSummary({ nodes, loading }: Props) {
       <StatCard
         label="Read ops"
         value={summary.totalReads}
-        sub="Successful read connections"
+        sub={`${summary.readableNodes} nodes available for reads`}
         color="text-sky-300"
       />
 

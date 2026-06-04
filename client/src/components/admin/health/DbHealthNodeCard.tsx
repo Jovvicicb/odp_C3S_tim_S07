@@ -1,9 +1,11 @@
 import type { DbNodeHealthDto } from "../../../models/health/DbNodeHealthDto";
 
 import { DbNodeRoleHelper } from "../../../helpers/health/DbNodeRoleHelper";
+import { DbReadAvailabilityHelper } from "../../../helpers/health/DbReadAvailabilityHelper";
 import { DbNodeRoleBadge } from "./DbNodeRoleBadge";
 import { DbNodeStatusBadge } from "./DbNodeStatusBadge";
 import { SectionLabel } from "../../ui/SectionLabel";
+import { Badge } from "../../ui/Badge";
 
 type Props = {
   node: DbNodeHealthDto;
@@ -13,6 +15,11 @@ export function DbHealthNodeCard({ node }: Props) {
   const lastCheck = node.lastCheck
     ? new Date(node.lastCheck).toLocaleString()
     : "Not checked yet";
+
+  const readAvailabilityLabel = DbReadAvailabilityHelper.label(node);
+  const readAvailabilityDescription =
+    DbReadAvailabilityHelper.description(node);
+  const readAvailabilityTone = DbReadAvailabilityHelper.tone(node);
 
   return (
     <article className="group relative overflow-hidden rounded-3xl border border-white/8 bg-white/3 p-5 transition-all hover:-translate-y-0.5 hover:border-sky-300/20 hover:bg-white/5">
@@ -33,11 +40,22 @@ export function DbHealthNodeCard({ node }: Props) {
             <p className="mt-1 text-xs text-white/30">
               {node.host}:{node.port}
             </p>
+
+            <p className="mt-2 text-xs text-white/35">
+              {readAvailabilityDescription}
+            </p>
           </div>
 
           <div className="flex shrink-0 flex-col items-end gap-2">
             <DbNodeRoleBadge role={node.role} />
             <DbNodeStatusBadge status={node.status} />
+
+            <Badge
+              tone={readAvailabilityTone}
+              className="rounded-2xl px-3 py-1"
+            >
+              {readAvailabilityLabel}
+            </Badge>
           </div>
         </div>
 
