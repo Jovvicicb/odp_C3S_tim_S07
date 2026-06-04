@@ -166,4 +166,22 @@ export const postApi: IPostAPIService = {
       .then((r) => r.data)
       .catch((e: ApiClientError) => err(e, PostMessages.feedFetchFailed));
   },
+
+  async getAllForAdmin(page = 1, limit = 10) {
+    return axios
+      .get<ApiResponse<PaginatedListDto<PostWithDetailsDto>>>(
+        `${BASE}/admin/all`,
+        {
+          headers: authHeader(),
+          params: {
+            page,
+            limit,
+          },
+        },
+      )
+      .then((r) => r.data)
+      .catch((e: ApiClientError) =>
+        err(e, PostMessages.fetchAdminPostsFailed),
+      );
+  },
 };

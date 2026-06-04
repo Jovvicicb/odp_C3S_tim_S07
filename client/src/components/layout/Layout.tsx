@@ -57,6 +57,7 @@ export function Layout({ children }: { children: ReactNode }) {
     { to: "/admin", label: "Dashboard" },
     { to: "/admin/users", label: "Users" },
     { to: "/admin/communities", label: "Communities" },
+    { to: "/admin/posts", label: "Posts" },
     { to: "/admin/tags", label: "Tags" },
     { to: "/admin/health", label: "Health" },
     { to: "/admin/audits", label: "Audit logs" },

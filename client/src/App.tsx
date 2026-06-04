@@ -33,6 +33,7 @@ import AdminCommunitiesPage from "./pages/admin/AdminCommunitiesPage";
 import AdminTagsPage from "./pages/admin/AdminTagsPage";
 import AdminHealthPage from "./pages/admin/AdminHealthPage";
 import AdminAuditLogsPage from "./pages/admin/AdminAuditLogsPage";
+import AdminPostsPage from "./pages/admin/AdminPostsPage";
 
 export default function App() {
   return (
@@ -202,6 +203,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <AdminCommunitiesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/posts"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminPostsPage />
           </ProtectedRoute>
         }
       />

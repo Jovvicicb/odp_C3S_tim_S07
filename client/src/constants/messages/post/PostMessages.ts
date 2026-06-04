@@ -15,4 +15,6 @@ createSuccess: "Post created successfully",
   removeTagSuccess: "Tag removed from post successfully",
   feedFetchFailed: "Failed to fetch feed posts",
   fetchByUserFailed: "Failed to fetch user posts",
+  fetchAdminPostsFailed: "Failed to fetch admin posts",
+  deleteSuccess: "Post deleted successfully",
 } as const;

@@ -4,14 +4,24 @@ import { ImageHelper } from "../../../helpers/images/ImageHelper";
 import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
 
 import { Badge } from "../../ui/Badge";
+import { Button } from "../../ui/button/Button";
 import { PostTagBadge } from "../shared/PostTagBadge";
 
 type Props = {
   post: PostWithDetailsDto;
   showCommunity?: boolean;
+  showDeleteAction?: boolean;
+  deleteLoading?: boolean;
+  onDelete?: (postId: number) => void;
 };
 
-export function PostCard({ post, showCommunity = false }: Props) {
+export function PostCard({
+  post,
+  showCommunity = false,
+  showDeleteAction = false,
+  deleteLoading = false,
+  onDelete,
+}: Props) {
   const navigate = useNavigate();
 
   const imageUrl = ImageHelper.getImageUrl(post.mediaUrl);
@@ -93,6 +103,19 @@ export function PostCard({ post, showCommunity = false }: Props) {
                 {post.commentCount === 1 ? "comment" : "comments"}
               </Badge>
             </div>
+
+            {showDeleteAction && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <Button
+                  label="Delete"
+                  loadingLabel="Deleting..."
+                  loading={deleteLoading}
+                  variant="danger"
+                  size="sm"
+                  onClick={() => onDelete?.(post.id)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
