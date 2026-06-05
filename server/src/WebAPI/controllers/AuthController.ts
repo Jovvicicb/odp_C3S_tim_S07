@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { IAuthService } from "../../Domain/services/auth/IAuthService";
 import { validateLogin } from "../validators/auth/ValidateLogin";
 import { validateRegister } from "../validators/auth/ValidateRegister";
-import { upload } from "../../Middlewares/multer/multer"
+import { upload } from "../../Middlewares/multer/multer";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { AuthMessages } from "../../Domain/constants/messages/auth/AuthMessages";
 import { RegisterInput } from "../types/auth/RegisterInput";

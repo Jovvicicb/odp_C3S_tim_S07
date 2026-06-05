@@ -1,34 +1,38 @@
 import { Request, Response, Router } from "express";
-import { IPostService } from "../../Domain/services/posts/IPostService";
-import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
-import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
-import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/users/UserRole";
-import { upload } from "../../Middlewares/multer/multer";
-import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
-import { CreatePostInput } from "../types/posts/CreatePostInput";
-import { IpHelper } from "../../Shared/helpers/IpHelper";
-import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
+
 import { PostLogMessages } from "../../Domain/constants/messages/posts/PostLogMessages";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
-import { validateCreatePost } from "../validators/posts/ValidateCreatePost";
-import { parseStringValue } from "../parser/common/ParseStringValue";
-import { parseId } from "../parser/common/ParseId";
-import { validateId } from "../validators/common/ValidateId";
-import { UpdatePostInput } from "../types/posts/UpdatePostInput";
-import { validateUpdatePost } from "../validators/posts/ValidateUpdatePost";
-import { validateAddTag } from "../validators/posts/ValidateAddTag";
-import { IPostTagService } from "../../Domain/services/posts/IPostTagService";
-import { IPostLikeService } from "../../Domain/services/posts/IPostLikeService";
-import { parsePagination } from "../parser/common/ParsePagination";
-import { validatePagination } from "../validators/common/ValidatePagination";
-import { GetPostsByCommunityDto } from "../../Domain/DTOs/posts/GetPostsByCommunityDto";
-import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
-import { validatePostSort } from "../validators/posts/ValidatePostSort";
-import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
-import { AddTagInput } from "../types/posts/AddTagInput";
-import { GetPostsByUserDto } from "../../Domain/DTOs/posts/GetPostsByUserDto";
+import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { GetAdminPostsDto } from "../../Domain/DTOs/posts/GetAdminPostsDto";
+import { GetPostsByCommunityDto } from "../../Domain/DTOs/posts/GetPostsByCommunityDto";
+import { GetPostsByUserDto } from "../../Domain/DTOs/posts/GetPostsByUserDto";
+import { UserRole } from "../../Domain/enums/users/UserRole";
+import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
+import { IPostLikeService } from "../../Domain/services/posts/IPostLikeService";
+import { IPostService } from "../../Domain/services/posts/IPostService";
+import { IPostTagService } from "../../Domain/services/posts/IPostTagService";
+
+import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
+import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
+import { upload } from "../../Middlewares/multer/multer";
+
+import { IpHelper } from "../../Shared/helpers/IpHelper";
+import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
+import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
+
+import { parseId } from "../parser/common/ParseId";
+import { parsePagination } from "../parser/common/ParsePagination";
+import { parseStringValue } from "../parser/common/ParseStringValue";
+import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
+import { validateId } from "../validators/common/ValidateId";
+import { validatePagination } from "../validators/common/ValidatePagination";
+import { validateAddTag } from "../validators/posts/ValidateAddTag";
+import { validateCreatePost } from "../validators/posts/ValidateCreatePost";
+import { validatePostSort } from "../validators/posts/ValidatePostSort";
+import { validateUpdatePost } from "../validators/posts/ValidateUpdatePost";
+import { AddTagInput } from "../types/posts/AddTagInput";
+import { CreatePostInput } from "../types/posts/CreatePostInput";
+import { UpdatePostInput } from "../types/posts/UpdatePostInput";
 
 export class PostController {
   private readonly router = Router();
@@ -37,20 +41,21 @@ export class PostController {
     private readonly postService: IPostService,
     private readonly postTagService: IPostTagService,
     private readonly postLikeService: IPostLikeService,
-    private readonly logger: ILoggerService) {
-        this.router.get("/posts/community/:communityId",                                                                             this.getByCommunity.bind(this));
-        this.router.get("/posts/feed",               authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getFeed.bind(this));
-        this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
-        this.router.get("/posts/user/:userId",                                                                                       this.getByUser.bind(this));
-        this.router.get("/posts/admin/all",          authenticate, authorize(UserRole.ADMIN),                                        this.getAllForAdmin.bind(this));
-        this.router.get("/posts/:id",                                                                                                this.getById.bind(this));
-        this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
-        this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
-        this.router.post("/posts/:id/like",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.like.bind(this));
-        this.router.delete("/posts/:id/like",        authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.unlike.bind(this));
-        this.router.post("/posts/:id/tags",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.addTag.bind(this));
-        this.router.delete("/posts/:id/tags/:tagId", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeTag.bind(this));
-    }
+    private readonly logger: ILoggerService,
+  ) {
+    this.router.get("/posts/community/:communityId",                                                                             this.getByCommunity.bind(this));
+    this.router.get("/posts/feed",               authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getFeed.bind(this));
+    this.router.post("/posts",                   authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.create.bind(this));
+    this.router.get("/posts/user/:userId",                                                                                       this.getByUser.bind(this));
+    this.router.get("/posts/admin/all",          authenticate, authorize(UserRole.ADMIN),                                        this.getAllForAdmin.bind(this));
+    this.router.get("/posts/:id",                                                                                                this.getById.bind(this));
+    this.router.put("/posts/:id",                authenticate, authorize(UserRole.ADMIN, UserRole.USER), upload.single("image"), this.update.bind(this));
+    this.router.delete("/posts/:id",             authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.delete.bind(this));
+    this.router.post("/posts/:id/like",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.like.bind(this));
+    this.router.delete("/posts/:id/like",        authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.unlike.bind(this));
+    this.router.post("/posts/:id/tags",          authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.addTag.bind(this));
+    this.router.delete("/posts/:id/tags/:tagId", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeTag.bind(this));
+  }
 
 
   private async getByCommunity(req: Request, res: Response): Promise<void> {
@@ -82,12 +87,7 @@ export class PostController {
 
     const sort = validatePostSort(sortParam);
 
-    const dto = new GetPostsByCommunityDto(
-      communityId,
-      page,
-      limit,
-      sort
-    );
+    const dto = new GetPostsByCommunityDto(communityId, page, limit, sort);
 
     const viewer = OptionalAuthHelper.getUser(req);
 
@@ -103,7 +103,6 @@ export class PostController {
       });
     }
   }
-
 
   private async getFeed(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
@@ -135,7 +134,6 @@ export class PostController {
     }
   }
 
-
   private async create(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
 
@@ -152,12 +150,13 @@ export class PostController {
       return;
     }
 
-    const ctx = IpHelper.buildAuditContext(req,userId);
+    const ctx = IpHelper.buildAuditContext(req, userId);
     try{
-      const result = await this.postService.create(dto,ctx);
+      const result = await this.postService.create(dto, ctx);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name, PostLogMessages.createFailed, err instanceof Error ? err : null);
+      this.logger.error(this.constructor.name, PostLogMessages.createFailed, err instanceof Error ? err : null);    
+
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: PostMessages.createFailed
@@ -183,11 +182,10 @@ export class PostController {
     const viewer = OptionalAuthHelper.getUser(req);
 
     try {
-      const result = await this.postService.getByUser( dto, viewer?.id, viewer?.role,);
-
+      const result = await this.postService.getByUser(dto, viewer?.id, viewer?.role);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(this.constructor.name, PostLogMessages.getByUserFailed, err instanceof Error ? err : null,);
+      this.logger.error(this.constructor.name, PostLogMessages.getByUserFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -217,11 +215,7 @@ export class PostController {
       const result = await this.postService.getAllForAdmin(dto);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(
-        this.constructor.name,
-        PostLogMessages.findAllFailed,
-        err instanceof Error ? err : null,
-      );
+      this.logger.error(this.constructor.name, PostLogMessages.findAllFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -275,7 +269,6 @@ export class PostController {
     }
   }
 
-
   private async delete(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -289,7 +282,8 @@ export class PostController {
       return;
     } 
 
-    const ctx = IpHelper.buildAuditContext(req,userId);
+    const ctx = IpHelper.buildAuditContext(req, userId);
+
     try{
       const result = await this.postService.delete(id, ctx, userRole);
       ResponseHelper.send(res, result);
@@ -303,9 +297,6 @@ export class PostController {
     }
   }
 
-
-
-
   private async update(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -315,19 +306,22 @@ export class PostController {
     const v = validateId(id);
 
     if (!v.valid) {
-        res.status(HttpStatus.badRequest).json({ success: false, message: v.message });
+      res.status(HttpStatus.badRequest).json({ success: false, message: v.message });
       return;
     } 
+
     const { validation, dto } = validateUpdatePost(
       req.body as UpdatePostInput,
       req.file
     );
+
     if (!validation.valid || !dto) {
         res.status(HttpStatus.badRequest).json({ success: false, message: validation.message });
         return;
       }
 
-    const ctx = IpHelper.buildAuditContext(req,userId);
+    const ctx = IpHelper.buildAuditContext(req, userId);
+
     try{
       const result = await this.postService.update(id, dto, ctx, userRole);
       ResponseHelper.send(res, result);
@@ -340,8 +334,6 @@ export class PostController {
       });
     }
   }
-
-
 
   private async like(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
@@ -371,8 +363,6 @@ export class PostController {
     }
   }
 
-
-  
   private async unlike(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
 
@@ -415,9 +405,7 @@ export class PostController {
       return;
     }
   
-    const { validation, tagId } = validateAddTag(
-      req.body as AddTagInput
-    );
+    const { validation, tagId } = validateAddTag(req.body as AddTagInput);
   
     if (!validation.valid || !tagId) {
       res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
@@ -425,6 +413,7 @@ export class PostController {
     }
   
     const ctx = IpHelper.buildAuditContext(req, userId);
+
     try {
       const result = await this.postTagService.addTag(postId, tagId, ctx, userRole);
       ResponseHelper.send(res, result);
@@ -462,6 +451,7 @@ export class PostController {
     }
   
     const ctx = IpHelper.buildAuditContext(req, requesterId);
+
     try {
       const result = await this.postTagService.removeTag(postId, tagId, ctx, userRole);
       ResponseHelper.send(res, result);

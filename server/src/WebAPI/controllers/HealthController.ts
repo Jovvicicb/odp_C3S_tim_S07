@@ -1,12 +1,15 @@
 import { Request, Response, Router } from "express";
-import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
-import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
-import { HealthMessages } from "../../Domain/constants/messages/health/HealthMessages";
+
 import { HealthLogMessages } from "../../Domain/constants/messages/health/HealthLogMessages";
+import { HealthMessages } from "../../Domain/constants/messages/health/HealthMessages";
+import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
+import { UserRole } from "../../Domain/enums/users/UserRole";
 import { IHealthService } from "../../Domain/services/health/IHealthService";
+import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
+
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/users/UserRole";
+
 import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 
 export class HealthController {
@@ -14,7 +17,7 @@ export class HealthController {
 
   public constructor(
     private readonly healthService: IHealthService,
-    private readonly logger: ILoggerService
+    private readonly logger: ILoggerService,
   ) {
     this.router.get("/health",                                                    this.getHealth.bind(this));
     this.router.get("/health/db",        authenticate, authorize(UserRole.ADMIN), this.getDbHealth.bind(this));
@@ -44,15 +47,15 @@ export class HealthController {
 
   private async getDbHealth(req: Request, res: Response): Promise<void> {
     try {
-        const result = await this.healthService.getDbHealth();
-        ResponseHelper.send(res, result);
+      const result = await this.healthService.getDbHealth();
+      ResponseHelper.send(res, result);
     } catch (err) {
-        this.logger.error(this.constructor.name, HealthLogMessages.getDbHealthFailed, err instanceof Error ? err : null);
+      this.logger.error(this.constructor.name, HealthLogMessages.getDbHealthFailed, err instanceof Error ? err : null);
 
-        res.status(HttpStatus.internalServerError).json({
-        success: false,
-        message: HealthMessages.dbHealthFetchFailed,
-        });
+      res.status(HttpStatus.internalServerError).json({
+      success: false,
+      message: HealthMessages.dbHealthFetchFailed,
+      });
     }
   }
 
@@ -70,7 +73,5 @@ export class HealthController {
     }
   }
 
-  public getRouter(): Router {
-    return this.router;
-  }
+  public getRouter(): Router { return this.router; }
 }

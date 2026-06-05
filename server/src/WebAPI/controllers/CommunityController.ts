@@ -1,31 +1,34 @@
 import { Request, Response, Router } from "express";
+
+import { CommunityLogMessages } from "../../Domain/constants/messages/community/CommunityLogMessages";
+import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
+import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
+import { DiscoverCommunitiesDto } from "../../Domain/DTOs/community/DiscoverCommunitiesDto";
+import { UserRole } from "../../Domain/enums/users/UserRole";
+import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
+import { ICommunityMemberService } from "../../Domain/services/community/ICommunityMemberService";
 import { ICommunityService } from "../../Domain/services/community/ICommunityService";
+
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/users/UserRole";
 import { upload } from "../../Middlewares/multer/multer";
-import { validateCreateCommunity } from "../validators/community/ValidateCreateCommunity";
+
+import { IpHelper } from "../../Shared/helpers/IpHelper";
+import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
+import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
+
 import { parseId } from "../parser/common/ParseId";
-import { validateId } from "../validators/common/ValidateId";
-import { parseStringValue } from "../parser/common/ParseStringValue";
 import { parsePagination } from "../parser/common/ParsePagination";
-import { validatePagination } from "../validators/common/ValidatePagination";
-import { validateUpdateCommunity } from "../validators/community/ValidateUpdateCommunity";
-import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
-import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
+import { parseStringValue } from "../parser/common/ParseStringValue";
 import { CreateCommunityInput } from "../types/community/CreateCommunityInput";
 import { UpdateCommunityInput } from "../types/community/UpdateCommunityInput";
-import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
-import { CommunityLogMessages } from "../../Domain/constants/messages/community/CommunityLogMessages";
-import { IpHelper } from "../../Shared/helpers/IpHelper";
-import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
-import { ICommunityMemberService } from "../../Domain/services/community/ICommunityMemberService";
+import { validateId } from "../validators/common/ValidateId";
+import { validatePagination } from "../validators/common/ValidatePagination";
+import { validateCommunityDiscoverType } from "../validators/community/ValidateCommunityDiscoverType";
+import { validateCreateCommunity } from "../validators/community/ValidateCreateCommunity";
+import { validateUpdateCommunity } from "../validators/community/ValidateUpdateCommunity";
 import { validateUpdateCommunityMemberRole } from "../validators/community/ValidateUpdateCommunityMemberRole";
 import { validateUpdateCommunityMemberStatus } from "../validators/community/ValidateUpdateCommunityMemberStatus";
-import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
-import { DiscoverCommunitiesDto } from "../../Domain/DTOs/community/DiscoverCommunitiesDto";
-import { validateCommunityDiscoverType } from "../validators/community/ValidateCommunityDiscoverType";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
 
 export class CommunityController {
   private readonly router = Router();
@@ -33,7 +36,8 @@ export class CommunityController {
   public constructor(
     private readonly communityService: ICommunityService,
     private readonly communityMemberService: ICommunityMemberService,
-    private readonly logger: ILoggerService) {
+    private readonly logger: ILoggerService,
+  ) {
     this.router.get("/communities",                                                                                                              this.getPublic.bind(this));
     this.router.get("/communities/discover",                     authenticate, authorize(UserRole.USER, UserRole.ADMIN),                         this.discover.bind(this));
     this.router.get("/communities/mine",                         authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.getMine.bind(this));
@@ -47,23 +51,23 @@ export class CommunityController {
     this.router.patch("/communities/:id/members/:userId/role",   authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.updateMemberRole.bind(this));
     this.router.patch("/communities/:id/members/:userId/status", authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.updateMemberStatus.bind(this));
     this.router.delete("/communities/:id/members/:userId",       authenticate, authorize(UserRole.ADMIN, UserRole.USER),                         this.removeMember.bind(this));
-    this.router.get("/communities/:communityId/join-requests",   authenticate, authorize(UserRole.USER, UserRole.ADMIN),                         this.getJoinRequests.bind(this)
-);
+    this.router.get("/communities/:communityId/join-requests",   authenticate, authorize(UserRole.USER, UserRole.ADMIN),                         this.getJoinRequests.bind(this));
   }
 
   private async getPublic(req: Request, res: Response): Promise<void> {
-    const pageParam   = parseStringValue(req.query.page);
+    const pageParam = parseStringValue(req.query.page);
     const limitParam = parseStringValue(req.query.limit);
    
     const { page, limit } = parsePagination(pageParam, limitParam);
    
-    const paginationValidation  = validatePagination(page, limit);
-    if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
+    const paginationValidation = validatePagination(page, limit);
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
       return;
     } 
 
     const viewer = OptionalAuthHelper.getUser(req);
+
     try{
       const result = await this.communityService.getPublic(page, limit, viewer?.id);
       ResponseHelper.send(res, result);
@@ -89,7 +93,6 @@ export class CommunityController {
     const { page, limit } = parsePagination(pageParam, limitParam);
 
     const paginationValidation = validatePagination(page, limit);
-
     if (!paginationValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -101,22 +104,13 @@ export class CommunityController {
     const type = validateCommunityDiscoverType(typeParam);
     const search = searchParam ? searchParam : null;
 
-    const dto = new DiscoverCommunitiesDto(
-      page,
-      limit,
-      type,
-      search
-    );
+    const dto = new DiscoverCommunitiesDto(page, limit, type, search);
 
     try {
       const result = await this.communityService.discover(dto, userId);
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(
-        this.constructor.name,
-        CommunityLogMessages.discoverFailed,
-        err instanceof Error ? err : null
-      );
+      this.logger.error(this.constructor.name, CommunityLogMessages.discoverFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -125,18 +119,17 @@ export class CommunityController {
     }
   }
 
-
   private async getMine(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
 
-    const pageParam   = parseStringValue(req.query.page);
+    const pageParam = parseStringValue(req.query.page);
     const limitParam = parseStringValue(req.query.limit);
    
     const { page, limit } = parsePagination(pageParam, limitParam);
    
-    const paginationValidation  = validatePagination(page, limit);
-    if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
+    const paginationValidation = validatePagination(page, limit);
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
       return;
     } 
 
@@ -155,18 +148,19 @@ export class CommunityController {
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
-    const pageParam   = parseStringValue(req.query.page);
+    const pageParam = parseStringValue(req.query.page);
     const limitParam = parseStringValue(req.query.limit);
    
     const { page, limit } = parsePagination(pageParam, limitParam);
    
-    const paginationValidation  = validatePagination(page, limit);
-    if (!paginationValidation .valid) {
-       res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
+    const paginationValidation = validatePagination(page, limit);
+    if (!paginationValidation.valid) {
+      res.status(HttpStatus.badRequest).json({ success: false, message: paginationValidation.message });
       return;
     } 
 
     const viewer = OptionalAuthHelper.getUser(req);
+
     try{
       const result = await this.communityService.getAll(page, limit, viewer?.id);
       ResponseHelper.send(res, result);
@@ -208,6 +202,7 @@ export class CommunityController {
     }
 
     const viewer = OptionalAuthHelper.getUser(req);
+
     try {
       const result = await this.communityService.getById(page, limit, id, viewer?.id, viewer?.role);
       ResponseHelper.send(res, result);
@@ -220,7 +215,6 @@ export class CommunityController {
       });
     }
   }
-
 
   private async create(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
@@ -238,19 +232,20 @@ export class CommunityController {
       return;
     }
 
-    const ctx = IpHelper.buildAuditContext(req,userId);
+    const ctx = IpHelper.buildAuditContext(req, userId);
+
     try{
-      const result = await this.communityService.create(dto,ctx);
+      const result = await this.communityService.create(dto, ctx);
       ResponseHelper.send(res, result);
     }catch(err){
       this.logger.error(this.constructor.name, CommunityLogMessages.createFailed, err instanceof Error ? err : null);
+
       res.status(HttpStatus.internalServerError).json({
         success: false,
         message: CommunityMessages.createFailed
       });
     }
   }
-
 
   private async update(req: Request, res: Response): Promise<void> {
     const userId = req.user!.id;
@@ -268,17 +263,19 @@ export class CommunityController {
       req.body as UpdateCommunityInput,
       req.file
     );
+
     if (!validation.valid || !dto) {
         res.status(HttpStatus.badRequest).json({ success: false, message: validation.message });
         return;
       }
 
     const ctx = IpHelper.buildAuditContext(req, userId);
+
     try{
       const result = await this.communityService.update(id, dto, ctx, userRole);
       ResponseHelper.send(res, result);
     }catch(err){
-      this.logger.error(this.constructor.name,CommunityLogMessages.updateFailed, err instanceof Error ? err : null);
+      this.logger.error(this.constructor.name, CommunityLogMessages.updateFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -300,7 +297,8 @@ export class CommunityController {
       return;
     } 
 
-    const ctx = IpHelper.buildAuditContext(req,userId);
+    const ctx = IpHelper.buildAuditContext(req, userId);
+
     try{
       const result = await this.communityService.delete(id, ctx, userRole);
       ResponseHelper.send(res, result);
@@ -372,8 +370,6 @@ export class CommunityController {
     }
   }
 
-
-
   private async updateMemberRole(req: Request, res: Response): Promise<void> {
     const requesterId = req.user!.id;
 
@@ -397,7 +393,7 @@ export class CommunityController {
 
     const { role } = req.body as { role?: string };
 
-    const {validation, normalizedRole} = validateUpdateCommunityMemberRole(role);
+    const { validation, normalizedRole } = validateUpdateCommunityMemberRole(role);
 
     if (!validation.valid || !normalizedRole) {
       res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
@@ -405,6 +401,7 @@ export class CommunityController {
     }
 
     const ctx = IpHelper.buildAuditContext(req, requesterId);
+
     try {
       const result = await this.communityMemberService.updateMemberRole(communityId, targetUserId, normalizedRole, ctx);
       ResponseHelper.send(res, result);
@@ -417,7 +414,6 @@ export class CommunityController {
       });
     }
   }
-
 
   private async updateMemberStatus(req: Request, res: Response): Promise<void> {
     const requesterId = req.user!.id;
@@ -442,7 +438,7 @@ export class CommunityController {
 
     const { action } = req.body as { action?: string };
 
-    const {validation, normalizedAction} = validateUpdateCommunityMemberStatus(action);
+    const { validation, normalizedAction } = validateUpdateCommunityMemberStatus(action);
 
     if (!validation.valid || !normalizedAction) {
       res.status(HttpStatus.badRequest).json({success: false, message: validation.message});
@@ -450,6 +446,7 @@ export class CommunityController {
     }
 
     const ctx = IpHelper.buildAuditContext(req, requesterId);
+
     try {
       const result = await this.communityMemberService.updateMemberStatus(communityId, targetUserId, normalizedAction, ctx);
       ResponseHelper.send(res, result);
@@ -462,7 +459,6 @@ export class CommunityController {
       });
     }
   }
-
 
   private async removeMember(req: Request, res: Response): Promise<void> {
     const requesterId = req.user!.id;
@@ -486,6 +482,7 @@ export class CommunityController {
     }
 
     const ctx = IpHelper.buildAuditContext(req, requesterId);
+
     try {
       const result = await this.communityMemberService.removeMember(communityId, targetUserId, ctx);
       ResponseHelper.send(res, result);
@@ -511,7 +508,6 @@ export class CommunityController {
     const { page, limit } = parsePagination(pageParam, limitParam);
 
     const communityIdValidation = validateId(communityId);
-
     if (!communityIdValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -521,7 +517,6 @@ export class CommunityController {
     }
 
     const paginationValidation = validatePagination(page, limit);
-
     if (!paginationValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -541,11 +536,7 @@ export class CommunityController {
 
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(
-        this.constructor.name,
-        CommunityLogMessages.getJoinRequestsFailed,
-        err instanceof Error ? err : null
-      );
+      this.logger.error(this.constructor.name, CommunityLogMessages.getJoinRequestsFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,

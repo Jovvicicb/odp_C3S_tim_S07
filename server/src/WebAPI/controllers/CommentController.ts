@@ -1,28 +1,32 @@
 import { Request, Response, Router } from "express";
-import { ICommentService } from "../../Domain/services/comments/ICommentService";
-import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
-import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
-import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/users/UserRole";
-import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
-import { validateCreateComment } from "../validators/comments/ValidateCreateComment";
-import { CreateCommentInput } from "../types/comments/CreateCommentInput";
-import { IpHelper } from "../../Shared/helpers/IpHelper";
-import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
+
 import { CommentLogMessages } from "../../Domain/constants/messages/comments/CommentLogMessages";
 import { CommentMessages } from "../../Domain/constants/messages/comments/CommentMessages";
-import { parseStringValue } from "../parser/common/ParseStringValue";
-import { parseId } from "../parser/common/ParseId";
-import { validateId } from "../validators/common/ValidateId";
-import { validateUpdateComment } from "../validators/comments/ValidateUpdateComment";
-import { UpdateCommentInput } from "../types/comments/UpdateCommentInput";
-import { ICommentLikeService } from "../../Domain/services/comments/ICommentLikeService";
-import { parsePagination } from "../parser/common/ParsePagination";
-import { validatePagination } from "../validators/common/ValidatePagination";
+import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { GetCommentsByPostDto } from "../../Domain/DTOs/comments/GetCommentsByPostDto";
-import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
-import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
 import { GetCommentsByUserDto } from "../../Domain/DTOs/comments/GetCommentsByUserDto";
+import { UserRole } from "../../Domain/enums/users/UserRole";
+import { ICommentLikeService } from "../../Domain/services/comments/ICommentLikeService";
+import { ICommentService } from "../../Domain/services/comments/ICommentService";
+import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
+
+import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
+import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
+
+import { IpHelper } from "../../Shared/helpers/IpHelper";
+import { OptionalAuthHelper } from "../../Shared/helpers/OptionalAuthHelper";
+import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
+
+import { parseId } from "../parser/common/ParseId";
+import { parsePagination } from "../parser/common/ParsePagination";
+import { parseStringValue } from "../parser/common/ParseStringValue";
+import { CreateCommentInput } from "../types/comments/CreateCommentInput";
+import { UpdateCommentInput } from "../types/comments/UpdateCommentInput";
+import { validateCommentSort } from "../validators/comments/ValidateCommentSort";
+import { validateCreateComment } from "../validators/comments/ValidateCreateComment";
+import { validateUpdateComment } from "../validators/comments/ValidateUpdateComment";
+import { validateId } from "../validators/common/ValidateId";
+import { validatePagination } from "../validators/common/ValidatePagination";
 
 export class CommentController {
   private readonly router = Router();
@@ -30,8 +34,7 @@ export class CommentController {
   public constructor(
     private readonly commentService: ICommentService,
     private readonly commentLikeService: ICommentLikeService,
-    private readonly logger: ILoggerService
-    
+    private readonly logger: ILoggerService,
   ) {
     this.router.get("/comments/post/:postId",                                                                this.getByPost.bind(this));
     this.router.get("/comments/user/:userId",                                                                this.getByUser.bind(this));
@@ -54,7 +57,6 @@ export class CommentController {
     const { page, limit } = parsePagination(pageParam, limitParam);
 
     const postIdValidation = validateId(postId);
-
     if (!postIdValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -64,7 +66,6 @@ export class CommentController {
     }
 
     const paginationValidation = validatePagination(page, limit);
-
     if (!paginationValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -75,22 +76,12 @@ export class CommentController {
 
     const sort = validateCommentSort(sortParam);
     
-    const dto = new GetCommentsByPostDto(
-      postId,
-      page,
-      limit,
-      sort
-    );
+    const dto = new GetCommentsByPostDto(postId, page, limit, sort);
 
     const viewer = OptionalAuthHelper.getUser(req);
 
     try {
-      const result = await this.commentService.getByPost(
-        dto,
-        viewer?.id,
-        viewer?.role
-      );
-
+      const result = await this.commentService.getByPost(dto, viewer?.id, viewer?.role);
       ResponseHelper.send(res, result);
     } catch (err) {
       this.logger.error(this.constructor.name, CommentLogMessages.fetchByPostFailed, err instanceof Error ? err : null);
@@ -112,7 +103,6 @@ export class CommentController {
     const { page, limit } = parsePagination(pageParam, limitParam);
 
     const userIdValidation = validateId(userId);
-
     if (!userIdValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -122,7 +112,6 @@ export class CommentController {
     }
 
     const paginationValidation = validatePagination(page, limit);
-
     if (!paginationValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -137,14 +126,9 @@ export class CommentController {
 
     try {
       const result = await this.commentService.getByUser(dto, viewer?.id, viewer?.role);
-
       ResponseHelper.send(res, result);
     } catch (err) {
-      this.logger.error(
-        this.constructor.name,
-        CommentLogMessages.fetchByUserFailed,
-        err instanceof Error ? err : null,
-      );
+      this.logger.error(this.constructor.name, CommentLogMessages.fetchByUserFailed, err instanceof Error ? err : null);
 
       res.status(HttpStatus.internalServerError).json({
         success: false,
@@ -170,7 +154,8 @@ export class CommentController {
       return;
     }
 
-    const ctx = IpHelper.buildAuditContext(req,userId);
+    const ctx = IpHelper.buildAuditContext(req, userId);
+
     try {
       const result = await this.commentService.create(dto, ctx);
       ResponseHelper.send(res, result);
@@ -191,7 +176,6 @@ export class CommentController {
     const id = parseId(idParam);
 
     const idValidation = validateId(id);
-
     if (!idValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -213,6 +197,7 @@ export class CommentController {
     }
 
     const ctx = IpHelper.buildAuditContext(req, userId);
+
     try {
       const result = await this.commentService.update(id, dto, ctx);
       ResponseHelper.send(res, result);
@@ -234,7 +219,6 @@ export class CommentController {
     const id = parseId(idParam);
 
     const idValidation = validateId(id);
-
     if (!idValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -244,6 +228,7 @@ export class CommentController {
     }
 
     const ctx = IpHelper.buildAuditContext(req, userId);
+
     try {
       const result = await this.commentService.delete(id, ctx, userRole);
       ResponseHelper.send(res, result);
@@ -263,7 +248,6 @@ export class CommentController {
     const commentId = parseId(commentIdParam);
 
     const commentIdValidation = validateId(commentId);
-
     if (!commentIdValidation.valid) {
       res.status(HttpStatus.badRequest).json({
         success: false,
@@ -332,6 +316,7 @@ export class CommentController {
     }
 
     const ctx = IpHelper.buildAuditContext(req, userId);
+
     try {
       const result = await this.commentService.flag(id, ctx, userRole);
       ResponseHelper.send(res, result);
@@ -363,6 +348,7 @@ export class CommentController {
     }
 
     const ctx = IpHelper.buildAuditContext(req, userId);
+
     try {
       const result = await this.commentService.unflag(id, ctx, userRole);
       ResponseHelper.send(res, result);
