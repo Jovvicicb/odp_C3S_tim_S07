@@ -15,8 +15,8 @@ export default function AdminDashboard() {
       <IntroPanel
         label="Administration"
         title="PulseNet administration"
-        description="Manage platform users, communities, global tags and operational monitoring from one place."
-        highlight="Use the dashboard cards to open each admin section."
+        description="Manage users, communities, posts, global tags, system health and audit activity from one central admin panel."
+        highlight="Use the dashboard cards to quickly open each administrative section."
       />
 
       {error && <ErrorBox message={error} />}
