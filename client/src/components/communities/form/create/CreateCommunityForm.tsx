@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { ErrorBox } from "../../../ui/UI";
+import { ErrorBox } from "../../../ui/feedback/ErrorBox";
 import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
 import { useCreateCommunity } from "../../../../hooks/communities/create/useCreateCommunity";
 import { validateCreateCommunity } from "../../../../validators/community/validateCreateCommunity";

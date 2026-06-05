@@ -1,4 +1,5 @@
-import { ErrorBox, PageHeader } from "../../components/ui/UI";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
 import { AdminCommunitiesSection } from "../../components/admin/communities/AdminCommunitiesSection";
 
 import { useAdminCommunities } from "../../hooks/communities/admin/useAdminCommunities";

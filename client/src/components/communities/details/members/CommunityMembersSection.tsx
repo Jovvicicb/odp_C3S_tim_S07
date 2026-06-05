@@ -3,9 +3,9 @@ import type { CommunityMemberDetailsDto } from "../../../../models/communities/C
 import type { CommunityViewerPermissionsDto } from "../../../../models/communities/CommunityViewerPermissionsDto";
 import type { CommunityMemberRole } from "../../../../types/communities/members/CommunityMemberRole";
 
-import { CountBadge } from "../../../ui/CountBadge";
-import { SectionCard } from "../../../ui/SectionCard";
-import { SectionEmptyState } from "../../../ui/SectionEmptyState";
+import { CountBadge } from "../../../ui/badge/CountBadge";
+import { SectionCard } from "../../../ui/card/SectionCard";
+import { SectionEmptyState } from "../../../ui/empty/SectionEmptyState";
 import { UserCard } from "../../../users/card/UserCard";
 
 type Props = {

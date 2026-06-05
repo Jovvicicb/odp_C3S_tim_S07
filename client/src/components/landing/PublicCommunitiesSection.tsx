@@ -1,7 +1,10 @@
 import { usePublicCommunities } from "../../hooks/communities/public/usePublicCommunities";
 
-import { ErrorBox, Pagination, Spinner } from "../ui/UI";
-import { SectionEmptyState } from "../ui/SectionEmptyState";
+import { ErrorBox } from "../ui/feedback/ErrorBox";
+import { Pagination } from "../ui/pagination/Pagination";
+import { Spinner } from "../ui/spinner/Spinner";
+import { SectionEmptyState } from "../ui/empty/SectionEmptyState";
+
 import { PublicCommunityPreviewCard } from "./PublicCommunityPreviewCard";
 import { PublicCommunitiesHeader } from "./PublicCommunitiesHeader";
 

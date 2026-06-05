@@ -1,5 +1,5 @@
 import type { CommunityDto } from "../../../models/communities/CommunityDto";
-import { Badge } from "../../ui/Badge";
+import { Badge } from "../../ui/badge/Badge";
 import { getCommunityMembershipLabel } from "./CommunityMembershipHelper";
 
 type Props = {

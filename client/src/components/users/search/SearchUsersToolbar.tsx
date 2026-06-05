@@ -1,4 +1,4 @@
-import { SectionLabel } from "../../ui/SectionLabel";
+import { SectionLabel } from "../../ui/label/SectionLabel";
 
 type Props = {
   username: string;

@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
 
-import { RoleBadge } from "../ui/RoleBadge";
+import { RoleBadge } from "../ui/badge/RoleBadge";
 import { SidebarFooter } from "./SidebarFooter";
 import { SidebarGroup } from "./SidebarGroup";
 import { SidebarMyCommunitiesPreview } from "./SidebarMyCommunitiesPreview";

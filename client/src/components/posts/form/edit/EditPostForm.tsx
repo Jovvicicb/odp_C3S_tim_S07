@@ -3,18 +3,23 @@ import { useNavigate } from "react-router-dom";
 
 import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
 import { PostMessages } from "../../../../constants/messages/post/PostMessages";
+
 import { ImageHelper } from "../../../../helpers/images/ImageHelper";
 import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
+
 import { usePostDetails } from "../../../../hooks/posts/details/core/usePostDetails";
 import { usePostImageInput } from "../../../../hooks/posts/create/usePostImageInput";
 import { useUpdatePost } from "../../../../hooks/posts/edit/useUpdatePost";
 import { useToast } from "../../../../hooks/toast/useToast";
+
 import type { PostDetailsDto } from "../../../../models/posts/PostDetailsDto";
+
 import { validateUpdatePost } from "../../../../validators/post/validateUpdatePost";
 
 import { SubmitButton } from "../../../ui/button/SubmitButton";
-import { ErrorBox, Spinner } from "../../../ui/UI";
-import { SectionEmptyState } from "../../../ui/SectionEmptyState";
+import { ErrorBox } from "../../../ui/feedback/ErrorBox";
+import { Spinner } from "../../../ui/spinner/Spinner";
+import { SectionEmptyState } from "../../../ui/empty/SectionEmptyState";
 
 import { PostImageInput } from "../shared/PostImageInput";
 import { PostMarkdownEditor } from "../shared/PostMarkdownEditor";

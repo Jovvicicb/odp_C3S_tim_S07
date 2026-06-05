@@ -1,6 +1,8 @@
 import { AdminAuditSection } from "../../components/audits/AdminAuditSection";
-import { ErrorBox, PageHeader } from "../../components/ui/UI";
+
 import { ActionButton } from "../../components/ui/button/ActionButton";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
 
 import { useAuditLogs } from "../../hooks/audits/useAuditLogs";
 

@@ -1,11 +1,10 @@
-import {
-  ErrorBox,
-  PageHeader,
-  Pagination,
-  Spinner,
-} from "../../components/ui/UI";
-import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+import { SectionEmptyState } from "../../components/ui/empty/SectionEmptyState";
 import { ActionButton } from "../../components/ui/button/ActionButton";
+import { IntroPanel } from "../../components/ui/panel/IntroPanel";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { Pagination } from "../../components/ui/pagination/Pagination";
+import { Spinner } from "../../components/ui/spinner/Spinner";
 
 import { MyCommunitiesList } from "../../components/communities/my/MyCommunitiesList";
 
@@ -13,7 +12,6 @@ import { useMyCommunities } from "../../hooks/communities/my/useMyCommunities";
 import { useMyCommunitiesActions } from "../../hooks/communities/my/useMyCommunitiesActions";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
-import { IntroPanel } from "../../components/ui/IntroPanel";
 
 export default function MyCommunitiesPage() {
   const {

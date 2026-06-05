@@ -1,5 +1,5 @@
 import type { CommunityDetailsTab } from "../../../../types/communities/details/CommunityDetailsTab";
-import { SectionLabel } from "../../../ui/SectionLabel";
+import { SectionLabel } from "../../../ui/label/SectionLabel";
 
 type Props = {
   activeTab: CommunityDetailsTab;

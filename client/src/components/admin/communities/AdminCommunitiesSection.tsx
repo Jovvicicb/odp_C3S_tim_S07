@@ -1,10 +1,12 @@
 import type { CommunityDto } from "../../../models/communities/CommunityDto";
 
+import { CountBadge } from "../../ui/badge/CountBadge";
+import { SectionCard } from "../../ui/card/SectionCard";
+import { SectionEmptyState } from "../../ui/empty/SectionEmptyState";
+import { Pagination } from "../../ui/pagination/Pagination";
+import { Spinner } from "../../ui/spinner/Spinner";
+
 import { CommunityCard } from "../../communities/card/CommunityCard";
-import { CountBadge } from "../../ui/CountBadge";
-import { Pagination, Spinner } from "../../ui/UI";
-import { SectionCard } from "../../ui/SectionCard";
-import { SectionEmptyState } from "../../ui/SectionEmptyState";
 
 type Props = {
   communities: CommunityDto[];

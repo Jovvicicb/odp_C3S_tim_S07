@@ -1,5 +1,6 @@
-import { ErrorBox, PageHeader } from "../../components/ui/UI";
-import { IntroPanel } from "../../components/ui/IntroPanel";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+import { IntroPanel } from "../../components/ui/panel/IntroPanel";
 
 import { AdminHealthSummary } from "../../components/admin/health/AdminHealthSummary";
 import { DbHealthSection } from "../../components/admin/health/DbHealthSection";

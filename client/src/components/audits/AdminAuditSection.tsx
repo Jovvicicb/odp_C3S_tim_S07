@@ -1,7 +1,9 @@
 import type { AuditDto } from "../../models/audits/AuditDto";
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
-import { CountBadge } from "../ui/CountBadge";
-import { SectionCard } from "../ui/SectionCard";
+
+import { CountBadge } from "../ui/badge/CountBadge";
+import { SectionCard } from "../ui/card/SectionCard";
+
 import { AdminAuditTable } from "./AdminAuditTable";
 
 type Props = {

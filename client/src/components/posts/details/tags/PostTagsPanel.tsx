@@ -7,9 +7,9 @@ import type { TagDto } from "../../../../models/tags/TagDto";
 import type { PostTagDto } from "../../../../models/tags/PostTagDto";
 
 import { Button } from "../../../ui/button/Button";
-import { CountBadge } from "../../../ui/CountBadge";
-import { SectionEmptyState } from "../../../ui/SectionEmptyState";
-import { SectionLabel } from "../../../ui/SectionLabel";
+import { CountBadge } from "../../../ui/badge/CountBadge";
+import { SectionEmptyState } from "../../../ui/empty/SectionEmptyState";
+import { SectionLabel } from "../../../ui/label/SectionLabel";
 import { PostTagBadge } from "../../shared/PostTagBadge";
 
 type Props = {

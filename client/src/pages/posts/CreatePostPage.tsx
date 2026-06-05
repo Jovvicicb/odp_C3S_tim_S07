@@ -1,7 +1,8 @@
-import CreatePostForm from "../../components/posts/form/create/CreatePostForm";
 import { ActionButton } from "../../components/ui/button/ActionButton";
-import { IntroPanel } from "../../components/ui/IntroPanel";
-import { PageHeader } from "../../components/ui/UI";
+import { IntroPanel } from "../../components/ui/panel/IntroPanel";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+
+import CreatePostForm from "../../components/posts/form/create/CreatePostForm";
 
 export default function CreatePostPage() {
   return (

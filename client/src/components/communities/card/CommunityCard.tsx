@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import type { CommunityDto } from "../../../models/communities/CommunityDto";
 import { ImageHelper } from "../../../helpers/images/ImageHelper";
-import { SectionLabel } from "../../ui/SectionLabel";
+import { SectionLabel } from "../../ui/label/SectionLabel";
 
 import { CommunityMembershipButton } from "../shared/CommunityMembershipButton";
 import { CommunityAvatar } from "./CommunityAvatar";

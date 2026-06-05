@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
-import { CountBadge } from "../ui/CountBadge";
-import { SectionLabel } from "../ui/SectionLabel";
+import { CountBadge } from "../ui/badge/CountBadge";
+import { SectionLabel } from "../ui/label/SectionLabel";
 
 type Props = {
   total: number;

@@ -1,5 +1,6 @@
 import { ActionButton } from "../../components/ui/button/ActionButton";
-import { ErrorBox, PageHeader } from "../../components/ui/UI";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
 
 import { DashboardFeedSection } from "../../components/dashboard/DashboardFeedSection";
 import { DashboardStatsGrid } from "../../components/dashboard/DashboardStatsGrid";

@@ -1,13 +1,15 @@
 import { useParams } from "react-router-dom";
 
 import { ActionButton } from "../../components/ui/button/ActionButton";
-import { ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
-import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+import { IntroPanel } from "../../components/ui/panel/IntroPanel";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+import { Spinner } from "../../components/ui/spinner/Spinner";
+import { SectionEmptyState } from "../../components/ui/empty/SectionEmptyState";
 
 import { EditCommunityForm } from "../../components/communities/form/edit/EditCommunityForm";
 
 import { useCommunityDetails } from "../../hooks/communities/core/useCommunityDetails";
-import { IntroPanel } from "../../components/ui/IntroPanel";
 
 export default function EditCommunityPage() {
   const { id } = useParams();

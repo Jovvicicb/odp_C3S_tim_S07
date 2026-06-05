@@ -4,9 +4,9 @@ import type { UserDto } from "../../../models/users/UserDto";
 import type { UserFollowStatus } from "../../../types/users/UserFollowStatus";
 
 import { ActionButton } from "../../ui/button/ActionButton";
-import { Badge } from "../../ui/Badge";
-import { RoleBadge } from "../../ui/RoleBadge";
-import { SectionLabel } from "../../ui/SectionLabel";
+import { Badge } from "../../ui/badge/Badge";
+import { RoleBadge } from "../../ui/badge/RoleBadge";
+import { SectionLabel } from "../../ui/label/SectionLabel";
 
 import { UserAvatar } from "../shared/UserAvatar";
 import { UserFollowButton } from "../shared/UserFollowButton";

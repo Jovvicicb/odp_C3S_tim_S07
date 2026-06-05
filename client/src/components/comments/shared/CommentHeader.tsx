@@ -1,6 +1,6 @@
 import type { CommentTreeDto } from "../../../models/comments/CommentTreeDto";
 
-import { Badge } from "../../ui/Badge";
+import { Badge } from "../../ui/badge/Badge";
 
 type Props = {
   comment: CommentTreeDto;

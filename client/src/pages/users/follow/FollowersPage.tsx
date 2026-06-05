@@ -1,21 +1,19 @@
 import { useParams } from "react-router-dom";
 
-import {
-  ErrorBox,
-  PageHeader,
-  Pagination,
-  Spinner,
-} from "../../../components/ui/UI";
-import { CountBadge } from "../../../components/ui/CountBadge";
-import { SectionCard } from "../../../components/ui/SectionCard";
+import { CountBadge } from "../../../components/ui/badge/CountBadge";
+import { SectionCard } from "../../../components/ui/card/SectionCard";
+import { SectionEmptyState } from "../../../components/ui/empty/SectionEmptyState";
+import { ActionButton } from "../../../components/ui/button/ActionButton";
+import { PageHeader } from "../../../components/ui/layout/PageHeader";
+import { ErrorBox } from "../../../components/ui/feedback/ErrorBox";
+import { Pagination } from "../../../components/ui/pagination/Pagination";
+import { Spinner } from "../../../components/ui/spinner/Spinner";
 
 import { FollowersList } from "../../../components/users/follow/FollowersList";
 
 import { useAuth } from "../../../hooks/auth/useAuthHook";
 import { useUserFollowList } from "../../../hooks/users/follow/useUserFollowList";
 import { useFollowersActions } from "../../../hooks/users/follow/useFollowersActions";
-import { SectionEmptyState } from "../../../components/ui/SectionEmptyState";
-import { ActionButton } from "../../../components/ui/button/ActionButton";
 
 export default function FollowersPage() {
   const { id } = useParams();

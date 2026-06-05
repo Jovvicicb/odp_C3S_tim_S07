@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SectionLabel } from "./SectionLabel";
+import { SectionLabel } from "../label/SectionLabel";
 
 type Props = {
   label: string;

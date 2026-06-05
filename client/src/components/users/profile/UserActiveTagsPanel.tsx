@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 
-import { Badge } from "../../ui/Badge";
-import { CountBadge } from "../../ui/CountBadge";
-import { SectionCard } from "../../ui/SectionCard";
-import { SectionEmptyState } from "../../ui/SectionEmptyState";
-import { Spinner } from "../../ui/UI";
+import { Badge } from "../../ui/badge/Badge";
+import { CountBadge } from "../../ui/badge/CountBadge";
+import { SectionCard } from "../../ui/card/SectionCard";
+import { SectionEmptyState } from "../../ui/empty/SectionEmptyState";
+import { Spinner } from "../../ui/spinner/Spinner";
 
 import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
 

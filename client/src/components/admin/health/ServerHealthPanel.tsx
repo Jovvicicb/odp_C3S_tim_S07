@@ -1,10 +1,11 @@
 import type { ServerHealthDto } from "../../../models/health/ServerHealthDto";
 
 import { ServerHealthHelper } from "../../../helpers/health/ServerHealthHelper";
-import { Badge } from "../../ui/Badge";
+
+import { Badge } from "../../ui/badge/Badge";
 import { Button } from "../../ui/button/Button";
-import { SectionCard } from "../../ui/SectionCard";
-import { Spinner } from "../../ui/UI";
+import { SectionCard } from "../../ui/card/SectionCard";
+import { Spinner } from "../../ui/spinner/Spinner";
 
 type Props = {
   serverHealth: ServerHealthDto | null;

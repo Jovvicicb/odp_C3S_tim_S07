@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { renderContentWithMentions } from "../../../helpers/comments/CommentMentionHelper";
 import type { UserProfileCommentDto } from "../../../models/comments/UserProfileCommentDto";
 
-import { Badge } from "../../ui/Badge";
+import { Badge } from "../../ui/badge/Badge";
 
 type Props = {
   comment: UserProfileCommentDto;

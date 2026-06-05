@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import type { CommunityMemberDetailsDto } from "../../../../models/communities/CommunityMemberDetailsDto";
 import { UserAvatar } from "../../../users/shared/UserAvatar";
-import { Badge } from "../../../ui/Badge";
+import { Badge } from "../../../ui/badge/Badge";
 
 type Props = {
   request: CommunityMemberDetailsDto;

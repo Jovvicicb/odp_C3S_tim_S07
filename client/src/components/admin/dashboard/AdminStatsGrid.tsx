@@ -2,9 +2,9 @@ import { useNavigate } from "react-router-dom";
 
 import type { AdminStatisticsDto } from "../../../models/statistics/AdminStatisticsDto";
 
-import { Spinner } from "../../ui/UI";
-import { StatCard } from "../../ui/StatCard";
-import { SectionCard } from "../../ui/SectionCard";
+import { StatCard } from "../../ui/card/StatCard";
+import { SectionCard } from "../../ui/card/SectionCard";
+import { Spinner } from "../../ui/spinner/Spinner";
 
 type Props = {
   statistics: AdminStatisticsDto | null;

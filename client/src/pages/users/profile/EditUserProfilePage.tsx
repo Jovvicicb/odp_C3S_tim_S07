@@ -1,11 +1,14 @@
 import { useParams } from "react-router-dom";
 
 import EditProfileForm from "../../../components/users/profile/edit/EditProfileForm";
-import { ErrorBox, PageHeader, Spinner } from "../../../components/ui/UI";
-import { SectionEmptyState } from "../../../components/ui/SectionEmptyState";
+
+import { SectionEmptyState } from "../../../components/ui/empty/SectionEmptyState";
+import { ErrorBox } from "../../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../../components/ui/layout/PageHeader";
+import { Spinner } from "../../../components/ui/spinner/Spinner";
 
 import { ActionButton } from "../../../components/ui/button/ActionButton";
-import { IntroPanel } from "../../../components/ui/IntroPanel";
+import { IntroPanel } from "../../../components/ui/panel/IntroPanel";
 
 import { useAuth } from "../../../hooks/auth/useAuthHook";
 import { useUserProfile } from "../../../hooks/users/core/useUserProfile";

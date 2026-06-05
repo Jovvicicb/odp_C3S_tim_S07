@@ -1,4 +1,5 @@
-import { ErrorBox, PageHeader } from "../../components/ui/UI";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
 import { ActionButton } from "../../components/ui/button/ActionButton";
 import { AdminPostsSection } from "../../components/admin/posts/AdminPostsSection";
 

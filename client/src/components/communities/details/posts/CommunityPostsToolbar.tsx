@@ -1,6 +1,6 @@
-import { Badge } from "../../../ui/Badge";
+import { Badge } from "../../../ui/badge/Badge";
 import { Button } from "../../../ui/button/Button";
-import { SectionLabel } from "../../../ui/SectionLabel";
+import { SectionLabel } from "../../../ui/label/SectionLabel";
 
 import type { PostTagDto } from "../../../../models/tags/PostTagDto";
 import type { PostSortType } from "../../../../types/posts/PostSortType";

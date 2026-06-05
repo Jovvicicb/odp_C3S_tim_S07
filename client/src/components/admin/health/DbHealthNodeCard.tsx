@@ -2,10 +2,12 @@ import type { DbNodeHealthDto } from "../../../models/health/DbNodeHealthDto";
 
 import { DbNodeRoleHelper } from "../../../helpers/health/DbNodeRoleHelper";
 import { DbReadAvailabilityHelper } from "../../../helpers/health/DbReadAvailabilityHelper";
+
 import { DbNodeRoleBadge } from "./DbNodeRoleBadge";
 import { DbNodeStatusBadge } from "./DbNodeStatusBadge";
-import { SectionLabel } from "../../ui/SectionLabel";
-import { Badge } from "../../ui/Badge";
+
+import { SectionLabel } from "../../ui/label/SectionLabel";
+import { Badge } from "../../ui/badge/Badge";
 
 type Props = {
   node: DbNodeHealthDto;

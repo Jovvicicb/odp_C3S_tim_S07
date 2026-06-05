@@ -3,8 +3,8 @@ import type { CommunityViewerPermissionsDto } from "../../../../models/communiti
 
 import { ImageHelper } from "../../../../helpers/images/ImageHelper";
 
-import { Badge } from "../../../ui/Badge";
-import { SectionLabel } from "../../../ui/SectionLabel";
+import { Badge } from "../../../ui/badge/Badge";
+import { SectionLabel } from "../../../ui/label/SectionLabel";
 
 import { CommunityAvatar } from "../../card/CommunityAvatar";
 import { CommunityMembershipBadge } from "../../card/CommunityMembershipBadge";

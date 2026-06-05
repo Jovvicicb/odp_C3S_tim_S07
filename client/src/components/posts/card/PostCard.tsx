@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ImageHelper } from "../../../helpers/images/ImageHelper";
 import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
 
-import { Badge } from "../../ui/Badge";
+import { Badge } from "../../ui/badge/Badge";
 import { Button } from "../../ui/button/Button";
 import { PostTagBadge } from "../shared/PostTagBadge";
 

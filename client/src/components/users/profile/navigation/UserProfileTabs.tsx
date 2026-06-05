@@ -1,5 +1,6 @@
 import type { UserProfileTab } from "../../../../types/users/profile/UserProfileTab";
-import { SectionLabel } from "../../../ui/SectionLabel";
+
+import { SectionLabel } from "../../../ui/label/SectionLabel";
 
 type Props = {
   activeTab: UserProfileTab;

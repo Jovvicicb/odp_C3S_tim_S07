@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
 
 import { ActionButton } from "../../components/ui/button/ActionButton";
-import { PageHeader } from "../../components/ui/UI";
-import { IntroPanel } from "../../components/ui/IntroPanel";
-import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+import { IntroPanel } from "../../components/ui/panel/IntroPanel";
+import { SectionEmptyState } from "../../components/ui/empty/SectionEmptyState";
 
 import { EditPostForm } from "../../components/posts/form/edit/EditPostForm";
 

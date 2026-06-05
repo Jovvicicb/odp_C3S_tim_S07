@@ -1,15 +1,20 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { ErrorBox } from "../../../ui/UI";
+import { ErrorBox } from "../../../ui/feedback/ErrorBox";
+import { SubmitButton } from "../../../ui/button/SubmitButton";
+
 import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
 import { PostMessages } from "../../../../constants/messages/post/PostMessages";
+
 import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
+
 import { usePostImageInput } from "../../../../hooks/posts/create/usePostImageInput";
 import { useCreatePost } from "../../../../hooks/posts/create/useCreatePost";
 import { useToast } from "../../../../hooks/toast/useToast";
+
 import { validateCreatePost } from "../../../../validators/post/validateCreatePost";
-import { SubmitButton } from "../../../ui/button/SubmitButton";
+
 import { PostImageInput } from "../shared/PostImageInput";
 import { PostMarkdownEditor } from "../shared/PostMarkdownEditor";
 import { PostTitleInput } from "../shared/PostTitleInput";

@@ -1,4 +1,5 @@
-import { ErrorBox, PageHeader } from "../../components/ui/UI";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
 
 import { AdminTagForm } from "../../components/admin/tags/AdminTagForm";
 import { AdminTagsSection } from "../../components/admin/tags/AdminTagsSection";

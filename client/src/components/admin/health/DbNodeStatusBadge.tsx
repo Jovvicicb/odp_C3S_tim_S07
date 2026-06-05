@@ -1,4 +1,5 @@
-import { Badge } from "../../ui/Badge";
+import { Badge } from "../../ui/badge/Badge";
+
 import { HealthStatusHelper } from "../../../helpers/health/HealthStatusHelper";
 
 type Props = {

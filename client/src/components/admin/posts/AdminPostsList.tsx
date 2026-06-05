@@ -1,5 +1,6 @@
-import { Pagination, Spinner } from "../../ui/UI";
-import { SectionEmptyState } from "../../ui/SectionEmptyState";
+import { Pagination } from "../../ui/pagination/Pagination";
+import { Spinner } from "../../ui/spinner/Spinner";
+import { SectionEmptyState } from "../../ui/empty/SectionEmptyState";
 import { PostCard } from "../../posts/card/PostCard";
 
 import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";

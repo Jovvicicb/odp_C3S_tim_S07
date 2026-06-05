@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
 
 import type { UserDto } from "../../../models/users/UserDto";
+
 import type { UserRole } from "../../../types/users/UserRole";
 import type { UserFollowStatus } from "../../../types/users/UserFollowStatus";
 import type { CommunityMemberRole } from "../../../types/communities/members/CommunityMemberRole";
 
-import { RoleBadge } from "../../ui/RoleBadge";
+import { RoleBadge } from "../../ui/badge/RoleBadge";
+
 import { UserAvatar } from "../shared/UserAvatar";
 import { UserCommunityMetaBadges } from "../shared/UserCommunityMetaBadges";
 import { UserFollowButton } from "../shared/UserFollowButton";

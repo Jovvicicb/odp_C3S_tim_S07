@@ -1,5 +1,5 @@
 import type { CommunityMemberRole } from "../../../types/communities/members/CommunityMemberRole";
-import { Badge } from "../../ui/Badge";
+import { Badge } from "../../ui/badge/Badge";
 
 type Props = {
   communityRole?: CommunityMemberRole;

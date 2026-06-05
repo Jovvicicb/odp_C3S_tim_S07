@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
-import { Spinner } from "../ui/UI";
-import { StatCard } from "../ui/StatCard";
+import { Spinner } from "../ui/spinner/Spinner";
+import { StatCard } from "../ui/card/StatCard";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
 

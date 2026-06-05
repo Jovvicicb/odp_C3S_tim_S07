@@ -1,14 +1,20 @@
 import { useState } from "react";
-import { ErrorBox } from "../../../ui/UI";
+
+import { ErrorBox } from "../../../ui/feedback/ErrorBox";
+
 import { FileValidationMessages } from "../../../../constants/messages/common/FileValidationMessages";
-import { ImageHelper } from "../../../../helpers/images/ImageHelper";
-import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
-import { useUpdateMe } from "../../../../hooks/users/settings/useUpdateMe";
-import type { UserDto } from "../../../../models/users/UserDto";
-import { validateUpdateMe } from "../../../../validators/user/validateUpdateMe";
-import { useToast } from "../../../../hooks/toast/useToast";
 import { UserMessages } from "../../../../constants/messages/user/UserMessages";
 import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
+
+import { ImageHelper } from "../../../../helpers/images/ImageHelper";
+import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
+
+import { useUpdateMe } from "../../../../hooks/users/settings/useUpdateMe";
+import { useToast } from "../../../../hooks/toast/useToast";
+
+import type { UserDto } from "../../../../models/users/UserDto";
+
+import { validateUpdateMe } from "../../../../validators/user/validateUpdateMe";
 
 type Props = {
   profile: UserDto;

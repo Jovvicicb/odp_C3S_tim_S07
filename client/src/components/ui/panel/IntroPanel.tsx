@@ -1,4 +1,4 @@
-import { SectionLabel } from "./SectionLabel";
+import { SectionLabel } from "../label/SectionLabel";
 
 type Props = {
   label: string;

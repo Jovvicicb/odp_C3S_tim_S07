@@ -1,8 +1,8 @@
-import { Pagination } from "../../../ui/UI";
-import { CountBadge } from "../../../ui/CountBadge";
-import { SectionCard } from "../../../ui/SectionCard";
-import { SectionEmptyState } from "../../../ui/SectionEmptyState";
-import { SectionLabel } from "../../../ui/SectionLabel";
+import { Pagination } from "../../../ui/pagination/Pagination";
+import { CountBadge } from "../../../ui/badge/CountBadge";
+import { SectionCard } from "../../../ui/card/SectionCard";
+import { SectionEmptyState } from "../../../ui/empty/SectionEmptyState";
+import { SectionLabel } from "../../../ui/label/SectionLabel";
 
 import type { PaginatedListDto } from "../../../../models/common/PaginatedListDto";
 import type { CommentTreeDto } from "../../../../models/comments/CommentTreeDto";

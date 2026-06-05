@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { Layout } from "../layout/Layout";
-import { Spinner } from "../ui/UI";
+import { Spinner } from "../ui/spinner/Spinner";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 
 type Props = {

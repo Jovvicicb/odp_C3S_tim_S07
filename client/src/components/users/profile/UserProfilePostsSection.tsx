@@ -1,7 +1,7 @@
-import { CountBadge } from "../../ui/CountBadge";
-import { Spinner } from "../../ui/UI";
-import { SectionCard } from "../../ui/SectionCard";
-import { SectionEmptyState } from "../../ui/SectionEmptyState";
+import { CountBadge } from "../../ui/badge/CountBadge";
+import { Spinner } from "../../ui/spinner/Spinner";
+import { SectionCard } from "../../ui/card/SectionCard";
+import { SectionEmptyState } from "../../ui/empty/SectionEmptyState";
 import { PostCard } from "../../posts/card/PostCard";
 
 import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";

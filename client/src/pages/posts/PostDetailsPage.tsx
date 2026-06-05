@@ -1,9 +1,11 @@
 import { useNavigate, useParams } from "react-router-dom";
 
-import { ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
-import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+import { SectionEmptyState } from "../../components/ui/empty/SectionEmptyState";
 
 import { ActionButton } from "../../components/ui/button/ActionButton";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+import { Spinner } from "../../components/ui/spinner/Spinner";
 
 import { PostDetailsCard } from "../../components/posts/details/card/PostDetailsCard";
 import { PostCommentsSection } from "../../components/posts/details/comments/PostCommentsSection";

@@ -1,11 +1,9 @@
 import { ActionButton } from "../../components/ui/button/ActionButton";
-import {
-  ErrorBox,
-  PageHeader,
-  Pagination,
-  Spinner,
-} from "../../components/ui/UI";
-import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+import { Pagination } from "../../components/ui/pagination/Pagination";
+import { Spinner } from "../../components/ui/spinner/Spinner";
+import { SectionEmptyState } from "../../components/ui/empty/SectionEmptyState";
 
 import { DiscoverCommunitiesToolbar } from "../../components/communities/discover/DiscoverCommunitiesToolbar";
 import { DiscoverCommunitiesList } from "../../components/communities/discover/DiscoverCommunitiesList";

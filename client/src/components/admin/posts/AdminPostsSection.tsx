@@ -1,7 +1,8 @@
 import type { PostWithDetailsDto } from "../../../models/posts/PostWithDetailsDto";
 
-import { CountBadge } from "../../ui/CountBadge";
-import { SectionCard } from "../../ui/SectionCard";
+import { CountBadge } from "../../ui/badge/CountBadge";
+import { SectionCard } from "../../ui/card/SectionCard";
+
 import { AdminPostsList } from "./AdminPostsList";
 
 type Props = {

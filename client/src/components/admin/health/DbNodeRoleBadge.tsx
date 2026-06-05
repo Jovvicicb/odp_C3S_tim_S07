@@ -1,6 +1,7 @@
 import type { DbNodeRole } from "../../../models/health/DbNodeHealthDto";
 
-import { Badge } from "../../ui/Badge";
+import { Badge } from "../../ui/badge/Badge";
+
 import { DbNodeRoleHelper } from "../../../helpers/health/DbNodeRoleHelper";
 
 type Props = {

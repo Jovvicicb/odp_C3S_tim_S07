@@ -1,7 +1,7 @@
 import type { TagDto } from "../../../models/tags/TagDto";
 
-import { CountBadge } from "../../ui/CountBadge";
-import { SectionCard } from "../../ui/SectionCard";
+import { CountBadge } from "../../ui/badge/CountBadge";
+import { SectionCard } from "../../ui/card/SectionCard";
 import { AdminTagList } from "./AdminTagList";
 
 type Props = {

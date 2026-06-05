@@ -1,7 +1,8 @@
-import CreateCommunityForm from "../../components/communities/form/create/CreateCommunityForm";
 import { ActionButton } from "../../components/ui/button/ActionButton";
-import { IntroPanel } from "../../components/ui/IntroPanel";
-import { PageHeader } from "../../components/ui/UI";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+import { IntroPanel } from "../../components/ui/panel/IntroPanel";
+
+import CreateCommunityForm from "../../components/communities/form/create/CreateCommunityForm";
 
 export default function CreateCommunityPage() {
   return (

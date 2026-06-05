@@ -1,5 +1,6 @@
-import { Pagination, Spinner } from "../../ui/UI";
-import { SectionEmptyState } from "../../ui/SectionEmptyState";
+import { SectionEmptyState } from "../../ui/empty/SectionEmptyState";
+import { Spinner } from "../../ui/spinner/Spinner";
+import { Pagination } from "../../ui/pagination/Pagination";
 
 import { AdminTagCard } from "./AdminTagCard";
 

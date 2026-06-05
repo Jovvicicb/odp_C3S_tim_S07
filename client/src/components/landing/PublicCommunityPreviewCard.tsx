@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ImageHelper } from "../../helpers/images/ImageHelper";
 import type { CommunityDto } from "../../models/communities/CommunityDto";
 
-import { Badge } from "../ui/Badge";
+import { Badge } from "../ui/badge/Badge";
 import { CommunityAvatar } from "../communities/card/CommunityAvatar";
 import { CommunityTypeBadge } from "../communities/card/CommunityTypeBadge";
 

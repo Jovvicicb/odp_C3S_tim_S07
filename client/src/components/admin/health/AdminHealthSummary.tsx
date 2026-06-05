@@ -3,8 +3,9 @@ import { useMemo } from "react";
 import type { DbNodeHealthDto } from "../../../models/health/DbNodeHealthDto";
 
 import { HealthStatusHelper } from "../../../helpers/health/HealthStatusHelper";
-import { Spinner } from "../../ui/UI";
-import { StatCard } from "../../ui/StatCard";
+
+import { Spinner } from "../../ui/spinner/Spinner";
+import { StatCard } from "../../ui/card/StatCard";
 
 type Props = {
   nodes: DbNodeHealthDto[];

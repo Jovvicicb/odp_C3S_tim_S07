@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
-import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+import { Spinner } from "../../components/ui/spinner/Spinner";
+import { SectionEmptyState } from "../../components/ui/empty/SectionEmptyState";
 import { ActionButton } from "../../components/ui/button/ActionButton";
 
 import { CommunityDetailsTabs } from "../../components/communities/details/navigation/CommunityDetailsTabs";

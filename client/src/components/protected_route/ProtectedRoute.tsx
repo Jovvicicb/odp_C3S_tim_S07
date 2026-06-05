@@ -1,8 +1,10 @@
 import React from "react";
+
 import { Navigate, useLocation } from "react-router-dom";
+
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { Layout } from "../layout/Layout";
-import { Spinner } from "../ui/UI";
+import { Spinner } from "../ui/spinner/Spinner";
 
 type Props = {
   children: React.ReactNode;

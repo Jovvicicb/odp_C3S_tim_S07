@@ -1,10 +1,13 @@
 import type { UserDto } from "../../../models/users/UserDto";
+
 import type { UserRole } from "../../../types/users/UserRole";
 
-import { CountBadge } from "../../ui/CountBadge";
-import { Pagination, Spinner } from "../../ui/UI";
-import { SectionCard } from "../../ui/SectionCard";
-import { SectionEmptyState } from "../../ui/SectionEmptyState";
+import { CountBadge } from "../../ui/badge/CountBadge";
+import { Pagination } from "../../ui/pagination/Pagination";
+import { Spinner } from "../../ui/spinner/Spinner";
+import { SectionCard } from "../../ui/card/SectionCard";
+import { SectionEmptyState } from "../../ui/empty/SectionEmptyState";
+
 import { UserCard } from "../../users/card/UserCard";
 
 type Props = {

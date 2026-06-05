@@ -1,5 +1,5 @@
 import type { CommunityDiscoverType } from "../../../types/communities/common/CommunityDiscoverType";
-import { SectionLabel } from "../../ui/SectionLabel";
+import { SectionLabel } from "../../ui/label/SectionLabel";
 
 type Props = {
   search: string;

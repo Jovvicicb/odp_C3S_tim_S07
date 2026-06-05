@@ -1,10 +1,11 @@
 import type { DbNodeHealthDto } from "../../../models/health/DbNodeHealthDto";
 
 import { Button } from "../../ui/button/Button";
-import { CountBadge } from "../../ui/CountBadge";
-import { SectionCard } from "../../ui/SectionCard";
-import { SectionEmptyState } from "../../ui/SectionEmptyState";
-import { Spinner } from "../../ui/UI";
+import { CountBadge } from "../../ui/badge/CountBadge";
+import { SectionCard } from "../../ui/card/SectionCard";
+import { SectionEmptyState } from "../../ui/empty/SectionEmptyState";
+import { Spinner } from "../../ui/spinner/Spinner";
+
 import { DbHealthNodeCard } from "./DbHealthNodeCard";
 
 type Props = {

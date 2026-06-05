@@ -1,4 +1,6 @@
-import { ErrorBox, PageHeader } from "../../components/ui/UI";
+import { ErrorBox } from "../../components/ui/feedback/ErrorBox";
+import { PageHeader } from "../../components/ui/layout/PageHeader";
+
 import { AdminUsersSection } from "../../components/admin/users/AdminUsersSection";
 
 import { useToast } from "../../hooks/toast/useToast";
