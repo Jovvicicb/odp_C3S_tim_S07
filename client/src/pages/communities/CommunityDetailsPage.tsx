@@ -25,7 +25,7 @@ import type { CommunityDetailsTab } from "../../types/communities/details/Commun
 import { CommunityDetailsHero } from "../../components/communities/details/hero/CommunityDetailsHero";
 import { CommunityLockedPanel } from "../../components/communities/details/locked/CommunityLockedPanel";
 import { CommunityMembersSection } from "../../components/communities/details/members/CommunityMembersSection";
-import { useDeleteCommunity } from "../../hooks/communities/details/menagement/useDeleteCommunity";
+import { useDeleteCommunity } from "../../hooks/communities/details/management/useDeleteCommunity";
 
 export default function CommunityDetailsPage() {
   const { id } = useParams();
