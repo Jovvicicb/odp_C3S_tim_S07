@@ -1,61 +1,62 @@
 import "dotenv/config";
-import express from "express";
-import cors from "cors";
 
-import { ConsoleLoggerService } from "./Services/logger/ConsoleLoggerService";
+import cors from "cors";
+import express from "express";
+
 import { DbManager } from "./Database/connection/DbConnectionPool";
 
-import { UserRepository }   from "./Database/repositories/users/UserRepository";
-import { CommunityRepository } from "./Database/repositories/community/CommunityRepository";
-
-
-import { AuthService }   from "./Services/auth/AuthService";
-import { UserService }   from "./Services/users/UserService";
-import { CommunityService } from "./Services/community/CommunityService";
-
-import { AuthController }   from "./WebAPI/controllers/AuthController";
-import { UserController }   from "./WebAPI/controllers/UserController";
-import { CommunityController } from "./WebAPI/controllers/CommunityController";
-
-import { errorHandler } from "./Middlewares/multer/errorHandler";
 import { AuditRepository } from "./Database/repositories/audits/AuditRepository";
-import { AuditService } from "./Services/audits/AuditService";
-import { AuditController } from "./WebAPI/controllers/AuditController";
-import { AuditHelperService } from "./Services/common/AuditHelperService";
-import { UserFollowService } from "./Services/users/UserFollowService";
-import { UserFollowRepository } from "./Database/repositories/users/UserFollowRepository";
-import { CommunityMemberRepository } from "./Database/repositories/community/CommunityMemberRepository";
-import { CommunityMemberService } from "./Services/community/CommunityMemberService";
-import { TagRepository } from "./Database/repositories/tags/TagRepository";
-import { TagService } from "./Services/tags/TagService";
-import { TagController } from "./WebAPI/controllers/TagController";
-import { PostService } from "./Services/posts/PostService";
-import { PostRepository } from "./Database/repositories/posts/PostRepository";
-import { PostController } from "./WebAPI/controllers/PostConntroller";
-import { PostTagRepository } from "./Database/repositories/posts/PostTagRepository";
-import { PostTagService } from "./Services/posts/PostTagService";
-import { PostLikeRepository } from "./Database/repositories/posts/PostLikeRepository";
-import { PostLikeService } from "./Services/posts/PostLikeService";
-import { PostCommentRepository } from "./Database/repositories/posts/PostCommentRepository";
-import { CommentRepository } from "./Database/repositories/comments/CommentRepository";
-import { CommentService } from "./Services/comments/CommentService";
-import { CommentController } from "./WebAPI/controllers/CommentController";
 import { CommentLikeRepository } from "./Database/repositories/comments/CommentLikeRepository";
-import { CommentLikeService } from "./Services/comments/CommentLikeService";
-import { HealthController } from "./WebAPI/controllers/HealthController";
-import { HealthService } from "./Services/health/HealthService";
+import { CommentRepository } from "./Database/repositories/comments/CommentRepository";
+import { CommunityMemberRepository } from "./Database/repositories/community/CommunityMemberRepository";
+import { CommunityRepository } from "./Database/repositories/community/CommunityRepository";
+import { PostCommentRepository } from "./Database/repositories/posts/PostCommentRepository";
+import { PostLikeRepository } from "./Database/repositories/posts/PostLikeRepository";
+import { PostRepository } from "./Database/repositories/posts/PostRepository";
+import { PostTagRepository } from "./Database/repositories/posts/PostTagRepository";
 import { StatisticsRepository } from "./Database/repositories/statistics/StatisticsRepository";
-import { StatisticsService } from "./Services/statistics/StatisticsService";
-import { StatisticsController } from "./WebAPI/controllers/StatisticsController";
-import { CreateAuditDto } from "./Domain/DTOs/audits/CreateAuditDto";
+import { TagRepository } from "./Database/repositories/tags/TagRepository";
+import { UserFollowRepository } from "./Database/repositories/users/UserFollowRepository";
+import { UserRepository } from "./Database/repositories/users/UserRepository";
+
 import { AuditActions } from "./Domain/constants/messages/audits/AuditActions";
 import { AuditDetails } from "./Domain/constants/messages/audits/AuditDetails";
+import { CreateAuditDto } from "./Domain/DTOs/audits/CreateAuditDto";
+
+import { errorHandler } from "./Middlewares/multer/errorHandler";
+
+import { AuditController } from "./WebAPI/controllers/AuditController";
+import { AuthController } from "./WebAPI/controllers/AuthController";
+import { CommentController } from "./WebAPI/controllers/CommentController";
+import { CommunityController } from "./WebAPI/controllers/CommunityController";
+import { HealthController } from "./WebAPI/controllers/HealthController";
+import { PostController } from "./WebAPI/controllers/PostController";
+import { StatisticsController } from "./WebAPI/controllers/StatisticsController";
+import { TagController } from "./WebAPI/controllers/TagController";
+import { UserController } from "./WebAPI/controllers/UserController";
+
+import { AuthService } from "./Services/auth/AuthService";
+import { AuditHelperService } from "./Services/common/AuditHelperService";
+import { AuditService } from "./Services/audits/AuditService";
+import { CommentLikeService } from "./Services/comments/CommentLikeService";
+import { CommentService } from "./Services/comments/CommentService";
+import { CommunityMemberService } from "./Services/community/CommunityMemberService";
+import { CommunityService } from "./Services/community/CommunityService";
+import { HealthService } from "./Services/health/HealthService";
+import { ConsoleLoggerService } from "./Services/logger/ConsoleLoggerService";
+import { PostLikeService } from "./Services/posts/PostLikeService";
+import { PostService } from "./Services/posts/PostService";
+import { PostTagService } from "./Services/posts/PostTagService";
+import { StatisticsService } from "./Services/statistics/StatisticsService";
+import { TagService } from "./Services/tags/TagService";
+import { UserFollowService } from "./Services/users/UserFollowService";
+import { UserService } from "./Services/users/UserService";
 
 export const logger = new ConsoleLoggerService();
 export const db     = new DbManager(logger);
 
 // Repositories
-const userRepo   = new UserRepository(db, logger);
+const userRepo = new UserRepository(db, logger);
 const communityRepo = new CommunityRepository(db, logger);
 const auditRepo = new AuditRepository(db,logger);
 const userFollowRepo = new UserFollowRepository(db,logger);
@@ -72,7 +73,7 @@ const statisticsRepo = new StatisticsRepository(db, logger);
 // Services
 const auditService =new AuditService(auditRepo);
 const auditHelperService = new AuditHelperService(auditService,logger);
-const authService   = new AuthService(userRepo,auditHelperService,db);
+const authService = new AuthService(userRepo,auditHelperService,db);
 
 db.registerFailoverListener(async (event) => {
   await auditHelperService.safeCreate(
@@ -85,9 +86,9 @@ db.registerFailoverListener(async (event) => {
   );
 });
 
-const userService   = new UserService(userRepo,userFollowRepo,auditHelperService,db);
+const userService = new UserService(userRepo,userFollowRepo,auditHelperService,db);
 const communityService = new CommunityService(communityRepo,communityMemberRepo,userRepo,userFollowRepo,auditHelperService,db);
-const userFollowService   = new UserFollowService(userFollowRepo,userRepo,db);
+const userFollowService = new UserFollowService(userFollowRepo,userRepo,db);
 const communityMemberService = new CommunityMemberService(communityMemberRepo,communityRepo,userRepo,userFollowRepo,auditHelperService,db);
 const tagService = new TagService(tagRepo,auditHelperService,db);
 const commentService = new CommentService(commentRepo,postRepo,communityRepo,communityMemberRepo,commentLikeRepo,userRepo,auditHelperService,db);
