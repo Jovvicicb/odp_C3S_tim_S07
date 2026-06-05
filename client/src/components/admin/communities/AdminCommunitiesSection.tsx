@@ -12,7 +12,9 @@ type Props = {
   page: number;
   limit: number;
   total: number;
+  loadingCommunityId: number | null;
   onPageChange: (page: number) => void;
+  onDelete: (communityId: number) => void;
 };
 
 export function AdminCommunitiesSection({
@@ -21,13 +23,15 @@ export function AdminCommunitiesSection({
   page,
   limit,
   total,
+  loadingCommunityId,
   onPageChange,
+  onDelete,
 }: Props) {
   return (
     <SectionCard
       label="Community management"
       title="All communities"
-      description="Review public and private communities across the platform and open community details when moderation is needed."
+      description="Review public and private communities across the platform and remove communities when moderation is needed."
       action={
         <CountBadge count={total} singular="community" plural="communities" />
       }
@@ -45,7 +49,13 @@ export function AdminCommunitiesSection({
         <>
           <div className="flex flex-col gap-5">
             {communities.map((community) => (
-              <CommunityCard key={community.id} community={community} />
+              <CommunityCard
+                key={community.id}
+                community={community}
+                showDeleteAction
+                deleteLoading={loadingCommunityId === community.id}
+                onDelete={onDelete}
+              />
             ))}
           </div>
 

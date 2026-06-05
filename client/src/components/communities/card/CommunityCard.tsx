@@ -8,6 +8,7 @@ import { CommunityMembershipButton } from "../shared/CommunityMembershipButton";
 import { CommunityAvatar } from "./CommunityAvatar";
 import { CommunityTypeBadge } from "./CommunityTypeBadge";
 import { CommunityMembershipBadge } from "./CommunityMembershipBadge";
+import { Button } from "../../ui/button/Button";
 
 type Props = {
   community: CommunityDto;
@@ -18,6 +19,9 @@ type Props = {
   actionLoading?: boolean;
   onJoin?: (communityId: number) => void;
   onLeave?: (communityId: number) => void;
+  showDeleteAction?: boolean;
+  deleteLoading?: boolean;
+  onDelete?: (communityId: number) => void;
 };
 
 export function CommunityCard({
@@ -29,6 +33,9 @@ export function CommunityCard({
   showMembershipAction = false,
   onJoin,
   onLeave,
+  showDeleteAction = false,
+  deleteLoading = false,
+  onDelete,
 }: Props) {
   const navigate = useNavigate();
 
@@ -123,9 +130,24 @@ export function CommunityCard({
             />
           </div>
 
-          <span className="text-xs font-bold text-sky-200/60 transition-colors group-hover:text-sky-200">
-            Open community →
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {showDeleteAction && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <Button
+                  label="Delete"
+                  loadingLabel="Deleting..."
+                  loading={deleteLoading}
+                  variant="danger"
+                  size="sm"
+                  onClick={() => onDelete?.(community.id)}
+                />
+              </div>
+            )}
+
+            <span className="text-xs font-bold text-sky-200/60 transition-colors group-hover:text-sky-200">
+              Open community →
+            </span>
+          </div>
         </div>
       </div>
     </article>

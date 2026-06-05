@@ -37,7 +37,7 @@ export function useAdminCommunities(initialPage = 1, initialLimit = 10) {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -48,6 +48,7 @@ export function useAdminCommunities(initialPage = 1, initialLimit = 10) {
 
   return {
     communities,
+    setCommunities,
     loading,
     error,
     page,
@@ -55,6 +56,7 @@ export function useAdminCommunities(initialPage = 1, initialLimit = 10) {
     total,
     setPage,
     setLimit,
+    setTotal,
     reload: () => fetchCommunities(page, limit),
   };
 }
