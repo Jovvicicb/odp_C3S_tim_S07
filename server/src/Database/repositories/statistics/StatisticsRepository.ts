@@ -75,7 +75,7 @@ export class StatisticsRepository implements IStatisticsRepository {
     const res = await this.db.getReadConnection();
 
     if (!res) {
-      return new AdminStatisticsDto(0, 0, 0);
+      return new AdminStatisticsDto(0, 0, 0, 0);
     }
 
     try {
@@ -87,6 +87,10 @@ export class StatisticsRepository implements IStatisticsRepository {
         `SELECT COUNT(*) as total FROM communities`
       );
 
+      const [postsRows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) as total FROM posts`
+      );
+
       const [tagsRows] = await res.conn.execute<RowDataPacket[]>(
         `SELECT COUNT(*) as total FROM tags`
       );
@@ -94,6 +98,7 @@ export class StatisticsRepository implements IStatisticsRepository {
       return new AdminStatisticsDto(
         Number(usersRows[0]?.total ?? 0),
         Number(communitiesRows[0]?.total ?? 0),
+        Number(postsRows[0]?.total ?? 0),
         Number(tagsRows[0]?.total ?? 0),
       );
     } catch (err) {
@@ -103,7 +108,7 @@ export class StatisticsRepository implements IStatisticsRepository {
         err instanceof Error ? err : null,
       );
 
-      return new AdminStatisticsDto(0, 0, 0);
+      return new AdminStatisticsDto(0, 0, 0, 0);
     } finally {
       res.conn.release();
     }

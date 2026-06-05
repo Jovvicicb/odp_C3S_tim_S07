@@ -53,10 +53,7 @@ export class StatisticsController {
 
 
 
-  private async getAdminDashboardStatistics(
-    req: Request,
-    res: Response,
-  ): Promise<void> {
+  private async getAdminDashboardStatistics(req: Request, res: Response,): Promise<void> {
     try {
       const result = await this.statisticsService.getAdminDashboardStatistics();
       ResponseHelper.send(res, result);
