@@ -1,12 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
-import {
-  Empty,
-  ErrorBox,
-  PageHeader,
-  Spinner,
-} from "../../../components/ui/UI";
+import { ErrorBox, PageHeader, Spinner } from "../../../components/ui/UI";
+import { SectionEmptyState } from "../../../components/ui/SectionEmptyState";
 import { ActionButton } from "../../../components/ui/button/ActionButton";
 import { UserProfileHero } from "../../../components/users/profile/UserProfileHero";
 import { UserProfilePostsSection } from "../../../components/users/profile/UserProfilePostsSection";
@@ -88,7 +84,20 @@ export default function UserProfilePage() {
   }
 
   if (!profile) {
-    return <Empty message="User profile not found." />;
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Users"
+          title="Profile not found"
+          action={<ActionButton variant="back" label="Back" />}
+        />
+
+        <SectionEmptyState
+          title="User profile not found."
+          description="The profile you are trying to open does not exist or is no longer available."
+        />
+      </div>
+    );
   }
 
   return (

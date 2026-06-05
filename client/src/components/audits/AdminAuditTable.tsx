@@ -1,4 +1,4 @@
-import { AuditDisplayHelper } from "../../helpers/audits/AuditDisplayHelper ";
+import { AuditDisplayHelper } from "../../helpers/audits/AuditDisplayHelper";
 import type { AuditDto } from "../../models/audits/AuditDto";
 import type { PaginatedListDto } from "../../models/common/PaginatedListDto";
 import { SectionEmptyState } from "../ui/SectionEmptyState";

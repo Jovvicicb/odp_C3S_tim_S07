@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
+import { ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
+import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
+
 import { ActionButton } from "../../components/ui/button/ActionButton";
 
 import { PostDetailsCard } from "../../components/posts/details/card/PostDetailsCard";
@@ -90,7 +92,20 @@ export default function PostDetailsPage() {
   }
 
   if (!postDetails) {
-    return <Empty message="Post not found." />;
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Post details"
+          title="Post not found"
+          action={<ActionButton variant="back" label="Back" />}
+        />
+
+        <SectionEmptyState
+          title="Post not found."
+          description="The post you are trying to open does not exist, was deleted or is no longer available."
+        />
+      </div>
+    );
   }
 
   return (

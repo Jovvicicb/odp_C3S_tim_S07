@@ -1,7 +1,8 @@
 import { useParams } from "react-router-dom";
 
 import { ActionButton } from "../../components/ui/button/ActionButton";
-import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
+import { ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
+import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
 
 import { EditCommunityForm } from "../../components/communities/form/edit/EditCommunityForm";
 
@@ -29,12 +30,42 @@ export default function EditCommunityPage() {
   }
 
   if (!details) {
-    return <Empty message="Community not found." />;
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Communities"
+          title="Community not found"
+          action={<ActionButton variant="back" label="Back" />}
+        />
+
+        <SectionEmptyState
+          title="Community not found."
+          description="The community you are trying to edit does not exist or is no longer available."
+        />
+      </div>
+    );
   }
 
   if (!details.permissions.canUpdateCommunity) {
     return (
-      <Empty message="You do not have permission to edit this community." />
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Communities"
+          title="Edit community"
+          action={
+            <ActionButton
+              variant="back"
+              label="Back"
+              to={`/communities/${details.community.id}`}
+            />
+          }
+        />
+
+        <SectionEmptyState
+          title="Permission denied."
+          description="You do not have permission to edit this community."
+        />
+      </div>
     );
   }
 

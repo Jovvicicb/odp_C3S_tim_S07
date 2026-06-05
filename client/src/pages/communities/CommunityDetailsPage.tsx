@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { Empty, ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
+import { ErrorBox, PageHeader, Spinner } from "../../components/ui/UI";
+import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
 import { ActionButton } from "../../components/ui/button/ActionButton";
 
 import { CommunityDetailsTabs } from "../../components/communities/details/navigation/CommunityDetailsTabs";
@@ -146,7 +147,20 @@ export default function CommunityDetailsPage() {
   }
 
   if (!details) {
-    return <Empty message="Community not found." />;
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Community details"
+          title="Community not found"
+          action={<ActionButton variant="back" label="Back" />}
+        />
+
+        <SectionEmptyState
+          title="Community not found."
+          description="The community you are trying to open does not exist or is no longer available."
+        />
+      </div>
+    );
   }
 
   const { community, members, canViewContent, permissions } = details;

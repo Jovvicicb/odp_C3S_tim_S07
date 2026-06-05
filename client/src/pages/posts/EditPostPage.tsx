@@ -1,8 +1,9 @@
 import { useParams } from "react-router-dom";
 
 import { ActionButton } from "../../components/ui/button/ActionButton";
-import { Empty, PageHeader } from "../../components/ui/UI";
+import { PageHeader } from "../../components/ui/UI";
 import { IntroPanel } from "../../components/ui/IntroPanel";
+import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
 
 import { EditPostForm } from "../../components/posts/form/edit/EditPostForm";
 
@@ -12,7 +13,20 @@ export default function EditPostPage() {
   const postId = Number(id);
 
   if (Number.isNaN(postId)) {
-    return <Empty message="Invalid post id." />;
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Posts"
+          title="Invalid post"
+          action={<ActionButton variant="back" label="Back" />}
+        />
+
+        <SectionEmptyState
+          title="Invalid post id."
+          description="The post you are trying to edit has an invalid identifier."
+        />
+      </div>
+    );
   }
 
   return (

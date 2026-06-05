@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
 import { PostMessages } from "../../../../constants/messages/post/PostMessages";
 import { ImageHelper } from "../../../../helpers/images/ImageHelper";
@@ -10,8 +11,11 @@ import { useUpdatePost } from "../../../../hooks/posts/edit/useUpdatePost";
 import { useToast } from "../../../../hooks/toast/useToast";
 import type { PostDetailsDto } from "../../../../models/posts/PostDetailsDto";
 import { validateUpdatePost } from "../../../../validators/post/validateUpdatePost";
+
 import { SubmitButton } from "../../../ui/button/SubmitButton";
-import { Spinner, ErrorBox } from "../../../ui/UI";
+import { ErrorBox, Spinner } from "../../../ui/UI";
+import { SectionEmptyState } from "../../../ui/SectionEmptyState";
+
 import { PostImageInput } from "../shared/PostImageInput";
 import { PostMarkdownEditor } from "../shared/PostMarkdownEditor";
 import { PostTitleInput } from "../shared/PostTitleInput";
@@ -36,7 +40,15 @@ export function EditPostForm({ postId }: Props) {
   }
 
   if (!postDetails) {
-    return <ErrorBox message={fetchError || PostMessages.fetchDetailsFailed} />;
+    return (
+      <SectionEmptyState
+        title="Post not found."
+        description={
+          fetchError ||
+          "The post you are trying to edit does not exist or is no longer available."
+        }
+      />
+    );
   }
 
   return <EditPostFieldsForm post={postDetails} />;

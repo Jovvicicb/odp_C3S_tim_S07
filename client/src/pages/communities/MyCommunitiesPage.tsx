@@ -1,10 +1,10 @@
 import {
-  Empty,
   ErrorBox,
   PageHeader,
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
+import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
 import { ActionButton } from "../../components/ui/button/ActionButton";
 
 import { MyCommunitiesList } from "../../components/communities/my/MyCommunitiesList";
@@ -69,7 +69,10 @@ export default function MyCommunitiesPage() {
           <Spinner size={24} />
         </div>
       ) : communities.length === 0 && !error ? (
-        <Empty message="You are not a member of communities yet." />
+        <SectionEmptyState
+          title="You are not a member of any communities yet."
+          description="Discover communities, join the ones you like and they will appear here."
+        />
       ) : (
         <>
           <MyCommunitiesList

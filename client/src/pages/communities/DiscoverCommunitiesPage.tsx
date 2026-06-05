@@ -1,11 +1,11 @@
 import { ActionButton } from "../../components/ui/button/ActionButton";
 import {
-  Empty,
   ErrorBox,
   PageHeader,
   Pagination,
   Spinner,
 } from "../../components/ui/UI";
+import { SectionEmptyState } from "../../components/ui/SectionEmptyState";
 
 import { DiscoverCommunitiesToolbar } from "../../components/communities/discover/DiscoverCommunitiesToolbar";
 import { DiscoverCommunitiesList } from "../../components/communities/discover/DiscoverCommunitiesList";
@@ -82,7 +82,14 @@ export default function DiscoverCommunitiesPage() {
           <Spinner size={24} />
         </div>
       ) : communities.length === 0 && !error ? (
-        <Empty message="No communities found." />
+        <SectionEmptyState
+          title="No communities found."
+          description={
+            search.trim()
+              ? "Try changing your search term or clearing the current filter."
+              : "Communities will appear here when users create them."
+          }
+        />
       ) : (
         <>
           <DiscoverCommunitiesList

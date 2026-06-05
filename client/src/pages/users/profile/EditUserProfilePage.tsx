@@ -1,12 +1,9 @@
 import { useParams } from "react-router-dom";
 
 import EditProfileForm from "../../../components/users/profile/edit/EditProfileForm";
-import {
-  Empty,
-  ErrorBox,
-  PageHeader,
-  Spinner,
-} from "../../../components/ui/UI";
+import { ErrorBox, PageHeader, Spinner } from "../../../components/ui/UI";
+import { SectionEmptyState } from "../../../components/ui/SectionEmptyState";
+
 import { ActionButton } from "../../../components/ui/button/ActionButton";
 import { IntroPanel } from "../../../components/ui/IntroPanel";
 
@@ -34,7 +31,10 @@ export default function EditUserProfilePage() {
           action={<ActionButton variant="back" label="Back" />}
         />
 
-        <Empty message="You can edit only your own profile." />
+        <SectionEmptyState
+          title="Permission denied."
+          description="You can edit only your own profile."
+        />
       </div>
     );
   }
@@ -59,7 +59,10 @@ export default function EditUserProfilePage() {
           <Spinner size={24} />
         </div>
       ) : !profile ? (
-        <Empty message="Profile not found." />
+        <SectionEmptyState
+          title="Profile not found."
+          description="The profile you are trying to edit does not exist or is no longer available."
+        />
       ) : (
         <div className="rounded-3xl border border-white/8 bg-[#0b0f17]/80 p-6 shadow-xl shadow-sky-950/10">
           <EditProfileForm profile={profile} onUpdated={reload} />
