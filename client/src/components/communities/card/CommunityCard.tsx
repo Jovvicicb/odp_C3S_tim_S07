@@ -110,16 +110,11 @@ export function CommunityCard({
             </div>
           </div>
 
-          {showActionButton && (
-            <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-              <CommunityMembershipButton
-                community={displayCommunity}
-                loading={actionLoading}
-                onJoin={onJoin}
-                onLeave={onLeave}
-              />
-            </div>
-          )}
+          <div className="flex shrink-0 flex-col items-end gap-3">
+            <span className="text-xs font-bold text-sky-200/60 transition-colors group-hover:text-sky-200">
+              Open community →
+            </span>
+          </div>
         </div>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/6 pt-4">
@@ -131,6 +126,17 @@ export function CommunityCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {showActionButton && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <CommunityMembershipButton
+                  community={displayCommunity}
+                  loading={actionLoading}
+                  onJoin={onJoin}
+                  onLeave={onLeave}
+                />
+              </div>
+            )}
+
             {showDeleteAction && (
               <div onClick={(e) => e.stopPropagation()}>
                 <Button
@@ -143,10 +149,6 @@ export function CommunityCard({
                 />
               </div>
             )}
-
-            <span className="text-xs font-bold text-sky-200/60 transition-colors group-hover:text-sky-200">
-              Open community →
-            </span>
           </div>
         </div>
       </div>
