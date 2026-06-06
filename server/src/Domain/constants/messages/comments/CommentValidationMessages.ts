@@ -4,5 +4,6 @@ export const CommentValidationMessages = {
 
   invalidPostId: "Invalid post ID",
   invalidParentId: "Invalid parent comment ID",
+  invalidUserId: "Comment user is invalid.",
 
 } as const;

@@ -4,8 +4,9 @@ import { parseId } from "../../parser/common/ParseId";
 import { validateId } from "../common/ValidateId";
 import { AddTagInput } from "../../types/posts/AddTagInput";
 
-export const validateAddTag = (input: AddTagInput): ValidateAddTagResult => {
+export const validateAddTag = (input?: AddTagInput | null): ValidateAddTagResult => {
   if (
+    !input ||
     input.tagId === undefined ||
     input.tagId === null ||
     input.tagId === ""

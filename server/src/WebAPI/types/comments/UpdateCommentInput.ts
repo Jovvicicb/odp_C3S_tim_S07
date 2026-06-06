@@ -1,3 +1,3 @@
 export type UpdateCommentInput = {
-  content?: string;
+  content?: string | null;
 };

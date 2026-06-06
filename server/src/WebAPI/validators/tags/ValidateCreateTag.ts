@@ -4,12 +4,9 @@ import { ValidateCreateTagResult } from "../../../Domain/types/tags/ValidateCrea
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
 export const validateCreateTag = (
-  input: { name?: string | null }
+  input?: { name?: string | null } | null
 ): ValidateCreateTagResult => {
-  const normalizedName =
-    typeof input.name === "string"
-      ? StringNormalizer.normalizeSpaces(input.name).toLowerCase()
-      : "";
+  const normalizedName = StringNormalizer.normalizeSpaces(input?.name).toLowerCase();
 
   if (!normalizedName) {
     return {

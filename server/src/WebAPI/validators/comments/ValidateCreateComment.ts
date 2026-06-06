@@ -6,12 +6,8 @@ import { parseId } from "../../parser/common/ParseId";
 import { validateId } from "../common/ValidateId";
 import { CreateCommentInput } from "../../types/comments/CreateCommentInput";
 
-export const validateCreateComment = (input: CreateCommentInput): ValidateCreateCommentResult => {
-
-  const content =
-  typeof input.content === "string"
-    ? StringNormalizer.normalizeSpaces(input.content)
-    : "";
+export const validateCreateComment = (input?: CreateCommentInput | null): ValidateCreateCommentResult => {
+  const content = StringNormalizer.normalizeSpaces(input?.content);
 
   if (!content) {
     return {
@@ -25,7 +21,7 @@ export const validateCreateComment = (input: CreateCommentInput): ValidateCreate
     };
   }
 
- if (input.postId === undefined || input.postId === null || input.postId === "") {
+  if (!input || input.postId === undefined || input.postId === null || input.postId === "") {
     return {
       validation: { valid: false, message: CommentValidationMessages.invalidPostId }
     };
@@ -53,6 +49,12 @@ export const validateCreateComment = (input: CreateCommentInput): ValidateCreate
         validation: { valid: false, message: CommentValidationMessages.invalidParentId }
       };
     }
+  }
+
+  if (!Number.isInteger(input.userId) || input.userId < 1) {
+    return {
+      validation: { valid: false, message: CommentValidationMessages.invalidUserId }
+    };
   }
 
   return {

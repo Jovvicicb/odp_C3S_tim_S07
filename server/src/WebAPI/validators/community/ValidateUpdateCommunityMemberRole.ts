@@ -3,7 +3,7 @@ import { CommunityMemberRole } from "../../../Domain/enums/communities/Community
 import { ValidateUpdateCommunityMemberRoleResult } from "../../../Domain/types/community/ValidateUpdateCommunityMemberRoleResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
-export const validateUpdateCommunityMemberRole = (role?: string) : ValidateUpdateCommunityMemberRoleResult => {
+export const validateUpdateCommunityMemberRole = (role?: string | null) : ValidateUpdateCommunityMemberRoleResult => {
   const normalizedRole = StringNormalizer.trim(role).toLowerCase();
 
   if (!normalizedRole) {

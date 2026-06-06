@@ -3,14 +3,14 @@ import { ValidationResult } from "../../../Domain/types/ValidationResult";
 
 export const validatePagination = (
   page: number,
-  limit: number
+  limit: number,
 ): ValidationResult => {
-  if (isNaN(page) || page < 1) {
+  if (!Number.isInteger(page) || page < 1) {
     return { valid: false, message: PaginationMessages.invalidPage };
   }
 
-  if (isNaN(limit) || limit < 1 || limit > 100) {
-    return { valid: false, message: PaginationMessages.invalidLimit};
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    return { valid: false, message: PaginationMessages.invalidLimit };
   }
 
   return { valid: true };

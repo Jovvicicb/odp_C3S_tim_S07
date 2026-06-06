@@ -3,8 +3,8 @@ import { UserValidationMessages } from "../../../Domain/constants/messages/user/
 import { ValidateUpdateRoleResult } from "../../../Domain/types/users/ValidateUpdateRoleResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
-export const validateUpdateUserRole = (role?: string): ValidateUpdateRoleResult => {
-  const normalizedRole = (StringNormalizer.trim(role)).toLowerCase();
+export const validateUpdateUserRole = (role?: string | null): ValidateUpdateRoleResult => {
+  const normalizedRole = StringNormalizer.trim(role).toLowerCase();
   
   if (!normalizedRole) {
     return {
@@ -20,6 +20,6 @@ export const validateUpdateUserRole = (role?: string): ValidateUpdateRoleResult 
 
   return {
     validation: { valid: true },
-    normalizedRole: normalizedRole === "user" ? UserRole.USER : UserRole.ADMIN
+    normalizedRole: normalizedRole as UserRole
   };
 };

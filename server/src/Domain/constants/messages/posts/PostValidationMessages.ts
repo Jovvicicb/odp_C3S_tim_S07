@@ -11,5 +11,5 @@ export const PostValidationMessages = {
   noFieldsToUpdate: "No fields to update",
 
   invalidTagId: "Invalid tag ID",
-
+  authorInvalid: "Post author is invalid.",
 } as const;

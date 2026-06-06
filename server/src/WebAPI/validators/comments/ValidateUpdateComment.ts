@@ -5,12 +5,9 @@ import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer
 import { UpdateCommentInput } from "../../types/comments/UpdateCommentInput";
 
 export const validateUpdateComment = (
-    input: UpdateCommentInput
+    input?: UpdateCommentInput | null
 ): ValidateUpdateCommentResult => {
-  const content =
-  typeof input.content === "string"
-    ? StringNormalizer.normalizeSpaces(input.content)
-    : "";
+  const content = StringNormalizer.normalizeSpaces(input?.content);
 
   if (!content) {
     return {

@@ -1,9 +1,10 @@
 import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
+import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
 export const validateCommunityDiscoverType = (
-  type?: string
+  type?: string | null
 ): CommunityType | null => {
-  const normalizedType = type?.trim().toLowerCase();
+  const normalizedType = StringNormalizer.trim(type).toLowerCase();
 
   if (!normalizedType || normalizedType === "all") {
     return null;

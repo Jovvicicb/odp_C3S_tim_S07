@@ -391,7 +391,7 @@ export class CommunityController {
       return;
     }
 
-    const { role } = req.body as { role?: string };
+    const { role } = req.body as { role?: string | null };
 
     const { validation, normalizedRole } = validateUpdateCommunityMemberRole(role);
 
@@ -436,7 +436,7 @@ export class CommunityController {
       return;
     }
 
-    const { action } = req.body as { action?: string };
+    const { action } = req.body as { action?: string | null };
 
     const { validation, normalizedAction } = validateUpdateCommunityMemberStatus(action);
 

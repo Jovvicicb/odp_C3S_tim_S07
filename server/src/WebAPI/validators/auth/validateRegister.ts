@@ -8,13 +8,13 @@ import { RegisterInput } from '../../types/auth/RegisterInput';
 
 
 export const validateRegister = (
-  input: RegisterInput,
+  input?: RegisterInput | null,
   file?: Express.Multer.File
 ): ValidateRegisterResult => {
-  const normalizedUserName = StringNormalizer.trim(input.username);
-  const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname);
-  const normalizedEmail = StringNormalizer.normalizeEmail(input.email);
-  const normalizedBio = StringNormalizer.trim(input.bio);
+  const normalizedUserName = StringNormalizer.trim(input?.username);
+  const normalizedFullname = StringNormalizer.normalizeSpaces(input?.fullname);
+  const normalizedEmail = StringNormalizer.normalizeEmail(input?.email);
+  const normalizedBio = StringNormalizer.trim(input?.bio);
 
   if (!normalizedUserName){
     return {
@@ -45,6 +45,7 @@ export const validateRegister = (
       validation: { valid: false, message: AuthValidationMessages.emailRequired},
     };
   }
+  
   if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(normalizedEmail)) 
   {
     return {
@@ -52,31 +53,31 @@ export const validateRegister = (
     };
   }
 
-  if (!input.password) {
+  if (typeof input?.password !== "string" || !input.password) {
      return {
       validation: { valid: false, message: AuthValidationMessages.passwordRequired},
     };
- }
+  }
     
   if (input.password.length < 8) {
     return {
       validation: { valid: false, message: AuthValidationMessages.passwordInvalid},
     };
- }
+  }
 
   if (!/[A-Z]/.test(input.password)) {
     return {
       validation: { valid: false, message: AuthValidationMessages.passwordInvalid},
     };
-    }
+  }
 
   if (!/[0-9]/.test(input.password)) {
-     return {
+    return {
       validation: { valid: false, message: AuthValidationMessages.passwordInvalid},
     };
  }
   if (normalizedBio.length > 300) {
-     return {
+    return {
       validation: { valid: false, message: AuthValidationMessages.bioTooLong},
     };
   }

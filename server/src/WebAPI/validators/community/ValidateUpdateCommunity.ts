@@ -7,13 +7,18 @@ import { UpdateCommunityInput } from '../../types/community/UpdateCommunityInput
 import { ValidateUpdateCommunityResult } from '../../../Domain/types/community/ValidateUpdateCommunityResult';
 
 export const validateUpdateCommunity = (
-  input: UpdateCommunityInput,
+  input?: UpdateCommunityInput | null,
   file?: Express.Multer.File
 ): ValidateUpdateCommunityResult => {
   const dto: UpdateCommunityDto = {};
 
+  if (!input && !file) {
+    return {
+      validation: { valid: false, message: CommunityValidationMessages.noFieldsToUpdate, },
+    };
+  }
 
-  if (input.name !== undefined && input.name !== null) {
+  if (input?.name !== undefined && input.name !== null) {
     const normalizedName = StringNormalizer.normalizeSpaces(input.name);
 
     if (!normalizedName) {
@@ -34,7 +39,7 @@ export const validateUpdateCommunity = (
     dto.name = normalizedName;
   }
 
-  if (input.description !== undefined && input.description !== null) {
+  if (input?.description !== undefined && input.description !== null) {
     const normalizedDescription = StringNormalizer.trim(input.description);
 
     if (normalizedDescription.length > 500) {
@@ -49,7 +54,7 @@ export const validateUpdateCommunity = (
     dto.description = normalizedDescription ? normalizedDescription : null;
   }
 
-  if (input.rules !== undefined && input.rules !== null) {
+  if (input?.rules !== undefined && input.rules !== null) {
     const normalizedRules = StringNormalizer.trim(input.rules);
 
     if (normalizedRules.length > 500) {
@@ -64,10 +69,10 @@ export const validateUpdateCommunity = (
     dto.rules = normalizedRules ? normalizedRules : null;
   }
   
-  if (input.type !== undefined && input.type !== null) {
+  if (input?.type !== undefined && input.type !== null) {
     const normalizedType = StringNormalizer.trim(input.type).toLowerCase();
 
-    if (normalizedType !== "public" && normalizedType !== "private") {
+    if (normalizedType !== CommunityType.PUBLIC && normalizedType !== CommunityType.PRIVATE) {
       return {
         validation: {
           valid: false,
@@ -77,7 +82,7 @@ export const validateUpdateCommunity = (
     }
 
     dto.type =
-      normalizedType === "public"
+      normalizedType === CommunityType.PUBLIC
         ? CommunityType.PUBLIC
         : CommunityType.PRIVATE;
   }
@@ -106,7 +111,7 @@ export const validateUpdateCommunity = (
     dto.avatar = file.filename;
   }
 
-  if (input.removeAvatar === true || String(input.removeAvatar) === "true") {
+  if (input?.removeAvatar === true || input?.removeAvatar === "true") {
     dto.avatar = null;
   }
 

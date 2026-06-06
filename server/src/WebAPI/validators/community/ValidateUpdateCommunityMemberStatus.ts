@@ -3,7 +3,7 @@ import { CommunityMemberStatusAction } from "../../../Domain/enums/communities/C
 import { ValidateUpdateCommunityMemberStatusResult } from "../../../Domain/types/community/ValidateUpdateCommunityMemberStatusResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
-export const validateUpdateCommunityMemberStatus = (action?: string) : ValidateUpdateCommunityMemberStatusResult => {
+export const validateUpdateCommunityMemberStatus = (action?: string | null) : ValidateUpdateCommunityMemberStatusResult => {
   const normalizedAction = StringNormalizer.trim(action).toLowerCase();
 
   if (!normalizedAction) {

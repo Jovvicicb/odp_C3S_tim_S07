@@ -27,7 +27,7 @@ export class AuthController {
     }
 
   private async login(req: Request, res: Response): Promise<void> {
-    const { username, password } = req.body as { username?: string; password?: string };
+    const { username, password } = req.body as { username?: string | null; password?: string | null };
    
     const {validation, validUserName, validPassword} = validateLogin(username, password);
  

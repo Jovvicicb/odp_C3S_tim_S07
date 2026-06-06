@@ -1,7 +1,7 @@
 import { CreatePostDto } from "../../DTOs/posts/CreatePostDto";
 import { ValidationResult } from "../ValidationResult";
 
-export type ValidateCreatePostResut = {
+export type ValidateCreatePostResult = {
   validation: ValidationResult;
   dto?: CreatePostDto;
 };

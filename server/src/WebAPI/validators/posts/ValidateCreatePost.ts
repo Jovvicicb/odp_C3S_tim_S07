@@ -1,18 +1,18 @@
 import { FileValidationMessages } from "../../../Domain/constants/messages/common/FileValidationMessages";
 import { PostValidationMessages } from "../../../Domain/constants/messages/posts/PostValidationMessages";
 import { CreatePostDto } from "../../../Domain/DTOs/posts/CreatePostDto";
-import { ValidateCreatePostResut } from "../../../Domain/types/posts/ValidateCreatePostResut";
+import { ValidateCreatePostResult } from "../../../Domain/types/posts/ValidateCreatePostResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 import { parseId } from "../../parser/common/ParseId";
 import { CreatePostInput } from "../../types/posts/CreatePostInput";
 import { validateId } from "../common/ValidateId";
 
 export const validateCreatePost = (
-  input: CreatePostInput,
+  input?: CreatePostInput | null,
   file?: Express.Multer.File,
-) : ValidateCreatePostResut => {
-  const title = StringNormalizer.normalizeSpaces(input.title);
-  const content = StringNormalizer.trim(input.content);
+) : ValidateCreatePostResult => {
+  const title = StringNormalizer.normalizeSpaces(input?.title);
+  const content = StringNormalizer.trim(input?.content);
 
   if (!title) {
     return { validation: { valid: false, message: PostValidationMessages.titleRequired } };
@@ -30,19 +30,29 @@ export const validateCreatePost = (
     return { validation: { valid: false, message: PostValidationMessages.contentInvalid } };
   }
 
-  if (!input.communityId) {
+  if (
+    !input ||
+    input.communityId === undefined ||
+    input.communityId === null ||
+    input.communityId === ""
+  ) {
     return { validation: { valid: false, message: PostValidationMessages.communityIdRequired } };
   }
 
-  const communityId = parseId(input.communityId);
+  const communityId = parseId(String(input.communityId));
   const communityIdValidation = validateId(communityId);
+
   if (!communityIdValidation.valid) {
     return {
-        validation: {
+      validation: {
         valid: false,
         message: PostValidationMessages.communityInvalid,
-        },
+      },
     };
+  }
+
+  if (!Number.isInteger(input.authorId) || input.authorId < 1) {
+    return { validation: { valid: false, message: PostValidationMessages.authorInvalid } };
   }
 
   if (file) {

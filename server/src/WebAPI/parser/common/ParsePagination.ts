@@ -1,7 +1,11 @@
-export const parsePagination = (pageParam?: string, limitParam?: string
+import { parseId } from "./ParseId";
+
+export const parsePagination = (
+  pageParam?: string,
+  limitParam?: string,
 ): { page: number; limit: number } => {
-  const page = parseInt(pageParam ?? "1", 10);
-  const limit = Math.min(parseInt(limitParam ?? "20", 10), 100);
+  const page = pageParam ? parseId(pageParam) : 1;
+  const limit = limitParam ? parseId(limitParam) : 20;
 
   return { page, limit };
 };

@@ -192,7 +192,7 @@ export class UserController {
       return;
     }
 
-    const { role } = req.body as { role?: string };
+    const { role } = req.body as { role?: string | null };
     const parsedRole = parseStringValue(role);
 
     const { validation, normalizedRole } = validateUpdateUserRole(parsedRole);

@@ -1,5 +1,5 @@
 export type UpdatePostInput = {
-  title?: string;
-  content?: string;
-  removeMedia?: boolean | string;
+  title?: string | null;
+  content?: string | null;
+  removeMedia?: boolean | string | null;
 };

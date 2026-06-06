@@ -6,19 +6,26 @@ import { CreateCommunityInput } from "../../types/community/CreateCommunityInput
 import { ValidateCreateCommunityResult } from "../../../Domain/types/community/ValidateCreateCommunityResult";
 
 export const validateCreateCommunity = (
-  input: CreateCommunityInput,
+  input?: CreateCommunityInput | null,
   file?: Express.Multer.File
 ): ValidateCreateCommunityResult => {
+  if (!input || !Number.isInteger(input.ownerId) || input.ownerId < 1) {
+    return {
+      validation: { valid: false, message: CommunityValidationMessages.ownerInvalid },
+    };
+  }
+
   const normalizedName = StringNormalizer.normalizeSpaces(input.name);
   const normalizedDescription = StringNormalizer.trim(input.description);
   const normalizedRules = StringNormalizer.trim(input.rules);
-  const normalizedType = (StringNormalizer.trim(input.type) || "public").toLowerCase();
+  const normalizedType = (StringNormalizer.trim(input.type) || CommunityType.PUBLIC).toLowerCase();
 
   if (!normalizedName) {
     return {
       validation: { valid: false, message: CommunityValidationMessages.nameRequired },
     };
   }
+
   if (normalizedName.length < 2 || normalizedName.length > 80) {
     return {
       validation: { valid: false, message: CommunityValidationMessages.nameLength },
@@ -37,7 +44,7 @@ export const validateCreateCommunity = (
     };
   }
 
-  if (normalizedType !== "public" && normalizedType !== "private") {
+  if (normalizedType !== CommunityType.PUBLIC && normalizedType !== CommunityType.PRIVATE) {
     return {
       validation: { valid: false, message: CommunityValidationMessages.invalidType },
     };
@@ -65,7 +72,7 @@ export const validateCreateCommunity = (
       name: normalizedName,
       description: normalizedDescription ? normalizedDescription : null,
       rules: normalizedRules ? normalizedRules : null,
-      type: normalizedType === "public" ? CommunityType.PUBLIC : CommunityType.PRIVATE,
+      type: normalizedType === CommunityType.PUBLIC ? CommunityType.PUBLIC : CommunityType.PRIVATE,
       ownerId: input.ownerId,
       avatar: file?.filename ?? null,
     },

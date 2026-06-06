@@ -1,7 +1,7 @@
 export type CreateCommunityInput = {
-  name?: string;
-  description?: string;
-  rules?: string;
-  type?: string;
+  name?: string | null;
+  description?: string | null;
+  rules?: string | null;
+  type?: string | null;
   ownerId: number;
 };

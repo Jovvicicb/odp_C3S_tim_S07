@@ -1,9 +1,8 @@
 export type UpdateMeInput = {
-  username?: string;
-  fullname?: string;
-  email?: string;
-  password?: string;
-  bio?: string;
-  removeImage?: boolean;
+  username?: string | null;
+  fullname?: string | null;
+  email?: string | null;
+  password?: string | null;
+  bio?: string | null;
+  removeImage?: boolean | string | null;
 };
-

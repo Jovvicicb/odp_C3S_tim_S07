@@ -11,4 +11,5 @@ export const CommunityValidationMessages = {
   invalidStatusAction: "Invalid status action",
   invalidDiscoverType: "Invalid discover type",
   searchTooLong: "Search query is too long",
+  ownerInvalid: "Community owner is invalid.",
 } as const;

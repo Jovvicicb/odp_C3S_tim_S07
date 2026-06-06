@@ -6,13 +6,19 @@ import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer
 import { UpdatePostInput } from "../../types/posts/UpdatePostInput";
 
 export const validateUpdatePost = (
-    input: UpdatePostInput,
+    input?: UpdatePostInput | null,
     file?: Express.Multer.File
 ): ValidateUpdatePostResult => {
 
  const dto: UpdatePostDto = {};
 
-  if (input.title !== undefined) {
+  if (!input && !file) {
+    return {
+      validation: { valid: false, message: PostValidationMessages.noFieldsToUpdate },
+    };
+  }
+
+  if (input?.title !== undefined && input.title !== null) {
     const title = StringNormalizer.normalizeSpaces(input.title);
 
     if (!title) {
@@ -30,7 +36,7 @@ export const validateUpdatePost = (
     dto.title = title;
   }
 
-  if (input.content !== undefined) {
+  if (input?.content !== undefined && input.content !== null) {
     const content = StringNormalizer.trim(input.content);
 
     if (!content) {
@@ -66,7 +72,7 @@ export const validateUpdatePost = (
     dto.mediaUrl = file.filename;
   }
 
-  if (input.removeMedia === true || String(input.removeMedia) === "true") {
+  if (input?.removeMedia === true || input?.removeMedia === "true") {
     dto.mediaUrl = null;
   }
 

@@ -1,7 +1,7 @@
 export type RegisterInput = {
-  username?: string;
-  email?: string;
-  password?: string;
-  fullname?: string;
-  bio?: string;
+  username?: string | null;
+  email?: string | null;
+  password?: string | null;
+  fullname?: string | null;
+  bio?: string | null;
 };

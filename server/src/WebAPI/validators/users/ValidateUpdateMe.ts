@@ -5,10 +5,19 @@ import { ValidateUpdateMeResult } from '../../../Domain/types/users/ValidateUpda
 import { UpdateMeDto } from '../../../Domain/DTOs/users/UpdateMeDto';
 import { UserValidationMessages } from '../../../Domain/constants/messages/user/UserValidationMessages';
 
-export const validateUpdateMe = (input: UpdateMeInput, file?: Express.Multer.File): ValidateUpdateMeResult => {
+export const validateUpdateMe = (input?: UpdateMeInput | null, file?: Express.Multer.File): ValidateUpdateMeResult => {
     const dto: UpdateMeDto = {};
 
-  if (input.username !== undefined) {
+  if (!input && !file) {
+    return {
+      validation: {
+        valid: false,
+        message: UserValidationMessages.noFieldsToUpdate,
+      },
+    };
+  }
+
+  if (input?.username !== undefined && input.username !== null) {
     const normalizedUserName = StringNormalizer.trim(input.username);
 
     if (!normalizedUserName){
@@ -32,7 +41,7 @@ export const validateUpdateMe = (input: UpdateMeInput, file?: Express.Multer.Fil
     dto.username = normalizedUserName;
   }
 
-  if (input.fullname !== undefined) {
+  if (input?.fullname !== undefined) {
         const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname);
 
         if (normalizedFullname.length > 100) {
@@ -44,7 +53,7 @@ export const validateUpdateMe = (input: UpdateMeInput, file?: Express.Multer.Fil
    }
 
 
-  if (input.email !== undefined) {
+  if (input?.email !== undefined && input.email !== null) {
     const normalizedEmail = StringNormalizer.normalizeEmail(input.email);
 
     if (!normalizedEmail) {
@@ -61,9 +70,9 @@ export const validateUpdateMe = (input: UpdateMeInput, file?: Express.Multer.Fil
     dto.email = normalizedEmail;
   }
 
-  if (input.password !== undefined) {
+  if (input?.password !== undefined ) {
 
-    if (!input.password) {
+    if (typeof input.password !== "string" || !input.password) {
         return {
         validation: { valid: false, message: UserValidationMessages.passwordRequired},
         };
@@ -89,7 +98,7 @@ export const validateUpdateMe = (input: UpdateMeInput, file?: Express.Multer.Fil
     dto.password = input.password;
   }
 
-  if (input.bio !== undefined) {
+  if (input?.bio !== undefined) {
     const normalizedBio = StringNormalizer.trim(input.bio);
 
     if (normalizedBio.length > 300) {
@@ -125,7 +134,7 @@ export const validateUpdateMe = (input: UpdateMeInput, file?: Express.Multer.Fil
     dto.profilePicture = file.filename;
   }
 
-  if (input.removeImage === true || String(input.removeImage) === "true") {
+  if (input?.removeImage === true || input?.removeImage === "true") {
     dto.profilePicture = null;
   }
 

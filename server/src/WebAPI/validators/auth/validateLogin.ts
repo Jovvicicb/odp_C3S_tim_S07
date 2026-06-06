@@ -2,8 +2,8 @@ import { AuthValidationMessages } from "../../../Domain/constants/messages/auth/
 import { ValidationLoginResult } from "../../../Domain/types/auth/ValidationLoginResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
-export const validateLogin = (username?: string, password?: string): ValidationLoginResult => {
-  const normalizedUserName = StringNormalizer.normalizeSpaces(username);
+export const validateLogin = (username?: string | null, password?: string | null): ValidationLoginResult => {
+  const normalizedUserName = StringNormalizer.trim(username);
   
   if (!normalizedUserName){
     return {
@@ -23,7 +23,7 @@ export const validateLogin = (username?: string, password?: string): ValidationL
     };
   }
 
-  if (!password) {
+  if (typeof password !== "string" || !password) {
     return {
       validation: { valid: false, message: AuthValidationMessages.passwordRequired }
     };

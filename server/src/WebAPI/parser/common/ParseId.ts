@@ -5,5 +5,11 @@ export const parseId = (value?: string): number => {
     return NaN;
   }
 
-  return Number(raw);
+  const parsedId = Number(raw);
+
+  if (!Number.isSafeInteger(parsedId)) {
+    return NaN;
+  }
+
+  return parsedId;
 };
