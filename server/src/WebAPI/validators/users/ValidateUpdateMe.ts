@@ -3,7 +3,7 @@ import { StringNormalizer } from '../../../Shared/normalization/StringNormalizer
 import { UpdateMeInput } from '../../types/users/UpdateMeInput';
 import { ValidateUpdateMeResult } from '../../../Domain/types/users/ValidateUpdateMe';
 import { UpdateMeDto } from '../../../Domain/DTOs/users/UpdateMeDto';
-import { UserValidationMessages } from '../../../Domain/constants/messages/user/UserValidationMessages';
+import { UserValidationMessages } from '../../../Domain/constants/messages/users/UserValidationMessages';
 
 export const validateUpdateMe = (input?: UpdateMeInput | null, file?: Express.Multer.File): ValidateUpdateMeResult => {
     const dto: UpdateMeDto = {};

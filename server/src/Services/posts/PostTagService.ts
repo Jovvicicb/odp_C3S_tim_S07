@@ -8,7 +8,7 @@ import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
 import { CommunityMemberRole } from "../../Domain/enums/communities/CommunityMemberRole";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { UserRole } from "../../Domain/enums/users/UserRole";
-import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
+import { ICommunityMemberRepository } from "../../Domain/repositories/communities/ICommunityMemberRepository";
 import { IPostRepository } from "../../Domain/repositories/posts/IPostRepository";
 import { IPostTagRepository } from "../../Domain/repositories/posts/IPostTagRepository";
 import { ITagRepository } from "../../Domain/repositories/tags/ITagRepository";

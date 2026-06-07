@@ -1,11 +1,11 @@
 import { RowDataPacket, ResultSetHeader } from "mysql2";
-import { ICommunityMemberRepository } from "../../../Domain/repositories/community/ICommunityMemberRepository";
+import { ICommunityMemberRepository } from "../../../Domain/repositories/communities/ICommunityMemberRepository";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { DbManager } from "../../connection/DbConnectionPool";
 import { CommunityMemberStatus } from "../../../Domain/enums/communities/CommunityMemberStatus";
-import { CommunityLogMessages } from "../../../Domain/constants/messages/community/CommunityLogMessages";
+import { CommunityLogMessages } from "../../../Domain/constants/messages/communities/CommunityLogMessages";
 import { CommunityMember } from "../../../Domain/models/CommunityMember";
-import { CommunityMemberMapper } from "../../../Shared/mappers/community/CommunityMemberMapper";
+import { CommunityMemberMapper } from "../../../Shared/mappers/communities/CommunityMemberMapper";
 import { CommunityMemberRole } from "../../../Domain/enums/communities/CommunityMemberRole";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));

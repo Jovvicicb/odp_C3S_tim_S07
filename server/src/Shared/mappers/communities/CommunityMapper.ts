@@ -1,8 +1,8 @@
 import { RowDataPacket } from "mysql2";
-import { CommunityDto } from "../../../Domain/DTOs/community/CommunityDto";
+import { CommunityDto } from "../../../Domain/DTOs/communities/CommunityDto";
 import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
 import { Community } from "../../../Domain/models/Community";
-import { CreateCommunityResponseDto } from "../../../Domain/DTOs/community/CreateCommunityResponseDto";
+import { CreateCommunityResponseDto } from "../../../Domain/DTOs/communities/CreateCommunityResponseDto";
 import { CommunityMemberStatus } from "../../../Domain/enums/communities/CommunityMemberStatus";
 
 export class CommunityMapper {

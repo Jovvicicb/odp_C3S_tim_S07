@@ -1,8 +1,8 @@
 import { Request, Response, Router } from "express";
 
-import { UserLogMessages } from "../../Domain/constants/messages/user/UserLogMessages";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
-import { UserValidationMessages } from "../../Domain/constants/messages/user/UserValidationMessages";
+import { UserLogMessages } from "../../Domain/constants/messages/users/UserLogMessages";
+import { UserMessages } from "../../Domain/constants/messages/users/UserMessages";
+import { UserValidationMessages } from "../../Domain/constants/messages/users/UserValidationMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { GetFollowersDto } from "../../Domain/DTOs/users/GetFollowersDto";
 import { GetFollowingDto } from "../../Domain/DTOs/users/GetFollowingDto";

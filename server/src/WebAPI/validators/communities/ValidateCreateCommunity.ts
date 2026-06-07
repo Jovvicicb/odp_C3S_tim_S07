@@ -1,9 +1,9 @@
 import { FileValidationMessages } from "../../../Domain/constants/messages/common/FileValidationMessages";
-import { CommunityValidationMessages } from "../../../Domain/constants/messages/community/CommunityValidationMessages";
+import { CommunityValidationMessages } from "../../../Domain/constants/messages/communities/CommunityValidationMessages";
 import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
-import { CreateCommunityInput } from "../../types/community/CreateCommunityInput";
-import { ValidateCreateCommunityResult } from "../../../Domain/types/community/ValidateCreateCommunityResult";
+import { CreateCommunityInput } from "../../types/communities/CreateCommunityInput";
+import { ValidateCreateCommunityResult } from "../../../Domain/types/communities/ValidateCreateCommunityResult";
 
 export const validateCreateCommunity = (
   input?: CreateCommunityInput | null,

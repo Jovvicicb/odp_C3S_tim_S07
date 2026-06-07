@@ -1,11 +1,11 @@
 import { DbManager } from "../../Database/connection/DbConnectionPool";
-import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
+import { CommunityMessages } from "../../Domain/constants/messages/communities/CommunityMessages";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CommunityMemberStatus } from "../../Domain/enums/communities/CommunityMemberStatus";
 import { CommunityType } from "../../Domain/enums/communities/CommunityType";
-import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
-import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
+import { ICommunityMemberRepository } from "../../Domain/repositories/communities/ICommunityMemberRepository";
+import { ICommunityRepository } from "../../Domain/repositories/communities/ICommunityRepository";
 import { IPostLikeRepository } from "../../Domain/repositories/posts/IPostLikeRepository";
 import { IPostRepository } from "../../Domain/repositories/posts/IPostRepository";
 import { IPostLikeService } from "../../Domain/services/posts/IPostLikeService";

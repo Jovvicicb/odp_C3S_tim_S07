@@ -6,7 +6,7 @@ import { PostWithDetailsDto } from "../../../Domain/DTOs/posts/PostWithDetailsDt
 import { CommentTreeDto } from "../../../Domain/DTOs/comments/CommentTreeDto";
 import { PostDetailsDto } from "../../../Domain/DTOs/posts/PostDetailsDto";
 import { UserDto } from "../../../Domain/DTOs/users/UserDto";
-import { CommunityDto } from "../../../Domain/DTOs/community/CommunityDto";
+import { CommunityDto } from "../../../Domain/DTOs/communities/CommunityDto";
 import { PostViewerPermissionsDto } from "../../../Domain/DTOs/posts/PostViewerPermissionsDto";
 import { PaginatedListDto } from "../../../Domain/DTOs/common/PaginatedListDto";
 

@@ -1,6 +1,6 @@
 import { Community } from "../../models/Community";
-import { CreateCommunityDto } from "../../DTOs/community/CreateCommunityDto";
-import { UpdateCommunityDto } from "../../DTOs/community/UpdateCommunityDto";
+import { CreateCommunityDto } from "../../DTOs/communities/CreateCommunityDto";
+import { UpdateCommunityDto } from "../../DTOs/communities/UpdateCommunityDto";
 import { CommunityType } from "../../enums/communities/CommunityType";
 
 export interface ICommunityRepository {

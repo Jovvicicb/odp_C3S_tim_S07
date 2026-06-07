@@ -1,10 +1,10 @@
 import { FileValidationMessages } from '../../../Domain/constants/messages/common/FileValidationMessages';
-import { CommunityValidationMessages } from '../../../Domain/constants/messages/community/CommunityValidationMessages';
-import { UpdateCommunityDto } from '../../../Domain/DTOs/community/UpdateCommunityDto';
+import { CommunityValidationMessages } from '../../../Domain/constants/messages/communities/CommunityValidationMessages';
+import { UpdateCommunityDto } from '../../../Domain/DTOs/communities/UpdateCommunityDto';
 import { CommunityType } from '../../../Domain/enums/communities/CommunityType';
 import { StringNormalizer } from '../../../Shared/normalization/StringNormalizer';
-import { UpdateCommunityInput } from '../../types/community/UpdateCommunityInput';
-import { ValidateUpdateCommunityResult } from '../../../Domain/types/community/ValidateUpdateCommunityResult';
+import { UpdateCommunityInput } from '../../types/communities/UpdateCommunityInput';
+import { ValidateUpdateCommunityResult } from '../../../Domain/types/communities/ValidateUpdateCommunityResult';
 
 export const validateUpdateCommunity = (
   input?: UpdateCommunityInput | null,

@@ -1,5 +1,5 @@
 import { DbManager } from "../../Database/connection/DbConnectionPool";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
+import { UserMessages } from "../../Domain/constants/messages/users/UserMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { PaginatedListDto } from "../../Domain/DTOs/common/PaginatedListDto";
 import { GetFollowersDto } from "../../Domain/DTOs/users/GetFollowersDto";

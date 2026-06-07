@@ -1,4 +1,4 @@
-import { CreateCommunityDto } from "../../DTOs/community/CreateCommunityDto";
+import { CreateCommunityDto } from "../../DTOs/communities/CreateCommunityDto";
 import { ValidationResult } from "../ValidationResult";
 
 export type ValidateCreateCommunityResult = {

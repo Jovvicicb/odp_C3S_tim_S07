@@ -13,7 +13,7 @@ import { AuditActions } from "../../Domain/constants/messages/audits/AuditAction
 import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
 import { ServiceResult } from "../../Domain/types/service/ServiceResult";
 import { ServiceResultFactory } from "../../Domain/types/service/ServiceResultFactory";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
+import { UserMessages } from "../../Domain/constants/messages/users/UserMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { UserRole } from "../../Domain/enums/users/UserRole";
 import { IUserFollowRepository } from "../../Domain/repositories/users/IUserFollowRepository";

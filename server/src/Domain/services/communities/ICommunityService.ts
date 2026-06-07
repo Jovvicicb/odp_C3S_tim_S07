@@ -1,13 +1,13 @@
-import { CommunityDto } from "../../DTOs/community/CommunityDto";
-import { CreateCommunityDto } from "../../DTOs/community/CreateCommunityDto";
+import { CommunityDto } from "../../DTOs/communities/CommunityDto";
+import { CreateCommunityDto } from "../../DTOs/communities/CreateCommunityDto";
 import { PaginatedListDto } from "../../DTOs/common/PaginatedListDto";
-import { UpdateCommunityDto } from "../../DTOs/community/UpdateCommunityDto";
+import { UpdateCommunityDto } from "../../DTOs/communities/UpdateCommunityDto";
 import { AuditContext } from "../../types/audits/AuditContext";
 import { ServiceResult } from "../../types/service/ServiceResult";
-import { CreateCommunityResponseDto } from "../../DTOs/community/CreateCommunityResponseDto";
-import { CommunityDetailsDto } from "../../DTOs/community/CommunityDetailsDto";
+import { CreateCommunityResponseDto } from "../../DTOs/communities/CreateCommunityResponseDto";
+import { CommunityDetailsDto } from "../../DTOs/communities/CommunityDetailsDto";
 import { UserRole } from "../../enums/users/UserRole";
-import { DiscoverCommunitiesDto } from "../../DTOs/community/DiscoverCommunitiesDto";
+import { DiscoverCommunitiesDto } from "../../DTOs/communities/DiscoverCommunitiesDto";
 
 export interface ICommunityService {
   getPublic(page: number, limit: number, viewerId?: number): Promise<ServiceResult<PaginatedListDto<CommunityDto>>>;

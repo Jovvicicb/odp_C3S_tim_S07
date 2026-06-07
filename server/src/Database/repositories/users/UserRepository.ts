@@ -5,7 +5,7 @@ import { DbManager } from "../../connection/DbConnectionPool";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { UserMapper } from "../../../Shared/mappers/users/UserMapper";
 import { GetUsersDto } from "../../../Domain/DTOs/users/GetUsersDto";
-import { UserLogMessages } from "../../../Domain/constants/messages/user/UserLogMessages";
+import { UserLogMessages } from "../../../Domain/constants/messages/users/UserLogMessages";
 import { UpdateMeDto } from "../../../Domain/DTOs/users/UpdateMeDto";
 import { UserRole } from "../../../Domain/enums/users/UserRole";
 

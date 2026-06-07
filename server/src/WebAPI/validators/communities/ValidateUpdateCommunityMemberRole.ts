@@ -1,6 +1,6 @@
-import { CommunityValidationMessages } from "../../../Domain/constants/messages/community/CommunityValidationMessages";
+import { CommunityValidationMessages } from "../../../Domain/constants/messages/communities/CommunityValidationMessages";
 import { CommunityMemberRole } from "../../../Domain/enums/communities/CommunityMemberRole";
-import { ValidateUpdateCommunityMemberRoleResult } from "../../../Domain/types/community/ValidateUpdateCommunityMemberRoleResult";
+import { ValidateUpdateCommunityMemberRoleResult } from "../../../Domain/types/communities/ValidateUpdateCommunityMemberRoleResult";
 import { StringNormalizer } from "../../../Shared/normalization/StringNormalizer";
 
 export const validateUpdateCommunityMemberRole = (role?: string | null) : ValidateUpdateCommunityMemberRoleResult => {

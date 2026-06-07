@@ -1,13 +1,13 @@
 import { Request, Response, Router } from "express";
 
-import { CommunityLogMessages } from "../../Domain/constants/messages/community/CommunityLogMessages";
-import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
+import { CommunityLogMessages } from "../../Domain/constants/messages/communities/CommunityLogMessages";
+import { CommunityMessages } from "../../Domain/constants/messages/communities/CommunityMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
-import { DiscoverCommunitiesDto } from "../../Domain/DTOs/community/DiscoverCommunitiesDto";
+import { DiscoverCommunitiesDto } from "../../Domain/DTOs/communities/DiscoverCommunitiesDto";
 import { UserRole } from "../../Domain/enums/users/UserRole";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
-import { ICommunityMemberService } from "../../Domain/services/community/ICommunityMemberService";
-import { ICommunityService } from "../../Domain/services/community/ICommunityService";
+import { ICommunityMemberService } from "../../Domain/services/communities/ICommunityMemberService";
+import { ICommunityService } from "../../Domain/services/communities/ICommunityService";
 
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
@@ -20,15 +20,15 @@ import { ResponseHelper } from "../../Shared/helpers/ResponseHelper";
 import { parseId } from "../parser/common/ParseId";
 import { parsePagination } from "../parser/common/ParsePagination";
 import { parseStringValue } from "../parser/common/ParseStringValue";
-import { CreateCommunityInput } from "../types/community/CreateCommunityInput";
-import { UpdateCommunityInput } from "../types/community/UpdateCommunityInput";
+import { CreateCommunityInput } from "../types/communities/CreateCommunityInput";
+import { UpdateCommunityInput } from "../types/communities/UpdateCommunityInput";
 import { validateId } from "../validators/common/ValidateId";
 import { validatePagination } from "../validators/common/ValidatePagination";
-import { validateCommunityDiscoverType } from "../validators/community/ValidateCommunityDiscoverType";
-import { validateCreateCommunity } from "../validators/community/ValidateCreateCommunity";
-import { validateUpdateCommunity } from "../validators/community/ValidateUpdateCommunity";
-import { validateUpdateCommunityMemberRole } from "../validators/community/ValidateUpdateCommunityMemberRole";
-import { validateUpdateCommunityMemberStatus } from "../validators/community/ValidateUpdateCommunityMemberStatus";
+import { validateCommunityDiscoverType } from "../validators/communities/ValidateCommunityDiscoverType";
+import { validateCreateCommunity } from "../validators/communities/ValidateCreateCommunity";
+import { validateUpdateCommunity } from "../validators/communities/ValidateUpdateCommunity";
+import { validateUpdateCommunityMemberRole } from "../validators/communities/ValidateUpdateCommunityMemberRole";
+import { validateUpdateCommunityMemberStatus } from "../validators/communities/ValidateUpdateCommunityMemberStatus";
 
 export class CommunityController {
   private readonly router = Router();

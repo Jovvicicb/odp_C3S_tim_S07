@@ -1,7 +1,7 @@
 import { AuditActions } from "../../Domain/constants/messages/audits/AuditActions";
 import { AuditDetails } from "../../Domain/constants/messages/audits/AuditDetails";
 import { CommentMessages } from "../../Domain/constants/messages/comments/CommentMessages";
-import { CommunityMessages } from "../../Domain/constants/messages/community/CommunityMessages";
+import { CommunityMessages } from "../../Domain/constants/messages/communities/CommunityMessages";
 import { PostMessages } from "../../Domain/constants/messages/posts/PostMessages";
 import { HttpStatus } from "../../Domain/constants/statusCode/HttpStatus";
 import { CreateAuditDto } from "../../Domain/DTOs/audits/CreateAuditDto";
@@ -17,8 +17,8 @@ import { CommunityType } from "../../Domain/enums/communities/CommunityType";
 import { UserRole } from "../../Domain/enums/users/UserRole";
 import { ICommentLikeRepository } from "../../Domain/repositories/comments/ICommentLikeRepository";
 import { ICommentRepository } from "../../Domain/repositories/comments/ICommentRepository";
-import { ICommunityMemberRepository } from "../../Domain/repositories/community/ICommunityMemberRepository";
-import { ICommunityRepository } from "../../Domain/repositories/community/ICommunityRepository";
+import { ICommunityMemberRepository } from "../../Domain/repositories/communities/ICommunityMemberRepository";
+import { ICommunityRepository } from "../../Domain/repositories/communities/ICommunityRepository";
 import { IPostRepository } from "../../Domain/repositories/posts/IPostRepository";
 import { ICommentService } from "../../Domain/services/comments/ICommentService";
 import { IAuditHelperService } from "../../Domain/services/common/IAuditHelperService";
@@ -34,7 +34,7 @@ import { Post } from "../../Domain/models/Post";
 import { IUserRepository } from "../../Domain/repositories/users/IUserRepository";
 import { UserProfileCommentDto } from "../../Domain/DTOs/comments/UserProfileCommentDto";
 import { GetCommentsByUserDto } from "../../Domain/DTOs/comments/GetCommentsByUserDto";
-import { UserMessages } from "../../Domain/constants/messages/user/UserMessages";
+import { UserMessages } from "../../Domain/constants/messages/users/UserMessages";
 import { DbManager } from "../../Database/connection/DbConnectionPool";
 
 type CommentAccessCheckResult =

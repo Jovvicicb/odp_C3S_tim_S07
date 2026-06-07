@@ -1,6 +1,6 @@
 import { PaginatedListDto } from "../../DTOs/common/PaginatedListDto";
-import { CommunityDto } from "../../DTOs/community/CommunityDto";
-import { CommunityMemberDetailsDto } from "../../DTOs/community/CommunityMemberDetailsDto";
+import { CommunityDto } from "../../DTOs/communities/CommunityDto";
+import { CommunityMemberDetailsDto } from "../../DTOs/communities/CommunityMemberDetailsDto";
 import { CommunityMemberRole } from "../../enums/communities/CommunityMemberRole";
 import { CommunityMemberStatusAction } from "../../enums/communities/CommunityMemberStatusAction";
 import { UserRole } from "../../enums/users/UserRole";

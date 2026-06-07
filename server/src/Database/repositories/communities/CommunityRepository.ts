@@ -1,12 +1,12 @@
 import { RowDataPacket, ResultSetHeader } from "mysql2";
-import { ICommunityRepository } from "../../../Domain/repositories/community/ICommunityRepository";
+import { ICommunityRepository } from "../../../Domain/repositories/communities/ICommunityRepository";
 import { Community } from "../../../Domain/models/Community";
-import { CreateCommunityDto } from "../../../Domain/DTOs/community/CreateCommunityDto";
+import { CreateCommunityDto } from "../../../Domain/DTOs/communities/CreateCommunityDto";
 import { DbManager } from "../../connection/DbConnectionPool";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
-import { CommunityMapper } from "../../../Shared/mappers/community/CommunityMapper";
-import { UpdateCommunityDto } from "../../../Domain/DTOs/community/UpdateCommunityDto";
-import { CommunityLogMessages } from "../../../Domain/constants/messages/community/CommunityLogMessages";
+import { CommunityMapper } from "../../../Shared/mappers/communities/CommunityMapper";
+import { UpdateCommunityDto } from "../../../Domain/DTOs/communities/UpdateCommunityDto";
+import { CommunityLogMessages } from "../../../Domain/constants/messages/communities/CommunityLogMessages";
 import { CommunityType } from "../../../Domain/enums/communities/CommunityType";
 
 const safeInt = (n: number): number => Math.max(0, Math.floor(n));

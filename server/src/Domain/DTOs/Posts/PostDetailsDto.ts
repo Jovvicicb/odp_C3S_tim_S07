@@ -1,6 +1,6 @@
 import { CommentTreeDto } from "../comments/CommentTreeDto";
 import { PaginatedListDto } from "../common/PaginatedListDto";
-import { CommunityDto } from "../community/CommunityDto";
+import { CommunityDto } from "../communities/CommunityDto";
 import { PostTagDto } from "../tags/PostTagDto";
 import { UserDto } from "../users/UserDto";
 import { PostViewerPermissionsDto } from "./PostViewerPermissionsDto";

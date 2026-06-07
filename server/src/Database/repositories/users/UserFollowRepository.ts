@@ -3,7 +3,7 @@ import { UserFollow } from "../../../Domain/models/UserFollow";
 import { IUserFollowRepository } from "../../../Domain/repositories/users/IUserFollowRepository";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
 import { DbManager } from "../../connection/DbConnectionPool";
-import { UserLogMessages } from "../../../Domain/constants/messages/user/UserLogMessages";
+import { UserLogMessages } from "../../../Domain/constants/messages/users/UserLogMessages";
 import { GetFollowersDto } from "../../../Domain/DTOs/users/GetFollowersDto";
 import { GetFollowingDto } from "../../../Domain/DTOs/users/GetFollowingDto";
 

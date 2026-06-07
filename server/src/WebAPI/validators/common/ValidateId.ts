@@ -1,4 +1,4 @@
-import { UserMessages } from "../../../Domain/constants/messages/user/UserMessages";
+import { UserMessages } from "../../../Domain/constants/messages/users/UserMessages";
 import { ValidationResult } from "../../../Domain/types/ValidationResult";
 
 export const validateId = (id: number): ValidationResult => {
