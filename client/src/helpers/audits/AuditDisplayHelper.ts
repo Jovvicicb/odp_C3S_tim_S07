@@ -16,6 +16,6 @@ export class AuditDisplayHelper {
   }
 
   public static actorLabel(userId: number | null): string {
-    return userId === null ? "System" : `User #${userId}`;
+    return userId === null ? "System" : `#${userId}`;
   }
 }
