@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { useToast } from "../../hooks/toast/useToast";
@@ -11,6 +12,7 @@ export function SidebarFooter({ onNavigate }: Props) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const initial = user?.username?.[0]?.toUpperCase() ?? "P";
 
@@ -56,16 +58,22 @@ export function SidebarFooter({ onNavigate }: Props) {
 
             <button
               type="button"
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                setLoggingOut(true);
+
+                await logout();
 
                 showToast({
                   type: "info",
                   message: "You have been signed out",
                 });
 
+                onNavigate();
                 navigate("/login");
+
+                setLoggingOut(false);
               }}
+              disabled={loggingOut}
               className="w-full rounded-xl border border-white/8 bg-white/4 px-3 py-2 text-left text-xs font-medium text-white/40 transition-all hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-200"
             >
               Sign out →

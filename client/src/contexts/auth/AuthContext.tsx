@@ -3,6 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import type { AuthContextType } from "../../types/auth/AuthContext";
 import type { AuthUser } from "../../types/auth/AuthUser";
 import type { JwtTokenClaims } from "../../types/auth/JwtTokenClaims";
+import { authApi } from "../../api_services/auth/AuthAPIService";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const KEY = "authToken";
@@ -33,7 +34,11 @@ const getInitialAuth = () => {
     if (claims) {
       return {
         token: saved,
-        user: { id: claims.id, username: claims.username, role: claims.role, } as AuthUser,
+        user: {
+          id: claims.id,
+          username: claims.username,
+          role: claims.role,
+        } as AuthUser,
       };
     }
   }
@@ -43,7 +48,9 @@ const getInitialAuth = () => {
   return { token: null, user: null };
 };
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const initial = getInitialAuth();
 
   const [token, setToken] = useState<string | null>(initial.token);
@@ -59,14 +66,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem(KEY, t);
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem(KEY);
+  const logout = async () => {
+    const currentToken = token ?? localStorage.getItem(KEY);
+
+    try {
+      if (currentToken) {
+        await authApi.logout(currentToken);
+      }
+    } finally {
+      setToken(null);
+      setUser(null);
+      localStorage.removeItem(KEY);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user && !!token, isLoading}}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        isAuthenticated: !!user && !!token,
+        isLoading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

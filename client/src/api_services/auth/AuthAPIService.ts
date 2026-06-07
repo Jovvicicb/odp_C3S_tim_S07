@@ -1,7 +1,11 @@
 import axios from "axios";
-import type { AuthResponse } from "../../types/auth/AuthResponse";
+
 import type { IAuthAPIService } from "./IAuthAPIService";
+import type { AuthResponse } from "../../types/auth/AuthResponse";
+import type { ApiResponse } from "../../types/common/ApiResponse";
+
 import { AuthMessages } from "../../constants/messages/auth/AuthMessages";
+
 import {
   getApiErrorMessage,
   type ApiClientError,
@@ -9,7 +13,7 @@ import {
 
 const BASE = import.meta.env.VITE_API_URL + "auth";
 
-const err = (e: ApiClientError, fallback: string): AuthResponse => ({
+const err = <T>(e: ApiClientError, fallback: string): ApiResponse<T> => ({
   success: false,
   message: getApiErrorMessage(e, fallback),
 });
@@ -19,7 +23,7 @@ export const authApi: IAuthAPIService = {
     return axios
       .post<AuthResponse>(`${BASE}/login`, { username, password })
       .then((r) => r.data)
-      .catch((e: ApiClientError) => err(e, AuthMessages.loginFailed));
+      .catch((e: ApiClientError) => err<string>(e, AuthMessages.loginFailed));
   },
 
   async register(formData) {
@@ -30,6 +34,25 @@ export const authApi: IAuthAPIService = {
         },
       })
       .then((r) => r.data)
-      .catch((e: ApiClientError) => err(e, AuthMessages.registerFailed));
+      .catch((e: ApiClientError) =>
+        err<string>(e, AuthMessages.registerFailed),
+      );
+  },
+
+  async logout(token) {
+    return axios
+      .post<ApiResponse<void>>(
+        `${BASE}/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+      .then((r) => r.data)
+      .catch((e: ApiClientError) =>
+        err<void>(e, AuthMessages.logoutFailed),
+      );
   },
 };
