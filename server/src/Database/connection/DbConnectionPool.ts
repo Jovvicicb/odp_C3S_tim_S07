@@ -5,8 +5,9 @@ import { DbNode } from "../../Domain/models/DbNode";
 import { NodeStatus } from "../../Domain/enums/nodes/NodeStatus";
 import { DbNodeRole } from "../../Domain/enums/nodes/DbNodeRole";
 import {
-  HEALTH_CHECK_TIMEOUT,
+  HEALTH_CHECK_TIMEOUT_MS,
   HEALTH_CHECK_INTERVAL_MS,
+  HEALTH_DEGRADED_THRESHOLD_MS,
 } from "../../Domain/constants/Constants";
 import { ILoggerService } from "../../Domain/services/logger/ILoggerService";
 import { DbMessages } from "../../Domain/constants/messages/db/DbMessages";
@@ -73,7 +74,7 @@ const createPool = (
     database,
     waitForConnections: true,
     connectionLimit: 10,
-    connectTimeout: HEALTH_CHECK_TIMEOUT,
+    connectTimeout: HEALTH_CHECK_TIMEOUT_MS,
   });
 
 const masterPool: Pool = createPool(
@@ -152,12 +153,7 @@ export class DbManager {
   }
 
   public async init(): Promise<void> {
-    await this.runHealthCheck();
-
-    this.healthTimer = setInterval(
-      () => void this.runHealthCheck(),
-      HEALTH_CHECK_INTERVAL_MS,
-    );
+    await this.startHealthCheck();
   }
 
   public stop(): void {
@@ -165,6 +161,15 @@ export class DbManager {
       clearInterval(this.healthTimer);
       this.healthTimer = null;
     }
+  }
+
+  public async startHealthCheck(interval: number = HEALTH_CHECK_INTERVAL_MS,): Promise<void> {
+    await this.runHealthCheck();
+
+    this.healthTimer = setInterval(
+      () => void this.runHealthCheck(),
+      interval,
+    );
   }
 
   public isFailoverInProgress(): boolean {
@@ -206,6 +211,10 @@ export class DbManager {
           slave.canServeReads && slave.node.status !== NodeStatus.OFFLINE,
       })),
     ];
+  }
+
+  public getHealthStatus(): DbNodeHealthSnapshot[] {
+    return this.getNodeHealthSnapshots();
   }
 
   public getSlaveRrIndex(): number {
@@ -269,6 +278,11 @@ export class DbManager {
   }
 
   public async getReadConnection(): Promise<DbConnectionResult | null> {
+    if (this.failoverInProgress) {
+      this.logger.warn("DB", DbLogMessages.readBlockedFailoverInProgress);
+      return null;
+    }
+
     const readableSlaves = this.slaves.filter((slave) => slave.canServeReads);
 
     const healthySlaves = readableSlaves.filter(
@@ -299,7 +313,7 @@ export class DbManager {
 
   public async promoteSlaveToMaster(
     slaveIndex: number,
-    reason: DbFailoverReason,
+    reason: DbFailoverReason = "manual",
   ): Promise<DbNode | null> {
     if (this.failoverInProgress) {
       this.logger.warn("DB", DbLogMessages.failoverAlreadyInProgress);
@@ -336,6 +350,7 @@ export class DbManager {
     }
 
     this.failoverInProgress = true;
+    targetSlave.canServeReads = false;
 
     const oldMaster = this.currentMaster;
     let event: DbFailoverEvent | null = null;
@@ -368,7 +383,6 @@ export class DbManager {
         (slave) => slave.name !== targetSlave.name,
       );
 
-      targetSlave.canServeReads = false;
       this.currentMaster = targetSlave;
 
       this.slaves.length = 0;
@@ -438,7 +452,9 @@ export class DbManager {
       const ms = Date.now() - start;
 
       info.node.status =
-        ms > HEALTH_CHECK_TIMEOUT ? NodeStatus.DEGRADED : NodeStatus.HEALTHY;
+        ms > HEALTH_DEGRADED_THRESHOLD_MS
+          ? NodeStatus.DEGRADED
+          : NodeStatus.HEALTHY;
     } catch (err) {
       info.node.status = NodeStatus.OFFLINE;
       info.node.failedReads++;

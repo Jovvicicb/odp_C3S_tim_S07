@@ -8,4 +8,5 @@ export const DbLogMessages = {
   failedToConnectToMasterForRead: "Failed to connect to master for fallback read",
   automaticFailoverNoHealthySlave: "Automatic failover failed - no healthy slave available",
   failoverNoHealthySlave: "Failover failed - no healthy slave available",
+  readBlockedFailoverInProgress: "Read blocked while failover is in progress",
 } as const;

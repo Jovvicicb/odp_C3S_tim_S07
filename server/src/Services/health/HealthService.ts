@@ -15,7 +15,7 @@ export class HealthService implements IHealthService {
   ) {}
 
   async getDbHealth(): Promise<ServiceResult<DbNodeHealthDto[]>> {
-    const snapshots = this.db.getNodeHealthSnapshots();
+    const snapshots = this.db.getHealthStatus();
 
     const data = snapshots.map((snapshot) =>
       HealthMapper.toDbNodeHealthDto(
