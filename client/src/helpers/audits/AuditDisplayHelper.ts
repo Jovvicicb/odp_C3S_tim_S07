@@ -9,7 +9,7 @@ export class AuditDisplayHelper {
 
   public static formatDate(value: string): string {
     if (!value) {
-      return "Unknown time";
+      return "Time not available";
     }
 
     return new Date(value).toLocaleString();

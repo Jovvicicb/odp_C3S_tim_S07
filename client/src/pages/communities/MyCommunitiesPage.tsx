@@ -68,7 +68,7 @@ export default function MyCommunitiesPage() {
         </div>
       ) : communities.length === 0 && !error ? (
         <SectionEmptyState
-          title="You are not a member of any communities yet."
+          title="You have not joined communities yet."
           description="Discover communities, join the ones you like and they will appear here."
         />
       ) : (

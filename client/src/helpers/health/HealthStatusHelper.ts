@@ -21,7 +21,7 @@ export class HealthStatusHelper {
     const normalized = this.normalize(status);
 
     if (!normalized) {
-      return "Unknown";
+      return "Not available";
     }
 
     return normalized.charAt(0).toUpperCase() + normalized.slice(1);

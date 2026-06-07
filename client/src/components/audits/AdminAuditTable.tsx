@@ -98,7 +98,7 @@ export function AdminAuditTable({
               </TableCell>
 
               <TableCell className="text-white/45">
-                {audit.ipAddress || "Unknown"}
+                {audit.ipAddress || "Not recorded"}
               </TableCell>
 
               <TableCell className="whitespace-nowrap text-white/45">

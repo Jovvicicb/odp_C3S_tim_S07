@@ -90,7 +90,7 @@ export function AdminHealthSummary({ nodes, loading }: Props) {
 
       <StatCard
         label="Current master"
-        value={summary.masterNode?.name ?? "Unknown"}
+        value={summary.masterNode?.name ?? "Not available"}
         sub={
           summary.masterNode
             ? `${summary.masterNode.host}:${summary.masterNode.port}`

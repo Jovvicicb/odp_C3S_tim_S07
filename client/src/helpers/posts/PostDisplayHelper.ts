@@ -3,7 +3,7 @@ import type { PostWithDetailsDto } from "../../models/posts/PostWithDetailsDto";
 export class PostDisplayHelper {
   public static formatDate(value: string | null): string {
     if (!value) {
-      return "Unknown";
+      return "Not available";
     }
 
     return new Date(value).toLocaleString();

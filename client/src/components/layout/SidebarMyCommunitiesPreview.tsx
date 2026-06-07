@@ -63,7 +63,7 @@ export function SidebarMyCommunitiesPreview({ visible, onNavigate }: Props) {
           </p>
         ) : communities.length === 0 ? (
           <p className="rounded-xl px-3 py-2 text-xs leading-5 text-white/30">
-            You are not a member of any communities yet.
+            You have not joined communities yet.
           </p>
         ) : (
           <div className="space-y-1">
