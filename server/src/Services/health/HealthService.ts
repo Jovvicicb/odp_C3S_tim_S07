@@ -46,7 +46,7 @@ export class HealthService implements IHealthService {
     const newMasterDto = HealthMapper.toDbNodeHealthDto(
       newMaster,
       DbNodeRole.MASTER,
-      newMaster.status !== NodeStatus.OFFLINE,
+      newMaster.status !== NodeStatus.UNREACHABLE,
     );
 
     return ServiceResultFactory.ok(HealthMessages.failoverSuccess, newMasterDto, HttpStatus.ok,);

@@ -1,7 +1,7 @@
 import { NodeStatus } from "../enums/nodes/NodeStatus";
 
 export class DbNode {
-  public status: NodeStatus    = NodeStatus.OFFLINE;
+  public status: NodeStatus    = NodeStatus.UNREACHABLE;
   public lastCheck: Date       = new Date();
 
   public successfulReads: number = 0;

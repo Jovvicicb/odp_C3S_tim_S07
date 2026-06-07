@@ -185,7 +185,7 @@ export class DbManager {
       return DbMessages.failoverInProgress;
     }
 
-    if (this.currentMaster.node.status === NodeStatus.OFFLINE) {
+    if (this.currentMaster.node.status === NodeStatus.UNREACHABLE) {
       return DbMessages.writeUnavailable;
     }
 
@@ -202,13 +202,13 @@ export class DbManager {
       {
         node: this.currentMaster.node,
         role: DbNodeRole.MASTER,
-        canServeReads: this.currentMaster.node.status !== NodeStatus.OFFLINE,
+        canServeReads: this.currentMaster.node.status !== NodeStatus.UNREACHABLE,
       },
       ...this.slaves.map((slave) => ({
         node: slave.node,
         role: DbNodeRole.SLAVE,
         canServeReads:
-          slave.canServeReads && slave.node.status !== NodeStatus.OFFLINE,
+          slave.canServeReads && slave.node.status !== NodeStatus.UNREACHABLE,
       })),
     ];
   }
@@ -246,7 +246,7 @@ export class DbManager {
       return null;
     }
 
-    if (this.currentMaster.node.status === NodeStatus.OFFLINE) {
+    if (this.currentMaster.node.status === NodeStatus.UNREACHABLE) {
       this.currentMaster.node.failedWrites++;
 
       this.logger.error("DB", DbLogMessages.masterOfflineWriteNotPossible);
@@ -264,7 +264,7 @@ export class DbManager {
         nodeName: this.currentMaster.name,
       };
     } catch (err) {
-      this.currentMaster.node.status = NodeStatus.OFFLINE;
+      this.currentMaster.node.status = NodeStatus.UNREACHABLE;
       this.currentMaster.node.failedWrites++;
 
       this.logger.error(
@@ -456,7 +456,7 @@ export class DbManager {
           ? NodeStatus.DEGRADED
           : NodeStatus.HEALTHY;
     } catch (err) {
-      info.node.status = NodeStatus.OFFLINE;
+      info.node.status = NodeStatus.UNREACHABLE;
       info.node.failedReads++;
 
       this.logger.warn("DB", `Node ${info.name} failed health check`);
@@ -491,7 +491,7 @@ export class DbManager {
           nodeName: info.name,
         };
       } catch (err) {
-        info.node.status = NodeStatus.OFFLINE;
+        info.node.status = NodeStatus.UNREACHABLE;
         info.node.failedReads++;
 
         this.logger.warn("DB", `Slave ${info.name} unreachable, trying next`);
@@ -502,7 +502,7 @@ export class DbManager {
   }
 
   private async getMasterReadConnection(): Promise<DbConnectionResult | null> {
-    if (this.currentMaster.node.status === NodeStatus.OFFLINE) {
+    if (this.currentMaster.node.status === NodeStatus.UNREACHABLE) {
       this.currentMaster.node.failedReads++;
 
       this.logger.error("DB", DbLogMessages.masterAlsoOfflineReadNotPossible);
@@ -520,7 +520,7 @@ export class DbManager {
         nodeName: this.currentMaster.name,
       };
     } catch (err) {
-      this.currentMaster.node.status = NodeStatus.OFFLINE;
+      this.currentMaster.node.status = NodeStatus.UNREACHABLE;
       this.currentMaster.node.failedReads++;
 
       this.logger.error(
@@ -538,13 +538,13 @@ export class DbManager {
       return;
     }
 
-    if (this.currentMaster.node.status !== NodeStatus.OFFLINE) {
+    if (this.currentMaster.node.status !== NodeStatus.UNREACHABLE) {
       return;
     }
 
     this.logger.warn(
       "DB",
-      `Current master ${this.currentMaster.name} is offline. Starting automatic failover.`,
+      `Current master ${this.currentMaster.name} is UNREACHABLE. Starting automatic failover.`,
     );
 
     const promoted = await this.failoverToPreferredSlave("automatic");

@@ -3,7 +3,7 @@ import { HealthStatusHelper } from "./HealthStatusHelper";
 
 export class DbReadAvailabilityHelper {
   public static canServeReads(node: DbNodeHealthDto): boolean {
-    return node.canServeReads && !HealthStatusHelper.isOffline(node.status);
+    return node.canServeReads && !HealthStatusHelper.isUnreachable(node.status);
   }
 
   public static label(node: DbNodeHealthDto): string {

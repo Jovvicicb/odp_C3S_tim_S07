@@ -13,8 +13,8 @@ export class HealthStatusHelper {
     return this.normalize(status) === "degraded";
   }
 
-  public static isOffline(status: string): boolean {
-    return this.normalize(status) === "offline";
+  public static isUnreachable(status: string): boolean {
+    return this.normalize(status) === "unreachable";
   }
 
   public static label(status: string): string {
@@ -38,7 +38,7 @@ export class HealthStatusHelper {
       return "amber";
     }
 
-    if (this.isOffline(status)) {
+    if (this.isUnreachable(status)) {
       return "red";
     }
 
@@ -47,17 +47,17 @@ export class HealthStatusHelper {
 
   public static overallStatus(
     statuses: DbNodeStatus[],
-  ): "healthy" | "warning" | "offline" {
+  ): "healthy" | "warning" | "unreachable" {
     if (statuses.length === 0) {
-      return "offline";
+      return "unreachable";
     }
 
-    if (statuses.every((status) => this.isOffline(status))) {
-      return "offline";
+    if (statuses.every((status) => this.isUnreachable(status))) {
+      return "unreachable";
     }
 
     if (
-      statuses.some((status) => this.isOffline(status)) ||
+      statuses.some((status) => this.isUnreachable(status)) ||
       statuses.some((status) => this.isDegraded(status))
     ) {
       return "warning";

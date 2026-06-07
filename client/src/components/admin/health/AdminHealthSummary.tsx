@@ -6,6 +6,7 @@ import { HealthStatusHelper } from "../../../helpers/health/HealthStatusHelper";
 
 import { Spinner } from "../../ui/spinner/Spinner";
 import { StatCard } from "../../ui/card/StatCard";
+import { DbReadAvailabilityHelper } from "../../../helpers/health/DbReadAvailabilityHelper";
 
 type Props = {
   nodes: DbNodeHealthDto[];
@@ -15,7 +16,9 @@ type Props = {
 export function AdminHealthSummary({ nodes, loading }: Props) {
   const summary = useMemo(() => {
     const totalNodes = nodes.length;
-    const readableNodes = nodes.filter((node) => node.canServeReads).length;
+    const readableNodes = nodes.filter((node) =>
+      DbReadAvailabilityHelper.canServeReads(node),
+    ).length;
 
     const healthyNodes = nodes.filter((node) =>
       HealthStatusHelper.isHealthy(node.status),
@@ -77,7 +80,7 @@ export function AdminHealthSummary({ nodes, loading }: Props) {
       ? "Healthy"
       : summary.overallStatus === "warning"
         ? "Warning"
-        : "Offline";
+        : "Unreachable";
 
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">

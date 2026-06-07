@@ -1,6 +1,6 @@
 export type DbNodeRole = "master" | "slave";
 
-export type DbNodeStatus = "healthy" | "degraded" | "offline";
+export type DbNodeStatus = "healthy" | "degraded" | "unreachable";
 
 export type DbNodeHealthDto = {
   name: string;

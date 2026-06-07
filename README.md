@@ -181,11 +181,11 @@ SELECT 1;
 
 Each node can have one of the following states:
 
-| Status   | Meaning                                                 |
-| -------- | ------------------------------------------------------- |
-| Healthy  | Node responds within the expected time                  |
-| Degraded | Node responds, but slower than the configured threshold |
-| Offline  | Node is unreachable or throws an error                  |
+| Status      | Meaning                                                 |
+| ----------- | ------------------------------------------------------- |
+| Healthy     | Node responds within the expected time                  |
+| Degraded    | Node responds, but slower than the configured threshold |
+| Unreachable | Node is unreachable or throws an error                  |
 
 ### Failover
 
