@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useAuth } from "../../../hooks/auth/useAuthHook";
 import type { IAuthAPIService } from "../../../api_services/auth/IAuthAPIService";
-import { validateLogin } from "../../../validators/auth/validateLogin";
+import { validateLogin } from "../../../validators/auth/ValidateLogin";
 import { StringNormalizer } from "../../../helpers/normalization/StringNormalizer";
 import { AuthMessages } from "../../../constants/messages/auth/AuthMessages";
 import { CommonMessages } from "../../../constants/messages/common/CommonMessages";
@@ -36,7 +36,7 @@ export function LoginForm({ authApi }: { authApi: IAuthAPIService }) {
 
     try {
       const res = await authApi.login(
-        StringNormalizer.normalizeSpaces(username),
+        StringNormalizer.trim(username),
         password,
       );
 

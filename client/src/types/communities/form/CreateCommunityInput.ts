@@ -1,6 +1,5 @@
 import type { CommunityType } from "../common/CommunityType";
 
-
 export type CreateCommunityInput = {
   name: string;
   description: string;

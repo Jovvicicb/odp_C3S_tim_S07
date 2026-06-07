@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { tagApi } from "../../api_services/tags/TagAPIService";
 import { TagMessages } from "../../constants/messages/tag/TagMessages";
-import { validateCreateTag } from "../../validators/tag/validateCreateTag";
+import { validateCreateTag } from "../../validators/tag/ValidateCreateTag";
 import { useToast } from "../toast/useToast";
 
 import type { TagDto } from "../../models/tags/TagDto";

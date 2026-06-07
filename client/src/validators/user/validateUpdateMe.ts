@@ -4,11 +4,11 @@ import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
 import type { UpdateMeInput } from "../../types/users/UpdateMeInput";
 
-export function validateUpdateMe(input: UpdateMeInput): ValidationResult {
-  const normalizedUsername = StringNormalizer.trim(input.username);
-  const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname);
-  const normalizedEmail = StringNormalizer.normalizeEmail(input.email);
-  const normalizedBio = StringNormalizer.trim(input.bio);
+export function validateUpdateMe(input?: UpdateMeInput | null): ValidationResult {
+  const normalizedUsername = StringNormalizer.trim(input?.username);
+  const normalizedFullname = StringNormalizer.normalizeSpaces(input?.fullname);
+  const normalizedEmail = StringNormalizer.normalizeEmail(input?.email);
+  const normalizedBio = StringNormalizer.trim(input?.bio);
 
   if (!normalizedUsername) {
     return { valid: false, message: UserValidationMessages.usernameRequired };
@@ -36,16 +36,22 @@ export function validateUpdateMe(input: UpdateMeInput): ValidationResult {
     return { valid: false, message: UserValidationMessages.emailInvalid };
   }
 
-  if (input.password !== "") {
-    if (input.password.length < 8) {
+  const password = input?.password;
+
+  if (password !== undefined && password !== "") {
+    if (typeof password !== "string" || !password) {
+      return { valid: false, message: UserValidationMessages.passwordRequired };
+    }
+
+    if (password.length < 8) {
       return { valid: false, message: UserValidationMessages.passwordInvalid };
     }
 
-    if (!/[A-Z]/.test(input.password)) {
+    if (!/[A-Z]/.test(password)) {
       return { valid: false, message: UserValidationMessages.passwordInvalid };
     }
 
-    if (!/[0-9]/.test(input.password)) {
+    if (!/[0-9]/.test(password)) {
       return { valid: false, message: UserValidationMessages.passwordInvalid };
     }
   }
@@ -54,7 +60,7 @@ export function validateUpdateMe(input: UpdateMeInput): ValidationResult {
     return { valid: false, message: UserValidationMessages.bioTooLong };
   }
 
-  if (input.imageFile) {
+  if (input?.imageFile) {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
     if (!allowedTypes.includes(input.imageFile.type)) {

@@ -3,8 +3,8 @@ import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
 import type { LoginInput } from "../../types/auth/LoginInput";
 
-export function validateLogin(input: LoginInput): ValidationResult {
-  const normalizedUsername = StringNormalizer.normalizeSpaces(input.username);
+export function validateLogin(input?: LoginInput | null): ValidationResult {
+  const normalizedUsername = StringNormalizer.trim(input?.username);
 
   if (!normalizedUsername) {
     return { valid: false, message: AuthValidationMessages.usernameRequired };
@@ -18,7 +18,7 @@ export function validateLogin(input: LoginInput): ValidationResult {
     return { valid: false, message: AuthValidationMessages.usernameInvalid };
   }
 
-  if (!input.password) {
+  if (typeof input?.password !== "string" || !input.password) {
     return { valid: false, message: AuthValidationMessages.passwordRequired };
   }
 

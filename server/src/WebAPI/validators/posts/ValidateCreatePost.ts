@@ -62,7 +62,7 @@ export const validateCreatePost = (
       return { validation: { valid: false, message: FileValidationMessages.imageInvalid } };
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 2 * 1024 * 1024) {
       return { validation: { valid: false, message: FileValidationMessages.imageTooLarge } };
     }
   }

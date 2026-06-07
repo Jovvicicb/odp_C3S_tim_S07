@@ -9,7 +9,7 @@ import { useToast } from "../../../../hooks/toast/useToast";
 import { useUpdateCommunity } from "../../../../hooks/communities/edit/useUpdateCommunity";
 import { useEditCommunityImageInput } from "../../../../hooks/communities/edit/useEditCommunityImageInput";
 
-import { validateUpdateCommunity } from "../../../../validators/community/validateUpdateCommunity";
+import { validateUpdateCommunity } from "../../../../validators/community/ValidateUpdateCommunity";
 import { CommunityMessages } from "../../../../constants/messages/community/CommunityMessages";
 import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
 

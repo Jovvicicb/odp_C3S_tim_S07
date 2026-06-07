@@ -7,7 +7,7 @@ export type ValidateUpdateCommentResult = ValidationResult & {
 };
 
 export function validateUpdateComment(
-  content: string,
+  content?: string | null,
 ): ValidateUpdateCommentResult {
   const normalizedContent = StringNormalizer.normalizeSpaces(content);
 

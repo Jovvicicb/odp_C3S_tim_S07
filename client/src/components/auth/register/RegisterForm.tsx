@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useAuth } from "../../../hooks/auth/useAuthHook";
 import type { IAuthAPIService } from "../../../api_services/auth/IAuthAPIService";
-import { validateRegister } from "../../../validators/auth/validateRegister";
+import { validateRegister } from "../../../validators/auth/ValidateRegister";
 import { StringNormalizer } from "../../../helpers/normalization/StringNormalizer";
 import { AuthMessages } from "../../../constants/messages/auth/AuthMessages";
 import { CommonMessages } from "../../../constants/messages/common/CommonMessages";

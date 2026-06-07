@@ -14,7 +14,7 @@ import { useToast } from "../../../../hooks/toast/useToast";
 
 import type { PostDetailsDto } from "../../../../models/posts/PostDetailsDto";
 
-import { validateUpdatePost } from "../../../../validators/post/validateUpdatePost";
+import { validateUpdatePost } from "../../../../validators/post/ValidateUpdatePost";
 
 import { SubmitButton } from "../../../ui/button/SubmitButton";
 import { ErrorBox } from "../../../ui/feedback/ErrorBox";
@@ -119,7 +119,7 @@ function EditPostFieldsForm({ post }: { post: PostDetailsDto }) {
       }
 
       if ([...formData.keys()].length === 0) {
-        setError("No fields to update");
+        setError(PostMessages.noChangesToUpdate);
         return;
       }
 

@@ -8,9 +8,9 @@ export type ValidateCreateTagResult = ValidationResult & {
 };
 
 export function validateCreateTag(
-  input: CreateTagInput,
+  input?: CreateTagInput | null,
 ): ValidateCreateTagResult {
-  const normalizedName = StringNormalizer.normalizeSpaces(input.name).toLowerCase();
+  const normalizedName = StringNormalizer.normalizeSpaces(input?.name).toLowerCase();
 
   if (!normalizedName) {
     return {

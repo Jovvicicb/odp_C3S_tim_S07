@@ -4,10 +4,11 @@ import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
 import type { UpdateCommunityInput } from "../../types/communities/form/UpdateCommunityInput";
 
-export function validateUpdateCommunity(input: UpdateCommunityInput): ValidationResult {
-  const normalizedName = StringNormalizer.normalizeSpaces(input.name);
-  const normalizedDescription = StringNormalizer.trim(input.description);
-  const normalizedRules = StringNormalizer.trim(input.rules);
+export function validateUpdateCommunity(input?: UpdateCommunityInput | null): ValidationResult {
+  const normalizedName = StringNormalizer.normalizeSpaces(input?.name);
+  const normalizedDescription = StringNormalizer.trim(input?.description);
+  const normalizedRules = StringNormalizer.trim(input?.rules);
+  const normalizedType = StringNormalizer.trim(input?.type).toLowerCase();
 
   if (!normalizedName) {
     return {
@@ -37,14 +38,14 @@ export function validateUpdateCommunity(input: UpdateCommunityInput): Validation
     };
   }
 
-  if (input.type !== "public" && input.type !== "private") {
+  if (normalizedType !== "public" && normalizedType !== "private") {
     return {
       valid: false,
       message: CommunityValidationMessages.invalidType,
     };
   }
 
-  if (input.avatar) {
+  if (input?.avatar) {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
     if (!allowedTypes.includes(input.avatar.type)) {

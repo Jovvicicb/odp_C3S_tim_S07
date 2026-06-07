@@ -41,7 +41,7 @@ export function useCommentUpdateAction({ reloadPostDetails }: Props) {
 
       showToast({
         type: "success",
-        message: res.message ?? "Comment updated successfully",
+        message: res.message ?? CommentMessages.updateSuccess,
       });
 
       await reloadPostDetails();

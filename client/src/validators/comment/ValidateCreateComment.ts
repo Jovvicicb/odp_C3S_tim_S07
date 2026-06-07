@@ -8,9 +8,9 @@ export type ValidateCreateCommentResult = ValidationResult & {
 };
 
 export function validateCreateComment(
-  input: CreateCommentInput,
+  input?: CreateCommentInput | null,
 ): ValidateCreateCommentResult {
-  const normalizedContent = StringNormalizer.normalizeSpaces(input.content);
+  const normalizedContent = StringNormalizer.normalizeSpaces(input?.content);
 
   if (!normalizedContent) {
     return {
@@ -26,7 +26,7 @@ export function validateCreateComment(
     };
   }
 
-  if (!input.postId || input.postId <= 0) {
+  if (!input || !Number.isInteger(input.postId) || input.postId < 1) {
     return {
       valid: false,
       message: CommentValidationMessages.postInvalid,
@@ -36,7 +36,7 @@ export function validateCreateComment(
   if (
     input.parentId !== undefined &&
     input.parentId !== null &&
-    input.parentId <= 0
+    (!Number.isInteger(input.parentId) || input.parentId < 1)
   ) {
     return {
       valid: false,

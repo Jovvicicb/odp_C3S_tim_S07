@@ -2,11 +2,11 @@ import { FileValidationMessages } from "../../constants/messages/common/FileVali
 import { PostValidationMessages } from "../../constants/messages/post/PostValidationMessages";
 import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
-import type { CreatePostInput } from "../../types/posts/CreatePostInput";
+import type { CreatePostInput } from "../../types/posts/form/CreatePostInput";
 
-export function validateCreatePost(input: CreatePostInput): ValidationResult {
-  const normalizedTitle = StringNormalizer.normalizeSpaces(input.title);
-  const normalizedContent = StringNormalizer.trim(input.content);
+export function validateCreatePost(input?: CreatePostInput | null): ValidationResult {
+  const normalizedTitle = StringNormalizer.normalizeSpaces(input?.title);
+  const normalizedContent = StringNormalizer.trim(input?.content);
 
   if (!normalizedTitle) {
     return {
@@ -36,14 +36,20 @@ export function validateCreatePost(input: CreatePostInput): ValidationResult {
     };
   }
 
-  if (!input.communityId || input.communityId <= 0) {
+  const communityId = input?.communityId;
+
+  if (
+    typeof communityId !== "number" ||
+    !Number.isInteger(communityId) ||
+    communityId < 1
+  ) {
     return {
       valid: false,
       message: PostValidationMessages.communityInvalid,
     };
   }
 
-  if (input.imageFile) {
+  if (input?.imageFile) {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
     if (!allowedTypes.includes(input.imageFile.type)) {
@@ -53,7 +59,7 @@ export function validateCreatePost(input: CreatePostInput): ValidationResult {
       };
     }
 
-    if (input.imageFile.size > 5 * 1024 * 1024) {
+    if (input.imageFile.size > 2 * 1024 * 1024) {
       return {
         valid: false,
         message: FileValidationMessages.imageTooLarge,

@@ -1,13 +1,17 @@
 export class StringNormalizer {
-  static trim(value?: string | null): string {
-    return value?.trim() ?? "";
+  private static toString(value?: string | number | boolean | null): string {
+    return typeof value === "string" ? value : "";
   }
 
-  static normalizeSpaces(value?: string | null): string {
-    return value?.trim().replace(/\s+/g, " ") ?? "";
+  static trim(value?: string | number | boolean | null): string {
+    return this.toString(value).trim();
   }
 
-  static normalizeEmail(value?: string | null): string {
-    return value?.trim().toLowerCase() ?? "";
+  static normalizeSpaces(value?: string | number | boolean | null): string {
+    return this.toString(value).trim().replace(/\s+/g, " ");
+  }
+
+  static normalizeEmail(value?: string | number | boolean | null): string {
+    return this.toString(value).trim().toLowerCase();
   }
 }

@@ -4,11 +4,11 @@ import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
 import type { RegisterInput } from "../../types/auth/RegisterInput";
 
-export function validateRegister(input: RegisterInput): ValidationResult {
-  const normalizedUserName = StringNormalizer.trim(input.username);
-  const normalizedFullname = StringNormalizer.normalizeSpaces(input.fullname);
-  const normalizedEmail = StringNormalizer.normalizeEmail(input.email);
-  const normalizedBio = StringNormalizer.trim(input.bio);
+export function validateRegister(input?: RegisterInput | null): ValidationResult {
+  const normalizedUserName = StringNormalizer.trim(input?.username);
+  const normalizedFullname = StringNormalizer.normalizeSpaces(input?.fullname);
+  const normalizedEmail = StringNormalizer.normalizeEmail(input?.email);
+  const normalizedBio = StringNormalizer.trim(input?.bio);
 
   if (!normalizedUserName) {
     return { valid: false, message: AuthValidationMessages.usernameRequired };
@@ -34,7 +34,7 @@ export function validateRegister(input: RegisterInput): ValidationResult {
     return { valid: false, message: AuthValidationMessages.emailInvalid };
   }
 
-  if (!input.password) {
+  if (typeof input?.password !== "string" || !input.password) {
     return { valid: false, message: AuthValidationMessages.passwordRequired };
   }
 
@@ -54,7 +54,7 @@ export function validateRegister(input: RegisterInput): ValidationResult {
     return { valid: false, message: AuthValidationMessages.bioTooLong };
   }
 
-  if (input.imageFile) {
+  if (input?.imageFile) {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
     if (!allowedTypes.includes(input.imageFile.type)) {

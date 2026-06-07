@@ -2,18 +2,13 @@ import { FileValidationMessages } from "../../constants/messages/common/FileVali
 import { PostValidationMessages } from "../../constants/messages/post/PostValidationMessages";
 import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
-
-type UpdatePostValidationInput = {
-  title: string;
-  content: string;
-  imageFile: File | null;
-};
+import type { UpdatePostInput } from "../../types/posts/form/UpdatePostInput";
 
 export function validateUpdatePost(
-  input: UpdatePostValidationInput,
+  input?: UpdatePostInput | null,
 ): ValidationResult {
-  const normalizedTitle = StringNormalizer.normalizeSpaces(input.title);
-  const normalizedContent = StringNormalizer.trim(input.content);
+  const normalizedTitle = StringNormalizer.normalizeSpaces(input?.title);
+  const normalizedContent = StringNormalizer.trim(input?.content);
 
   if (!normalizedTitle) {
     return {
@@ -43,7 +38,7 @@ export function validateUpdatePost(
     };
   }
 
-  if (input.imageFile !== null) {
+  if (input?.imageFile) {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
     if (!allowedTypes.includes(input.imageFile.type)) {
@@ -53,7 +48,7 @@ export function validateUpdatePost(
       };
     }
 
-    if (input.imageFile.size > 5 * 1024 * 1024) {
+    if (input.imageFile.size > 2 * 1024 * 1024) {
       return {
         valid: false,
         message: FileValidationMessages.imageTooLarge,

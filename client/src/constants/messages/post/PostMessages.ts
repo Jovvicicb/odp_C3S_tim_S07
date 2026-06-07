@@ -1,5 +1,5 @@
 export const PostMessages = {
-createSuccess: "Post created successfully",
+  createSuccess: "Post created successfully",
   createFailed: "Failed to create post",
   fetchByCommunityFailed: "Failed to load community posts",
   postsFetched: "Posts loaded successfully",
@@ -17,4 +17,5 @@ createSuccess: "Post created successfully",
   fetchByUserFailed: "Failed to fetch user posts",
   fetchAdminPostsFailed: "Failed to fetch admin posts",
   deleteSuccess: "Post deleted successfully",
+  noChangesToUpdate: "No fields to update.",
 } as const;

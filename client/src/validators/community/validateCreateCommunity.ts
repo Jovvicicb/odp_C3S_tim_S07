@@ -2,15 +2,15 @@ import { FileValidationMessages } from "../../constants/messages/common/FileVali
 import { CommunityValidationMessages } from "../../constants/messages/community/CommunityValidationMessages";
 import { StringNormalizer } from "../../helpers/normalization/StringNormalizer";
 import type { ValidationResult } from "../../types/common/ValidationResult";
-import type { CreateCommunityInput } from "../../types/communities/CreateCommunityInput";
+import type { CreateCommunityInput } from "../../types/communities/form/CreateCommunityInput";
 
 export function validateCreateCommunity(
-  input: CreateCommunityInput
+  input?: CreateCommunityInput | null
 ): ValidationResult {
-  const normalizedName = StringNormalizer.normalizeSpaces(input.name);
-  const normalizedDescription = StringNormalizer.trim(input.description);
-  const normalizedRules = StringNormalizer.trim(input.rules);
-  const normalizedType = (StringNormalizer.trim(input.type) || "public").toLowerCase();
+  const normalizedName = StringNormalizer.normalizeSpaces(input?.name);
+  const normalizedDescription = StringNormalizer.trim(input?.description);
+  const normalizedRules = StringNormalizer.trim(input?.rules);
+  const normalizedType = StringNormalizer.trim(input?.type || "public").toLowerCase();
 
   if (!normalizedName) {
     return { valid: false, message: CommunityValidationMessages.nameRequired };
@@ -29,10 +29,10 @@ export function validateCreateCommunity(
   }
 
   if (normalizedType !== "public" && normalizedType !== "private") {
-    return { valid: false, message: CommunityValidationMessages.invalidType, };
+    return { valid: false, message: CommunityValidationMessages.invalidType };
   }
 
-  if (input.avatar) {
+  if (input?.avatar) {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
     if (!allowedTypes.includes(input.avatar.type)) {

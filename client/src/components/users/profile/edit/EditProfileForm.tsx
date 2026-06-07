@@ -14,7 +14,7 @@ import { useToast } from "../../../../hooks/toast/useToast";
 
 import type { UserDto } from "../../../../models/users/UserDto";
 
-import { validateUpdateMe } from "../../../../validators/user/validateUpdateMe";
+import { validateUpdateMe } from "../../../../validators/user/ValidateUpdateMe";
 
 type Props = {
   profile: UserDto;
@@ -94,7 +94,7 @@ export default function EditProfileForm({ profile, onUpdated }: Props) {
       }
 
       if ([...formData.keys()].length === 0) {
-        setError("No fields to update");
+        setError(UserMessages.noChangesToUpdate);
         return;
       }
 

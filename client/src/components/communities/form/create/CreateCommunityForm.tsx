@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ErrorBox } from "../../../ui/feedback/ErrorBox";
 import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
 import { useCreateCommunity } from "../../../../hooks/communities/create/useCreateCommunity";
-import { validateCreateCommunity } from "../../../../validators/community/validateCreateCommunity";
+import { validateCreateCommunity } from "../../../../validators/community/ValidateCreateCommunity";
 import { useToast } from "../../../../hooks/toast/useToast";
 import { CommunityMessages } from "../../../../constants/messages/community/CommunityMessages";
 import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";

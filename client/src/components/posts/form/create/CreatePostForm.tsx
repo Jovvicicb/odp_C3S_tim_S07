@@ -6,6 +6,7 @@ import { SubmitButton } from "../../../ui/button/SubmitButton";
 
 import { CommonMessages } from "../../../../constants/messages/common/CommonMessages";
 import { PostMessages } from "../../../../constants/messages/post/PostMessages";
+import { PostValidationMessages } from "../../../../constants/messages/post/PostValidationMessages";
 
 import { StringNormalizer } from "../../../../helpers/normalization/StringNormalizer";
 
@@ -13,7 +14,7 @@ import { usePostImageInput } from "../../../../hooks/posts/create/usePostImageIn
 import { useCreatePost } from "../../../../hooks/posts/create/useCreatePost";
 import { useToast } from "../../../../hooks/toast/useToast";
 
-import { validateCreatePost } from "../../../../validators/post/validateCreatePost";
+import { validateCreatePost } from "../../../../validators/post/ValidateCreatePost";
 
 import { PostImageInput } from "../shared/PostImageInput";
 import { PostMarkdownEditor } from "../shared/PostMarkdownEditor";
@@ -37,10 +38,15 @@ export default function CreatePostForm() {
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const communityIdValue =
+      Number.isInteger(parsedCommunityId) && parsedCommunityId > 0
+        ? parsedCommunityId
+        : null;
+
     const validation = validateCreatePost({
       title,
       content,
-      communityId: Number.isNaN(parsedCommunityId) ? null : parsedCommunityId,
+      communityId: communityIdValue,
       imageFile,
     });
 
@@ -49,12 +55,17 @@ export default function CreatePostForm() {
       return;
     }
 
+    if (communityIdValue === null) {
+      setError(PostValidationMessages.communityInvalid);
+      return;
+    }
+
     try {
       const formData = new FormData();
 
       formData.append("title", StringNormalizer.normalizeSpaces(title));
       formData.append("content", StringNormalizer.trim(content));
-      formData.append("communityId", String(parsedCommunityId));
+      formData.append("communityId", String(communityIdValue));
 
       if (imageFile) {
         formData.append("image", imageFile);

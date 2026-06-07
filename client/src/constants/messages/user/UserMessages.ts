@@ -15,4 +15,5 @@ export const UserMessages = {
   removeFollowerFailed: "Failed to remove follower",
   searchSuccess: "Users loaded successfully",
   searchFailed: "Failed to search users",
+  noChangesToUpdate: "No fields to update.",
 } as const;
