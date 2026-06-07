@@ -38,9 +38,11 @@ export class AuthController {
       }); 
       return; 
     }
+
     const ctx = IpHelper.buildAuditContext(req);
+
     try{
-      const result = await this.authService.login(validUserName, validPassword,ctx);
+      const result = await this.authService.login(validUserName, validPassword, ctx);
       
       if (!result.success || !result.data) {
         ResponseHelper.send(res, result);
@@ -81,9 +83,11 @@ export class AuthController {
       });
       return;
     }
+
     const ctx = IpHelper.buildAuditContext(req);
+
     try{
-      const result = await this.authService.register(dto,ctx);
+      const result = await this.authService.register(dto, ctx);
       if (!result.success || !result.data) {
         ResponseHelper.send(res, result);
         return;
@@ -112,6 +116,7 @@ export class AuthController {
   
   private async logout(req: Request, res: Response): Promise<void> {
     const ctx = IpHelper.buildAuditContext(req,req.user!.id);
+    
     try{
       const result =  await this.authService.logout(ctx);
       ResponseHelper.send(res, result);

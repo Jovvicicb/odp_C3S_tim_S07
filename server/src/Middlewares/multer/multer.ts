@@ -1,21 +1,30 @@
 import multer from "multer";
-import path from 'path';
-import fs from 'fs';
+import path from "path";
+import fs from "fs";
 
-const uploadDir = path.join(process.cwd(), 'uploads');
+import { FileValidationMessages } from "../../Domain/constants/messages/common/FileValidationMessages";
+
+const uploadDir = path.join(process.cwd(), "uploads");
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+const mimeTypeToExtension: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+};
 
+const allowedTypes = Object.keys(mimeTypeToExtension);
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, uploadDir);
   },
+
   filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
+    const ext = mimeTypeToExtension[file.mimetype];
     const uniqueName = `${Date.now()}-${Math.random()
       .toString(36)
       .slice(2)}${ext}`;
@@ -33,7 +42,7 @@ export const upload = multer({
 
   fileFilter: (_req, file, cb) => {
     if (!allowedTypes.includes(file.mimetype)) {
-      cb(new Error("Only JPG, PNG or WEBP images are allowed"));
+      cb(new Error(FileValidationMessages.imageInvalid));
       return;
     }
 
